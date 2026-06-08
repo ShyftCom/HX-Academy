@@ -1,13 +1,14 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import bcrypt from "bcryptjs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, "..", "dev.db");
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const db = new PrismaClient({ adapter } as any);
+if (process.env.NODE_ENV !== "production") {
+  const { config } = await import("dotenv");
+  config();
+}
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
+const db = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -91,20 +92,21 @@ async function main() {
     create: { name: "Staff", description: "Academy staff member", isSystem: false },
   });
 
-  const playerRole = await db.role.upsert({
+  await db.role.upsert({
     where: { name: "Player" },
     update: {},
     create: { name: "Player", description: "Academy player", isSystem: true },
   });
 
-  // Assign all permissions to Admin
-  const adminPerms = Object.values(permissions);
-  for (const perm of adminPerms) {
-    await db.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: adminRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: adminRole.id, permissionId: perm.id },
-    });
+  // Assign all permissions to Super Admin and Admin
+  for (const role of [superAdminRole, adminRole]) {
+    for (const perm of Object.values(permissions)) {
+      await db.rolePermission.upsert({
+        where: { roleId_permissionId: { roleId: role.id, permissionId: (perm as any).id } },
+        update: {},
+        create: { roleId: role.id, permissionId: (perm as any).id },
+      });
+    }
   }
 
   // Assign limited permissions to Staff
@@ -122,7 +124,7 @@ async function main() {
 
   // Create Super Admin User
   const adminPassword = await bcrypt.hash("admin123", 12);
-  const adminUser = await db.user.upsert({
+  await db.user.upsert({
     where: { email: "admin@hxacademy.com" },
     update: {},
     create: {
@@ -263,7 +265,7 @@ async function main() {
         isPublished: false,
         sections: {
           create: [
-            { type: "hero", title: "Hero Section", content: JSON.stringify({ heading: "Join HX Academy", subheading: "Train like a champion. Become the best version of yourself.", buttonText: "Register Now", buttonUrl: "#registration" }), order: 0, isEnabled: true },
+            { type: "hero", title: "Hero Section", content: JSON.stringify({ heading: "Join HX Academy", subheading: "Train like a champion.", buttonText: "Register Now", buttonUrl: "#registration" }), order: 0, isEnabled: true },
             { type: "about", title: "About Us", content: JSON.stringify({ title: "About HX Academy", text: "We are a premier football academy dedicated to developing young talent." }), order: 1, isEnabled: true },
             { type: "plans", title: "Membership Plans", content: JSON.stringify({ title: "Choose Your Plan", subtitle: "Flexible plans to fit your schedule and budget." }), order: 2, isEnabled: true },
             { type: "registration", title: "Registration Form", content: JSON.stringify({ title: "Register Now", subtitle: "Fill out the form below and we'll get back to you shortly." }), order: 3, isEnabled: true },
@@ -296,10 +298,8 @@ async function main() {
   console.log("✅ Registration survey created");
 
   console.log("\n🎉 Seeding complete!");
-  console.log("\n📧 Admin Login:");
   console.log("   Email:    admin@hxacademy.com");
   console.log("   Password: admin123");
-  console.log("\n🌐 Start the server: npm run dev");
 }
 
 main()
