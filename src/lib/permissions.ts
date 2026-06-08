@@ -85,4 +85,11 @@ export const PERMISSIONS = {
   ROLES_CREATE: "roles:create",
   ROLES_EDIT: "roles:edit",
   ROLES_DELETE: "roles:delete",
+  // Website & Applications
+  WEBSITE_VIEW: "website:view",
+  WEBSITE_EDIT: "website:edit",
+  APPLICATIONS_VIEW: "applications:view",
+  APPLICATIONS_MANAGE: "applications:manage",
+  APPLICATIONS_EXPORT: "applications:export",
+  FILE_REQUIREMENTS_MANAGE: "file_requirements:manage",
 } as const;

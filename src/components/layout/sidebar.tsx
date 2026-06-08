@@ -24,6 +24,9 @@ import {
   FileText,
   Shield,
   Package,
+  Inbox,
+  UploadCloud,
+  PanelsTopLeft,
 } from "lucide-react";
 
 interface NavItem {
@@ -57,8 +60,16 @@ const navItems: NavItem[] = [
     ],
   },
   { title: "Orders", href: "/dashboard/orders", icon: ClipboardList },
-  { title: "Landing Page", href: "/dashboard/landing-page", icon: Globe },
-  { title: "Survey Builder", href: "/dashboard/surveys", icon: FileText },
+  {
+    title: "Website & Apps",
+    icon: Globe,
+    children: [
+      { title: "Landing Page", href: "/dashboard/website/landing", icon: PanelsTopLeft },
+      { title: "Survey Builder", href: "/dashboard/surveys", icon: FileText },
+      { title: "File Requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud },
+      { title: "Applications", href: "/dashboard/website/applications", icon: Inbox },
+    ],
+  },
   { title: "Reports", href: "/dashboard/reports", icon: BarChart3 },
   { title: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { title: "Activity Logs", href: "/dashboard/activity-logs", icon: Activity },

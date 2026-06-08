@@ -172,6 +172,10 @@ model Lead {
   updatedAt        DateTime   @updatedAt
 
   surveyAnswers    SurveyAnswer[]
+  selectedPlanId   String?
+  selectedPlan     SubscriptionPlan? @relation("ApplicationPlan", fields: [selectedPlanId], references: [id])
+  applicationFiles ApplicationFile[]
+  adminNotes       String?
 
   @@map("leads")
 }
@@ -226,6 +230,7 @@ model SubscriptionPlan {
 
   subscriptions Subscription[]
   payments      Payment[]
+  applications  Lead[]           @relation("ApplicationPlan")
 
   @@map("subscription_plans")
 }
@@ -515,4 +520,38 @@ model MediaFile {
   createdAt    DateTime @default(now())
 
   @@map("media_files")
+}
+
+// ==================== WEBSITE / APPLICATIONS ====================
+
+model FileRequirement {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  isRequired   Boolean  @default(true)
+  allowedTypes String   @default("image/*,.pdf")
+  maxSizeMb    Int      @default(10)
+  isActive     Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  applicationFiles ApplicationFile[]
+
+  @@map("file_requirements")
+}
+
+model ApplicationFile {
+  id            String           @id @default(cuid())
+  leadId        String
+  requirementId String?
+  lead          Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  requirement   FileRequirement? @relation(fields: [requirementId], references: [id])
+  fileName      String
+  fileUrl       String
+  mimeType      String?
+  size          Int?
+  createdAt     DateTime         @default(now())
+
+  @@map("application_files")
 }
