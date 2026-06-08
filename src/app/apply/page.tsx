@@ -141,7 +141,7 @@ function ApplyFormInner() {
   function renderSurveyQuestion(q: any) {
     const val = surveyAnswers[q.id];
     const set = (v: string | string[]) => setSurveyAnswers((p) => ({ ...p, [q.id]: v }));
-    const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
+    const inputClass = "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
 
     switch (q.questionType) {
       case "textarea": return <textarea rows={3} className={inputClass} value={String(val ?? "")} onChange={(e) => set(e.target.value)} placeholder={q.question} />;
@@ -154,9 +154,9 @@ function ApplyFormInner() {
       case "radio": return (
         <div className="space-y-2">
           {(q.options ?? []).map((o: string) => (
-            <label key={o} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${val === o ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+            <label key={o} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${val === o ? "border-green-500 bg-green-50 dark:bg-green-900/20" : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"}`}>
               <input type="radio" name={q.id} value={o} checked={val === o} onChange={() => set(o)} className="text-green-600" />
-              <span className="text-sm">{o}</span>
+              <span className="text-sm text-gray-800 dark:text-gray-200">{o}</span>
             </label>
           ))}
         </div>
@@ -168,7 +168,7 @@ function ApplyFormInner() {
             {(q.options ?? []).map((o: string) => (
               <label key={o} className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={arr.includes(o)} onChange={(e) => set(e.target.checked ? [...arr, o] : arr.filter((x) => x !== o))} className="text-green-600 rounded" />
-                <span className="text-sm">{o}</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">{o}</span>
               </label>
             ))}
           </div>
@@ -183,20 +183,20 @@ function ApplyFormInner() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <Loader2 className="w-8 h-8 animate-spin text-green-600" />
     </div>
   );
 
   if (submitted) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center max-w-md">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 className="w-12 h-12 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
-        <p className="text-gray-500 mb-2">Thank you, <span className="font-semibold text-gray-700">{form.fullName}</span>!</p>
-        <p className="text-gray-500 mb-8">We&apos;ll review your application and contact you soon at <span className="font-semibold">{form.phone || form.email}</span>.</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Application Submitted!</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-2">Thank you, <span className="font-semibold text-gray-700 dark:text-gray-300">{form.fullName}</span>!</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">We&apos;ll review your application and contact you soon at <span className="font-semibold">{form.phone || form.email}</span>.</p>
         <Link href="/" className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
@@ -204,13 +204,13 @@ function ApplyFormInner() {
     </div>
   );
 
-  const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+  const inputClass = "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
+  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gray-900 text-white py-4 px-4">
+      <div className="bg-gray-900 dark:bg-gray-950 text-white py-4 px-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center font-bold text-sm">HX</div>
@@ -221,18 +221,18 @@ function ApplyFormInner() {
       </div>
 
       {/* Progress */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center">
             {STEPS.map((label, i) => (
               <div key={i} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center gap-1">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${i < step ? "bg-green-600 text-white" : i === step ? "bg-green-600 text-white ring-4 ring-green-100" : "bg-gray-200 text-gray-500"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${i < step ? "bg-green-600 text-white" : i === step ? "bg-green-600 text-white ring-4 ring-green-100 dark:ring-green-900" : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"}`}>
                     {i < step ? <Check className="w-4 h-4" /> : i + 1}
                   </div>
-                  <span className={`text-xs hidden sm:block whitespace-nowrap ${i === step ? "text-gray-900 font-semibold" : "text-gray-400"}`}>{label}</span>
+                  <span className={`text-xs hidden sm:block whitespace-nowrap ${i === step ? "text-gray-900 dark:text-white font-semibold" : "text-gray-400 dark:text-gray-500"}`}>{label}</span>
                 </div>
-                {i < STEPS.length - 1 && <div className={`flex-1 h-0.5 mx-2 mb-4 transition-colors ${i < step ? "bg-green-600" : "bg-gray-200"}`} />}
+                {i < STEPS.length - 1 && <div className={`flex-1 h-0.5 mx-2 mb-4 transition-colors ${i < step ? "bg-green-600" : "bg-gray-200 dark:bg-gray-700"}`} />}
               </div>
             ))}
           </div>
@@ -247,16 +247,16 @@ function ApplyFormInner() {
             {/* STEP 0: Choose Plan */}
             {step === 0 && (
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900">Choose Your Plan</h2>
-                <p className="text-gray-500">Select the subscription plan that best suits you.</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Choose Your Plan</h2>
+                <p className="text-gray-500 dark:text-gray-400">Select the subscription plan that best suits you.</p>
                 <div className="grid gap-4 mt-6">
                   {plans.map((plan: any) => (
-                    <div key={plan.id} onClick={() => setSelectedPlan(plan)} className={`border-2 rounded-xl p-5 cursor-pointer transition-all ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-50" : "border-gray-200 bg-white hover:border-gray-300"}`}>
+                    <div key={plan.id} onClick={() => setSelectedPlan(plan)} className={`border-2 rounded-xl p-5 cursor-pointer transition-all ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-50 dark:bg-green-900/20" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"}`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
+                          <h3 className="font-bold text-gray-900 dark:text-white text-lg">{plan.name}</h3>
                           <p className="text-green-600 font-semibold">{currencySymbol} {plan.price.toLocaleString()} / {plan.duration} {plan.durationType}</p>
-                          {plan.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{plan.description}</p>}
+                          {plan.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{plan.description}</p>}
                         </div>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-4 ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-500" : "border-gray-300"}`}>
                           {selectedPlan?.id === plan.id && <Check className="w-3 h-3 text-white" />}
@@ -272,10 +272,10 @@ function ApplyFormInner() {
             {step === 1 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-                  <p className="text-gray-500 mt-1">Tell us about yourself</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Personal Information</h2>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">Tell us about yourself</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
@@ -316,8 +316,8 @@ function ApplyFormInner() {
                 </div>
 
                 {survey && survey.questions.length > 0 && (
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-                    <h3 className="font-semibold text-gray-900">{survey.title}</h3>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{survey.title}</h3>
                     {survey.questions.map((q: any) => (
                       <div key={q.id}>
                         <label className={labelClass}>{q.question} {q.isRequired && <span className="text-red-500">*</span>}</label>
@@ -333,39 +333,39 @@ function ApplyFormInner() {
             {step === 2 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Required Documents</h2>
-                  <p className="text-gray-500 mt-1">Upload the following documents to complete your application</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Required Documents</h2>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">Upload the following documents to complete your application</p>
                 </div>
                 {fileReqs.length === 0 ? (
-                  <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">No documents required at this time.</div>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">No documents required at this time.</div>
                 ) : (
                   <div className="space-y-4">
                     {fileReqs.map((req: any) => (
-                      <div key={req.id} className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div key={req.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900">{req.title}</p>
-                              {req.isRequired ? <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">Required</span> : <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Optional</span>}
+                              <p className="font-semibold text-gray-900 dark:text-white">{req.title}</p>
+                              {req.isRequired ? <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">Required</span> : <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">Optional</span>}
                             </div>
-                            {req.description && <p className="text-sm text-gray-500 mt-0.5">{req.description}</p>}
-                            <p className="text-xs text-gray-400 mt-1">Accepted: {req.allowedTypes} · Max: {req.maxSizeMb}MB</p>
+                            {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{req.description}</p>}
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Accepted: {req.allowedTypes} · Max: {req.maxSizeMb}MB</p>
                           </div>
                           {uploadedFiles[req.id] && <Check className="w-5 h-5 text-green-500 flex-shrink-0 ml-2" />}
                         </div>
                         {uploadedFiles[req.id] ? (
-                          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                            <span className="text-sm text-green-700 flex-1 truncate">{uploadedFiles[req.id].fileName}</span>
+                          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg px-3 py-2">
+                            <span className="text-sm text-green-700 dark:text-green-400 flex-1 truncate">{uploadedFiles[req.id].fileName}</span>
                             <button onClick={() => removeFile(req.id)} className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><X className="w-4 h-4" /></button>
                           </div>
                         ) : (
                           <label className="cursor-pointer block">
                             <input type="file" className="hidden" accept={req.allowedTypes} onChange={(e) => handleFileUpload(req.id, e)} />
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-green-400 hover:bg-green-50/50 transition-all">
+                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-all">
                               {uploading[req.id] ? (
                                 <Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-400" />
                               ) : (
-                                <><Upload className="w-5 h-5 mx-auto text-gray-400 mb-1" /><span className="text-sm text-gray-500">Click to upload file</span></>
+                                <><Upload className="w-5 h-5 mx-auto text-gray-400 dark:text-gray-500 mb-1" /><span className="text-sm text-gray-500 dark:text-gray-400">Click to upload file</span></>
                               )}
                             </div>
                           </label>
@@ -381,39 +381,39 @@ function ApplyFormInner() {
             {step === 3 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Review Your Application</h2>
-                  <p className="text-gray-500 mt-1">Please review before submitting</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Review Your Application</h2>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">Please review before submitting</p>
                 </div>
                 <div className="space-y-4">
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full" /> Selected Plan
                     </h3>
-                    <p className="text-gray-700 font-medium">{selectedPlan?.name}</p>
+                    <p className="text-gray-700 dark:text-gray-300 font-medium">{selectedPlan?.name}</p>
                     <p className="text-green-600 text-sm">{currencySymbol} {selectedPlan?.price?.toLocaleString()} / {selectedPlan?.duration} {selectedPlan?.durationType}</p>
                   </div>
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> Your Information</h3>
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> Your Information</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       {[["Name", form.fullName], ["Phone", form.phone], ["Email", form.email || "—"], ["Category", form.categoryInterest || "—"]].map(([k, v]) => (
-                        <div key={k}><span className="text-gray-400">{k}:</span> <span className="text-gray-700 font-medium">{v}</span></div>
+                        <div key={k}><span className="text-gray-400 dark:text-gray-500">{k}:</span> <span className="text-gray-700 dark:text-gray-300 font-medium">{v}</span></div>
                       ))}
                     </div>
                   </div>
                   {Object.keys(uploadedFiles).length > 0 && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                      <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-yellow-500 rounded-full" /> Uploaded Documents ({Object.keys(uploadedFiles).length})</h3>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-yellow-500 rounded-full" /> Uploaded Documents ({Object.keys(uploadedFiles).length})</h3>
                       <div className="space-y-1">
                         {Object.values(uploadedFiles).map((f, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-gray-600"><Check className="w-4 h-4 text-green-500" />{f.fileName}</div>
+                          <div key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"><Check className="w-4 h-4 text-green-500" />{f.fileName}</div>
                         ))}
                       </div>
                     </div>
                   )}
                   {Object.keys(surveyAnswers).filter((k) => surveyAnswers[k]).length > 0 && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                      <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2"><div className="w-2 h-2 bg-purple-500 rounded-full" /> Survey Answers</h3>
-                      <p className="text-sm text-gray-500">{Object.keys(surveyAnswers).filter((k) => surveyAnswers[k]).length} question(s) answered</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2"><div className="w-2 h-2 bg-purple-500 rounded-full" /> Survey Answers</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{Object.keys(surveyAnswers).filter((k) => surveyAnswers[k]).length} question(s) answered</p>
                     </div>
                   )}
                 </div>
@@ -423,8 +423,8 @@ function ApplyFormInner() {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-          <button onClick={step === 0 ? () => router.push("/") : back} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-medium transition-colors">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button onClick={step === 0 ? () => router.push("/") : back} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium transition-colors">
             <ArrowLeft className="w-4 h-4" /> {step === 0 ? "Back to Home" : "Back"}
           </button>
           {step < 3 ? (
@@ -445,7 +445,7 @@ function ApplyFormInner() {
 export default function ApplyPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-green-600" />
       </div>
     }>

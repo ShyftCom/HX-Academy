@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,7 +26,9 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -45,8 +47,8 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
           <span className="font-semibold text-sm">Player Portal</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <Button variant="ghost" size="icon" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+            {mounted && resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           <Avatar className="h-8 w-8 cursor-pointer" onClick={() => router.push("/player/profile")}>
             <AvatarFallback>{getInitials(session?.user?.name ?? "P")}</AvatarFallback>
