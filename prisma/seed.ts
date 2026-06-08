@@ -135,6 +135,21 @@ async function main() {
   });
   console.log("✅ Super Admin created: admin@hxacademy.com / admin123");
 
+  // Create Secondary Admin
+  const adminPassword2 = await bcrypt.hash("12345678", 12);
+  await db.user.upsert({
+    where: { email: "admin@admin.com" },
+    update: {},
+    create: {
+      name: "Admin",
+      email: "admin@admin.com",
+      password: adminPassword2,
+      roleId: superAdminRole.id,
+      isActive: true,
+    },
+  });
+  console.log("✅ Admin created: admin@admin.com / 12345678");
+
   // Create Default Settings
   const defaultSettings = [
     { key: "academy_name", value: "HX Academy" },
