@@ -13,11 +13,52 @@ import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTi
 import { DataTable } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Check, X, Eye, Upload, CreditCard } from "lucide-react";
+import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText } from "lucide-react";
 
 type Status = "all" | "pending" | "approved" | "rejected";
+
+function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
+  const isPdf = url.toLowerCase().includes(".pdf") || url.includes("application/pdf");
+  const filename = url.split("/").pop() ?? "proof";
+
+  function handleDownload() {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.target = "_blank";
+    a.click();
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent size="lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {isPdf ? <FileText className="h-5 w-5 text-red-500" /> : <ZoomIn className="h-5 w-5 text-blue-500" />}
+            Payment Proof
+          </DialogTitle>
+        </DialogHeader>
+        <DialogBody className="p-0 overflow-hidden">
+          {isPdf ? (
+            <iframe src={url} className="w-full h-[70vh] rounded-b-xl" title="Payment proof PDF" />
+          ) : (
+            <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-64 p-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt="Payment proof" className="max-w-full max-h-[65vh] object-contain rounded-lg shadow-md" />
+            </div>
+          )}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button onClick={handleDownload}>
+            <Download className="mr-1.5 h-4 w-4" /> Download
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function PaymentsPage() {
   const qc = useQueryClient();
@@ -32,6 +73,8 @@ export default function PaymentsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState({ playerId: "", planId: "", amount: "", paymentMethodId: "", proof: "" });
   const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadingAdd, setUploadingAdd] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["payments", page, search, status],
@@ -68,13 +111,15 @@ export default function PaymentsPage() {
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadingAdd(true);
     const fd = new FormData();
     fd.append("file", file);
     fd.append("folder", "payments");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (res.ok) { setProofUrl(data.url); toast.success("Proof uploaded"); }
-    else toast.error("Upload failed");
+    const d = await res.json();
+    if (res.ok) { setProofUrl(d.url); toast.success("Proof uploaded"); }
+    else toast.error(d.error ?? "Upload failed");
+    setUploadingAdd(false);
   };
 
   const STATUS_VARIANT: Record<string, string> = { pending: "warning", approved: "success", rejected: "destructive" };
@@ -85,16 +130,38 @@ export default function PaymentsPage() {
     { key: "amount", header: "Amount", cell: (r: any) => <span className="font-medium">{formatCurrency(r.amount)}</span> },
     { key: "method", header: "Method", cell: (r: any) => r.paymentMethod?.name ?? "—" },
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={STATUS_VARIANT[r.status] as any}>{r.status}</Badge> },
-    { key: "proof", header: "Proof", cell: (r: any) => r.proof ? <a href={r.proof} target="_blank" className="flex items-center gap-1 text-blue-600 text-xs hover:underline"><Eye className="h-3 w-3" />View</a> : "—" },
+    {
+      key: "proof", header: "Proof", cell: (r: any) => r.proof ? (
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setPreviewUrl(r.proof)}
+            className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 transition-colors"
+          >
+            <Eye className="h-3 w-3" /> Preview
+          </button>
+          <a
+            href={r.proof}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 transition-colors"
+          >
+            <Download className="h-3 w-3" /> Download
+          </a>
+        </div>
+      ) : <span className="text-xs text-gray-400">No proof</span>
+    },
     { key: "date", header: "Date", cell: (r: any) => formatDate(r.createdAt) },
-    { key: "actions", header: "", cell: (r: any) => (
-      <div className="flex gap-1">
-        {r.status === "pending" && <>
-          <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title="Approve"><Check className="h-3.5 w-3.5" /></Button>
-          <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title="Reject"><X className="h-3.5 w-3.5" /></Button>
-        </>}
-      </div>
-    )},
+    {
+      key: "actions", header: "", cell: (r: any) => (
+        <div className="flex gap-1">
+          {r.status === "pending" && <>
+            <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title="Approve"><Check className="h-3.5 w-3.5" /></Button>
+            <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title="Reject"><X className="h-3.5 w-3.5" /></Button>
+          </>}
+        </div>
+      )
+    },
   ];
 
   return (
@@ -112,6 +179,9 @@ export default function PaymentsPage() {
 
       <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No payments found" emptyIcon={<CreditCard className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
+
+      {/* Proof Preview Dialog */}
+      {previewUrl && <ProofViewer url={previewUrl} onClose={() => setPreviewUrl(null)} />}
 
       {/* Approve Dialog */}
       <Dialog open={!!approveId} onOpenChange={(o) => !o && setApproveId(null)}>
@@ -173,11 +243,16 @@ export default function PaymentsPage() {
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Proof</label>
               <div className="flex items-center gap-2">
                 <input ref={proofInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={handleProofUpload} />
-                <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()}>
-                  <Upload className="mr-1.5 h-4 w-4" />Upload Proof
+                <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()} loading={uploadingAdd}>
+                  <Upload className="mr-1.5 h-4 w-4" />{uploadingAdd ? "Uploading..." : "Upload Proof"}
                 </Button>
-                {proofUrl && <a href={proofUrl} target="_blank" className="text-xs text-blue-600 hover:underline">View uploaded</a>}
+                {proofUrl && (
+                  <button onClick={() => setPreviewUrl(proofUrl)} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                    <Eye className="h-3 w-3" /> Preview
+                  </button>
+                )}
               </div>
+              {proofUrl && <p className="mt-1 text-xs text-green-600">✓ Proof uploaded successfully</p>}
             </div>
           </DialogBody>
           <DialogFooter>

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { writeFile, mkdir } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: NextRequest) {
@@ -26,24 +24,18 @@ export async function POST(req: NextRequest) {
     }
 
     const ext = file.name.split(".").pop() ?? "bin";
-    const filename = `${uuidv4()}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
+    const filename = `${folder}/${uuidv4()}.${ext}`;
 
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(path.join(uploadDir, filename), buffer);
-
-    const url = `/uploads/${folder}/${filename}`;
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
     const mediaFile = await db.mediaFile.create({
       data: {
         name: filename,
         originalName: file.name,
-        url,
+        url: blob.url,
         mimeType: file.type,
         size: file.size,
         folder,
@@ -51,7 +43,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ url, id: mediaFile.id, name: file.name });
+    return NextResponse.json({ url: blob.url, id: mediaFile.id, name: file.name });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
