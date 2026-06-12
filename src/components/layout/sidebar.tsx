@@ -27,6 +27,7 @@ import {
   Inbox,
   UploadCloud,
   PanelsTopLeft,
+  Palette,
 } from "lucide-react";
 
 interface NavItem {
@@ -82,6 +83,7 @@ const navItems: NavItem[] = [
       { title: "Roles & Permissions", href: "/dashboard/roles", icon: Shield },
     ],
   },
+  { title: "Branding & Logos", href: "/dashboard/branding", icon: Palette },
   { title: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -105,8 +107,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex h-16 items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-sm text-white">HX</div>
-          <span className="font-semibold text-gray-900 dark:text-white">HX Academy</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 font-bold text-xs text-white">FSA</div>
+          <span className="font-semibold text-gray-900 dark:text-white text-sm">Foot-Ball Skills Academy</span>
         </div>
 
         {/* Nav */}
@@ -120,7 +122,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center">HX Academy ERP v1.0</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center">FSA Platform v1.0</p>
         </div>
       </aside>
     </>

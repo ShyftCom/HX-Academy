@@ -13,6 +13,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 const navItems = [
   { href: "/player", icon: Home, label: "Home" },
@@ -43,10 +44,11 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
       {/* Top Header */}
       <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs">HX</div>
-          <span className="font-semibold text-sm">Player Portal</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600 text-white font-bold text-xs">FSA</div>
+          <span className="font-semibold text-sm">Foot-Ball Skills Academy</span>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageSwitcher variant="admin" />
           <Button variant="ghost" size="icon" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
             {mounted && resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>

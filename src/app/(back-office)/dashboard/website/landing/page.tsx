@@ -58,10 +58,21 @@ const GROUPS = [
   { label: "General", keys: ["academy_name", "currency_symbol"] },
 ];
 
+const LANG_TABS = [
+  { code: "fr",  flag: "🇫🇷", label: "Français" },
+  { code: "eng", flag: "🇬🇧", label: "English" },
+  { code: "ar",  flag: "🇩🇿", label: "العربية" },
+];
+
+function langKey(baseKey: string, lang: string): string {
+  return lang === "fr" ? baseKey : `${baseKey}_${lang}`;
+}
+
 export default function LandingPageEditor() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeLang, setActiveLang] = useState("fr");
 
   useEffect(() => {
     fetch("/api/website-settings")
@@ -85,6 +96,8 @@ export default function LandingPageEditor() {
   const inputClass = "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent";
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
 
+  const isRtl = activeLang === "ar";
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -93,7 +106,7 @@ export default function LandingPageEditor() {
           <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">Edit the content shown on your public website.</p>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/" target="_blank" className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <a href="/fr" target="_blank" className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Globe className="w-4 h-4" /> Preview
           </a>
           <button onClick={save} disabled={saving} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
@@ -102,22 +115,48 @@ export default function LandingPageEditor() {
         </div>
       </div>
 
+      {/* Language tabs */}
+      <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit">
+        {LANG_TABS.map((tab) => (
+          <button
+            key={tab.code}
+            onClick={() => setActiveLang(tab.code)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeLang === tab.code
+                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
+          >
+            <span>{tab.flag}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {activeLang !== "fr" && (
+        <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2.5">
+          <span>⚠️</span>
+          <span>Leave a field blank to fall back to the French version on the website.</span>
+        </div>
+      )}
+
       {GROUPS.map((group) => (
         <div key={group.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
             <h2 className="font-semibold text-gray-700 dark:text-gray-300 text-sm">{group.label}</h2>
           </div>
-          <div className="p-5 space-y-4">
+          <div className="p-5 space-y-4" dir={isRtl ? "rtl" : "ltr"}>
             {group.keys.map((key) => {
               const field = FIELDS.find((f) => f.key === key);
               if (!field) return null;
+              const k = langKey(key, activeLang);
               return (
-                <div key={key}>
+                <div key={k}>
                   <label className={labelClass}>{field.label}</label>
                   {field.type === "textarea" ? (
-                    <textarea rows={3} className={inputClass} value={values[key] ?? ""} onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))} placeholder={field.placeholder} />
+                    <textarea rows={3} className={inputClass} value={values[k] ?? ""} onChange={(e) => setValues((p) => ({ ...p, [k]: e.target.value }))} placeholder={activeLang !== "fr" ? (values[key] ? `(FR: ${values[key].slice(0, 40)}...)` : field.placeholder) : field.placeholder} />
                   ) : (
-                    <input type={field.type === "url" ? "url" : "text"} className={inputClass} value={values[key] ?? ""} onChange={(e) => setValues((p) => ({ ...p, [key]: e.target.value }))} placeholder={field.placeholder} />
+                    <input type={field.type === "url" ? "url" : "text"} className={inputClass} value={values[k] ?? ""} onChange={(e) => setValues((p) => ({ ...p, [k]: e.target.value }))} placeholder={activeLang !== "fr" ? (values[key] ? `(FR: ${values[key].slice(0, 40)}...)` : field.placeholder) : field.placeholder} />
                   )}
                 </div>
               );

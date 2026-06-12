@@ -18,6 +18,7 @@ model User {
   roleId        String?
   role          Role?     @relation(fields: [roleId], references: [id])
   isActive      Boolean   @default(true)
+  language      String    @default("fr")
   lastLogin     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

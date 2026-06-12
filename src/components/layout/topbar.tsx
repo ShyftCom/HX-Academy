@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, Bell, Sun, Moon, LogOut, User, Settings } from "lucide-react";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -51,6 +52,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
+        <LanguageSwitcher variant="admin" />
         <Button
           variant="ghost"
           size="icon"

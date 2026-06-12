@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "required": "Requis",
+    "optional": "Optionnel",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date",
+    "name": "Nom"
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "plans": "Abonnements",
+    "contact": "Contact",
+    "apply": "Postuler",
+    "login": "Connexion"
+  },
+  "hero": {
+    "cta": "Postuler maintenant",
+    "secondaryCta": "En savoir plus",
+    "scrollDown": "Défiler vers le bas"
+  },
+  "stats": {
+    "playersTrained": "Joueurs formés",
+    "yearsExperience": "Ans d'expérience",
+    "expertCoaches": "Entraîneurs experts",
+    "successRate": "Taux de réussite"
+  },
+  "about": {
+    "defaultBadge": "Est. 2010"
+  },
+  "benefits": {
+    "title": "Pourquoi nous choisir"
+  },
+  "plans": {
+    "title": "Choisissez votre parcours",
+    "perMonth": "par mois",
+    "applyNow": "Postuler maintenant",
+    "duration": "Durée",
+    "price": "Prix"
+  },
+  "cta": {
+    "apply": "Postuler maintenant",
+    "learnMore": "En savoir plus"
+  },
+  "footer": {
+    "rights": "Tous droits réservés.",
+    "contact": "Contact",
+    "links": "Liens rapides"
+  },
+  "apply": {
+    "title": "Formulaire de candidature",
+    "choosePlan": "Choisissez votre abonnement",
+    "choosePlanDesc": "Sélectionnez l'abonnement qui vous convient.",
+    "personalInfo": "Informations personnelles",
+    "personalInfoDesc": "Parlez-nous de vous",
+    "documents": "Documents requis",
+    "documentsDesc": "Téléchargez les documents nécessaires pour compléter votre candidature",
+    "review": "Révision",
+    "reviewDesc": "Vérifiez votre candidature avant de soumettre",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "email": "Email",
+    "dateOfBirth": "Date de naissance",
+    "category": "Catégorie",
+    "parentName": "Nom du parent",
+    "parentPhone": "Téléphone du parent",
+    "address": "Adresse",
+    "selectCategory": "Sélectionnez une catégorie",
+    "noDocuments": "Aucun document requis pour le moment.",
+    "clickToUpload": "Cliquez pour télécharger",
+    "selectedPlan": "Abonnement sélectionné",
+    "yourInfo": "Vos informations",
+    "uploadedDocs": "Documents téléchargés",
+    "surveyAnswers": "Réponses au questionnaire",
+    "questionAnswered": "question(s) répondue(s)",
+    "continue": "Continuer",
+    "backToHome": "Retour à l'accueil",
+    "submitApplication": "Soumettre la candidature",
+    "submitting": "Envoi en cours...",
+    "submitted": "Candidature soumise !",
+    "submittedThank": "Merci",
+    "submittedMessage": "Nous examinerons votre candidature et vous contacterons bientôt.",
+    "alreadyExists": "Une candidature existe déjà avec ces coordonnées",
+    "selectPlan": "Veuillez sélectionner un abonnement",
+    "nameRequired": "Le nom complet est requis",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "uploadRequired": "Veuillez télécharger",
+    "isRequired": "est requis"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "uploadFailed": "Échec du téléchargement",
+    "submissionFailed": "Échec de la soumission. Veuillez réessayer."
+  },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Connectez-vous à la plateforme",
+    "email": "Email",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "forgotPassword": "Mot de passe oublié ?",
+    "invalidCredentials": "Identifiants invalides"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "players": "Joueurs",
+    "payments": "Paiements",
+    "subscriptions": "Abonnements",
+    "leads": "Prospects",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "player": {
+    "portal": "Portail joueur",
+    "home": "Accueil",
+    "profile": "Profil",
+    "subscriptions": "Abonnements",
+    "store": "Boutique",
+    "notifications": "Notifications",
+    "logout": "Déconnexion"
+  },
+  "language": {
+    "fr": "Français",
+    "eng": "English",
+    "ar": "العربية",
+    "select": "Langue"
+  },
+  "theme": {
+    "light": "Mode clair",
+    "dark": "Mode sombre",
+    "toggle": "Changer de thème"
+  }
+}

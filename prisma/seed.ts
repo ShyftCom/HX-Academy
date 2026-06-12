@@ -152,8 +152,8 @@ async function main() {
 
   // Create Default Settings
   const defaultSettings = [
-    { key: "academy_name", value: "HX Academy" },
-    { key: "academy_email", value: "contact@hxacademy.com" },
+    { key: "academy_name", value: "Foot-Ball Skills Academy" },
+    { key: "academy_email", value: "contact@footballskillsacademy.com" },
     { key: "academy_phone", value: "+213 000 000 000" },
     { key: "academy_whatsapp", value: "+213 000 000 000" },
     { key: "academy_address", value: "Algiers, Algeria" },
@@ -161,7 +161,7 @@ async function main() {
     { key: "academy_favicon", value: "" },
     { key: "primary_color", value: "#1e40af" },
     { key: "secondary_color", value: "#0f172a" },
-    { key: "footer_text", value: "© 2024 HX Academy. All rights reserved." },
+    { key: "footer_text", value: "© 2024 Foot-Ball Skills Academy. All rights reserved." },
     { key: "currency", value: "DZD" },
     { key: "currency_symbol", value: "DA" },
   ];
@@ -278,11 +278,11 @@ async function main() {
         isPublished: false,
         sections: {
           create: [
-            { type: "hero", title: "Hero Section", content: JSON.stringify({ heading: "Join HX Academy", subheading: "Train like a champion.", buttonText: "Register Now", buttonUrl: "#registration" }), order: 0, isEnabled: true },
-            { type: "about", title: "About Us", content: JSON.stringify({ title: "About HX Academy", text: "We are a premier football academy dedicated to developing young talent." }), order: 1, isEnabled: true },
+            { type: "hero", title: "Hero Section", content: JSON.stringify({ heading: "Join Foot-Ball Skills Academy", subheading: "Train like a champion.", buttonText: "Register Now", buttonUrl: "#registration" }), order: 0, isEnabled: true },
+            { type: "about", title: "About Us", content: JSON.stringify({ title: "About Foot-Ball Skills Academy", text: "We are a premier football academy dedicated to developing young talent." }), order: 1, isEnabled: true },
             { type: "plans", title: "Membership Plans", content: JSON.stringify({ title: "Choose Your Plan", subtitle: "Flexible plans to fit your schedule and budget." }), order: 2, isEnabled: true },
             { type: "registration", title: "Registration Form", content: JSON.stringify({ title: "Register Now", subtitle: "Fill out the form below and we'll get back to you shortly." }), order: 3, isEnabled: true },
-            { type: "footer", title: "Footer", content: JSON.stringify({ copyright: "© 2024 HX Academy. All rights reserved.", email: "contact@hxacademy.com", phone: "+213 000 000 000" }), order: 4, isEnabled: true },
+            { type: "footer", title: "Footer", content: JSON.stringify({ copyright: "© 2024 Foot-Ball Skills Academy. All rights reserved.", email: "contact@footballskillsacademy.com", phone: "+213 000 000 000" }), order: 4, isEnabled: true },
           ],
         },
       },

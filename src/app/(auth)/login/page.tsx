@@ -69,11 +69,11 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold text-xl shadow-lg">
-          HX
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-600 text-white font-bold text-sm shadow-lg">
+          FSA
         </div>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to HX Academy Management</CardDescription>
+        <CardDescription>Foot-Ball Skills Academy</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

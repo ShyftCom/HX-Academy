@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await createNotification({
       userId: user.id,
       playerId: player.id,
-      title: "Welcome to HX Academy!",
+      title: "Welcome to Foot-Ball Skills Academy!",
       message: `Your account has been created. Your temporary password is your phone number.`,
       type: "success",
     });

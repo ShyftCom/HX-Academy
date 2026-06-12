@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "search": "Search",
+    "required": "Required",
+    "optional": "Optional",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "name": "Name"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "plans": "Plans",
+    "contact": "Contact",
+    "apply": "Apply",
+    "login": "Login"
+  },
+  "hero": {
+    "cta": "Apply Now",
+    "secondaryCta": "Learn More",
+    "scrollDown": "Scroll down"
+  },
+  "stats": {
+    "playersTrained": "Players Trained",
+    "yearsExperience": "Years Experience",
+    "expertCoaches": "Expert Coaches",
+    "successRate": "Success Rate"
+  },
+  "about": {
+    "defaultBadge": "Est. 2010"
+  },
+  "benefits": {
+    "title": "Why Choose Us"
+  },
+  "plans": {
+    "title": "Choose Your Path",
+    "perMonth": "per month",
+    "applyNow": "Apply Now",
+    "duration": "Duration",
+    "price": "Price"
+  },
+  "cta": {
+    "apply": "Apply Now",
+    "learnMore": "Learn More"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "contact": "Contact",
+    "links": "Quick Links"
+  },
+  "apply": {
+    "title": "Application Form",
+    "choosePlan": "Choose Your Plan",
+    "choosePlanDesc": "Select the subscription plan that best suits you.",
+    "personalInfo": "Personal Information",
+    "personalInfoDesc": "Tell us about yourself",
+    "documents": "Required Documents",
+    "documentsDesc": "Upload the following documents to complete your application",
+    "review": "Review",
+    "reviewDesc": "Please review before submitting",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "email": "Email",
+    "dateOfBirth": "Date of Birth",
+    "category": "Category",
+    "parentName": "Parent Name",
+    "parentPhone": "Parent Phone",
+    "address": "Address",
+    "selectCategory": "Select category",
+    "noDocuments": "No documents required at this time.",
+    "clickToUpload": "Click to upload file",
+    "selectedPlan": "Selected Plan",
+    "yourInfo": "Your Information",
+    "uploadedDocs": "Uploaded Documents",
+    "surveyAnswers": "Survey Answers",
+    "questionAnswered": "question(s) answered",
+    "continue": "Continue",
+    "backToHome": "Back to Home",
+    "submitApplication": "Submit Application",
+    "submitting": "Submitting...",
+    "submitted": "Application Submitted!",
+    "submittedThank": "Thank you",
+    "submittedMessage": "We'll review your application and contact you soon.",
+    "alreadyExists": "An application already exists with this contact info",
+    "selectPlan": "Please select a plan",
+    "nameRequired": "Full name is required",
+    "phoneRequired": "Phone number is required",
+    "uploadRequired": "Please upload",
+    "isRequired": "is required"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "uploadFailed": "Upload failed",
+    "submissionFailed": "Submission failed. Please try again."
+  },
+  "login": {
+    "title": "Sign In",
+    "subtitle": "Sign in to the platform",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "forgotPassword": "Forgot password?",
+    "invalidCredentials": "Invalid credentials"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "players": "Players",
+    "payments": "Payments",
+    "subscriptions": "Subscriptions",
+    "leads": "Leads",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "player": {
+    "portal": "Player Portal",
+    "home": "Home",
+    "profile": "Profile",
+    "subscriptions": "Subscriptions",
+    "store": "Store",
+    "notifications": "Notifications",
+    "logout": "Logout"
+  },
+  "language": {
+    "fr": "Français",
+    "eng": "English",
+    "ar": "العربية",
+    "select": "Language"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "toggle": "Toggle theme"
+  }
+}

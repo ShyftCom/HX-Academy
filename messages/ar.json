@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "close": "إغلاق",
+    "search": "بحث",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "actions": "الإجراءات",
+    "status": "الحالة",
+    "date": "التاريخ",
+    "name": "الاسم"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "plans": "الباقات",
+    "contact": "اتصل بنا",
+    "apply": "تقديم",
+    "login": "تسجيل الدخول"
+  },
+  "hero": {
+    "cta": "قدّم الآن",
+    "secondaryCta": "اعرف أكثر",
+    "scrollDown": "اسحب للأسفل"
+  },
+  "stats": {
+    "playersTrained": "لاعب مدرَّب",
+    "yearsExperience": "سنوات خبرة",
+    "expertCoaches": "مدرب متخصص",
+    "successRate": "نسبة النجاح"
+  },
+  "about": {
+    "defaultBadge": "تأسست 2010"
+  },
+  "benefits": {
+    "title": "لماذا تختارنا"
+  },
+  "plans": {
+    "title": "اختر مسارك",
+    "perMonth": "في الشهر",
+    "applyNow": "قدّم الآن",
+    "duration": "المدة",
+    "price": "السعر"
+  },
+  "cta": {
+    "apply": "قدّم الآن",
+    "learnMore": "اعرف أكثر"
+  },
+  "footer": {
+    "rights": "جميع الحقوق محفوظة.",
+    "contact": "اتصل بنا",
+    "links": "روابط سريعة"
+  },
+  "apply": {
+    "title": "نموذج التقديم",
+    "choosePlan": "اختر باقتك",
+    "choosePlanDesc": "اختر الباقة التي تناسبك.",
+    "personalInfo": "المعلومات الشخصية",
+    "personalInfoDesc": "أخبرنا عن نفسك",
+    "documents": "الوثائق المطلوبة",
+    "documentsDesc": "ارفع الوثائق التالية لإتمام تقديمك",
+    "review": "مراجعة",
+    "reviewDesc": "يرجى المراجعة قبل الإرسال",
+    "fullName": "الاسم الكامل",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "dateOfBirth": "تاريخ الميلاد",
+    "category": "الفئة",
+    "parentName": "اسم ولي الأمر",
+    "parentPhone": "هاتف ولي الأمر",
+    "address": "العنوان",
+    "selectCategory": "اختر فئة",
+    "noDocuments": "لا توجد وثائق مطلوبة في الوقت الحالي.",
+    "clickToUpload": "انقر لرفع الملف",
+    "selectedPlan": "الباقة المختارة",
+    "yourInfo": "معلوماتك",
+    "uploadedDocs": "الوثائق المرفوعة",
+    "surveyAnswers": "إجابات الاستبيان",
+    "questionAnswered": "سؤال تمت الإجابة عليه",
+    "continue": "متابعة",
+    "backToHome": "العودة للرئيسية",
+    "submitApplication": "إرسال الطلب",
+    "submitting": "جارٍ الإرسال...",
+    "submitted": "تم إرسال طلبك!",
+    "submittedThank": "شكراً لك",
+    "submittedMessage": "سنراجع طلبك ونتصل بك قريباً.",
+    "alreadyExists": "يوجد طلب مسبق بهذه المعلومات",
+    "selectPlan": "يرجى اختيار باقة",
+    "nameRequired": "الاسم الكامل مطلوب",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "uploadRequired": "يرجى رفع",
+    "isRequired": "مطلوب"
+  },
+  "errors": {
+    "generic": "حدث خطأ ما. يرجى المحاولة مجدداً.",
+    "uploadFailed": "فشل الرفع",
+    "submissionFailed": "فشل الإرسال. يرجى المحاولة مجدداً."
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "تسجيل الدخول إلى المنصة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "signIn": "دخول",
+    "signingIn": "جارٍ الدخول...",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "invalidCredentials": "بيانات الدخول غير صحيحة"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "players": "اللاعبون",
+    "payments": "المدفوعات",
+    "subscriptions": "الاشتراكات",
+    "leads": "العملاء المحتملون",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
+  },
+  "player": {
+    "portal": "بوابة اللاعب",
+    "home": "الرئيسية",
+    "profile": "الملف الشخصي",
+    "subscriptions": "الاشتراكات",
+    "store": "المتجر",
+    "notifications": "الإشعارات",
+    "logout": "تسجيل الخروج"
+  },
+  "language": {
+    "fr": "Français",
+    "eng": "English",
+    "ar": "العربية",
+    "select": "اللغة"
+  },
+  "theme": {
+    "light": "الوضع الفاتح",
+    "dark": "الوضع الداكن",
+    "toggle": "تبديل الثيم"
+  }
+}

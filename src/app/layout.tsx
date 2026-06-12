@@ -6,13 +6,13 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HX Academy - Football Academy Management",
-  description: "Complete Football Academy ERP System",
+  title: "Foot-Ball Skills Academy",
+  description: "Complete Football Academy Management Platform",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} h-full antialiased`}>
         <Providers>{children}</Providers>
       </body>
