@@ -99,16 +99,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="fixed inset-0 z-20 bg-black/50 lg:hidden" onClick={onClose} />
       )}
       <aside
+        style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)", color: "var(--text-primary)" }}
         className={cn(
-          "fixed left-0 top-0 z-30 flex h-full w-64 flex-col transition-transform duration-300 lg:relative lg:translate-x-0",
-          "bg-white border-r border-gray-200 dark:bg-gray-900 dark:border-gray-700",
+          "fixed left-0 top-0 z-30 flex h-full w-64 flex-col transition-transform duration-300 lg:relative lg:translate-x-0 border-r",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-gray-200 dark:border-gray-700 px-5">
+        <div style={{ borderColor: "var(--sidebar-border)" }} className="flex h-16 items-center gap-2 border-b px-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 font-bold text-xs text-white">FSA</div>
-          <span className="font-semibold text-gray-900 dark:text-white text-sm">Foot-Ball Skills Academy</span>
+          <span style={{ color: "var(--text-primary)" }} className="font-semibold text-sm">Foot-Ball Skills Academy</span>
         </div>
 
         {/* Nav */}
@@ -121,8 +121,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center">FSA Platform v1.0</p>
+        <div style={{ borderColor: "var(--sidebar-border)" }} className="border-t p-3">
+          <p style={{ color: "var(--text-muted)" }} className="text-xs text-center">FSA Platform v1.0</p>
         </div>
       </aside>
     </>
@@ -141,11 +141,11 @@ function NavItemComponent({ item, onClose }: { item: NavItem; onClose: () => voi
       <div>
         <button
           onClick={() => setOpen(!open)}
+          style={{ color: "var(--text-secondary)" }}
           className={cn(
             "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-            "dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white",
-            open && "bg-gray-100 text-gray-900 dark:bg-white/5 dark:text-white"
+            "hover:bg-gray-100 dark:hover:bg-white/10",
+            open && "bg-gray-100 dark:bg-white/5"
           )}
         >
           <item.icon className="h-4 w-4 shrink-0" />
@@ -173,11 +173,12 @@ function NavItemComponent({ item, onClose }: { item: NavItem; onClose: () => voi
     <Link
       href={item.href!}
       onClick={onClose}
+      style={isActive ? undefined : { color: "var(--text-secondary)" }}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         isActive
           ? "bg-blue-600 text-white"
-          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+          : "hover:bg-gray-100 dark:hover:bg-white/10"
       )}
     >
       <item.icon className="h-4 w-4 shrink-0" />

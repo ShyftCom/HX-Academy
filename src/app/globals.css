@@ -1,49 +1,69 @@
 @import "tailwindcss";
 
-/* ===== LIGHT MODE TOKENS ===== */
+/* ============================================================
+   THEME TOKENS
+   ============================================================ */
+
 :root {
-  --background:        #ffffff;
-  --foreground:        #000000;
-  --card:              #ffffff;
-  --card-border:       #e5e7eb;
-  --sidebar-bg:        #ffffff;
-  --sidebar-border:    #e5e7eb;
-  --header-bg:         #ffffff;
-  --header-border:     #e5e7eb;
-  --input-bg:          #ffffff;
-  --input-border:      #d1d5db;
-  --muted:             #4b5563;
-  --muted-bg:          #f3f4f6;
-  --accent:            #16a34a;
-  --accent-hover:      #15803d;
-  --destructive:       #dc2626;
-  --ring:              #16a34a;
+  /* Surfaces */
+  --background:     #f9fafb;
+  --card:           #ffffff;
+  --card-border:    #e5e7eb;
+  --sidebar-bg:     #ffffff;
+  --sidebar-border: #e5e7eb;
+  --header-bg:      #ffffff;
+  --header-border:  #e5e7eb;
+  --input-bg:       #ffffff;
+  --input-border:   #d1d5db;
+  --muted-bg:       #f3f4f6;
+
+  /* Text */
+  --text-primary:   #000000;
+  --text-secondary: #374151;
+  --text-muted:     #6B7280;
+  --foreground:     #000000;
+
+  /* Accents */
+  --accent:         #16a34a;
+  --accent-hover:   #15803d;
+  --destructive:    #dc2626;
+  --ring:           #16a34a;
 }
 
-/* ===== DARK MODE TOKENS ===== */
 .dark {
-  --background:        #0f172a;
-  --foreground:        #f1f5f9;
-  --card:              #1e293b;
-  --card-border:       #334155;
-  --sidebar-bg:        #111827;
-  --sidebar-border:    #1f2937;
-  --header-bg:         #111827;
-  --header-border:     #1f2937;
-  --input-bg:          #1e293b;
-  --input-border:      #475569;
-  --muted:             #94a3b8;
-  --muted-bg:          #1e293b;
-  --accent:            #16a34a;
-  --accent-hover:      #22c55e;
-  --destructive:       #ef4444;
-  --ring:              #22c55e;
+  /* Surfaces */
+  --background:     #0f172a;
+  --card:           #1e293b;
+  --card-border:    #334155;
+  --sidebar-bg:     #111827;
+  --sidebar-border: #1f2937;
+  --header-bg:      #111827;
+  --header-border:  #1f2937;
+  --input-bg:       #1e293b;
+  --input-border:   #475569;
+  --muted-bg:       #1e293b;
+
+  /* Text */
+  --text-primary:   #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #94A3B8;
+  --foreground:     #f1f5f9;
+
+  /* Accents */
+  --accent:         #16a34a;
+  --accent-hover:   #22c55e;
+  --destructive:    #ef4444;
+  --ring:           #22c55e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 }
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
 
 * {
   box-sizing: border-box;
@@ -55,73 +75,133 @@ html, body {
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* ===== LIGHT MODE TEXT ENFORCEMENT ===== */
-/* Ensure all primary text is black in light mode */
-:not(.dark) body,
-:not(.dark) h1, :not(.dark) h2, :not(.dark) h3, :not(.dark) h4, :not(.dark) h5, :not(.dark) h6 {
-  color: #000000;
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
 }
 
-/* Override Tailwind gray utility classes in light mode to be darker */
-:not(.dark) .text-gray-900 { color: #000000 !important; }
-:not(.dark) .text-gray-800 { color: #111111 !important; }
-:not(.dark) .text-gray-700 { color: #222222 !important; }
-:not(.dark) .text-gray-600 { color: #333333 !important; }
-:not(.dark) .text-gray-500 { color: #555555 !important; }
-:not(.dark) .text-gray-400 { color: #666666 !important; }
+/* ============================================================
+   AUTOMATIC GRAY TEXT ADAPTATION
 
-/* ===== GLOBAL CARD UTILITY ===== */
+   These selectors have specificity 0,1,0.
+   Tailwind dark: variants (.dark .dark\:text-*) have 0,2,0
+   and will still override when explicitly written — preserving
+   intentional per-component overrides.
+
+   Elements WITHOUT a dark: variant auto-adapt via the CSS
+   variable resolving to the correct theme value.
+   ============================================================ */
+
+/* Primary text — maps to --text-primary (black / white) */
+.text-gray-950,
+.text-gray-900,
+.text-gray-800 {
+  color: var(--text-primary);
+}
+
+/* Secondary text — maps to --text-secondary */
+.text-gray-700,
+.text-gray-600 {
+  color: var(--text-secondary);
+}
+
+/* Muted text — maps to --text-muted */
+.text-gray-500,
+.text-gray-400 {
+  color: var(--text-muted);
+}
+
+/* text-gray-100/200/300 intentionally NOT overridden —
+   they're used on dark-background sections (public navbar, hero, etc.)
+   where light colors are correct. */
+
+/* ============================================================
+   INPUTS, TEXTAREAS, SELECTS
+   ============================================================ */
+
+input, textarea, select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+table {
+  color: var(--text-primary);
+}
+
+table thead {
+  color: var(--text-secondary);
+}
+
+.dark table thead {
+  background: #1e293b;
+}
+
+.dark table tbody tr:hover {
+  background: #1e293b;
+}
+
+/* ============================================================
+   GLOBAL CARD UTILITY
+   ============================================================ */
+
 .theme-card {
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: 0.75rem;
 }
 
-/* ===== INPUT GLOBAL STYLES ===== */
-input, textarea, select {
-  background-color: var(--input-bg);
-  color: var(--foreground);
-  border-color: var(--input-border);
-}
+/* ============================================================
+   RTL SUPPORT
+   ============================================================ */
 
-/* ===== TABLE DEFAULTS ===== */
-.dark table thead {
-  background: #1e293b;
-}
-.dark table tbody tr:hover {
-  background: #1e293b;
-}
-
-/* ===== RTL SUPPORT ===== */
 [dir="rtl"] {
   font-family: "Segoe UI", Tahoma, sans-serif;
 }
+
 [dir="rtl"] .space-x-2 > * + * {
   margin-right: 0.5rem;
   margin-left: 0;
 }
 
-/* ===== SCROLLBAR ===== */
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
+
 .dark ::-webkit-scrollbar-thumb {
   background: #334155;
 }
 
-/* ===== ANIMATIONS ===== */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -132,15 +212,9 @@ input, textarea, select {
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-spin    { animation: spin 1s linear infinite; }
-.animate-pulse   { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
-.animate-fadeIn  { animation: fadeIn 0.2s ease; }
-
-/* ===== LIGHT MODE EXPLICIT FIXES ===== */
-.light body, :root body {
-  background-color: var(--background);
-  color: #000000;
-}
+.animate-spin   { animation: spin 1s linear infinite; }
+.animate-pulse  { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-fadeIn { animation: fadeIn 0.2s ease; }

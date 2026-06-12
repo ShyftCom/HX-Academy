@@ -27,7 +27,7 @@ export default function BackOfficeLayout({ children }: { children: React.ReactNo
   if ((session?.user as any)?.isPlayer) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div style={{ background: "var(--background)", color: "var(--text-primary)" }} className="flex h-screen overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />

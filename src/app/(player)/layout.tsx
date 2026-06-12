@@ -40,9 +40,9 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
   if (status === "unauthenticated") return null;
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
+    <div style={{ background: "var(--background)", color: "var(--text-primary)" }} className="flex h-screen flex-col">
       {/* Top Header */}
-      <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900">
+      <header style={{ background: "var(--header-bg)", borderColor: "var(--header-border)", color: "var(--text-primary)" }} className="flex h-14 items-center justify-between border-b px-4">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600 text-white font-bold text-xs">FSA</div>
           <span className="font-semibold text-sm">Foot-Ball Skills Academy</span>
@@ -67,12 +67,12 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <nav style={{ background: "var(--header-bg)", borderColor: "var(--header-border)" }} className="fixed bottom-0 left-0 right-0 border-t">
         <div className="flex">
           {navItems.map((item) => {
             const isActive = item.href === "/player" ? pathname === item.href : pathname.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href} className={cn("flex flex-1 flex-col items-center justify-center py-2 text-xs transition-colors", isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-400 hover:text-gray-700 dark:hover:text-gray-300")}>
+              <Link key={item.href} href={item.href} style={isActive ? undefined : { color: "var(--text-muted)" }} className={cn("flex flex-1 flex-col items-center justify-center py-2 text-xs transition-colors", isActive ? "text-blue-600 dark:text-blue-400" : "")}>
                 <item.icon className={cn("h-5 w-5 mb-0.5", isActive && "fill-current opacity-20")} />
                 {item.label}
               </Link>

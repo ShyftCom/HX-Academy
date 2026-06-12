@@ -44,7 +44,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   };
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900">
+    <header style={{ background: "var(--header-bg)", borderColor: "var(--header-border)", color: "var(--text-primary)" }} className="flex h-16 items-center gap-4 border-b px-4">
       <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
         <Menu className="h-5 w-5" />
       </Button>
