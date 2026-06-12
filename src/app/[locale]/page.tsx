@@ -89,6 +89,7 @@ export default function LocaleHomePage() {
               <a href="#vsl" className="text-gray-300 hover:text-white text-sm transition-colors">Video</a>
               <a href="#plans" className="text-gray-300 hover:text-white text-sm transition-colors">{t("nav.plans")}</a>
               <a href="#apply" className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">{t("nav.apply")}</a>
+              <Link href="/login" className="border border-white/30 hover:border-white/60 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/10">Login</Link>
               <LanguageSwitcher variant="public" />
             </div>
             <div className="md:hidden flex items-center gap-2">
@@ -104,6 +105,7 @@ export default function LocaleHomePage() {
               <a href="#vsl" className="block text-gray-300 py-2 text-sm" onClick={() => setNavOpen(false)}>Video</a>
               <a href="#plans" className="block text-gray-300 py-2 text-sm" onClick={() => setNavOpen(false)}>{t("nav.plans")}</a>
               <a href="#apply" className="block bg-green-600 text-white px-4 py-2 rounded-lg text-center text-sm mt-2 font-medium" onClick={() => setNavOpen(false)}>{t("nav.apply")}</a>
+              <Link href="/login" className="block border border-white/30 text-white px-4 py-2 rounded-lg text-center text-sm mt-2 font-medium hover:bg-white/10" onClick={() => setNavOpen(false)}>Login</Link>
             </div>
           )}
         </div>
