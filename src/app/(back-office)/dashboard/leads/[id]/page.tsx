@@ -1,21 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
   ChevronRight, ArrowRight, User, Phone, Mail, MapPin, Calendar,
   Tag, UserCheck, CheckCircle2, Circle, FileText, PhoneCall,
   MailOpen, ClipboardList, Paperclip, Archive, RefreshCw,
-  Loader2, AlertTriangle, Plus, X, ChevronDown,
+  Loader2, AlertTriangle, Plus, X,
 } from "lucide-react";
 import { formatDate, timeAgo } from "@/lib/utils";
-
-interface LeadStatus {
-  id: string; name: string; color: string; order: number; isDefault: boolean; isTerminal: boolean;
-}
+import { StatusBadge, type LeadStatus } from "@/components/leads/status-badge";
 
 interface Lead {
   id: string; fullName: string; phone?: string; email?: string;
@@ -33,14 +30,14 @@ interface Activity {
 }
 
 const ACTION_TYPES = [
-  { key: "all",             label: "All" },
-  { key: "status_change",   label: "Status" },
-  { key: "note_added",      label: "Notes" },
-  { key: "call_logged",     label: "Calls" },
-  { key: "email_sent",      label: "Emails" },
-  { key: "task_created",    label: "Tasks" },
-  { key: "field_edited",    label: "Edits" },
-  { key: "lead_converted",  label: "Convert" },
+  { key: "all",            label: "All" },
+  { key: "status_change",  label: "Status" },
+  { key: "note_added",     label: "Notes" },
+  { key: "call_logged",    label: "Calls" },
+  { key: "email_sent",     label: "Emails" },
+  { key: "task_created",   label: "Tasks" },
+  { key: "field_edited",   label: "Edits" },
+  { key: "lead_converted", label: "Convert" },
 ];
 
 function getActionIcon(type: string) {
@@ -87,16 +84,6 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function StatusBadge({ status }: { status: LeadStatus }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-      style={{ background: hexToRgba(status.color, 0.15), color: status.color, border: `1px solid ${hexToRgba(status.color, 0.35)}` }}>
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: status.color }} />
-      {status.name}
-    </span>
-  );
-}
-
 function RoleBadge({ role }: { role: string }) {
   const colors: Record<string, { bg: string; text: string }> = {
     admin:  { bg: "#FEE2E2", text: "#A02020" },
@@ -113,7 +100,6 @@ function RoleBadge({ role }: { role: string }) {
 
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const qc = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<"info" | "activity">("info");
@@ -121,8 +107,6 @@ export default function LeadDetailPage() {
   const [activityPage, setActivityPage] = useState(1);
   const [noteText, setNoteText] = useState("");
   const [addingNote, setAddingNote] = useState(false);
-  const [quickStatusId, setQuickStatusId] = useState("");
-  const [showStatusDrop, setShowStatusDrop] = useState(false);
 
   const { data: lead, isLoading: leadLoading } = useQuery<Lead>({
     queryKey: ["lead", id],
@@ -142,26 +126,6 @@ export default function LeadDetailPage() {
       return fetch(`/api/leads/${id}/activity?${params}`).then((r) => r.json());
     },
     refetchInterval: 30000,
-  });
-
-  useEffect(() => {
-    if (lead?.statusId) setQuickStatusId(lead.statusId);
-  }, [lead?.statusId]);
-
-  const statusChangeMutation = useMutation({
-    mutationFn: (statusId: string) =>
-      fetch(`/api/leads/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...lead, statusId }),
-      }).then((r) => r.json()),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["lead", id] });
-      qc.invalidateQueries({ queryKey: ["lead-activity", id] });
-      setShowStatusDrop(false);
-      toast.success("Status updated");
-    },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const addNoteMutation = useMutation({
@@ -187,15 +151,11 @@ export default function LeadDetailPage() {
     mutationFn: () => fetch(`/api/leads/${id}/convert`, { method: "POST" }).then((r) => r.json()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
+      qc.invalidateQueries({ queryKey: ["lead-activity", id] });
       toast.success("Lead converted to player");
     },
     onError: () => toast.error("Conversion failed"),
   });
-
-  const handleStatusChange = useCallback((statusId: string) => {
-    setQuickStatusId(statusId);
-    statusChangeMutation.mutate(statusId);
-  }, [statusChangeMutation]);
 
   if (leadLoading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--text-muted)" }} /></div>;
@@ -212,7 +172,6 @@ export default function LeadDetailPage() {
   }
 
   const currentStatus = statuses?.find((s) => s.id === lead.statusId);
-  const sortedStatuses = [...(statuses ?? [])].sort((a, b) => a.order - b.order);
   const activities = activityQuery.data?.data ?? [];
 
   const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) => (
@@ -236,7 +195,7 @@ export default function LeadDetailPage() {
         <span style={{ color: "var(--text-primary)" }}>{lead.fullName}</span>
       </div>
 
-      {/* Header */}
+      {/* Header card */}
       <div className="rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-white flex-shrink-0" style={{ background: "#A02020" }}>
@@ -250,45 +209,38 @@ export default function LeadDetailPage() {
               )}
             </div>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
-              {currentStatus && <StatusBadge status={currentStatus} />}
-              {lead.source && <span className="text-xs px-2 py-1 rounded-full" style={{ background: "var(--muted-bg)", color: "var(--text-muted)" }}>{lead.source}</span>}
+              {/* Clickable status badge — opens inline dropdown */}
+              <StatusBadge
+                leadId={lead.id}
+                leadName={lead.fullName}
+                currentStatus={currentStatus}
+                statuses={statuses ?? []}
+                onStatusChange={() => {
+                  qc.invalidateQueries({ queryKey: ["lead", id] });
+                  qc.invalidateQueries({ queryKey: ["lead-activity", id] });
+                }}
+              />
+              {lead.source && (
+                <span className="text-xs px-2 py-1 rounded-full" style={{ background: "var(--muted-bg)", color: "var(--text-muted)" }}>
+                  {lead.source}
+                </span>
+              )}
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>Added {formatDate(lead.createdAt)}</span>
             </div>
           </div>
 
-          {/* Quick status change */}
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            <div className="relative">
-              <button
-                onClick={() => setShowStatusDrop((v) => !v)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
-                style={{ background: "var(--muted-bg)", border: "1px solid var(--card-border)", color: "var(--text-primary)" }}>
-                Move to <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {showStatusDrop && (
-                <div className="absolute right-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[180px]"
-                  style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
-                  {sortedStatuses.map((s) => (
-                    <button key={s.id} onClick={() => handleStatusChange(s.id)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:opacity-80 transition-colors"
-                      style={{ color: s.id === lead.statusId ? s.color : "var(--text-primary)" }}>
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
-                      {s.name}
-                      {s.id === lead.statusId && <span className="ml-auto text-xs" style={{ color: "var(--text-muted)" }}>current</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {!lead.isConverted && (
-              <button onClick={() => convertMutation.mutate()} disabled={convertMutation.isPending}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
-                style={{ background: "#10B981" }}>
-                {convertMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                Convert
-              </button>
-            )}
-          </div>
+          {/* Convert button */}
+          {!lead.isConverted && (
+            <button
+              onClick={() => convertMutation.mutate()}
+              disabled={convertMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60 flex-shrink-0"
+              style={{ background: "#10B981" }}
+            >
+              {convertMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+              Convert to Player
+            </button>
+          )}
         </div>
       </div>
 
@@ -307,7 +259,6 @@ export default function LeadDetailPage() {
 
       {activeTab === "info" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: contact info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Contact Information</h2>
@@ -321,7 +272,6 @@ export default function LeadDetailPage() {
                 <InfoRow icon={MapPin} label="Address" value={lead.address} />
               </div>
             </div>
-
             {lead.notes && (
               <div className="rounded-2xl p-5" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
                 <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--text-muted)" }}>Notes</h2>
@@ -330,14 +280,19 @@ export default function LeadDetailPage() {
             )}
           </div>
 
-          {/* Right: meta */}
           <div className="space-y-4">
             <div className="rounded-2xl p-5 space-y-3" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Details</h2>
               {currentStatus && (
                 <div>
                   <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Status</p>
-                  <StatusBadge status={currentStatus} />
+                  <StatusBadge
+                    leadId={lead.id}
+                    leadName={lead.fullName}
+                    currentStatus={currentStatus}
+                    statuses={statuses ?? []}
+                    onStatusChange={() => qc.invalidateQueries({ queryKey: ["lead", id] })}
+                  />
                 </div>
               )}
               {lead.assignedStaff && (
@@ -362,7 +317,6 @@ export default function LeadDetailPage() {
                 </div>
               )}
             </div>
-
             <Link href={`/dashboard/leads?edit=${lead.id}`}
               className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{ border: "1px solid var(--card-border)", color: "var(--text-primary)" }}>
@@ -374,7 +328,6 @@ export default function LeadDetailPage() {
 
       {activeTab === "activity" && (
         <div className="space-y-4">
-          {/* Filter + Add note */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex gap-1 p-1 rounded-xl flex-wrap" style={{ background: "var(--muted-bg)" }}>
               {ACTION_TYPES.map((t) => (
@@ -394,7 +347,6 @@ export default function LeadDetailPage() {
             </button>
           </div>
 
-          {/* Note input */}
           {addingNote && (
             <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
               <textarea
@@ -415,14 +367,13 @@ export default function LeadDetailPage() {
                   disabled={!noteText.trim() || addNoteMutation.isPending}
                   className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold text-white rounded-lg disabled:opacity-60"
                   style={{ background: "#A02020" }}>
-                  {addNoteMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                  {addNoteMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Save Note
                 </button>
               </div>
             </div>
           )}
 
-          {/* Timeline */}
           {activityQuery.isLoading ? (
             <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--text-muted)" }} /></div>
           ) : activities.length === 0 ? (
@@ -440,11 +391,10 @@ export default function LeadDetailPage() {
                       style={{ background: hexToRgba(color, 0.12), border: `2px solid ${hexToRgba(color, 0.3)}`, color }}>
                       {getActionIcon(a.actionType)}
                     </div>
-                    <div className="flex-1 min-w-0 pt-1 pb-0">
+                    <div className="flex-1 min-w-0 pt-1">
                       <div className="flex items-start justify-between gap-2 flex-wrap">
                         <p className="text-sm font-medium leading-snug" style={{ color: "var(--text-primary)" }}>{a.description}</p>
-                        <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}
-                          title={formatDate(a.createdAt)}>
+                        <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }} title={formatDate(a.createdAt)}>
                           {timeAgo(a.createdAt)}
                         </span>
                       </div>
@@ -465,7 +415,6 @@ export default function LeadDetailPage() {
             </div>
           )}
 
-          {/* Load more */}
           {activityQuery.data && activityPage < activityQuery.data.totalPages && (
             <button onClick={() => setActivityPage((p) => p + 1)}
               className="w-full py-2.5 rounded-xl text-sm font-medium transition-all"
