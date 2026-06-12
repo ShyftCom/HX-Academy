@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Upload, Trash2, Loader2, ImageIcon, Eye } from "lucide-react";
+import { Upload, Trash2, Loader2, ImageIcon, Eye, Palette, Save } from "lucide-react";
 
 interface LogoSlot {
   key: string;
@@ -41,6 +41,23 @@ const LOGO_GROUPS = [
   },
 ];
 
+const COLOR_FIELDS = [
+  { key: "primary_color",   label: "Primary Color",           description: "Main action color — buttons, links, accents",    default: "#A02020" },
+  { key: "secondary_color", label: "Secondary Color",         description: "Hover / pressed state of primary",               default: "#903030" },
+  { key: "dark_bg_color",   label: "Dark Mode Background",    description: "Root background in dark mode",                   default: "#101010" },
+  { key: "card_dark_color", label: "Dark Mode Card Surface",  description: "Card and panel background in dark mode",         default: "#202020" },
+];
+
+const FONT_OPTIONS = [
+  "Inter",
+  "Roboto",
+  "Poppins",
+  "Montserrat",
+  "Open Sans",
+  "Nunito",
+  "Lato",
+];
+
 function LogoCard({ slot, url, onUpload, onRemove }: {
   slot: LogoSlot;
   url: string;
@@ -68,16 +85,16 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+    <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
       <div>
-        <p className="font-medium text-gray-900 dark:text-white text-sm">{slot.label}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{slot.description}</p>
-        {slot.recommended && <p className="text-xs text-blue-500 dark:text-blue-400 mt-0.5">💡 {slot.recommended}</p>}
+        <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{slot.label}</p>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>{slot.description}</p>
+        {slot.recommended && <p className="text-xs mt-0.5" style={{ color: "#A02020" }}>💡 {slot.recommended}</p>}
       </div>
 
       {url ? (
         <div className="space-y-2">
-          <div className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center" style={{ minHeight: 80 }}>
+          <div className="relative group rounded-lg overflow-hidden flex items-center justify-center" style={{ minHeight: 80, background: "var(--muted-bg)", border: "1px solid var(--card-border)" }}>
             <img src={url} alt={slot.label} className="max-h-20 max-w-full object-contain p-2" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <button onClick={() => setPreview(true)} className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-colors"><Eye className="w-4 h-4" /></button>
@@ -86,12 +103,13 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
           <div className="flex gap-2">
             <label className="flex-1 cursor-pointer">
               <input ref={inputRef} type="file" className="hidden" accept="image/*,.ico" onChange={handleFile} />
-              <div className="flex items-center justify-center gap-1.5 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg px-3 py-1.5 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer" style={{ border: "1px solid var(--card-border)", color: "var(--text-secondary)" }}>
                 {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                 Replace
               </div>
             </label>
-            <button onClick={handleRemove} disabled={removing} className="flex items-center gap-1.5 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg px-3 py-1.5 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
+            <button onClick={handleRemove} disabled={removing} className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+              style={{ border: "1px solid #FEE2E2", color: "#A02020" }}>
               {removing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               Remove
             </button>
@@ -100,14 +118,14 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
       ) : (
         <label className="cursor-pointer block">
           <input ref={inputRef} type="file" className="hidden" accept="image/*,.ico" onChange={handleFile} />
-          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-5 text-center hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50/30 dark:hover:bg-green-900/10 transition-all">
+          <div className="rounded-lg p-5 text-center transition-all" style={{ border: "2px dashed var(--card-border)" }}>
             {uploading ? (
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-gray-400" />
+              <Loader2 className="w-6 h-6 animate-spin mx-auto" style={{ color: "var(--text-muted)" }} />
             ) : (
               <>
-                <ImageIcon className="w-6 h-6 mx-auto text-gray-400 dark:text-gray-500 mb-1.5" />
-                <p className="text-xs text-gray-500 dark:text-gray-400">Click to upload</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">PNG, SVG, ICO, JPG</p>
+                <ImageIcon className="w-6 h-6 mx-auto mb-1.5" style={{ color: "var(--text-muted)" }} />
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>Click to upload</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>PNG, SVG, ICO, JPG</p>
               </>
             )}
           </div>
@@ -116,9 +134,9 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
 
       {preview && url && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreview(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <p className="font-semibold text-gray-900 dark:text-white mb-4">{slot.label} — Preview</p>
-            <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex items-center justify-center p-4" style={{ minHeight: 120 }}>
+          <div className="rounded-2xl p-6 shadow-2xl max-w-sm w-full" style={{ background: "var(--card)" }} onClick={(e) => e.stopPropagation()}>
+            <p className="font-semibold mb-4" style={{ color: "var(--text-primary)" }}>{slot.label} — Preview</p>
+            <div className="rounded-xl overflow-hidden flex items-center justify-center p-4" style={{ minHeight: 120, background: "var(--muted-bg)", border: "1px solid var(--card-border)" }}>
               <img src={url} alt={slot.label} className="max-h-32 max-w-full object-contain" />
             </div>
             <div className="grid grid-cols-2 gap-3 mt-4">
@@ -129,8 +147,8 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
                 <img src={url} alt="dark preview" className="max-h-12 max-w-full object-contain" />
               </div>
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">Light bg / Dark bg preview</p>
-            <button onClick={() => setPreview(false)} className="mt-4 w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Close</button>
+            <p className="text-xs text-center mt-2" style={{ color: "var(--text-muted)" }}>Light bg / Dark bg preview</p>
+            <button onClick={() => setPreview(false)} className="mt-4 w-full text-center text-sm transition-colors" style={{ color: "var(--text-muted)" }}>Close</button>
           </div>
         </div>
       )}
@@ -140,13 +158,27 @@ function LogoCard({ slot, url, onUpload, onRemove }: {
 
 export default function BrandingPage() {
   const [logos, setLogos] = useState<Record<string, string>>({});
+  const [colors, setColors] = useState<Record<string, string>>({});
+  const [fontFamily, setFontFamily] = useState("Inter");
+  const [footerCopyright, setFooterCopyright] = useState("");
   const [loading, setLoading] = useState(true);
+  const [savingColors, setSavingColors] = useState(false);
 
   useEffect(() => {
-    fetch("/api/branding")
-      .then((r) => r.json())
-      .then((d) => { setLogos(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch("/api/branding").then((r) => r.json()),
+      fetch("/api/settings").then((r) => r.json()),
+    ]).then(([logoData, settingsData]) => {
+      setLogos(logoData);
+      const c: Record<string, string> = {};
+      for (const f of COLOR_FIELDS) {
+        c[f.key] = settingsData[f.key] ?? f.default;
+      }
+      setColors(c);
+      setFontFamily(settingsData.font_family ?? "Inter");
+      setFooterCopyright(settingsData.footer_copyright ?? "");
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   async function handleUpload(key: string, file: File) {
@@ -181,20 +213,126 @@ export default function BrandingPage() {
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
+  async function saveColors() {
+    setSavingColors(true);
+    try {
+      const payload: Record<string, string> = {
+        ...colors,
+        font_family: fontFamily,
+        footer_copyright: footerCopyright,
+      };
+      const r = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (r.ok) {
+        toast.success("Brand colors saved — reload to see changes");
+      } else {
+        toast.error("Failed to save colors");
+      }
+    } catch {
+      toast.error("Failed to save colors");
+    } finally {
+      setSavingColors(false);
+    }
+  }
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--text-muted)" }} /></div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Branding &amp; Logos</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Upload logos for each part of the platform. The correct logo displays automatically based on the interface and theme.</p>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Branding &amp; Logos</h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>Manage your academy's visual identity — logos, colors, typography, and footer text.</p>
       </div>
 
+      {/* BRAND COLORS */}
+      <section className="space-y-4">
+        <div className="pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5" style={{ color: "#A02020" }} />
+            <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>Brand Colors</h2>
+          </div>
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>These colors inject as CSS variables globally — every button, badge, and accent updates automatically.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {COLOR_FIELDS.map((f) => (
+            <div key={f.key} className="rounded-xl p-4" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
+              <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.label}</label>
+              <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>{f.description}</p>
+              <div className="flex items-center gap-3">
+                <div className="relative w-12 h-10 rounded-lg overflow-hidden cursor-pointer" style={{ border: "2px solid var(--card-border)" }}>
+                  <input
+                    type="color"
+                    value={colors[f.key] ?? f.default}
+                    onChange={(e) => setColors((p) => ({ ...p, [f.key]: e.target.value }))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className="w-full h-full rounded-md" style={{ background: colors[f.key] ?? f.default }} />
+                </div>
+                <input
+                  type="text"
+                  value={colors[f.key] ?? f.default}
+                  onChange={(e) => setColors((p) => ({ ...p, [f.key]: e.target.value }))}
+                  className="flex-1 text-sm font-mono rounded-lg px-3 py-2 outline-none"
+                  style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
+                  placeholder={f.default}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Font Family */}
+        <div className="rounded-xl p-4" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
+          <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Font Family</label>
+          <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Applied as the global UI typeface</p>
+          <select
+            value={fontFamily}
+            onChange={(e) => setFontFamily(e.target.value)}
+            className="w-full text-sm rounded-lg px-3 py-2 outline-none"
+            style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
+          >
+            {FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+
+        {/* Footer Copyright */}
+        <div className="rounded-xl p-4" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
+          <label className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Footer Copyright Text</label>
+          <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>Shown in the website footer. Leave blank to use auto-generated text.</p>
+          <input
+            type="text"
+            value={footerCopyright}
+            onChange={(e) => setFooterCopyright(e.target.value)}
+            className="w-full text-sm rounded-lg px-3 py-2 outline-none"
+            style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
+            placeholder={`© ${new Date().getFullYear()} Foot-Ball Skills Academy. All rights reserved.`}
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={saveColors}
+            disabled={savingColors}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
+            style={{ background: "#A02020" }}
+            onMouseEnter={e => !savingColors && (e.currentTarget.style.background = "#903030")}
+            onMouseLeave={e => (e.currentTarget.style.background = "#A02020")}
+          >
+            {savingColors ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save Brand Settings
+          </button>
+        </div>
+      </section>
+
+      {/* LOGOS */}
       {LOGO_GROUPS.map((group) => (
-        <div key={group.title} className="space-y-4">
-          <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
-            <h2 className="font-semibold text-gray-900 dark:text-white">{group.title}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{group.description}</p>
+        <section key={group.title} className="space-y-4">
+          <div className="pb-3" style={{ borderBottom: "1px solid var(--card-border)" }}>
+            <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>{group.title}</h2>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{group.description}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.slots.map((slot) => (
@@ -207,7 +345,7 @@ export default function BrandingPage() {
               />
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );

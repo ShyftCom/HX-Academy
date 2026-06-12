@@ -1,59 +1,66 @@
 @import "tailwindcss";
 
 /* ============================================================
-   THEME TOKENS
+   BRAND PALETTE — Football Academy
    ============================================================ */
-
 :root {
-  /* Surfaces */
-  --background:     #f9fafb;
-  --card:           #ffffff;
-  --card-border:    #e5e7eb;
-  --sidebar-bg:     #ffffff;
-  --sidebar-border: #e5e7eb;
-  --header-bg:      #ffffff;
-  --header-border:  #e5e7eb;
-  --input-bg:       #ffffff;
-  --input-border:   #d1d5db;
-  --muted-bg:       #f3f4f6;
+  --primary-red:   #A02020;
+  --secondary-red: #903030;
+  --dark-red:      #701C1C;
+  --deep-red:      #500F0F;
+  --black:         #000000;
+  --soft-black:    #101010;
+  --white:         #FFFFFF;
+  --light-gray:    #F0F0F0;
+  --border-gray:   #D0D0D0;
+}
 
-  /* Text */
+/* ============================================================
+   LIGHT MODE TOKENS
+   ============================================================ */
+:root {
+  --background:     #FFFFFF;
+  --card:           #FFFFFF;
+  --card-border:    #D0D0D0;
+  --sidebar-bg:     #FFFFFF;
+  --sidebar-border: #D0D0D0;
+  --header-bg:      #FFFFFF;
+  --header-border:  #D0D0D0;
+  --input-bg:       #FFFFFF;
+  --input-border:   #D0D0D0;
+  --muted-bg:       #F0F0F0;
   --text-primary:   #000000;
   --text-secondary: #374151;
   --text-muted:     #6B7280;
   --foreground:     #000000;
-
-  /* Accents */
-  --accent:         #16a34a;
-  --accent-hover:   #15803d;
-  --destructive:    #dc2626;
-  --ring:           #16a34a;
+  --accent:         #A02020;
+  --accent-hover:   #903030;
+  --ring:           #A02020;
+  --destructive:    #A02020;
 }
 
+/* ============================================================
+   DARK MODE TOKENS
+   ============================================================ */
 .dark {
-  /* Surfaces */
-  --background:     #0f172a;
-  --card:           #1e293b;
-  --card-border:    #334155;
-  --sidebar-bg:     #111827;
-  --sidebar-border: #1f2937;
-  --header-bg:      #111827;
-  --header-border:  #1f2937;
-  --input-bg:       #1e293b;
-  --input-border:   #475569;
-  --muted-bg:       #1e293b;
-
-  /* Text */
+  --background:     #101010;
+  --card:           #202020;
+  --card-border:    #2a2a2a;
+  --sidebar-bg:     #181818;
+  --sidebar-border: #2a2a2a;
+  --header-bg:      #181818;
+  --header-border:  #2a2a2a;
+  --input-bg:       #1a1a1a;
+  --input-border:   #333333;
+  --muted-bg:       #202020;
   --text-primary:   #FFFFFF;
-  --text-secondary: #CBD5E1;
-  --text-muted:     #94A3B8;
-  --foreground:     #f1f5f9;
-
-  /* Accents */
-  --accent:         #16a34a;
-  --accent-hover:   #22c55e;
+  --text-secondary: #D0D0D0;
+  --text-muted:     #888888;
+  --foreground:     #FFFFFF;
+  --accent:         #A02020;
+  --accent-hover:   #903030;
+  --ring:           #A02020;
   --destructive:    #ef4444;
-  --ring:           #22c55e;
 }
 
 @theme inline {
@@ -64,14 +71,8 @@
 /* ============================================================
    BASE RESET
    ============================================================ */
-
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 
 body {
   background: var(--background);
@@ -79,142 +80,227 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
-}
+h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
 
 /* ============================================================
-   AUTOMATIC GRAY TEXT ADAPTATION
+   AUTO GRAY TEXT ADAPTATION
+   Written after @import → later in cascade → wins at same specificity.
+   dark: Tailwind variants (0,2,0) still win over these (0,1,0).
+   ============================================================ */
+.text-gray-950, .text-gray-900, .text-gray-800 { color: var(--text-primary); }
+.text-gray-700, .text-gray-600                  { color: var(--text-secondary); }
+.text-gray-500, .text-gray-400                  { color: var(--text-muted); }
 
-   These selectors have specificity 0,1,0.
-   Tailwind dark: variants (.dark .dark\:text-*) have 0,2,0
-   and will still override when explicitly written — preserving
-   intentional per-component overrides.
-
-   Elements WITHOUT a dark: variant auto-adapt via the CSS
-   variable resolving to the correct theme value.
+/* ============================================================
+   BRAND COLOR REMAPPING
+   All blue / green / indigo / purple / emerald → brand red.
+   Semantic amber/yellow (warnings) are intentionally kept.
+   No !important needed: same specificity, later in file → wins.
    ============================================================ */
 
-/* Primary text — maps to --text-primary (black / white) */
-.text-gray-950,
-.text-gray-900,
-.text-gray-800 {
+/* ---- BLUE → BRAND RED ---- */
+.bg-blue-50  { background-color: #FEF2F2; }
+.bg-blue-100 { background-color: #FEE2E2; }
+.bg-blue-200 { background-color: #FECACA; }
+.bg-blue-600 { background-color: var(--primary-red); }
+.bg-blue-700 { background-color: var(--secondary-red); }
+.bg-blue-800 { background-color: var(--dark-red); }
+.bg-blue-900 { background-color: var(--deep-red); }
+
+.text-blue-500 { color: var(--primary-red); }
+.text-blue-600 { color: var(--primary-red); }
+.text-blue-700 { color: var(--secondary-red); }
+.text-blue-800 { color: var(--dark-red); }
+.text-blue-900 { color: var(--deep-red); }
+
+.border-blue-200 { border-color: #FECACA; }
+.border-blue-500 { border-color: var(--primary-red); }
+.border-blue-600 { border-color: var(--primary-red); }
+
+.hover\:bg-blue-600:hover   { background-color: var(--primary-red); }
+.hover\:bg-blue-700:hover   { background-color: var(--secondary-red); }
+.hover\:bg-blue-800:hover   { background-color: var(--dark-red); }
+.hover\:text-blue-600:hover { color: var(--primary-red); }
+.active\:bg-blue-800:active { background-color: var(--dark-red); }
+.focus\:ring-blue-500:focus                     { --tw-ring-color: var(--primary-red); }
+.focus-visible\:ring-blue-500:focus-visible     { --tw-ring-color: var(--primary-red); }
+.focus\:border-blue-500:focus                   { border-color: var(--primary-red); }
+.focus-visible\:border-transparent:focus-visible { border-color: transparent; }
+
+/* dark: blue */
+.dark .dark\:bg-blue-900\/20 { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:bg-blue-900\/30 { background-color: rgba(160,32,32,0.30); }
+.dark .dark\:text-blue-400   { color: #c04040; }
+.dark .dark\:text-blue-300   { color: #d05050; }
+.dark .dark\:border-blue-800 { border-color: #701C1C; }
+
+/* ---- GREEN → BRAND RED ---- */
+.bg-green-50  { background-color: #FEF2F2; }
+.bg-green-100 { background-color: #FEE2E2; }
+.bg-green-200 { background-color: #FECACA; }
+.bg-green-600 { background-color: var(--primary-red); }
+.bg-green-700 { background-color: var(--secondary-red); }
+.bg-green-800 { background-color: var(--dark-red); }
+.bg-green-900 { background-color: var(--deep-red); }
+.bg-green-950 { background-color: var(--deep-red); }
+
+.text-green-100 { color: #FEE2E2; }
+.text-green-200 { color: #FECACA; }
+.text-green-300 { color: #f08080; }
+.text-green-400 { color: #c04040; }
+.text-green-500 { color: var(--primary-red); }
+.text-green-600 { color: var(--primary-red); }
+.text-green-700 { color: var(--secondary-red); }
+.text-green-800 { color: var(--dark-red); }
+
+.border-green-200 { border-color: #FECACA; }
+.border-green-500 { border-color: var(--primary-red); }
+.border-green-600 { border-color: var(--primary-red); }
+
+.hover\:bg-green-50:hover   { background-color: #FEF2F2; }
+.hover\:bg-green-600:hover  { background-color: var(--primary-red); }
+.hover\:bg-green-700:hover  { background-color: var(--secondary-red); }
+.hover\:text-green-600:hover { color: var(--primary-red); }
+.hover\:bg-green-100:hover  { background-color: #FEE2E2; }
+.focus\:ring-green-500:focus { --tw-ring-color: var(--primary-red); }
+
+/* dark: green */
+.dark .dark\:bg-green-900\/20  { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:bg-green-900\/30  { background-color: rgba(160,32,32,0.30); }
+.dark .dark\:text-green-400    { color: #c04040; }
+.dark .dark\:border-green-800  { border-color: #701C1C; }
+.dark .dark\:hover\:bg-green-900\/30:hover { background-color: rgba(160,32,32,0.30); }
+
+/* ---- INDIGO → BRAND RED ---- */
+.bg-indigo-50  { background-color: #FEF2F2; }
+.bg-indigo-100 { background-color: #FEE2E2; }
+.bg-indigo-600 { background-color: var(--primary-red); }
+.text-indigo-600 { color: var(--primary-red); }
+.text-indigo-800 { color: var(--dark-red); }
+.dark .dark\:bg-indigo-900\/20 { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:text-indigo-400   { color: #c04040; }
+
+/* ---- PURPLE → BRAND RED ---- */
+.bg-purple-50  { background-color: #FEF2F2; }
+.bg-purple-100 { background-color: #FEE2E2; }
+.bg-purple-600 { background-color: var(--primary-red); }
+.text-purple-600 { color: var(--primary-red); }
+.text-purple-800 { color: var(--dark-red); }
+.dark .dark\:bg-purple-900\/20 { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:text-purple-400   { color: #c04040; }
+
+/* ---- EMERALD / TEAL → BRAND RED ---- */
+.bg-emerald-50  { background-color: #FEF2F2; }
+.bg-emerald-100 { background-color: #FEE2E2; }
+.bg-emerald-600 { background-color: var(--primary-red); }
+.text-emerald-600 { color: var(--primary-red); }
+.dark .dark\:bg-emerald-900\/20 { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:text-emerald-400   { color: #c04040; }
+.bg-teal-50  { background-color: #FEF2F2; }
+.bg-teal-100 { background-color: #FEE2E2; }
+.bg-teal-600 { background-color: var(--primary-red); }
+.text-teal-600 { color: var(--primary-red); }
+
+/* ---- ROSE / VIOLET → BRAND RED ---- */
+.bg-rose-50  { background-color: #FEF2F2; }
+.bg-rose-100 { background-color: #FEE2E2; }
+.bg-rose-600 { background-color: var(--primary-red); }
+.text-rose-600 { color: var(--primary-red); }
+.dark .dark\:bg-rose-900\/20 { background-color: rgba(160,32,32,0.20); }
+.dark .dark\:text-rose-400   { color: #c04040; }
+.bg-violet-50  { background-color: #FEF2F2; }
+.bg-violet-600 { background-color: var(--primary-red); }
+.text-violet-600 { color: var(--primary-red); }
+
+/* ---- OPACITY VARIANT OVERRIDES (attribute selector, scoped to context) ---- */
+/* Landing page always-dark sections */
+[class*="bg-green-600/"]  { background-color: rgba(160,32,32,0.20); }
+[class*="border-green-5"] { border-color: rgba(160,32,32,0.30); }
+/* Dark mode icon bg opacity variants */
+.dark [class*="bg-blue-900/"]    { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-green-900/"]   { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-indigo-900/"]  { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-purple-900/"]  { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-emerald-900/"] { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-rose-900/"]    { background-color: rgba(160,32,32,0.20); }
+.dark [class*="bg-amber-900/"]   { background-color: rgba(180,100,0,0.20); }
+
+/* ============================================================
+   DARK MODE SURFACE REMAPPING
+   Remap Tailwind slate/gray dark backgrounds to brand dark palette.
+   Only applies inside .dark to avoid affecting intentional dark sections
+   on the public landing page (hero, navbar — always dark by design).
+   ============================================================ */
+.dark .bg-gray-950,
+.dark .dark\:bg-gray-950 { background-color: #101010; }
+
+.dark .bg-gray-900,
+.dark .dark\:bg-gray-900 { background-color: #181818; }
+
+.dark .bg-gray-800,
+.dark .dark\:bg-gray-800 { background-color: #202020; }
+
+.dark .bg-gray-750,
+.dark .dark\:bg-gray-750 { background-color: #252525; }
+
+.dark .bg-gray-700,
+.dark .dark\:bg-gray-700 { background-color: #2a2a2a; }
+
+.dark .dark\:border-gray-700 { border-color: #2a2a2a; }
+.dark .dark\:border-gray-600 { border-color: #333333; }
+.dark .dark\:border-gray-800 { border-color: #1a1a1a; }
+
+/* ============================================================
+   GLOBAL CARD UTILITY
+   ============================================================ */
+.theme-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
   color: var(--text-primary);
 }
-
-/* Secondary text — maps to --text-secondary */
-.text-gray-700,
-.text-gray-600 {
-  color: var(--text-secondary);
-}
-
-/* Muted text — maps to --text-muted */
-.text-gray-500,
-.text-gray-400 {
-  color: var(--text-muted);
-}
-
-/* text-gray-100/200/300 intentionally NOT overridden —
-   they're used on dark-background sections (public navbar, hero, etc.)
-   where light colors are correct. */
 
 /* ============================================================
    INPUTS, TEXTAREAS, SELECTS
    ============================================================ */
-
 input, textarea, select {
   background-color: var(--input-bg);
   color: var(--text-primary);
   border-color: var(--input-border);
 }
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-muted);
-}
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 /* ============================================================
    TABLES
    ============================================================ */
-
-table {
-  color: var(--text-primary);
-}
-
-table thead {
-  color: var(--text-secondary);
-}
-
-.dark table thead {
-  background: #1e293b;
-}
-
-.dark table tbody tr:hover {
-  background: #1e293b;
-}
-
-/* ============================================================
-   GLOBAL CARD UTILITY
-   ============================================================ */
-
-.theme-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 0.75rem;
-}
+table            { color: var(--text-primary); }
+table thead      { color: var(--text-secondary); }
+.dark table thead           { background: #202020; }
+.dark table tbody tr:hover  { background: #1a1a1a; }
 
 /* ============================================================
    RTL SUPPORT
    ============================================================ */
-
-[dir="rtl"] {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-}
-
-[dir="rtl"] .space-x-2 > * + * {
-  margin-right: 0.5rem;
-  margin-left: 0;
-}
+[dir="rtl"] { font-family: "Segoe UI", Tahoma, sans-serif; }
+[dir="rtl"] .space-x-2 > * + * { margin-right: 0.5rem; margin-left: 0; }
 
 /* ============================================================
    SCROLLBAR
    ============================================================ */
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D0D0D0; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #333333; }
 
 /* ============================================================
    ANIMATIONS
    ============================================================ */
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  50% { opacity: .5; }
-}
-
-@keyframes fadeIn {
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes pulse   { 50% { opacity: .5; } }
+@keyframes fadeIn  {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 .animate-spin   { animation: spin 1s linear infinite; }
-.animate-pulse  { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-pulse  { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
 .animate-fadeIn { animation: fadeIn 0.2s ease; }

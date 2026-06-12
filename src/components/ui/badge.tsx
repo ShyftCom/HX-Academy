@@ -7,19 +7,17 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-        secondary: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
-        destructive: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-        success: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        outline: "border border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300",
-        orange: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-        purple: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+        default:     "bg-[#FEE2E2] text-[#701C1C] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
+        secondary:   "bg-[#F0F0F0] text-[#374151] dark:bg-[#2a2a2a] dark:text-[#D0D0D0]",
+        destructive: "bg-[#FEE2E2] text-[#701C1C] dark:bg-[#A02020]/30 dark:text-[#ffaaaa]",
+        success:     "bg-[#FEF2F2] text-[#A02020] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
+        warning:     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+        outline:     "border border-[#D0D0D0] text-[#374151] dark:border-[#2a2a2a] dark:text-[#D0D0D0]",
+        orange:      "bg-[#FEF2F2] text-[#903030] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
+        purple:      "bg-[#FEF2F2] text-[#701C1C] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
       },
     },
-    defaultVariants: {
-      variant: "default",
-    },
+    defaultVariants: { variant: "default" },
   }
 );
 
