@@ -137,15 +137,16 @@ model Setting {
 // ==================== LEADS CRM ====================
 
 model LeadStatus {
-  id        String   @id @default(cuid())
-  name      String
-  color     String   @default("#6B7280")
-  order     Int      @default(0)
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  color      String   @default("#6B7280")
+  order      Int      @default(0)
+  isDefault  Boolean  @default(false)
+  isTerminal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  leads     Lead[]
+  leads      Lead[]
 
   @@map("lead_statuses")
 }
@@ -177,8 +178,27 @@ model Lead {
   selectedPlan     SubscriptionPlan? @relation("ApplicationPlan", fields: [selectedPlanId], references: [id])
   applicationFiles ApplicationFile[]
   adminNotes       String?
+  activities       LeadActivity[]
 
   @@map("leads")
+}
+
+model LeadActivity {
+  id              String   @id @default(cuid())
+  leadId          String
+  lead            Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actionType      String
+  description     String
+  performedById   String?
+  performedByName String   @default("System")
+  performedByRole String   @default("system")
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  @@index([leadId])
+  @@index([performedById])
+  @@index([createdAt])
+  @@map("lead_activities")
 }
 
 // ==================== PLAYERS ====================

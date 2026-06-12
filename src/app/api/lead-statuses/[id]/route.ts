@@ -8,23 +8,44 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   try {
     const body = await req.json();
-    const status = await db.leadStatus.update({
-      where: { id },
-      data: { name: body.name, color: body.color, isDefault: body.isDefault, order: body.order },
-    });
+    const existing = await db.leadStatus.findUnique({ where: { id } });
+    if (!existing) return NextResponse.json({ error: "Status not found" }, { status: 404 });
+
+    const data: Record<string, unknown> = {};
+    if (body.name !== undefined) data.name = String(body.name).trim().slice(0, 40);
+    if (body.color !== undefined) data.color = body.color;
+    if (body.order !== undefined) data.order = body.order;
+    if (body.isTerminal !== undefined && !existing.isDefault) data.isTerminal = body.isTerminal;
+
+    const status = await db.leadStatus.update({ where: { id }, data });
     return NextResponse.json(status);
   } catch {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+
   try {
-    await db.lead.updateMany({ where: { statusId: id }, data: { statusId: null } });
-    await db.leadStatus.delete({ where: { id } });
+    const existing = await db.leadStatus.findUnique({ where: { id } });
+    if (!existing) return NextResponse.json({ error: "Status not found" }, { status: 404 });
+    if (existing.isDefault) return NextResponse.json({ error: "Default statuses cannot be deleted" }, { status: 400 });
+
+    const body = await req.json().catch(() => ({}));
+    const fallbackStatusId = body.fallbackStatusId ?? null;
+
+    // Move all leads in this status to the fallback (or null)
+    await db.$transaction([
+      db.lead.updateMany({
+        where: { statusId: id },
+        data: { statusId: fallbackStatusId },
+      }),
+      db.leadStatus.delete({ where: { id } }),
+    ]);
+
     return NextResponse.json({ message: "Deleted" });
   } catch {
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });

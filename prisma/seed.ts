@@ -173,21 +173,22 @@ async function main() {
 
   // Create Lead Statuses
   const leadStatuses = [
-    { name: "New Lead", color: "#3B82F6", order: 0, isDefault: true },
-    { name: "Contacted", color: "#8B5CF6", order: 1 },
-    { name: "Trial Scheduled", color: "#F59E0B", order: 2 },
-    { name: "Trial Completed", color: "#10B981", order: 3 },
-    { name: "Interested", color: "#14B8A6", order: 4 },
-    { name: "Waiting Payment", color: "#F97316", order: 5 },
-    { name: "Converted", color: "#22C55E", order: 6 },
-    { name: "Lost", color: "#EF4444", order: 7 },
+    { name: "New",           color: "#3B82F6", order: 0, isDefault: true,  isTerminal: false },
+    { name: "Contacted",     color: "#F59E0B", order: 1, isDefault: false, isTerminal: false },
+    { name: "Qualified",     color: "#8B5CF6", order: 2, isDefault: false, isTerminal: false },
+    { name: "Proposal Sent", color: "#EC4899", order: 3, isDefault: false, isTerminal: false },
+    { name: "Negotiation",   color: "#F97316", order: 4, isDefault: false, isTerminal: false },
+    { name: "Won",           color: "#10B981", order: 5, isDefault: false, isTerminal: true  },
+    { name: "Lost",          color: "#EF4444", order: 6, isDefault: false, isTerminal: true  },
+    { name: "On Hold",       color: "#6B7280", order: 7, isDefault: false, isTerminal: false },
   ];
 
   for (const s of leadStatuses) {
+    const id = s.name.toLowerCase().replace(/\s+/g, "-");
     await db.leadStatus.upsert({
-      where: { id: s.name.toLowerCase().replace(/\s+/g, "-") },
-      update: {},
-      create: { id: s.name.toLowerCase().replace(/\s+/g, "-"), ...s },
+      where: { id },
+      update: { isTerminal: s.isTerminal },
+      create: { id, ...s },
     });
   }
   console.log("✅ Lead statuses created");

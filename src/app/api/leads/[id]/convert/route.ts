@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
+import { logLeadActivity } from "@/lib/lead-activity";
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
@@ -13,7 +14,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     if (lead.isConverted) return NextResponse.json({ error: "Lead already converted" }, { status: 400 });
 
-    // Check if user with this email already exists
     let user = lead.email ? await db.user.findUnique({ where: { email: lead.email } }) : null;
 
     const playerRole = await db.role.findFirst({ where: { name: "Player" } });
@@ -32,7 +32,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    // Check if player already exists for this user
     const existingPlayer = await db.player.findUnique({ where: { userId: user.id } });
     if (existingPlayer) return NextResponse.json({ error: "Player record already exists for this user" }, { status: 400 });
 
@@ -56,6 +55,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await db.lead.update({
       where: { id },
       data: { isConverted: true, convertedAt: new Date() },
+    });
+
+    const actor = session.user as { id: string; name?: string | null; role?: string };
+    await logLeadActivity({
+      leadId: id,
+      actionType: "lead_converted",
+      description: `Lead converted to player account (${user.email})`,
+      performedById: session.user.id,
+      performedByName: actor.name ?? "Admin",
+      performedByRole: actor.role ?? "admin",
+      metadata: { playerId: player.id, userId: user.id, email: user.email },
     });
 
     await logActivity({

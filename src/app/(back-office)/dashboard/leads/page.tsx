@@ -17,10 +17,10 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DataTable } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
-import { EmptyState } from "@/components/shared/empty-state";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDate, getInitials } from "@/lib/utils";
-import { Plus, MoreHorizontal, Edit, Trash2, UserCheck, MessagesSquare, Filter } from "lucide-react";
+import Link from "next/link";
+import { Plus, MoreHorizontal, Edit, Trash2, UserCheck, MessagesSquare, Eye, Settings2 } from "lucide-react";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -126,13 +126,13 @@ export default function LeadsPage() {
 
   const columns = [
     { key: "fullName", header: "Name", cell: (r: any) => (
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-xs font-semibold dark:bg-blue-900/30 dark:text-blue-400">{getInitials(r.fullName)}</div>
+      <Link href={`/dashboard/leads/${r.id}`} className="flex items-center gap-2 hover:underline">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-xs font-semibold dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">{getInitials(r.fullName)}</div>
         <div>
           <p className="font-medium text-sm">{r.fullName}</p>
           {r.isConverted && <span className="text-xs text-green-600">Converted</span>}
         </div>
-      </div>
+      </Link>
     )},
     { key: "phone", header: "Phone", cell: (r: any) => r.phone ?? "—" },
     { key: "email", header: "Email", cell: (r: any) => r.email ? <span className="text-xs">{r.email}</span> : "—" },
@@ -150,6 +150,7 @@ export default function LeadsPage() {
           <Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="mr-2 h-4 w-4" />View Activity</Link></DropdownMenuItem>
           <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
           {!r.isConverted && (
             <DropdownMenuItem onClick={() => setConvertId(r.id)}><UserCheck className="mr-2 h-4 w-4" />Convert to Player</DropdownMenuItem>
@@ -163,6 +164,7 @@ export default function LeadsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Leads CRM" description="Manage potential players and track conversions">
+        <Button variant="outline" asChild><Link href="/dashboard/leads/pipeline"><Settings2 className="mr-2 h-4 w-4" />Pipeline Stages</Link></Button>
         <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Lead</Button>
       </PageHeader>
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { logLeadActivity } from "@/lib/lead-activity";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -71,7 +72,6 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
 
     const data = parsed.data;
-
     const defaultStatus = await db.leadStatus.findFirst({ where: { isDefault: true } });
 
     const lead = await db.lead.create({
@@ -90,8 +90,34 @@ export async function POST(req: NextRequest) {
         statusId: data.statusId ?? defaultStatus?.id ?? null,
         assignedStaffId: data.assignedStaffId ?? null,
       },
-      include: { status: true },
+      include: { status: true, assignedStaff: { select: { id: true, name: true } } },
     });
+
+    const actor = session.user as { id: string; name?: string | null; role?: string };
+    const performedByName = actor.name ?? "Admin";
+    const performedByRole = actor.role ?? "admin";
+
+    await logLeadActivity({
+      leadId: lead.id,
+      actionType: "lead_created",
+      description: "Lead created",
+      performedById: session.user.id,
+      performedByName,
+      performedByRole,
+      metadata: { source: lead.source, status: lead.status?.name },
+    });
+
+    if (data.assignedStaffId && lead.assignedStaff) {
+      await logLeadActivity({
+        leadId: lead.id,
+        actionType: "lead_assigned",
+        description: `Lead assigned to ${lead.assignedStaff.name}`,
+        performedById: session.user.id,
+        performedByName,
+        performedByRole,
+        metadata: { assignedToId: lead.assignedStaff.id, assignedToName: lead.assignedStaff.name },
+      });
+    }
 
     await logActivity({
       userId: session.user.id,
