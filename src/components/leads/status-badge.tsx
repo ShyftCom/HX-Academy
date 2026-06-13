@@ -147,6 +147,10 @@ export function StatusBadge({
 
       toast.success(`${leadName} → ${newStatus.name}`, { duration: 2500 });
       onStatusChange?.(newStatus);
+
+      if (newStatus.name.toLowerCase().includes("meeting")) {
+        document.dispatchEvent(new CustomEvent("lead-meeting-booked", { detail: { leadId, leadName } }));
+      }
     } catch {
       setOptimisticStatus(prevStatus);
       toast.error("Failed to update status. Please try again.");

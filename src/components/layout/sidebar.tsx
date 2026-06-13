@@ -28,6 +28,7 @@ import {
   UploadCloud,
   PanelsTopLeft,
   Palette,
+  CalendarDays,
 } from "lucide-react";
 
 interface NavItem {
@@ -41,6 +42,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Leads CRM", href: "/dashboard/leads", icon: MessagesSquare },
+  { title: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
   { title: "Players", href: "/dashboard/players", icon: UserCheck },
   {
     title: "Subscriptions",

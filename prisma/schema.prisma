@@ -26,9 +26,11 @@ model User {
   sessions      Session[]
   accounts      Account[]
   player        Player?
-  assignedLeads Lead[]    @relation("AssignedStaff")
-  activityLogs  ActivityLog[]
-  notifications Notification[] @relation("UserNotifications")
+  assignedLeads      Lead[]             @relation("AssignedStaff")
+  activityLogs       ActivityLog[]
+  notifications      Notification[]     @relation("UserNotifications")
+  agentAvailability  AgentAvailability?
+  agentMeetings      Meeting[]          @relation("AgentMeetings")
 
   @@map("users")
 }
@@ -179,6 +181,8 @@ model Lead {
   applicationFiles ApplicationFile[]
   adminNotes       String?
   activities       LeadActivity[]
+  meetings         Meeting[]
+  leadNotes        LeadNote[]
 
   @@map("leads")
 }
@@ -507,7 +511,62 @@ model Notification {
   link      String?
   createdAt DateTime @default(now())
 
+  @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ==================== CALENDAR & MEETINGS ====================
+
+model AgentAvailability {
+  id             String   @id @default(cuid())
+  agentId        String   @unique
+  agent          User     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  timezone       String   @default("Africa/Algiers")
+  bufferMinutes  Int      @default(15)
+  weeklySchedule Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("agent_availability")
+}
+
+model Meeting {
+  id              String   @id @default(cuid())
+  leadId          String
+  lead            Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  agentId         String
+  agent           User     @relation("AgentMeetings", fields: [agentId], references: [id])
+  leadName        String
+  agentName       String
+  date            String
+  time            String
+  durationMinutes Int      @default(30)
+  type            String   @default("call")
+  notes           String?
+  status          String   @default("scheduled")
+  createdById     String?
+  createdByName   String   @default("System")
+  reminderSent    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([agentId, date])
+  @@index([date, time, reminderSent])
+  @@map("meetings")
+}
+
+model LeadNote {
+  id              String   @id @default(cuid())
+  leadId          String
+  lead            Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  content         String
+  createdById     String?
+  createdByName   String   @default("System")
+  createdByRole   String   @default("agent")
+  createdAt       DateTime @default(now())
+
+  @@index([leadId])
+  @@map("lead_notes")
 }
 
 // ==================== ACTIVITY LOGS ====================

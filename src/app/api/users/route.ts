@@ -11,13 +11,21 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") ?? "1");
   const perPage = parseInt(searchParams.get("perPage") ?? "20");
 
+  const rolesParam = searchParams.get("roles");
+  const includeAvailability = searchParams.get("include_availability") === "true" || !!rolesParam;
+
   const where: Record<string, unknown> = {};
   if (q) where.OR = [{ name: { contains: q } }, { email: { contains: q } }];
+  if (rolesParam) {
+    const roleNames = rolesParam.split(",").map((r) => r.trim());
+    where.role = { name: { in: roleNames } };
+    where.isActive = true;
+  }
 
   const [data, total] = await Promise.all([
     db.user.findMany({
       where,
-      include: { role: true },
+      include: { role: true, ...(includeAvailability && { agentAvailability: true }) },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,

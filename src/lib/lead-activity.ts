@@ -14,7 +14,10 @@ export type LeadActionType =
   | "task_created"
   | "task_completed"
   | "lead_converted"
-  | "lead_archived";
+  | "lead_archived"
+  | "meeting_booked"
+  | "meeting_updated"
+  | "meeting_cancelled";
 
 interface LogLeadActivityParams {
   leadId: string;
