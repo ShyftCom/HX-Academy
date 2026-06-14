@@ -38,6 +38,11 @@ import {
   Banknote,
   Link2,
   Zap,
+  Star,
+  Navigation,
+  Layers,
+  Store,
+  ShoppingCart,
 } from "lucide-react";
 
 interface NavItem {
@@ -89,6 +94,7 @@ const navItems: NavItem[] = [
       { tKey: "products", href: "/dashboard/store/products", icon: Package },
       { tKey: "categories", href: "/dashboard/store/categories", icon: Folder },
       { tKey: "order_form", href: "/dashboard/store/form-builder", icon: ClipboardList },
+      { tKey: "store_orders", href: "/dashboard/store/orders", icon: ShoppingCart },
     ],
   },
   { tKey: "orders", href: "/dashboard/orders", icon: ClipboardList },
@@ -97,6 +103,10 @@ const navItems: NavItem[] = [
     icon: Globe,
     children: [
       { tKey: "landing", href: "/dashboard/website/landing", icon: PanelsTopLeft },
+      { tKey: "header", href: "/dashboard/website/header", icon: Navigation },
+      { tKey: "footer", href: "/dashboard/website/footer", icon: Layers },
+      { tKey: "store_settings", href: "/dashboard/website/store", icon: Store },
+      { tKey: "reviews", href: "/dashboard/website/reviews", icon: Star },
       { tKey: "surveys", href: "/dashboard/surveys", icon: FileText },
       { tKey: "file_requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud },
       { tKey: "applications", href: "/dashboard/website/applications", icon: Inbox },

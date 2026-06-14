@@ -43,6 +43,9 @@ model User {
   // Charges
   paidCharges        Charge[]           @relation("ChargePaidBy")
 
+  // Reviews
+  reviewReplies      Review[]           @relation("ReviewReplyBy")
+
   // HRM
   staffProfile       StaffProfile?
   recordedAttendances Attendance[]      @relation("AttendanceRecorder")
@@ -202,6 +205,7 @@ model Lead {
   activities       LeadActivity[]
   meetings         Meeting[]
   leadNotes        LeadNote[]
+  websiteOrders    WebsiteOrder[]
 
   @@map("leads")
 }
@@ -361,6 +365,7 @@ model ProductCategory {
 model Product {
   id            String          @id @default(cuid())
   name          String
+  slug          String?         @unique
   description   String?
   images        String          @default("[]")
   price         Float
@@ -377,6 +382,8 @@ model Product {
 
   orderItems    OrderItem[]
   variants      ProductVariant[]
+  websiteOrderItems WebsiteOrderItem[]
+  reviews       Review[]
 
   @@map("products")
 }
@@ -696,6 +703,10 @@ model Station {
   payrolls           Payroll[]
   pixelConfigs       PixelConfig[]
   attributeGroups    AttributeGroup[]
+  footerConfig       WebsiteFooterConfig?
+  headerConfig       WebsiteHeaderConfig?
+  websiteOrders      WebsiteOrder[]
+  reviews            Review[]
 
   @@map("stations")
 }
@@ -974,4 +985,211 @@ model PixelConfig {
 
   @@unique([stationId, platform])
   @@map("pixel_configs")
+}
+
+// ==================== WEBSITE FOOTER ====================
+
+model WebsiteFooterConfig {
+  id              String   @id @default(cuid())
+  stationId       String?  @unique
+  station         Station? @relation(fields: [stationId], references: [id])
+  backgroundColor String   @default("#0a1628")
+  textColor       String   @default("#ffffff")
+  accentColor     String   @default("#1da1f2")
+  logoUrl         String?
+  tagline         String?
+  taglineFr       String?
+  taglineAr       String?
+  copyrightText   String   @default("© 2026 Football Skills Academy. All rights reserved.")
+  showTrustpilot  Boolean  @default(false)
+  trustpilotUrl   String?
+  updatedAt       DateTime @updatedAt
+
+  linkColumns     FooterLinkColumn[]
+  socialLinks     FooterSocialLink[]
+  bottomLinks     FooterBottomLink[]
+
+  @@map("website_footer_configs")
+}
+
+model FooterLinkColumn {
+  id       String              @id @default(cuid())
+  footerId String
+  footer   WebsiteFooterConfig @relation(fields: [footerId], references: [id], onDelete: Cascade)
+  title    String
+  titleFr  String?
+  titleAr  String?
+  position Int                 @default(0)
+
+  links    FooterLink[]
+
+  @@map("footer_link_columns")
+}
+
+model FooterLink {
+  id           String           @id @default(cuid())
+  columnId     String
+  column       FooterLinkColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  label        String
+  labelFr      String?
+  labelAr      String?
+  url          String
+  openInNewTab Boolean          @default(false)
+  position     Int              @default(0)
+  isActive     Boolean          @default(true)
+
+  @@map("footer_links")
+}
+
+model FooterSocialLink {
+  id       String              @id @default(cuid())
+  footerId String
+  footer   WebsiteFooterConfig @relation(fields: [footerId], references: [id], onDelete: Cascade)
+  platform String
+  url      String
+  isActive Boolean             @default(true)
+  position Int                 @default(0)
+
+  @@map("footer_social_links")
+}
+
+model FooterBottomLink {
+  id       String              @id @default(cuid())
+  footerId String
+  footer   WebsiteFooterConfig @relation(fields: [footerId], references: [id], onDelete: Cascade)
+  label    String
+  labelFr  String?
+  labelAr  String?
+  url      String
+  position Int                 @default(0)
+
+  @@map("footer_bottom_links")
+}
+
+// ==================== WEBSITE HEADER ====================
+
+model WebsiteHeaderConfig {
+  id                   String   @id @default(cuid())
+  stationId            String?  @unique
+  station              Station? @relation(fields: [stationId], references: [id])
+  logoUrl              String?
+  backgroundColor      String   @default("#ffffff")
+  textColor            String   @default("#0a1628")
+  accentColor          String   @default("#0a1628")
+  sticky               Boolean  @default(true)
+  showLanguageSwitcher Boolean  @default(true)
+  ctaLabel             String?
+  ctaLabelFr           String?
+  ctaLabelAr           String?
+  ctaUrl               String?
+  ctaStyle             String   @default("filled")
+  updatedAt            DateTime @updatedAt
+
+  navItems             HeaderNavItem[]
+
+  @@map("website_header_configs")
+}
+
+model HeaderNavItem {
+  id           String              @id @default(cuid())
+  headerId     String
+  header       WebsiteHeaderConfig @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  label        String
+  labelFr      String?
+  labelAr      String?
+  url          String?
+  hasDropdown  Boolean             @default(false)
+  position     Int                 @default(0)
+  isActive     Boolean             @default(true)
+
+  dropdownItems HeaderNavDropdownItem[]
+
+  @@map("header_nav_items")
+}
+
+model HeaderNavDropdownItem {
+  id            String        @id @default(cuid())
+  navItemId     String
+  navItem       HeaderNavItem @relation(fields: [navItemId], references: [id], onDelete: Cascade)
+  label         String
+  labelFr       String?
+  labelAr       String?
+  url           String
+  icon          String?
+  description   String?
+  descriptionFr String?
+  descriptionAr String?
+  position      Int           @default(0)
+  isActive      Boolean       @default(true)
+
+  @@map("header_nav_dropdown_items")
+}
+
+// ==================== WEBSITE STORE ORDERS ====================
+
+model WebsiteOrder {
+  id            String    @id @default(cuid())
+  orderNumber   String    @unique
+  stationId     String?
+  station       Station?  @relation(fields: [stationId], references: [id])
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  wilaya        String?
+  city          String?
+  address       String?
+  deliveryNotes String?
+  subtotal      Decimal   @db.Decimal(10, 2)
+  shippingFee   Decimal   @default(0) @db.Decimal(10, 2)
+  total         Decimal   @db.Decimal(10, 2)
+  status        String    @default("pending")
+  leadId        String?
+  lead          Lead?     @relation(fields: [leadId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  items         WebsiteOrderItem[]
+
+  @@map("website_orders")
+}
+
+model WebsiteOrderItem {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     WebsiteOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product      @relation(fields: [productId], references: [id])
+  variantId String?
+  variantInfo String?
+  quantity  Int
+  price     Decimal      @db.Decimal(10, 2)
+
+  @@map("website_order_items")
+}
+
+// ==================== REVIEWS ====================
+
+model Review {
+  id            String    @id @default(cuid())
+  stationId     String?
+  station       Station?  @relation(fields: [stationId], references: [id])
+  reviewerName  String
+  reviewerEmail String?
+  reviewerPhone String?
+  rating        Int
+  title         String?
+  content       String
+  productId     String?
+  product       Product?  @relation(fields: [productId], references: [id])
+  orderId       String?
+  status        String    @default("pending")
+  isVerified    Boolean   @default(false)
+  isFeatured    Boolean   @default(false)
+  adminReply    String?
+  adminReplyAt  DateTime?
+  adminReplyBy  String?
+  adminReplier  User?     @relation("ReviewReplyBy", fields: [adminReplyBy], references: [id])
+  createdAt     DateTime  @default(now())
+
+  @@map("reviews")
 }
