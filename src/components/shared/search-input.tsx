@@ -19,7 +19,7 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`pl-8 pr-8 ${className ?? ""}`}
+        className={`ps-8 pe-8 ${className ?? ""}`}
       />
       {value && (
         <button

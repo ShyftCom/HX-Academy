@@ -1,0 +1,92 @@
+{
+  "title": "Leads CRM",
+  "pipeline": "Pipeline",
+  "table": {
+    "full_name": "Full Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "source": "Source",
+    "assigned_to": "Assigned To",
+    "category": "Category",
+    "created": "Created",
+    "actions": "Actions"
+  },
+  "filters": {
+    "search_placeholder": "Search leads...",
+    "all_statuses": "All statuses",
+    "all_agents": "All agents",
+    "filter_by_source": "Filter by source"
+  },
+  "actions": {
+    "add_lead": "Add Lead",
+    "edit_lead": "Edit Lead",
+    "delete_lead": "Delete Lead",
+    "convert_to_player": "Convert to Player",
+    "book_call": "Book Call",
+    "add_note": "Add Note",
+    "save_note": "Save note",
+    "view_activity": "View Activity"
+  },
+  "form": {
+    "full_name": "Full Name",
+    "full_name_placeholder": "Enter full name",
+    "phone": "Phone Number",
+    "phone_placeholder": "+213 XXX XXX XXX",
+    "email": "Email (optional)",
+    "email_placeholder": "email@example.com",
+    "date_of_birth": "Date of Birth",
+    "parent_name": "Parent Name",
+    "parent_phone": "Parent Phone",
+    "address": "Address",
+    "address_placeholder": "City, Wilaya",
+    "category": "Category of Interest",
+    "source": "Lead Source",
+    "notes": "Internal Notes",
+    "notes_placeholder": "Any notes about this lead...",
+    "assign_to": "Assign To"
+  },
+  "status_change": {
+    "changed_to": "Status changed to {{status}}",
+    "failed": "Failed to update status"
+  },
+  "activity": {
+    "title": "Activity",
+    "all": "All",
+    "status": "Status",
+    "notes": "Notes",
+    "calls": "Calls",
+    "emails": "Emails",
+    "tasks": "Tasks",
+    "edits": "Edits",
+    "convert": "Convert",
+    "no_activity": "No activity yet for this filter."
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Add a note about this lead...",
+    "empty_title": "No notes yet",
+    "empty_subtitle": "Add the first one above.",
+    "saved": "Note saved",
+    "failed": "Failed to save note"
+  },
+  "detail": {
+    "contact_info": "Contact Information",
+    "details": "Details",
+    "edit_lead": "Edit Lead Info",
+    "converted_badge": "Converted",
+    "added": "Added {{date}}"
+  },
+  "convert": {
+    "success": "Lead converted to player",
+    "failed": "Conversion failed"
+  },
+  "empty": {
+    "no_leads": "No leads found",
+    "no_leads_subtitle": "Add your first lead to get started",
+    "no_activity": "No activity yet"
+  },
+  "count_one": "{{count}} lead",
+  "count_other": "{{count}} leads",
+  "count_zero": "No leads"
+}

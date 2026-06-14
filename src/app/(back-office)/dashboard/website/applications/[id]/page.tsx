@@ -162,7 +162,7 @@ export default function ApplicationDetailPage() {
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status</h3>
             <div className="relative">
-              <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={`appearance-none pr-8 ${inputClass}`}>
+              <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={`appearance-none pe-8 ${inputClass}`}>
                 <option value="">No status</option>
                 {statuses.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>

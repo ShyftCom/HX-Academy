@@ -1,0 +1,25 @@
+{
+  "title": "Tableau de bord",
+  "welcome": "Bon retour",
+  "stats": {
+    "total_leads": "Total Leads",
+    "active_players": "Joueurs actifs",
+    "total_revenue": "Revenu total",
+    "pending_payments": "Paiements en attente",
+    "new_leads": "Nouveaux leads",
+    "meetings_today": "Réunions aujourd'hui",
+    "conversion_rate": "Taux de conversion",
+    "monthly_revenue": "Revenu mensuel"
+  },
+  "charts": {
+    "leads_over_time": "Leads dans le temps",
+    "revenue_chart": "Revenus",
+    "status_breakdown": "Répartition par statut",
+    "conversion_funnel": "Entonnoir de conversion"
+  },
+  "recent": {
+    "recent_leads": "Leads récents",
+    "recent_payments": "Paiements récents",
+    "upcoming_meetings": "Réunions à venir"
+  }
+}

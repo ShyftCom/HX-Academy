@@ -74,6 +74,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       description: `Approved payment for ${payment.player.fullName} - ${payment.amount} DA`,
     });
 
+    if (payment.stationId) {
+      fetch(`${process.env.NEXTAUTH_URL ?? ""}/api/pixels/event`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName: "Purchase",
+          stationId: payment.stationId,
+          userData: {
+            phone: payment.player.phone ?? undefined,
+            email: payment.player.email ?? undefined,
+            firstName: payment.player.fullName,
+          },
+          eventData: {
+            value: payment.amount,
+            currency: "DZD",
+          },
+        }),
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ message: "Payment approved and subscription activated" });
   } catch (error) {
     console.error(error);

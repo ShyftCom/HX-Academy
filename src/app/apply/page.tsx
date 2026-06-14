@@ -258,7 +258,7 @@ function ApplyFormInner() {
                           <p className="text-green-600 font-semibold">{currencySymbol} {plan.price.toLocaleString()} / {plan.duration} {plan.durationType}</p>
                           {plan.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{plan.description}</p>}
                         </div>
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-4 ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-500" : "border-gray-300"}`}>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ms-4 ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-500" : "border-gray-300"}`}>
                           {selectedPlan?.id === plan.id && <Check className="w-3 h-3 text-white" />}
                         </div>
                       </div>
@@ -351,7 +351,7 @@ function ApplyFormInner() {
                             {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{req.description}</p>}
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Accepted: {req.allowedTypes} · Max: {req.maxSizeMb}MB</p>
                           </div>
-                          {uploadedFiles[req.id] && <Check className="w-5 h-5 text-green-500 flex-shrink-0 ml-2" />}
+                          {uploadedFiles[req.id] && <Check className="w-5 h-5 text-green-500 flex-shrink-0 ms-2" />}
                         </div>
                         {uploadedFiles[req.id] ? (
                           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg px-3 py-2">

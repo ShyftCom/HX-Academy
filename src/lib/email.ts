@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { createServerTranslator } from "./i18n.server";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST ?? "smtp.gmail.com",
@@ -30,21 +31,24 @@ export function buildBookingConfirmationEmail(params: {
   bookedByName: string;
   leadId: string;
   baseUrl: string;
+  lang?: string;
 }): { subject: string; text: string } {
-  const subject = `Meeting scheduled — ${params.leadName} · ${params.date} at ${params.time}`;
-  const text = `Hi ${params.agentName},
-
-A meeting has been booked for you:
-
-  Lead:      ${params.leadName}
-  Date:      ${params.date}
-  Time:      ${params.time} (Africa/Algiers)
-  Duration:  ${params.duration} minutes
-  Type:      ${params.type}
-
-Booked by: ${params.bookedByName}
-
-View lead → ${params.baseUrl}/dashboard/leads/${params.leadId}`;
+  const t = createServerTranslator(params.lang ?? "fr", "emails");
+  const subject = t("meeting_confirmation.subject", {
+    lead: params.leadName,
+    date: params.date,
+    time: params.time,
+  });
+  const text = t("meeting_confirmation.body", {
+    agent_name: params.agentName,
+    lead: params.leadName,
+    date: params.date,
+    time: params.time,
+    duration: String(params.duration),
+    type: params.type,
+    booked_by: params.bookedByName,
+    link: `${params.baseUrl}/dashboard/leads/${params.leadId}`,
+  });
   return { subject, text };
 }
 
@@ -55,16 +59,16 @@ export function buildReminderEmail(params: {
   duration: number;
   leadId: string;
   baseUrl: string;
+  lang?: string;
 }): { subject: string; text: string } {
-  const subject = `Reminder — Call with ${params.leadName} in 1 hour`;
-  const text = `Hi ${params.agentName},
-
-This is a reminder that you have a call starting in 1 hour:
-
-  Lead:     ${params.leadName}
-  Time:     ${params.time} today
-  Duration: ${params.duration} minutes
-
-View lead → ${params.baseUrl}/dashboard/leads/${params.leadId}`;
+  const t = createServerTranslator(params.lang ?? "fr", "emails");
+  const subject = t("meeting_reminder.subject", { lead: params.leadName });
+  const text = t("meeting_reminder.body", {
+    agent_name: params.agentName,
+    lead: params.leadName,
+    time: params.time,
+    duration: String(params.duration),
+    link: `${params.baseUrl}/dashboard/leads/${params.leadId}`,
+  });
   return { subject, text };
 }

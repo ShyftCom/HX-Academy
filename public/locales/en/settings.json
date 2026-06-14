@@ -1,0 +1,37 @@
+{
+  "title": "Settings",
+  "profile": {
+    "title": "Profile",
+    "name": "Full Name",
+    "email": "Email",
+    "current_password": "Current Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "save_profile": "Save Profile",
+    "change_password": "Change Password",
+    "language_preference": "Language Preference",
+    "avatar": "Profile Picture"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "email_notifications": "Email Notifications",
+    "push_notifications": "Push Notifications",
+    "meeting_reminders": "Meeting Reminders",
+    "lead_updates": "Lead Updates"
+  },
+  "availability": {
+    "title": "My Availability",
+    "subtitle": "Set your working hours and buffer time",
+    "save_availability": "Save Availability",
+    "saved": "Availability saved",
+    "failed": "Failed to save availability"
+  },
+  "branding": {
+    "title": "Branding & Logos",
+    "logo": "Logo",
+    "primary_color": "Primary Color",
+    "save_branding": "Save Branding"
+  },
+  "saved": "Settings saved",
+  "save_failed": "Failed to save settings"
+}

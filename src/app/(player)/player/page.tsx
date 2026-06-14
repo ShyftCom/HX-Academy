@@ -109,7 +109,7 @@ export default function PlayerHomePage() {
               {recentOrders.map((o: any) => (
                 <div key={o.id} className="flex items-center justify-between text-sm">
                   <div><p className="font-medium">#{o.orderNumber}</p><p className="text-xs text-gray-400">{formatDate(o.createdAt)}</p></div>
-                  <div className="text-right"><p className="font-medium">{formatCurrency(o.totalAmount)}</p><p className="text-xs text-gray-400">{o.status?.name ?? "Processing"}</p></div>
+                  <div className="text-end"><p className="font-medium">{formatCurrency(o.totalAmount)}</p><p className="text-xs text-gray-400">{o.status?.name ?? "Processing"}</p></div>
                 </div>
               ))}
             </div>

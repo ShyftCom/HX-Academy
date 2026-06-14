@@ -1,0 +1,14 @@
+{
+  "meeting_confirmation": {
+    "subject": "Meeting scheduled — {{lead}} · {{date}} at {{time}}",
+    "body": "Hi {{agent_name}},\n\nA meeting has been booked for you:\n\n  Lead:      {{lead}}\n  Date:      {{date}}\n  Time:      {{time}} (Africa/Algiers)\n  Duration:  {{duration}} minutes\n  Type:      {{type}}\n\nBooked by: {{booked_by}}\n\nView lead → {{link}}"
+  },
+  "meeting_reminder": {
+    "subject": "Reminder — Call with {{lead}} in 1 hour",
+    "body": "Hi {{agent_name}},\n\nThis is a reminder that you have a call starting in 1 hour:\n\n  Lead:     {{lead}}\n  Time:     {{time}} today\n  Duration: {{duration}} minutes\n\nView lead → {{link}}"
+  },
+  "reset_password": {
+    "subject": "Password Reset — Football Skills Academy",
+    "body": "Hi {{name}},\n\nClick the link below to reset your password:\n\n{{link}}\n\nThis link expires in 1 hour.\n\nIf you did not request this, ignore this email."
+  }
+}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Users,
@@ -29,10 +30,18 @@ import {
   PanelsTopLeft,
   Palette,
   CalendarDays,
+  MapPin,
+  TrendingUp,
+  Receipt,
+  Users2,
+  CalendarOff,
+  Banknote,
+  Link2,
+  Zap,
 } from "lucide-react";
 
 interface NavItem {
-  title: string;
+  tKey: string;
   href?: string;
   icon: React.ElementType;
   children?: NavItem[];
@@ -40,53 +49,75 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Leads CRM", href: "/dashboard/leads", icon: MessagesSquare },
-  { title: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
-  { title: "Players", href: "/dashboard/players", icon: UserCheck },
+  { tKey: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { tKey: "stations", href: "/dashboard/stations", icon: MapPin },
+  { tKey: "leads", href: "/dashboard/leads", icon: MessagesSquare },
+  { tKey: "calendar", href: "/dashboard/calendar", icon: CalendarDays },
+  { tKey: "players", href: "/dashboard/players", icon: UserCheck },
   {
-    title: "Subscriptions",
+    tKey: "subscriptions",
     icon: CreditCard,
     children: [
-      { title: "Plans", href: "/dashboard/subscriptions/plans", icon: FileText },
-      { title: "Subscriptions", href: "/dashboard/subscriptions", icon: CreditCard },
+      { tKey: "plans", href: "/dashboard/subscriptions/plans", icon: FileText },
+      { tKey: "subscriptions", href: "/dashboard/subscriptions", icon: CreditCard },
     ],
   },
-  { title: "Payments", href: "/dashboard/payments", icon: CreditCard },
+  { tKey: "payments", href: "/dashboard/payments", icon: CreditCard },
   {
-    title: "Store",
+    tKey: "finance",
+    icon: TrendingUp,
+    children: [
+      { tKey: "profit_overview", href: "/dashboard/finance", icon: BarChart3 },
+      { tKey: "charges", href: "/dashboard/finance/charges", icon: Receipt },
+    ],
+  },
+  {
+    tKey: "hrm",
+    icon: Users2,
+    children: [
+      { tKey: "hrm_dashboard", href: "/dashboard/hrm", icon: LayoutDashboard },
+      { tKey: "staff", href: "/dashboard/hrm/staff", icon: UserCheck },
+      { tKey: "attendance", href: "/dashboard/hrm/attendance", icon: CalendarDays },
+      { tKey: "leave", href: "/dashboard/hrm/leave", icon: CalendarOff },
+      { tKey: "payroll", href: "/dashboard/hrm/payroll", icon: Banknote },
+    ],
+  },
+  {
+    tKey: "store",
     icon: ShoppingBag,
     children: [
-      { title: "Products", href: "/dashboard/store/products", icon: Package },
-      { title: "Categories", href: "/dashboard/store/categories", icon: Folder },
-      { title: "Order Form", href: "/dashboard/store/form-builder", icon: ClipboardList },
+      { tKey: "products", href: "/dashboard/store/products", icon: Package },
+      { tKey: "categories", href: "/dashboard/store/categories", icon: Folder },
+      { tKey: "order_form", href: "/dashboard/store/form-builder", icon: ClipboardList },
     ],
   },
-  { title: "Orders", href: "/dashboard/orders", icon: ClipboardList },
+  { tKey: "orders", href: "/dashboard/orders", icon: ClipboardList },
   {
-    title: "Website & Apps",
+    tKey: "website",
     icon: Globe,
     children: [
-      { title: "Landing Page", href: "/dashboard/website/landing", icon: PanelsTopLeft },
-      { title: "Survey Builder", href: "/dashboard/surveys", icon: FileText },
-      { title: "File Requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud },
-      { title: "Applications", href: "/dashboard/website/applications", icon: Inbox },
+      { tKey: "landing", href: "/dashboard/website/landing", icon: PanelsTopLeft },
+      { tKey: "surveys", href: "/dashboard/surveys", icon: FileText },
+      { tKey: "file_requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud },
+      { tKey: "applications", href: "/dashboard/website/applications", icon: Inbox },
+      { tKey: "pixels", href: "/dashboard/settings/pixels", icon: Zap },
     ],
   },
-  { title: "Reports", href: "/dashboard/reports", icon: BarChart3 },
-  { title: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { title: "Activity Logs", href: "/dashboard/activity-logs", icon: Activity },
-  { title: "File Manager", href: "/dashboard/files", icon: Folder },
+  { tKey: "reports", href: "/dashboard/reports", icon: BarChart3 },
+  { tKey: "notifications", href: "/dashboard/notifications", icon: Bell },
+  { tKey: "activity_logs", href: "/dashboard/activity-logs", icon: Activity },
+  { tKey: "file_manager", href: "/dashboard/files", icon: Folder },
   {
-    title: "Admin",
+    tKey: "admin",
     icon: Shield,
     children: [
-      { title: "Users", href: "/dashboard/users", icon: Users },
-      { title: "Roles & Permissions", href: "/dashboard/roles", icon: Shield },
+      { tKey: "users", href: "/dashboard/users", icon: Users },
+      { tKey: "roles", href: "/dashboard/roles", icon: Shield },
+      { tKey: "affiliates", href: "/dashboard/affiliates", icon: Link2 },
     ],
   },
-  { title: "Branding & Logos", href: "/dashboard/branding", icon: Palette },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+  { tKey: "branding", href: "/dashboard/branding", icon: Palette },
+  { tKey: "settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -95,6 +126,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { t } = useTranslation("common");
+
   return (
     <>
       {isOpen && (
@@ -103,28 +136,28 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside
         style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)", color: "var(--text-primary)" }}
         className={cn(
-          "fixed left-0 top-0 z-30 flex h-full w-64 flex-col transition-transform duration-300 lg:relative lg:translate-x-0 border-r",
+          "fixed left-0 top-0 z-30 flex h-full w-64 flex-col transition-transform duration-300 lg:relative lg:translate-x-0 border-e",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
         <div style={{ borderColor: "var(--sidebar-border)" }} className="flex h-16 items-center gap-2 border-b px-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 font-bold text-xs text-white">FSA</div>
-          <span style={{ color: "var(--text-primary)" }} className="font-semibold text-sm">Foot-Ball Skills Academy</span>
+          <span style={{ color: "var(--text-primary)" }} className="font-semibold text-sm">{t("misc.academy_name")}</span>
         </div>
 
         {/* Nav */}
         <ScrollArea className="flex-1 py-3">
           <nav className="space-y-0.5 px-3">
             {navItems.map((item) => (
-              <NavItemComponent key={item.title} item={item} onClose={onClose} />
+              <NavItemComponent key={item.tKey} item={item} onClose={onClose} />
             ))}
           </nav>
         </ScrollArea>
 
         {/* Footer */}
         <div style={{ borderColor: "var(--sidebar-border)" }} className="border-t p-3">
-          <p style={{ color: "var(--text-muted)" }} className="text-xs text-center">FSA Platform v1.0</p>
+          <p style={{ color: "var(--text-muted)" }} className="text-xs text-center">{t("misc.platform")}</p>
         </div>
       </aside>
     </>
@@ -133,10 +166,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 function NavItemComponent({ item, onClose }: { item: NavItem; onClose: () => void }) {
   const pathname = usePathname();
+  const { t } = useTranslation("common");
   const [open, setOpen] = useState(() => {
     if (!item.children) return false;
     return item.children.some((c) => c.href && pathname.startsWith(c.href));
   });
+
+  const label = t(`nav.${item.tKey}`);
 
   if (item.children) {
     return (
@@ -151,15 +187,15 @@ function NavItemComponent({ item, onClose }: { item: NavItem; onClose: () => voi
           )}
         >
           <item.icon className="h-4 w-4 shrink-0" />
-          <span className="flex-1 text-left">{item.title}</span>
+          <span className="flex-1 text-start">{label}</span>
           {open
             ? <ChevronDown className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
             : <ChevronRight className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />}
         </button>
         {open && (
-          <div className="ml-3 mt-0.5 space-y-0.5 border-l border-gray-200 dark:border-white/10 pl-3">
+          <div className="ms-3 mt-0.5 space-y-0.5 border-s border-gray-200 dark:border-white/10 ps-3">
             {item.children.map((child) => (
-              <NavItemComponent key={child.title} item={child} onClose={onClose} />
+              <NavItemComponent key={child.tKey} item={child} onClose={onClose} />
             ))}
           </div>
         )}
@@ -184,9 +220,9 @@ function NavItemComponent({ item, onClose }: { item: NavItem; onClose: () => voi
       )}
     >
       <item.icon className="h-4 w-4 shrink-0" />
-      <span>{item.title}</span>
+      <span>{label}</span>
       {item.badge !== undefined && item.badge > 0 && (
-        <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+        <span className="ms-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
           {item.badge > 99 ? "99+" : item.badge}
         </span>
       )}

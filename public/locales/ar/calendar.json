@@ -1,0 +1,121 @@
+{
+  "title": "التقويم",
+  "subtitle": "إدارة الاجتماعات والتوفر",
+  "views": {
+    "week": "أسبوع",
+    "month": "شهر",
+    "my_calendar": "تقويمي",
+    "team": "الفريق"
+  },
+  "navigation": {
+    "previous": "السابق",
+    "next": "التالي",
+    "today": "اليوم"
+  },
+  "days": {
+    "monday": "الإثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة",
+    "saturday": "السبت",
+    "sunday": "الأحد"
+  },
+  "booking": {
+    "title": "حجز اجتماع",
+    "subtitle": "جدولة مكالمة مع عميل",
+    "tabs": {
+      "agent_first": "اختر الوكيل أولاً",
+      "time_first": "اختر الوقت أولاً"
+    },
+    "fields": {
+      "lead": "العميل",
+      "lead_search": "البحث عن عميل بالاسم...",
+      "agent": "الوكيل",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "duration": "المدة",
+      "type": "النوع",
+      "notes": "ملاحظات ما قبل الاجتماع (اختياري)",
+      "notes_placeholder": "سياق هذا الاجتماع..."
+    },
+    "duration_options": {
+      "15min": "15 دقيقة",
+      "30min": "30 دقيقة",
+      "45min": "45 دقيقة",
+      "60min": "60 دقيقة",
+      "90min": "90 دقيقة",
+      "custom": "مخصص",
+      "minutes_range": "دقائق (5–180)"
+    },
+    "types": {
+      "call": "مكالمة استكشافية",
+      "follow_up": "متابعة",
+      "demo": "عرض تجريبي",
+      "closing": "إغلاق"
+    },
+    "summary": {
+      "title": "ملخص الحجز",
+      "confirm": "تأكيد الاجتماع"
+    },
+    "validation": {
+      "select_lead": "اختر عميلاً",
+      "select_agent": "اختر وكيلاً",
+      "select_time": "اختر وقتاً",
+      "fill_all": "أكمل جميع الحقول"
+    },
+    "slots": {
+      "available": "الأوقات المتاحة",
+      "none": "لا توجد أوقات متاحة في هذا اليوم",
+      "loading": "تحميل الأوقات..."
+    },
+    "agents": {
+      "available": "الوكلاء المتاحون",
+      "none": "لا يوجد وكلاء متاحون في هذا الوقت",
+      "change": "تغيير"
+    },
+    "success": "تم حجز الاجتماع مع {{agent}} في {{date}} الساعة {{time}}",
+    "error": "فشل الحجز"
+  },
+  "meeting": {
+    "title": "تفاصيل الاجتماع",
+    "status": {
+      "scheduled": "مجدول",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "no_show": "غائب"
+    },
+    "actions": {
+      "mark_completed": "مكتمل",
+      "mark_no_show": "غائب",
+      "cancel": "إلغاء"
+    },
+    "updated": "تم تحديث حالة الاجتماع",
+    "update_failed": "فشل التحديث",
+    "deleted": "تم حذف الاجتماع",
+    "delete_failed": "فشل الحذف"
+  },
+  "book_meeting": "حجز اجتماع",
+  "no_meetings": "لا توجد اجتماعات مجدولة",
+  "more_meetings_one": "+{{count}} المزيد",
+  "more_meetings_other": "+{{count}} المزيد",
+  "availability": {
+    "title": "إعدادات التوفر",
+    "timezone": "المنطقة الزمنية",
+    "buffer": "وقت الفاصل بين الاجتماعات",
+    "buffer_minutes": "{{count}} دقائق",
+    "days": {
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    },
+    "available": "متاح",
+    "not_available": "غير متاح",
+    "start_time": "وقت البداية",
+    "end_time": "وقت النهاية"
+  }
+}

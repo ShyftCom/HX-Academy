@@ -36,7 +36,7 @@ export default function PlayerNotificationsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
         <Button variant="outline" size="sm" onClick={() => readAllMutation.mutate()} loading={readAllMutation.isPending}>
-          <CheckCheck className="mr-1.5 h-4 w-4" />Mark All Read
+          <CheckCheck className="me-1.5 h-4 w-4" />Mark All Read
         </Button>
       </div>
 

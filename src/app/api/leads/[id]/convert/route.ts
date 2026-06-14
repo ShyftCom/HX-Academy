@@ -35,6 +35,14 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const existingPlayer = await db.player.findUnique({ where: { userId: user.id } });
     if (existingPlayer) return NextResponse.json({ error: "Player record already exists for this user" }, { status: 400 });
 
+    const refMatch = lead.notes?.match(/__ref:([A-Z0-9]+)__/);
+    const refCode = refMatch?.[1] ?? null;
+    const cleanNotes = lead.notes?.replace(/__ref:[A-Z0-9]+__/, "").trim() || null;
+
+    const affiliate = refCode
+      ? await db.affiliate.findUnique({ where: { code: refCode } })
+      : null;
+
     const player = await db.player.create({
       data: {
         userId: user.id,
@@ -47,10 +55,24 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         parentPhone: lead.parentPhone ?? null,
         address: lead.address ?? null,
         category: lead.categoryInterest ?? null,
-        notes: lead.notes ?? null,
+        notes: cleanNotes,
         status: "active",
+        referralCode: refCode,
+        stationId: (lead as { stationId?: string | null }).stationId ?? null,
       },
     });
+
+    if (affiliate) {
+      await db.affiliateReferral.create({
+        data: {
+          affiliateId: affiliate.id,
+          playerId: player.id,
+          stationId: affiliate.stationId ?? null,
+          registrationDate: new Date(),
+          paymentStatus: "unpaid",
+        },
+      });
+    }
 
     await db.lead.update({
       where: { id },

@@ -221,7 +221,7 @@ export default function LocaleHomePage() {
               <div className="relative w-full rounded-2xl overflow-hidden flex items-center justify-center" style={{ minHeight: "360px", background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#A02020" }}>
-                    <Play className="w-8 h-8 text-white fill-white ml-1" />
+                    <Play className="w-8 h-8 text-white fill-white ms-1" />
                   </div>
                   <p className="text-sm" style={{ color: "#888" }}>Video coming soon</p>
                 </div>
@@ -275,7 +275,7 @@ export default function LocaleHomePage() {
                   <h3 className="text-xl font-bold mb-1" style={{ color: "#000" }}>{plan.name}</h3>
                   <div className="mb-4">
                     <span className="text-3xl font-black" style={{ color: "#A02020" }}>{currencySymbol} {plan.price.toLocaleString()}</span>
-                    <span className="text-sm ml-1" style={{ color: "#6B7280" }}>/ {plan.duration} {plan.durationType}</span>
+                    <span className="text-sm ms-1" style={{ color: "#6B7280" }}>/ {plan.duration} {plan.durationType}</span>
                   </div>
                   <Link href="/apply"
                     className="mt-auto block text-center py-3 rounded-xl font-semibold transition-all"

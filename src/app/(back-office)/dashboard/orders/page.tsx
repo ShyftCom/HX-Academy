@@ -68,8 +68,8 @@ export default function OrdersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setViewOrder(r)}><Eye className="mr-2 h-4 w-4" />View</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setViewOrder(r)}><Eye className="me-2 h-4 w-4" />View</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},

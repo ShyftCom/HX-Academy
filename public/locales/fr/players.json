@@ -1,0 +1,56 @@
+{
+  "title": "Joueurs",
+  "subtitle": "Gérer les joueurs inscrits",
+  "table": {
+    "player": "Joueur",
+    "category": "Catégorie",
+    "team": "Équipe",
+    "status": "Statut",
+    "subscription": "Abonnement",
+    "joined": "Inscrit le",
+    "actions": "Actions"
+  },
+  "filters": {
+    "search_placeholder": "Rechercher des joueurs...",
+    "all_categories": "Toutes les catégories",
+    "all_teams": "Toutes les équipes"
+  },
+  "actions": {
+    "add_player": "Ajouter un joueur",
+    "edit_player": "Modifier le joueur",
+    "view_profile": "Voir le profil"
+  },
+  "form": {
+    "full_name": "Nom complet",
+    "date_of_birth": "Date de naissance",
+    "gender": "Genre",
+    "phone": "Téléphone",
+    "email": "Email",
+    "parent_name": "Nom du parent",
+    "parent_phone": "Téléphone du parent",
+    "address": "Adresse",
+    "team": "Équipe",
+    "category": "Catégorie",
+    "position": "Poste",
+    "emergency_contact": "Contact d'urgence",
+    "medical_notes": "Notes médicales",
+    "notes": "Notes"
+  },
+  "profile": {
+    "title": "Profil du joueur",
+    "personal_info": "Informations personnelles",
+    "contact_info": "Informations de contact",
+    "football_info": "Informations football",
+    "subscription_history": "Historique des abonnements",
+    "payment_history": "Historique des paiements"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "suspended": "Suspendu"
+  },
+  "empty": {
+    "no_players": "Aucun joueur",
+    "no_players_subtitle": "Convertissez des leads pour ajouter des joueurs"
+  }
+}

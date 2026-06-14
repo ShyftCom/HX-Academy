@@ -83,7 +83,7 @@ export default function PlansPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Subscription Plans" description="Manage academy membership plans">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Plan</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Plan</Button>
       </PageHeader>
 
       {plans?.length === 0 ? (
@@ -93,7 +93,7 @@ export default function PlansPage() {
           {plans?.map((plan: any) => (
             <Card key={plan.id} className="relative overflow-hidden">
               <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: plan.color }} />
-              <CardContent className="pl-5 pt-5 pb-5">
+              <CardContent className="ps-5 pt-5 pb-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">{plan.name}</h3>
@@ -106,7 +106,7 @@ export default function PlansPage() {
                   <p className="text-sm text-gray-500">{plan.duration} {plan.durationType}{plan.duration > 1 ? "s" : ""}</p>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="mr-1.5 h-3.5 w-3.5" />Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="me-1.5 h-3.5 w-3.5" />Edit</Button>
                   <Button variant="outline" size="sm" onClick={() => setDeleteId(plan.id)} className="text-red-600 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </CardContent>

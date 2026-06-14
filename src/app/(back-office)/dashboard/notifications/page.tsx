@@ -42,7 +42,7 @@ export default function NotificationsPage() {
     <div className="space-y-5">
       <PageHeader title="Notifications" description="Stay up to date with academy activity">
         <Button variant="outline" onClick={() => readAllMutation.mutate()} loading={readAllMutation.isPending} disabled={!notifications.some((n: any) => !n.isRead)}>
-          <CheckCheck className="mr-2 h-4 w-4" />Mark All Read
+          <CheckCheck className="me-2 h-4 w-4" />Mark All Read
         </Button>
       </PageHeader>
 

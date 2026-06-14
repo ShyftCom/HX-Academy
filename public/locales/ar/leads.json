@@ -1,0 +1,92 @@
+{
+  "title": "إدارة العملاء",
+  "pipeline": "خط الأنابيب",
+  "table": {
+    "full_name": "الاسم الكامل",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "status": "الحالة",
+    "source": "المصدر",
+    "assigned_to": "مُسنَد إلى",
+    "category": "الفئة",
+    "created": "تاريخ الإنشاء",
+    "actions": "الإجراءات"
+  },
+  "filters": {
+    "search_placeholder": "البحث في العملاء...",
+    "all_statuses": "جميع الحالات",
+    "all_agents": "جميع الوكلاء",
+    "filter_by_source": "تصفية حسب المصدر"
+  },
+  "actions": {
+    "add_lead": "إضافة عميل",
+    "edit_lead": "تعديل العميل",
+    "delete_lead": "حذف العميل",
+    "convert_to_player": "تحويل إلى لاعب",
+    "book_call": "حجز مكالمة",
+    "add_note": "إضافة ملاحظة",
+    "save_note": "حفظ الملاحظة",
+    "view_activity": "عرض النشاط"
+  },
+  "form": {
+    "full_name": "الاسم الكامل",
+    "full_name_placeholder": "أدخل الاسم الكامل",
+    "phone": "رقم الهاتف",
+    "phone_placeholder": "+213 XXX XXX XXX",
+    "email": "البريد الإلكتروني (اختياري)",
+    "email_placeholder": "email@example.com",
+    "date_of_birth": "تاريخ الميلاد",
+    "parent_name": "اسم ولي الأمر",
+    "parent_phone": "هاتف ولي الأمر",
+    "address": "العنوان",
+    "address_placeholder": "المدينة، الولاية",
+    "category": "الفئة العمرية المهتم بها",
+    "source": "مصدر العميل",
+    "notes": "ملاحظات داخلية",
+    "notes_placeholder": "أي ملاحظات حول هذا العميل...",
+    "assign_to": "التعيين إلى"
+  },
+  "status_change": {
+    "changed_to": "تم تغيير الحالة إلى {{status}}",
+    "failed": "فشل تحديث الحالة"
+  },
+  "activity": {
+    "title": "النشاط",
+    "all": "الكل",
+    "status": "الحالة",
+    "notes": "ملاحظات",
+    "calls": "مكالمات",
+    "emails": "رسائل",
+    "tasks": "مهام",
+    "edits": "تعديلات",
+    "convert": "تحويل",
+    "no_activity": "لا يوجد نشاط لهذا الفلتر."
+  },
+  "notes": {
+    "title": "ملاحظات",
+    "placeholder": "أضف ملاحظة حول هذا العميل...",
+    "empty_title": "لا توجد ملاحظات",
+    "empty_subtitle": "أضف الملاحظة الأولى أعلاه.",
+    "saved": "تم حفظ الملاحظة",
+    "failed": "فشل حفظ الملاحظة"
+  },
+  "detail": {
+    "contact_info": "معلومات الاتصال",
+    "details": "التفاصيل",
+    "edit_lead": "تعديل معلومات العميل",
+    "converted_badge": "محوَّل",
+    "added": "أُضيف في {{date}}"
+  },
+  "convert": {
+    "success": "تم تحويل العميل إلى لاعب",
+    "failed": "فشل التحويل"
+  },
+  "empty": {
+    "no_leads": "لا يوجد عملاء",
+    "no_leads_subtitle": "أضف أول عميل للبدء",
+    "no_activity": "لا يوجد نشاط"
+  },
+  "count_one": "عميل واحد",
+  "count_other": "{{count}} عملاء",
+  "count_zero": "لا يوجد عملاء"
+}

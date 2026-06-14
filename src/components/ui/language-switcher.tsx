@@ -1,24 +1,33 @@
 "use client";
 
+import "@/i18n";
 import { useState, useRef, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
+import i18n from "@/i18n";
 
 const LOCALES = [
   { code: "fr",  flag: "🇫🇷", label: "Français" },
-  { code: "eng", flag: "🇬🇧", label: "English" },
+  { code: "en",  flag: "🇬🇧", label: "English" },
   { code: "ar",  flag: "🇩🇿", label: "العربية" },
 ] as const;
 
 type LocaleCode = typeof LOCALES[number]["code"];
 
-function getActiveLocale(pathname: string): LocaleCode {
-  const seg = pathname.split("/")[1];
-  if (seg === "fr" || seg === "eng" || seg === "ar") return seg as LocaleCode;
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("locale") as LocaleCode | null;
-    if (saved) return saved;
-  }
+const STORAGE_KEY = "shyftcom_lang";
+
+function applyLocale(code: LocaleCode) {
+  i18n.changeLanguage(code);
+  localStorage.setItem(STORAGE_KEY, code);
+  document.documentElement.lang = code;
+  document.documentElement.dir = code === "ar" ? "rtl" : "ltr";
+}
+
+function getStoredLocale(): LocaleCode {
+  if (typeof window === "undefined") return "fr";
+  // Support legacy "eng" key from old switcher
+  const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem("locale");
+  if (raw === "eng") return "en";
+  if (raw === "fr" || raw === "en" || raw === "ar") return raw;
   return "fr";
 }
 
@@ -27,15 +36,15 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
-  const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState<LocaleCode>(() => getActiveLocale(pathname));
+  const [current, setCurrent] = useState<LocaleCode>("fr");
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setCurrent(getActiveLocale(pathname));
-  }, [pathname]);
+    const stored = getStoredLocale();
+    setCurrent(stored);
+    applyLocale(stored);
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -47,33 +56,27 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
 
   function switchLocale(code: LocaleCode) {
     setOpen(false);
-    localStorage.setItem("locale", code);
     setCurrent(code);
+    applyLocale(code);
 
+    // Persist preference to server
     fetch("/api/user/language", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ language: code }),
     }).catch(() => {});
-
-    if (variant === "public") {
-      const seg = pathname.split("/")[1];
-      const isLocale = seg === "fr" || seg === "eng" || seg === "ar";
-      const rest = isLocale ? pathname.slice(seg.length + 1) || "/" : pathname;
-      router.push(`/${code}${rest === "/" ? "" : rest}`);
-    }
   }
 
   const active = LOCALES.find((l) => l.code === current) ?? LOCALES[0];
-
   const isAdmin = variant === "admin";
+
   const btnClass = isAdmin
     ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium transition-colors"
     : "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors border border-white/20";
 
   const dropdownClass = isAdmin
-    ? "absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-1 overflow-hidden"
-    : "absolute right-0 mt-1 w-36 bg-gray-900 border border-white/10 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
+    ? "absolute end-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-1 overflow-hidden"
+    : "absolute end-0 mt-1 w-36 bg-gray-900 border border-white/10 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
 
   const itemClass = (code: string) => isAdmin
     ? `flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${code === current ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-medium" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`

@@ -92,7 +92,7 @@ export default function SettingsPage() {
             <Input label="WhatsApp" value={settings.academy_whatsapp ?? ""} onChange={(e) => upd("academy_whatsapp", e.target.value)} placeholder="+213 ..." />
             <Textarea label="Address" value={settings.academy_address ?? ""} onChange={(e) => upd("academy_address", e.target.value)} placeholder="Algiers, Algeria" rows={2} />
             <Input label="Currency Symbol" value={settings.currency_symbol ?? ""} onChange={(e) => upd("currency_symbol", e.target.value)} placeholder="DA" />
-            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="mr-2 h-4 w-4" />Save General Settings</Button>
+            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />Save General Settings</Button>
           </CardContent></Card>
         </TabsContent>
 
@@ -119,14 +119,14 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="mr-2 h-4 w-4" />Save Branding</Button>
+            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />Save Branding</Button>
           </CardContent></Card>
         </TabsContent>
 
         <TabsContent value="payments">
           <div className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={openAddMethod}><Plus className="mr-2 h-4 w-4" />Add Method</Button>
+              <Button onClick={openAddMethod}><Plus className="me-2 h-4 w-4" />Add Method</Button>
             </div>
             <DataTable columns={methodColumns} data={methods ?? []} loading={methodsLoading} emptyMessage="No payment methods configured" />
           </div>
@@ -137,7 +137,7 @@ export default function SettingsPage() {
             {[["Instagram URL", "social_instagram"], ["Facebook URL", "social_facebook"], ["YouTube URL", "social_youtube"], ["Twitter/X URL", "social_twitter"], ["TikTok URL", "social_tiktok"]].map(([label, key]) => (
               <Input key={key} label={label} value={settings[key] ?? ""} onChange={(e) => upd(key, e.target.value)} placeholder="https://..." />
             ))}
-            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="mr-2 h-4 w-4" />Save Social Links</Button>
+            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />Save Social Links</Button>
           </CardContent></Card>
         </TabsContent>
 
@@ -146,7 +146,7 @@ export default function SettingsPage() {
             <Input label="Terms of Service URL" value={settings.terms_url ?? ""} onChange={(e) => upd("terms_url", e.target.value)} placeholder="https://..." />
             <Input label="Privacy Policy URL" value={settings.privacy_url ?? ""} onChange={(e) => upd("privacy_url", e.target.value)} placeholder="https://..." />
             <Textarea label="Footer Text" value={settings.footer_text ?? ""} onChange={(e) => upd("footer_text", e.target.value)} placeholder="© 2024 HX Academy..." rows={2} />
-            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="mr-2 h-4 w-4" />Save Legal Settings</Button>
+            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />Save Legal Settings</Button>
           </CardContent></Card>
         </TabsContent>
       </Tabs>

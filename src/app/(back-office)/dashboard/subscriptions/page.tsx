@@ -88,10 +88,10 @@ export default function SubscriptionsPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="mr-2 h-3.5 w-3.5" />Activate</DropdownMenuItem>}
+          {r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="me-2 h-3.5 w-3.5" />Activate</DropdownMenuItem>}
           {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}>Suspend</DropdownMenuItem>}
           {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "expired" })}>Mark Expired</DropdownMenuItem>}
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-3.5 w-3.5" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-3.5 w-3.5" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -100,7 +100,7 @@ export default function SubscriptionsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Subscriptions" description="Manage player subscriptions">
-        <Button onClick={() => setAddOpen(true)}><Plus className="mr-2 h-4 w-4" />Add Subscription</Button>
+        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Add Subscription</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">

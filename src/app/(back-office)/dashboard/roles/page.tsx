@@ -59,7 +59,7 @@ export default function RolesPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Roles & Permissions" description="Manage access control">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Role</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Role</Button>
       </PageHeader>
 
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
@@ -86,7 +86,7 @@ export default function RolesPage() {
                     {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">+{role.permissions.length - 6} more</span>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="mr-1.5 h-3.5 w-3.5" />Edit</Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />Edit</Button>
                     {!role.isSystem && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteId(role.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </CardContent>

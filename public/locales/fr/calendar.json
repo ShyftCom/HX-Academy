@@ -1,0 +1,121 @@
+{
+  "title": "Calendrier",
+  "subtitle": "Gérer les réunions et la disponibilité",
+  "views": {
+    "week": "Semaine",
+    "month": "Mois",
+    "my_calendar": "Mon Calendrier",
+    "team": "Équipe"
+  },
+  "navigation": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "today": "Aujourd'hui"
+  },
+  "days": {
+    "monday": "Lun",
+    "tuesday": "Mar",
+    "wednesday": "Mer",
+    "thursday": "Jeu",
+    "friday": "Ven",
+    "saturday": "Sam",
+    "sunday": "Dim"
+  },
+  "booking": {
+    "title": "Réserver une réunion",
+    "subtitle": "Planifier un appel avec un lead",
+    "tabs": {
+      "agent_first": "Choisir l'agent d'abord",
+      "time_first": "Choisir l'heure d'abord"
+    },
+    "fields": {
+      "lead": "Lead",
+      "lead_search": "Rechercher un lead par nom...",
+      "agent": "Agent",
+      "date": "Date",
+      "time": "Heure",
+      "duration": "Durée",
+      "type": "Type",
+      "notes": "Notes pré-réunion (optionnel)",
+      "notes_placeholder": "Contexte pour cette réunion..."
+    },
+    "duration_options": {
+      "15min": "15 min",
+      "30min": "30 min",
+      "45min": "45 min",
+      "60min": "60 min",
+      "90min": "90 min",
+      "custom": "Personnalisé",
+      "minutes_range": "minutes (5–180)"
+    },
+    "types": {
+      "call": "Appel découverte",
+      "follow_up": "Suivi",
+      "demo": "Démonstration",
+      "closing": "Closing"
+    },
+    "summary": {
+      "title": "Récapitulatif",
+      "confirm": "Confirmer la réunion"
+    },
+    "validation": {
+      "select_lead": "Sélectionnez un lead",
+      "select_agent": "Sélectionnez un agent",
+      "select_time": "Choisissez un créneau",
+      "fill_all": "Remplissez tous les champs"
+    },
+    "slots": {
+      "available": "Créneaux disponibles",
+      "none": "Aucun créneau disponible ce jour",
+      "loading": "Chargement des créneaux..."
+    },
+    "agents": {
+      "available": "Agents disponibles",
+      "none": "Aucun agent disponible à cette heure",
+      "change": "Changer"
+    },
+    "success": "Réunion réservée avec {{agent}} le {{date}} à {{time}}",
+    "error": "Échec de la réservation"
+  },
+  "meeting": {
+    "title": "Détails de la réunion",
+    "status": {
+      "scheduled": "Planifiée",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "no_show": "Absent"
+    },
+    "actions": {
+      "mark_completed": "Terminé",
+      "mark_no_show": "Absent",
+      "cancel": "Annuler"
+    },
+    "updated": "Statut de la réunion mis à jour",
+    "update_failed": "Échec de la mise à jour",
+    "deleted": "Réunion supprimée",
+    "delete_failed": "Échec de la suppression"
+  },
+  "book_meeting": "Réserver une réunion",
+  "no_meetings": "Aucune réunion planifiée",
+  "more_meetings_one": "+{{count}} de plus",
+  "more_meetings_other": "+{{count}} de plus",
+  "availability": {
+    "title": "Paramètres de disponibilité",
+    "timezone": "Fuseau horaire",
+    "buffer": "Temps tampon entre réunions",
+    "buffer_minutes": "{{count}} minutes",
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    },
+    "available": "Disponible",
+    "not_available": "Indisponible",
+    "start_time": "Heure de début",
+    "end_time": "Heure de fin"
+  }
+}

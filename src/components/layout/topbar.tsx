@@ -3,6 +3,7 @@
 import { Menu, Bell, Sun, Moon, LogOut, User, Settings } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Button } from "@/components/ui/button";
+import { StationSwitcher } from "@/components/layout/station-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,12 +19,14 @@ import { getInitials } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface TopbarProps {
   onMenuClick: () => void;
 }
 
 export function Topbar({ onMenuClick }: TopbarProps) {
+  const { t } = useTranslation("common");
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -49,7 +52,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <Menu className="h-5 w-5" />
       </Button>
 
-      <div className="flex-1" />
+      <div className="flex-1 flex items-center">
+        <StationSwitcher />
+      </div>
 
       <div className="flex items-center gap-2">
         <LanguageSwitcher variant="admin" />
@@ -92,20 +97,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/dashboard/profile">
-                <User className="mr-2 h-4 w-4" />
-                Profile
+                <User className="me-2 h-4 w-4" />
+                {t("nav.profile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/dashboard/settings">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+                <Settings className="me-2 h-4 w-4" />
+                {t("nav.settings")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} destructive>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              <LogOut className="me-2 h-4 w-4" />
+              {t("nav.sign_out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

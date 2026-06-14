@@ -1,0 +1,25 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back",
+  "stats": {
+    "total_leads": "Total Leads",
+    "active_players": "Active Players",
+    "total_revenue": "Total Revenue",
+    "pending_payments": "Pending Payments",
+    "new_leads": "New Leads",
+    "meetings_today": "Meetings Today",
+    "conversion_rate": "Conversion Rate",
+    "monthly_revenue": "Monthly Revenue"
+  },
+  "charts": {
+    "leads_over_time": "Leads Over Time",
+    "revenue_chart": "Revenue",
+    "status_breakdown": "Status Breakdown",
+    "conversion_funnel": "Conversion Funnel"
+  },
+  "recent": {
+    "recent_leads": "Recent Leads",
+    "recent_payments": "Recent Payments",
+    "upcoming_meetings": "Upcoming Meetings"
+  }
+}

@@ -52,7 +52,7 @@ export default function CategoriesPage() {
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.isActive ? "success" : "secondary"}>{r.isActive ? "Active" : "Inactive"}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 mr-1" />Edit</Button>
+        <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />Edit</Button>
         <Button variant="outline" size="sm" onClick={() => setDeleteId(r.id)} className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     )},
@@ -61,7 +61,7 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Product Categories" description="Organize products by category">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Category</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Category</Button>
       </PageHeader>
 
       {!isLoading && categories?.length === 0 ? (

@@ -1,0 +1,37 @@
+{
+  "title": "الإعدادات",
+  "profile": {
+    "title": "الملف الشخصي",
+    "name": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "current_password": "كلمة المرور الحالية",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "save_profile": "حفظ الملف الشخصي",
+    "change_password": "تغيير كلمة المرور",
+    "language_preference": "تفضيل اللغة",
+    "avatar": "صورة الملف الشخصي"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "email_notifications": "إشعارات البريد الإلكتروني",
+    "push_notifications": "الإشعارات الفورية",
+    "meeting_reminders": "تذكيرات الاجتماعات",
+    "lead_updates": "تحديثات العملاء"
+  },
+  "availability": {
+    "title": "توفري",
+    "subtitle": "حدد ساعات عملك ووقت الفاصل",
+    "save_availability": "حفظ التوفر",
+    "saved": "تم حفظ التوفر",
+    "failed": "فشل الحفظ"
+  },
+  "branding": {
+    "title": "الشعار والهوية",
+    "logo": "الشعار",
+    "primary_color": "اللون الرئيسي",
+    "save_branding": "حفظ"
+  },
+  "saved": "تم حفظ الإعدادات",
+  "save_failed": "فشل حفظ الإعدادات"
+}

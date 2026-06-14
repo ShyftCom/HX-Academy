@@ -1,0 +1,121 @@
+{
+  "title": "Calendar",
+  "subtitle": "Manage meetings and availability",
+  "views": {
+    "week": "Week",
+    "month": "Month",
+    "my_calendar": "My Calendar",
+    "team": "Team"
+  },
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "today": "Today"
+  },
+  "days": {
+    "monday": "Mon",
+    "tuesday": "Tue",
+    "wednesday": "Wed",
+    "thursday": "Thu",
+    "friday": "Fri",
+    "saturday": "Sat",
+    "sunday": "Sun"
+  },
+  "booking": {
+    "title": "Book a Meeting",
+    "subtitle": "Schedule a call with a lead",
+    "tabs": {
+      "agent_first": "Pick agent first",
+      "time_first": "Pick time first"
+    },
+    "fields": {
+      "lead": "Lead",
+      "lead_search": "Search lead by name...",
+      "agent": "Agent",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "type": "Type",
+      "notes": "Pre-meeting notes (optional)",
+      "notes_placeholder": "Any context for this meeting..."
+    },
+    "duration_options": {
+      "15min": "15 min",
+      "30min": "30 min",
+      "45min": "45 min",
+      "60min": "60 min",
+      "90min": "90 min",
+      "custom": "Custom",
+      "minutes_range": "minutes (5–180)"
+    },
+    "types": {
+      "call": "Discovery call",
+      "follow_up": "Follow-up",
+      "demo": "Demo",
+      "closing": "Closing"
+    },
+    "summary": {
+      "title": "Booking summary",
+      "confirm": "Confirm Meeting"
+    },
+    "validation": {
+      "select_lead": "Select a lead",
+      "select_agent": "Select an agent",
+      "select_time": "Pick a time slot",
+      "fill_all": "Fill all fields"
+    },
+    "slots": {
+      "available": "Available slots",
+      "none": "No available slots on this date",
+      "loading": "Loading slots..."
+    },
+    "agents": {
+      "available": "Available agents",
+      "none": "No agents available at this time",
+      "change": "Change"
+    },
+    "success": "Meeting booked with {{agent}} on {{date}} at {{time}}",
+    "error": "Booking failed"
+  },
+  "meeting": {
+    "title": "Meeting Details",
+    "status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No show"
+    },
+    "actions": {
+      "mark_completed": "Completed",
+      "mark_no_show": "No show",
+      "cancel": "Cancel"
+    },
+    "updated": "Meeting status updated",
+    "update_failed": "Update failed",
+    "deleted": "Meeting deleted",
+    "delete_failed": "Delete failed"
+  },
+  "book_meeting": "Book Meeting",
+  "no_meetings": "No meetings scheduled",
+  "more_meetings_one": "+{{count}} more",
+  "more_meetings_other": "+{{count}} more",
+  "availability": {
+    "title": "Availability Settings",
+    "timezone": "Timezone",
+    "buffer": "Buffer between meetings",
+    "buffer_minutes": "{{count}} minutes",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "available": "Available",
+    "not_available": "Not available",
+    "start_time": "Start time",
+    "end_time": "End time"
+  }
+}

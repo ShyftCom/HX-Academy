@@ -1,0 +1,92 @@
+{
+  "title": "Leads CRM",
+  "pipeline": "Pipeline",
+  "table": {
+    "full_name": "Nom complet",
+    "phone": "Téléphone",
+    "email": "Email",
+    "status": "Statut",
+    "source": "Source",
+    "assigned_to": "Assigné à",
+    "category": "Catégorie",
+    "created": "Créé le",
+    "actions": "Actions"
+  },
+  "filters": {
+    "search_placeholder": "Rechercher des leads...",
+    "all_statuses": "Tous les statuts",
+    "all_agents": "Tous les agents",
+    "filter_by_source": "Filtrer par source"
+  },
+  "actions": {
+    "add_lead": "Ajouter un lead",
+    "edit_lead": "Modifier le lead",
+    "delete_lead": "Supprimer le lead",
+    "convert_to_player": "Convertir en joueur",
+    "book_call": "Réserver un appel",
+    "add_note": "Ajouter une note",
+    "save_note": "Enregistrer la note",
+    "view_activity": "Voir l'activité"
+  },
+  "form": {
+    "full_name": "Nom complet",
+    "full_name_placeholder": "Entrez le nom complet",
+    "phone": "Numéro de téléphone",
+    "phone_placeholder": "+213 XXX XXX XXX",
+    "email": "Email (optionnel)",
+    "email_placeholder": "email@exemple.com",
+    "date_of_birth": "Date de naissance",
+    "parent_name": "Nom du parent",
+    "parent_phone": "Téléphone du parent",
+    "address": "Adresse",
+    "address_placeholder": "Ville, Wilaya",
+    "category": "Catégorie d'intérêt",
+    "source": "Source du lead",
+    "notes": "Notes internes",
+    "notes_placeholder": "Notes sur ce lead...",
+    "assign_to": "Assigner à"
+  },
+  "status_change": {
+    "changed_to": "Statut changé en {{status}}",
+    "failed": "Échec de la mise à jour du statut"
+  },
+  "activity": {
+    "title": "Activité",
+    "all": "Tout",
+    "status": "Statut",
+    "notes": "Notes",
+    "calls": "Appels",
+    "emails": "Emails",
+    "tasks": "Tâches",
+    "edits": "Modifications",
+    "convert": "Conversion",
+    "no_activity": "Aucune activité pour ce filtre."
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Ajouter une note sur ce lead...",
+    "empty_title": "Aucune note",
+    "empty_subtitle": "Ajoutez la première note ci-dessus.",
+    "saved": "Note enregistrée",
+    "failed": "Échec de l'enregistrement de la note"
+  },
+  "detail": {
+    "contact_info": "Informations de contact",
+    "details": "Détails",
+    "edit_lead": "Modifier le lead",
+    "converted_badge": "Converti",
+    "added": "Ajouté le {{date}}"
+  },
+  "convert": {
+    "success": "Lead converti en joueur",
+    "failed": "Échec de la conversion"
+  },
+  "empty": {
+    "no_leads": "Aucun lead trouvé",
+    "no_leads_subtitle": "Ajoutez votre premier lead pour commencer",
+    "no_activity": "Aucune activité"
+  },
+  "count_one": "{{count}} lead",
+  "count_other": "{{count}} leads",
+  "count_zero": "Aucun lead"
+}

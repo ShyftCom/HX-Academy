@@ -82,7 +82,7 @@ export default function SurveysPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Survey Builder" description="Build surveys for lead registration">
-        <Button onClick={openAddSurvey}><Plus className="mr-2 h-4 w-4" />New Survey</Button>
+        <Button onClick={openAddSurvey}><Plus className="me-2 h-4 w-4" />New Survey</Button>
       </PageHeader>
 
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
@@ -102,7 +102,7 @@ export default function SurveysPage() {
                       <p className="text-xs text-gray-400 mt-1">{s._count?.questions ?? 0} questions · {s._count?.answers ?? 0} responses</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(selectedSurvey?.id === s.id ? null : s)}><FileText className="mr-1.5 h-3.5 w-3.5" />{selectedSurvey?.id === s.id ? "Hide" : "Questions"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(selectedSurvey?.id === s.id ? null : s)}><FileText className="me-1.5 h-3.5 w-3.5" />{selectedSurvey?.id === s.id ? "Hide" : "Questions"}</Button>
                       <Button variant="outline" size="sm" onClick={() => openEditSurvey(s)}><Edit className="h-3.5 w-3.5" /></Button>
                       <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteSurveyId(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
@@ -112,7 +112,7 @@ export default function SurveysPage() {
                     <div className="mt-4 border-t pt-4 dark:border-gray-700">
                       <div className="flex justify-between mb-3">
                         <p className="text-sm font-medium">Questions ({surveyDetail?.questions?.length ?? 0})</p>
-                        <Button size="sm" onClick={openAddQ}><Plus className="mr-1.5 h-3.5 w-3.5" />Add Question</Button>
+                        <Button size="sm" onClick={openAddQ}><Plus className="me-1.5 h-3.5 w-3.5" />Add Question</Button>
                       </div>
                       <div className="space-y-2">
                         {surveyDetail?.questions?.map((q: any, i: number) => (

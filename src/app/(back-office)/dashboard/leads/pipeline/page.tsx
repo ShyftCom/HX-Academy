@@ -204,7 +204,7 @@ export default function PipelinePage() {
                 <GripVertical className="w-4 h-4 cursor-grab flex-shrink-0" style={{ color: "var(--text-muted)" }} />
                 <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: s.color }} />
                 <StatusBadge status={s} />
-                <div className="flex items-center gap-1 ml-1 flex-shrink-0">
+                <div className="flex items-center gap-1 ms-1 flex-shrink-0">
                   {s.isTerminal && (
                     <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: "var(--muted-bg)", color: "var(--text-muted)" }}>Terminal</span>
                   )}
@@ -212,7 +212,7 @@ export default function PipelinePage() {
                     <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: "var(--muted-bg)", color: "var(--text-muted)" }}>Default</span>
                   )}
                 </div>
-                <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+                <div className="flex items-center gap-1 ms-auto flex-shrink-0">
                   <button onClick={() => startEdit(s)} className="p-1.5 rounded-lg transition-colors" style={{ color: "var(--text-muted)" }}
                     title="Edit">
                     <Pencil className="w-3.5 h-3.5" />

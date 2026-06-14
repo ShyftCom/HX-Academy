@@ -33,7 +33,7 @@ export function DataTable<T extends Record<string, unknown>>({
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                <th key={col.key} className="px-4 py-3 text-start font-medium text-gray-600 dark:text-gray-400">
                   {col.header}
                 </th>
               ))}
@@ -62,7 +62,7 @@ export function DataTable<T extends Record<string, unknown>>({
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                <th key={col.key} className="px-4 py-3 text-start font-medium text-gray-600 dark:text-gray-400">
                   {col.header}
                 </th>
               ))}
@@ -83,7 +83,7 @@ export function DataTable<T extends Record<string, unknown>>({
         <thead>
           <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
             {columns.map((col) => (
-              <th key={col.key} className={cn("px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap", col.className)}>
+              <th key={col.key} className={cn("px-4 py-3 text-start font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap", col.className)}>
                 {col.header}
               </th>
             ))}

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { I18nProvider } from "@/components/providers/i18n-provider";
 
 const navItems = [
   { href: "/player", icon: Home, label: "Home" },
@@ -40,6 +41,7 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
   if (status === "unauthenticated") return null;
 
   return (
+    <I18nProvider>
     <div style={{ background: "var(--background)", color: "var(--text-primary)" }} className="flex h-screen flex-col">
       {/* Top Header */}
       <header style={{ background: "var(--header-bg)", borderColor: "var(--header-border)", color: "var(--text-primary)" }} className="flex h-14 items-center justify-between border-b px-4">
@@ -81,5 +83,6 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
         </div>
       </nav>
     </div>
+    </I18nProvider>
   );
 }

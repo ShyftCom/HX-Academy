@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ import { SearchInput } from "@/components/shared/search-input";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency, parseJsonSafe } from "@/lib/utils";
-import { Plus, MoreHorizontal, Edit, Trash2, Upload, Package, X } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash2, Upload, Package, X, Layers } from "lucide-react";
 
 const schema = z.object({
   name: z.string().min(1, "Name required"),
@@ -38,6 +39,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function ProductsPage() {
   const qc = useQueryClient();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("");
@@ -125,8 +127,9 @@ export default function ProductsPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push(`/dashboard/store/products/${r.id}/variants`)}><Layers className="me-2 h-4 w-4" />Manage Variants</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -135,7 +138,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Products" description="Manage academy store products">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Product</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Product</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">

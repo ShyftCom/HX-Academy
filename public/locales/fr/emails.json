@@ -1,0 +1,14 @@
+{
+  "meeting_confirmation": {
+    "subject": "Réunion planifiée — {{lead}} · {{date}} à {{time}}",
+    "body": "Bonjour {{agent_name}},\n\nUne réunion a été réservée pour vous :\n\n  Lead :     {{lead}}\n  Date :     {{date}}\n  Heure :    {{time}} (Africa/Algiers)\n  Durée :    {{duration}} minutes\n  Type :     {{type}}\n\nRéservé par : {{booked_by}}\n\nVoir le lead → {{link}}"
+  },
+  "meeting_reminder": {
+    "subject": "Rappel — Appel avec {{lead}} dans 1 heure",
+    "body": "Bonjour {{agent_name}},\n\nVoici un rappel : vous avez un appel qui commence dans 1 heure :\n\n  Lead :    {{lead}}\n  Heure :   {{time}} aujourd'hui\n  Durée :   {{duration}} minutes\n\nVoir le lead → {{link}}"
+  },
+  "reset_password": {
+    "subject": "Réinitialisation du mot de passe — Académie Football Skills",
+    "body": "Bonjour {{name}},\n\nCliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :\n\n{{link}}\n\nCe lien expire dans 1 heure.\n\nSi vous n'avez pas demandé cela, ignorez cet email."
+  }
+}

@@ -68,7 +68,7 @@ export default function FilesPage() {
           accept="image/*,.pdf,.mp4,.webm"
         />
         <Button loading={uploading} onClick={() => fileInputRef.current?.click()}>
-          <Upload className="mr-2 h-4 w-4" />Upload File
+          <Upload className="me-2 h-4 w-4" />Upload File
         </Button>
       </PageHeader>
 

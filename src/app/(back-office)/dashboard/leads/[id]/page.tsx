@@ -14,6 +14,7 @@ import {
 import { formatDate, timeAgo } from "@/lib/utils";
 import { StatusBadge, type LeadStatus } from "@/components/leads/status-badge";
 import { BookingModal } from "@/components/calendar/booking-modal";
+import { useTranslation } from "react-i18next";
 
 interface Lead {
   id: string; fullName: string; phone?: string; email?: string;
@@ -31,14 +32,14 @@ interface Activity {
 }
 
 const ACTION_TYPES = [
-  { key: "all",            label: "All" },
-  { key: "status_change",  label: "Status" },
-  { key: "note_added",     label: "Notes" },
-  { key: "call_logged",    label: "Calls" },
-  { key: "email_sent",     label: "Emails" },
-  { key: "task_created",   label: "Tasks" },
-  { key: "field_edited",   label: "Edits" },
-  { key: "lead_converted", label: "Convert" },
+  { key: "all",            tKey: "activity.all" },
+  { key: "status_change",  tKey: "activity.status" },
+  { key: "note_added",     tKey: "activity.notes" },
+  { key: "call_logged",    tKey: "activity.calls" },
+  { key: "email_sent",     tKey: "activity.emails" },
+  { key: "task_created",   tKey: "activity.tasks" },
+  { key: "field_edited",   tKey: "activity.edits" },
+  { key: "lead_converted", tKey: "activity.convert" },
 ];
 
 function getActionIcon(type: string) {
@@ -100,6 +101,8 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 export default function LeadDetailPage() {
+  const { t: tl } = useTranslation("leads");
+  const { t: tc } = useTranslation("common");
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
 
@@ -154,9 +157,9 @@ export default function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead-activity", id] });
       setNoteText(""); setAddingNote(false);
-      toast.success("Note added");
+      toast.success(tl("notes.saved"));
     },
-    onError: () => toast.error("Failed to add note"),
+    onError: () => toast.error(tl("notes.failed")),
   });
 
   interface LeadNote {
@@ -181,9 +184,9 @@ export default function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead-notes", id] });
       setNewNoteText("");
-      toast.success("Note saved");
+      toast.success(tl("notes.saved"));
     },
-    onError: () => toast.error("Failed to save note"),
+    onError: () => toast.error(tl("notes.failed")),
   });
 
   const convertMutation = useMutation({
@@ -191,9 +194,9 @@ export default function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
       qc.invalidateQueries({ queryKey: ["lead-activity", id] });
-      toast.success("Lead converted to player");
+      toast.success(tl("convert.success"));
     },
-    onError: () => toast.error("Conversion failed"),
+    onError: () => toast.error(tl("convert.failed")),
   });
 
   if (leadLoading) {
@@ -229,7 +232,7 @@ export default function LeadDetailPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
-        <Link href="/dashboard/leads" className="hover:underline">Leads</Link>
+        <Link href="/dashboard/leads" className="hover:underline">{tl("title")}</Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span style={{ color: "var(--text-primary)" }}>{lead.fullName}</span>
       </div>
@@ -274,7 +277,7 @@ export default function LeadDetailPage() {
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: "#3B82F6" }}
             >
-              <PhoneCall className="w-3.5 h-3.5" /> Book Call
+              <PhoneCall className="w-3.5 h-3.5" /> {tl("actions.book_call")}
             </button>
             {!lead.isConverted && (
               <button
@@ -284,7 +287,7 @@ export default function LeadDetailPage() {
                 style={{ background: "#10B981" }}
               >
                 {convertMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                Convert to Player
+                {tl("actions.convert_to_player")}
               </button>
             )}
           </div>
@@ -299,7 +302,7 @@ export default function LeadDetailPage() {
             style={activeTab === tab
               ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
               : { color: "var(--text-muted)" }}>
-            {tab === "activity" ? `Activity${activityQuery.data ? ` (${activityQuery.data.total})` : ""}` : tab === "notes" ? `Notes${notesQuery.data ? ` (${notesQuery.data.length})` : ""}` : "Info"}
+            {tab === "activity" ? `${tl("activity.title")}${activityQuery.data ? ` (${activityQuery.data.total})` : ""}` : tab === "notes" ? `${tl("notes.title")}${notesQuery.data ? ` (${notesQuery.data.length})` : ""}` : tl("detail.details")}
           </button>
         ))}
       </div>
@@ -308,15 +311,15 @@ export default function LeadDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
-              <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Contact Information</h2>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>{tl("detail.contact_info")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <InfoRow icon={Phone} label="Phone" value={lead.phone} />
-                <InfoRow icon={Mail} label="Email" value={lead.email} />
-                <InfoRow icon={User} label="Parent Name" value={lead.parentName} />
-                <InfoRow icon={Phone} label="Parent Phone" value={lead.parentPhone} />
-                <InfoRow icon={Calendar} label="Date of Birth" value={lead.dateOfBirth ? formatDate(lead.dateOfBirth) : null} />
-                <InfoRow icon={Tag} label="Category" value={lead.categoryInterest} />
-                <InfoRow icon={MapPin} label="Address" value={lead.address} />
+                <InfoRow icon={Phone} label={tl("form.phone")} value={lead.phone} />
+                <InfoRow icon={Mail} label={tl("form.email")} value={lead.email} />
+                <InfoRow icon={User} label={tl("form.parent_name")} value={lead.parentName} />
+                <InfoRow icon={Phone} label={tl("form.parent_phone")} value={lead.parentPhone} />
+                <InfoRow icon={Calendar} label={tl("form.date_of_birth")} value={lead.dateOfBirth ? formatDate(lead.dateOfBirth) : null} />
+                <InfoRow icon={Tag} label={tl("form.category")} value={lead.categoryInterest} />
+                <InfoRow icon={MapPin} label={tl("form.address")} value={lead.address} />
               </div>
             </div>
             {lead.notes && (
@@ -329,10 +332,10 @@ export default function LeadDetailPage() {
 
           <div className="space-y-4">
             <div className="rounded-2xl p-5 space-y-3" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
-              <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>Details</h2>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>{tl("detail.details")}</h2>
               {currentStatus && (
                 <div>
-                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Status</p>
+                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{tc("labels.status")}</p>
                   <StatusBadge
                     leadId={lead.id}
                     leadName={lead.fullName}
@@ -344,7 +347,7 @@ export default function LeadDetailPage() {
               )}
               {lead.assignedStaff && (
                 <div>
-                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Assigned To</p>
+                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{tc("labels.assigned_to")}</p>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#8B5CF6" }}>
                       {lead.assignedStaff.name?.[0]}
@@ -354,7 +357,7 @@ export default function LeadDetailPage() {
                 </div>
               )}
               <div>
-                <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Created</p>
+                <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{tc("labels.created_at")}</p>
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>{formatDate(lead.createdAt)}</p>
               </div>
               {lead.isConverted && lead.convertedAt && (
@@ -367,7 +370,7 @@ export default function LeadDetailPage() {
             <Link href={`/dashboard/leads?edit=${lead.id}`}
               className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{ border: "1px solid var(--card-border)", color: "var(--text-primary)" }}>
-              Edit Lead Info
+              {tl("detail.edit_lead")}
             </Link>
           </div>
         </div>
@@ -377,20 +380,20 @@ export default function LeadDetailPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex gap-1 p-1 rounded-xl flex-wrap" style={{ background: "var(--muted-bg)" }}>
-              {ACTION_TYPES.map((t) => (
-                <button key={t.key} onClick={() => { setActivityFilter(t.key); setActivityPage(1); }}
+              {ACTION_TYPES.map((at) => (
+                <button key={at.key} onClick={() => { setActivityFilter(at.key); setActivityPage(1); }}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={activityFilter === t.key
+                  style={activityFilter === at.key
                     ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
                     : { color: "var(--text-muted)" }}>
-                  {t.label}
+                  {tl(at.tKey)}
                 </button>
               ))}
             </div>
             <button onClick={() => setAddingNote(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white ml-auto"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white ms-auto"
               style={{ background: "#A02020" }}>
-              <Plus className="w-3.5 h-3.5" /> Add Note
+              <Plus className="w-3.5 h-3.5" /> {tl("actions.add_note")}
             </button>
           </div>
 
@@ -403,7 +406,7 @@ export default function LeadDetailPage() {
                 rows={3}
                 className="w-full resize-none rounded-lg px-3 py-2 text-sm outline-none"
                 style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
-                placeholder="Write a note about this lead..."
+                placeholder={tl("notes.placeholder")}
               />
               <div className="flex justify-end gap-2">
                 <button onClick={() => { setAddingNote(false); setNoteText(""); }}
@@ -415,7 +418,7 @@ export default function LeadDetailPage() {
                   className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold text-white rounded-lg disabled:opacity-60"
                   style={{ background: "#A02020" }}>
                   {addNoteMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  Save Note
+                  {tl("actions.save_note")}
                 </button>
               </div>
             </div>
@@ -425,7 +428,7 @@ export default function LeadDetailPage() {
             <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--text-muted)" }} /></div>
           ) : activities.length === 0 ? (
             <div className="text-center py-16 rounded-2xl" style={{ border: "1px dashed var(--card-border)" }}>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>No activity yet for this filter.</p>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("activity.no_activity")}</p>
             </div>
           ) : (
             <div className="relative space-y-0">
@@ -466,7 +469,7 @@ export default function LeadDetailPage() {
             <button onClick={() => setActivityPage((p) => p + 1)}
               className="w-full py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{ border: "1px solid var(--card-border)", color: "var(--text-muted)" }}>
-              Load more
+              {tc("actions.load_more")}
             </button>
           )}
         </div>
@@ -483,7 +486,7 @@ export default function LeadDetailPage() {
               rows={3}
               className="w-full resize-none rounded-xl px-3 py-2.5 text-sm outline-none"
               style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
-              placeholder="Add a note about this lead..."
+              placeholder={tl("notes.placeholder")}
             />
             <div className="flex justify-end">
               <button
@@ -492,7 +495,7 @@ export default function LeadDetailPage() {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
                 style={{ background: "#A02020" }}>
                 {addLeadNoteMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Save note
+                {tl("actions.save_note")}
               </button>
             </div>
           </div>
@@ -503,7 +506,8 @@ export default function LeadDetailPage() {
           ) : (notesQuery.data ?? []).length === 0 ? (
             <div className="text-center py-12 rounded-2xl" style={{ border: "1px dashed var(--card-border)" }}>
               <FileText className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>No notes yet. Add the first one above.</p>
+              <p className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>{tl("notes.empty_title")}</p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{tl("notes.empty_subtitle")}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -522,7 +526,7 @@ export default function LeadDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap pl-9" style={{ color: "var(--text-primary)" }}>{note.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap ps-9" style={{ color: "var(--text-primary)" }}>{note.content}</p>
                 </div>
               ))}
             </div>

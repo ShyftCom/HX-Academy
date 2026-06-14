@@ -19,7 +19,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {icon && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center ps-3 text-gray-400">
               {icon}
             </div>
           )}
@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               "flex h-9 w-full rounded-lg border px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-red-500 focus-visible:ring-red-500",
-              icon && "pl-9",
+              icon && "ps-9",
               className
             )}
             style={{

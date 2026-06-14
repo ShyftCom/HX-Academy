@@ -32,6 +32,23 @@ model User {
   agentAvailability  AgentAvailability?
   agentMeetings      Meeting[]          @relation("AgentMeetings")
 
+  // Station relations
+  stationStaff       StationStaff[]
+
+  // Affiliate relations
+  affiliate          Affiliate?         @relation("AffiliateUser")
+  createdAffiliates  Affiliate[]        @relation("AffiliateCreatedBy")
+  processedWithdrawals AffiliateWithdrawal[]
+
+  // Charges
+  paidCharges        Charge[]           @relation("ChargePaidBy")
+
+  // HRM
+  staffProfile       StaffProfile?
+  recordedAttendances Attendance[]      @relation("AttendanceRecorder")
+  approvedLeaves     LeaveRequest[]     @relation("LeaveApprover")
+  paidPayrolls       Payroll[]          @relation("PayrollPaidBy")
+
   @@map("users")
 }
 
@@ -172,6 +189,8 @@ model Lead {
   assignedStaff    User?       @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
   convertedAt      DateTime?
   isConverted      Boolean    @default(false)
+  stationId        String?
+  station          Station?   @relation(fields: [stationId], references: [id])
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
@@ -228,13 +247,17 @@ model Player {
   medicalNotes    String?
   notes           String?
   status          String    @default("active")
+  referralCode    String?
+  stationId       String?
+  station         Station?  @relation(fields: [stationId], references: [id])
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  subscriptions   Subscription[]
-  payments        Payment[]
-  orders          Order[]
-  notifications   Notification[]
+  subscriptions      Subscription[]
+  payments           Payment[]
+  orders             Order[]
+  notifications      Notification[]
+  affiliateReferrals AffiliateReferral[]
 
   @@map("players")
 }
@@ -310,6 +333,8 @@ model Payment {
   adminNotes       String?
   approvalDate     DateTime?
   rejectionReason  String?
+  stationId        String?
+  station          Station?          @relation(fields: [stationId], references: [id])
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -351,6 +376,7 @@ model Product {
   updatedAt     DateTime        @updatedAt
 
   orderItems    OrderItem[]
+  variants      ProductVariant[]
 
   @@map("products")
 }
@@ -400,6 +426,8 @@ model Order {
   totalAmount Float
   codData     String      @default("{}")
   notes       String?
+  stationId   String?
+  station     Station?    @relation(fields: [stationId], references: [id])
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -544,6 +572,8 @@ model Meeting {
   type            String   @default("call")
   notes           String?
   status          String   @default("scheduled")
+  stationId       String?
+  station         Station? @relation(fields: [stationId], references: [id])
   createdById     String?
   createdByName   String   @default("System")
   reminderSent    Boolean  @default(false)
@@ -634,4 +664,314 @@ model ApplicationFile {
   createdAt     DateTime         @default(now())
 
   @@map("application_files")
+}
+
+// ==================== STATIONS ====================
+
+model Station {
+  id          String   @id @default(cuid())
+  name        String
+  wilaya      String
+  wilayaCode  Int?
+  address     String?
+  phone       String?
+  email       String?
+  whatsapp    String?
+  logoUrl     String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stationStaff       StationStaff[]
+  leads              Lead[]
+  players            Player[]
+  payments           Payment[]
+  orders             Order[]
+  meetings           Meeting[]
+  affiliates         Affiliate[]
+  affiliateReferrals AffiliateReferral[]
+  charges            Charge[]
+  chargeCategories   ChargeCategory[]
+  staffProfiles      StaffProfile[]
+  payrolls           Payroll[]
+  pixelConfigs       PixelConfig[]
+  attributeGroups    AttributeGroup[]
+
+  @@map("stations")
+}
+
+model StationStaff {
+  id         String   @id @default(cuid())
+  stationId  String
+  station    Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       String?
+  assignedAt DateTime @default(now())
+
+  @@unique([stationId, userId])
+  @@map("station_staff")
+}
+
+model Wilaya {
+  id     String @id @default(cuid())
+  code   Int    @unique
+  nameFr String
+  nameAr String
+
+  @@map("wilayas")
+}
+
+// ==================== AFFILIATES ====================
+
+model Affiliate {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation("AffiliateUser", fields: [userId], references: [id])
+  stationId      String?
+  station        Station? @relation(fields: [stationId], references: [id])
+  code           String   @unique
+  commissionRate Decimal  @default(0) @db.Decimal(5, 2)
+  status         String   @default("active")
+  createdById    String?
+  createdBy      User?    @relation("AffiliateCreatedBy", fields: [createdById], references: [id])
+  createdAt      DateTime @default(now())
+
+  referrals    AffiliateReferral[]
+  earnings     AffiliateEarning[]
+  withdrawals  AffiliateWithdrawal[]
+
+  @@map("affiliates")
+}
+
+model AffiliateReferral {
+  id               String    @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id])
+  playerId         String
+  player           Player    @relation(fields: [playerId], references: [id])
+  registrationDate DateTime  @default(now())
+  paymentStatus    String    @default("unpaid")
+  amountPaid       Decimal   @default(0) @db.Decimal(10, 2)
+  paidAt           DateTime?
+  stationId        String?
+  station          Station?  @relation(fields: [stationId], references: [id])
+
+  earnings AffiliateEarning[]
+
+  @@map("affiliate_referrals")
+}
+
+model AffiliateEarning {
+  id          String            @id @default(cuid())
+  affiliateId String
+  affiliate   Affiliate         @relation(fields: [affiliateId], references: [id])
+  referralId  String
+  referral    AffiliateReferral @relation(fields: [referralId], references: [id])
+  amount      Decimal           @db.Decimal(10, 2)
+  status      String            @default("pending")
+  createdAt   DateTime          @default(now())
+
+  @@map("affiliate_earnings")
+}
+
+model AffiliateWithdrawal {
+  id             String    @id @default(cuid())
+  affiliateId    String
+  affiliate      Affiliate @relation(fields: [affiliateId], references: [id])
+  amount         Decimal   @db.Decimal(10, 2)
+  status         String    @default("pending")
+  requestedAt    DateTime  @default(now())
+  processedAt    DateTime?
+  processedById  String?
+  processedBy    User?     @relation(fields: [processedById], references: [id])
+  notes          String?
+
+  @@map("affiliate_withdrawals")
+}
+
+// ==================== CHARGES ====================
+
+model ChargeCategory {
+  id        String   @id @default(cuid())
+  name      String
+  stationId String?
+  station   Station? @relation(fields: [stationId], references: [id])
+  color     String?
+  isGlobal  Boolean  @default(false)
+
+  charges   Charge[]
+
+  @@map("charge_categories")
+}
+
+model Charge {
+  id         String          @id @default(cuid())
+  stationId  String?
+  station    Station?        @relation(fields: [stationId], references: [id])
+  categoryId String?
+  category   ChargeCategory? @relation(fields: [categoryId], references: [id])
+  title      String
+  amount     Decimal         @db.Decimal(10, 2)
+  chargeDate DateTime
+  paidById   String?
+  paidBy     User?           @relation("ChargePaidBy", fields: [paidById], references: [id])
+  receiptUrl String?
+  notes      String?
+  isSalary   Boolean         @default(false)
+  staffId    String?
+  staff      StaffProfile?   @relation(fields: [staffId], references: [id])
+  createdAt  DateTime        @default(now())
+
+  @@map("charges")
+}
+
+// ==================== HRM ====================
+
+model StaffProfile {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  stationId   String?
+  station     Station?  @relation(fields: [stationId], references: [id])
+  fullName    String
+  role        String?
+  phone       String?
+  nationalId  String?
+  hireDate    DateTime?
+  baseSalary  Decimal?  @db.Decimal(10, 2)
+  salaryType  String    @default("monthly")
+  bankAccount String?
+  status      String    @default("active")
+
+  attendances   Attendance[]
+  leaveRequests LeaveRequest[]
+  payrolls      Payroll[]
+  charges       Charge[]
+
+  @@map("staff_profiles")
+}
+
+model Attendance {
+  id           String       @id @default(cuid())
+  staffId      String
+  staff        StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date         DateTime
+  status       String
+  checkIn      String?
+  checkOut     String?
+  notes        String?
+  recordedById String?
+  recordedBy   User?        @relation("AttendanceRecorder", fields: [recordedById], references: [id])
+
+  @@unique([staffId, date])
+  @@map("attendance")
+}
+
+model LeaveRequest {
+  id           String       @id @default(cuid())
+  staffId      String
+  staff        StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  leaveType    String
+  startDate    DateTime
+  endDate      DateTime
+  daysCount    Int
+  reason       String?
+  status       String       @default("pending")
+  approvedById String?
+  approvedBy   User?        @relation("LeaveApprover", fields: [approvedById], references: [id])
+  createdAt    DateTime     @default(now())
+
+  @@map("leave_requests")
+}
+
+model Payroll {
+  id                String       @id @default(cuid())
+  staffId           String
+  staff             StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  stationId         String?
+  station           Station?     @relation(fields: [stationId], references: [id])
+  month             Int
+  year              Int
+  baseSalary        Decimal      @db.Decimal(10, 2)
+  bonuses           Decimal      @default(0) @db.Decimal(10, 2)
+  deductions        Decimal      @default(0) @db.Decimal(10, 2)
+  absencesDeduction Decimal      @default(0) @db.Decimal(10, 2)
+  netSalary         Decimal      @db.Decimal(10, 2)
+  status            String       @default("unpaid")
+  paidAt            DateTime?
+  paidById          String?
+  paidBy            User?        @relation("PayrollPaidBy", fields: [paidById], references: [id])
+  notes             String?
+
+  @@unique([staffId, month, year])
+  @@map("payroll")
+}
+
+// ==================== PRODUCT VARIANTS ====================
+
+model AttributeGroup {
+  id        String   @id @default(cuid())
+  name      String
+  stationId String?
+  station   Station? @relation(fields: [stationId], references: [id])
+
+  attributes Attribute[]
+
+  @@map("attribute_groups")
+}
+
+model Attribute {
+  id       String         @id @default(cuid())
+  groupId  String
+  group    AttributeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  value    String
+  colorHex String?
+
+  variantAttributes VariantAttribute[]
+
+  @@map("attributes")
+}
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku       String?
+  price     Decimal? @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+
+  variantAttributes VariantAttribute[]
+
+  @@map("product_variants")
+}
+
+model VariantAttribute {
+  variantId   String
+  attributeId String
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attribute   Attribute      @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, attributeId])
+  @@map("variant_attributes")
+}
+
+// ==================== PIXELS ====================
+
+model PixelConfig {
+  id               String   @id @default(cuid())
+  stationId        String?
+  station          Station? @relation(fields: [stationId], references: [id])
+  platform         String
+  pixelId          String?
+  accessToken      String?
+  useConversionApi Boolean  @default(false)
+  testEventCode    String?
+  isActive         Boolean  @default(true)
+  updatedAt        DateTime @updatedAt
+
+  @@unique([stationId, platform])
+  @@map("pixel_configs")
 }

@@ -122,7 +122,7 @@ export default function PlayerSubscriptionsPage() {
                     <p className="text-xs text-gray-400">{formatDate(p.createdAt)}</p>
                     {p.status === "rejected" && p.rejectionReason && <p className="text-xs text-red-500 mt-0.5">Reason: {p.rejectionReason}</p>}
                   </div>
-                  <div className="text-right">
+                  <div className="text-end">
                     <p className="text-sm font-medium">{formatCurrency(p.amount)}</p>
                     <Badge variant={p.status === "approved" ? "success" : p.status === "rejected" ? "destructive" : "warning"} className="text-[10px]">{p.status}</Badge>
                   </div>

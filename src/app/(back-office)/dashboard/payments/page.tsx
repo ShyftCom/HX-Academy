@@ -52,7 +52,7 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Close</Button>
           <Button onClick={handleDownload}>
-            <Download className="mr-1.5 h-4 w-4" /> Download
+            <Download className="me-1.5 h-4 w-4" /> Download
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -167,7 +167,7 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Payments" description="Manage payment verification">
-        <Button onClick={() => setAddOpen(true)}><Plus className="mr-2 h-4 w-4" />Create Payment</Button>
+        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Create Payment</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
@@ -193,7 +193,7 @@ export default function PaymentsPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setApproveId(null)}>Cancel</Button>
-            <Button variant="success" onClick={() => approveId && approveMutation.mutate(approveId)} loading={approveMutation.isPending}><Check className="mr-1.5 h-4 w-4" />Approve</Button>
+            <Button variant="success" onClick={() => approveId && approveMutation.mutate(approveId)} loading={approveMutation.isPending}><Check className="me-1.5 h-4 w-4" />Approve</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -207,7 +207,7 @@ export default function PaymentsPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => rejectId && rejectMutation.mutate(rejectId)} loading={rejectMutation.isPending} disabled={!rejectReason.trim()}><X className="mr-1.5 h-4 w-4" />Reject</Button>
+            <Button variant="destructive" onClick={() => rejectId && rejectMutation.mutate(rejectId)} loading={rejectMutation.isPending} disabled={!rejectReason.trim()}><X className="me-1.5 h-4 w-4" />Reject</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -244,7 +244,7 @@ export default function PaymentsPage() {
               <div className="flex items-center gap-2">
                 <input ref={proofInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={handleProofUpload} />
                 <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()} loading={uploadingAdd}>
-                  <Upload className="mr-1.5 h-4 w-4" />{uploadingAdd ? "Uploading..." : "Upload Proof"}
+                  <Upload className="me-1.5 h-4 w-4" />{uploadingAdd ? "Uploading..." : "Upload Proof"}
                 </Button>
                 {proofUrl && (
                   <button onClick={() => setPreviewUrl(proofUrl)} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">

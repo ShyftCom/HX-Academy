@@ -42,7 +42,7 @@ export default function PlayerOrdersPage() {
                     <p className="font-mono text-sm font-medium">#{order.orderNumber}</p>
                     <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-end">
                     <p className="font-bold">{formatCurrency(order.totalAmount)}</p>
                     {order.status && (
                       <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium mt-1" style={{ backgroundColor: (order.status.color ?? "#6B7280") + "20", color: order.status.color ?? "#6B7280" }}>

@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         statusId: data.statusId ?? defaultStatus?.id ?? null,
         assignedStaffId: data.assignedStaffId ?? null,
       },
-      include: { status: true, assignedStaff: { select: { id: true, name: true } } },
+      include: { status: true, assignedStaff: { select: { id: true, name: true } }, station: true },
     });
 
     const actor = session.user as { id: string; name?: string | null; role?: string };
@@ -126,6 +126,23 @@ export async function POST(req: NextRequest) {
       description: `Created lead: ${lead.fullName}`,
       metadata: { leadId: lead.id },
     });
+
+    if (lead.stationId) {
+      fetch(`${process.env.NEXTAUTH_URL ?? ""}/api/pixels/event`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName: "Lead",
+          stationId: lead.stationId,
+          userData: {
+            email: lead.email ?? undefined,
+            phone: lead.phone ?? undefined,
+            firstName: lead.fullName,
+          },
+          eventData: { contentName: lead.categoryInterest ?? undefined },
+        }),
+      }).catch(() => {});
+    }
 
     return NextResponse.json(lead, { status: 201 });
   } catch (error) {

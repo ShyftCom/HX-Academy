@@ -1,0 +1,25 @@
+{
+  "title": "لوحة التحكم",
+  "welcome": "مرحباً بعودتك",
+  "stats": {
+    "total_leads": "إجمالي العملاء",
+    "active_players": "اللاعبون النشطون",
+    "total_revenue": "إجمالي الإيرادات",
+    "pending_payments": "مدفوعات معلقة",
+    "new_leads": "عملاء جدد",
+    "meetings_today": "اجتماعات اليوم",
+    "conversion_rate": "معدل التحويل",
+    "monthly_revenue": "الإيرادات الشهرية"
+  },
+  "charts": {
+    "leads_over_time": "العملاء عبر الزمن",
+    "revenue_chart": "الإيرادات",
+    "status_breakdown": "توزيع الحالات",
+    "conversion_funnel": "مسار التحويل"
+  },
+  "recent": {
+    "recent_leads": "أحدث العملاء",
+    "recent_payments": "أحدث المدفوعات",
+    "upcoming_meetings": "الاجتماعات القادمة"
+  }
+}

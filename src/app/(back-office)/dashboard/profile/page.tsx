@@ -51,7 +51,7 @@ export default function ProfilePage() {
                 if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error("Passwords don't match"); return; }
                 if (pwForm.newPassword.length < 8) { toast.error("Password must be at least 8 characters"); return; }
                 pwMutation.mutate();
-              }} loading={pwMutation.isPending}><Save className="mr-2 h-4 w-4" />Change Password</Button>
+              }} loading={pwMutation.isPending}><Save className="me-2 h-4 w-4" />Change Password</Button>
             </div>
           </div>
         </CardContent>

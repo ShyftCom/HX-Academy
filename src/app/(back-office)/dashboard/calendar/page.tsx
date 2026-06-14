@@ -11,6 +11,7 @@ import {
 import { format, startOfWeek, addDays, addWeeks, subWeeks, addMonths, subMonths, startOfMonth, endOfMonth, isSameDay, isSameMonth, getDay, startOfDay } from "date-fns";
 import { toast } from "sonner";
 import { BookingModal } from "@/components/calendar/booking-modal";
+import { useTranslation } from "react-i18next";
 
 interface Meeting {
   id: string;
@@ -53,6 +54,7 @@ function timeToMinutes(t: string): number {
 }
 
 export default function CalendarPage() {
+  const { t } = useTranslation("calendar");
   const { data: session } = useSession();
   const qc = useQueryClient();
   const isAdmin = (session?.user as { role?: string })?.role === "admin";
@@ -112,20 +114,20 @@ export default function CalendarPage() {
       }).then((r) => r.json()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success("Meeting status updated");
+      toast.success(t("meeting.updated"));
       setSelectedMeeting(null);
     },
-    onError: () => toast.error("Update failed"),
+    onError: () => toast.error(t("meeting.update_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/meetings/${id}`, { method: "DELETE" }).then((r) => r.json()),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success("Meeting deleted");
+      toast.success(t("meeting.deleted"));
       setSelectedMeeting(null);
     },
-    onError: () => toast.error("Delete failed"),
+    onError: () => toast.error(t("meeting.delete_failed")),
   });
 
   function prevPeriod() {
@@ -150,7 +152,7 @@ export default function CalendarPage() {
     return (
       <button
         onClick={() => setSelectedMeeting(meeting)}
-        className="w-full text-left rounded-lg px-2 py-1.5 transition-opacity hover:opacity-80"
+        className="w-full text-start rounded-lg px-2 py-1.5 transition-opacity hover:opacity-80"
         style={{ background: hexToRgba(color, 0.15), borderLeft: `3px solid ${color}` }}>
         <div className="text-xs font-semibold truncate" style={{ color }}>{meeting.time} · {meeting.leadName}</div>
         {!compact && <div className="text-[11px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{meeting.agentName} · {meeting.durationMinutes}m</div>}
@@ -185,7 +187,7 @@ export default function CalendarPage() {
             const dayMeetings = day ? getMeetingsForDay(day) : [];
             return (
               <div key={i}
-                className="border-b border-r p-1.5 min-h-24"
+                className="border-b border-e p-1.5 min-h-24"
                 style={{ borderColor: "var(--card-border)", opacity: inMonth ? 1 : 0.3 }}>
                 {day && (
                   <>
@@ -235,7 +237,7 @@ export default function CalendarPage() {
         <div className="relative">
           {hours.map((hour) => (
             <div key={hour} className="grid" style={{ gridTemplateColumns: "60px repeat(7, 1fr)", minHeight: "64px" }}>
-              <div className="text-right pr-3 pt-1">
+              <div className="text-end pe-3 pt-1">
                 <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{hour}:00</span>
               </div>
               {weekDays.map((day) => {
@@ -244,7 +246,7 @@ export default function CalendarPage() {
                   return h === hour;
                 });
                 return (
-                  <div key={day.toISOString()} className="border-l border-b p-0.5 space-y-0.5"
+                  <div key={day.toISOString()} className="border-s border-b p-0.5 space-y-0.5"
                     style={{ borderColor: "var(--card-border)" }}>
                     {dayMeetings.map((m) => <MeetingBlock key={m.id} meeting={m} />)}
                   </div>
@@ -262,8 +264,8 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-shrink-0">
         <div className="flex-1">
-          <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Calendar</h1>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Manage meetings and availability</p>
+          <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{t("title")}</h1>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* My / Team toggle */}
@@ -271,13 +273,13 @@ export default function CalendarPage() {
             <button onClick={() => setCalView("my")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={calView === "my" ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" } : { color: "var(--text-muted)" }}>
-              <Calendar className="w-3.5 h-3.5" /> My Calendar
+              <Calendar className="w-3.5 h-3.5" /> {t("views.my_calendar")}
             </button>
             {isAdmin && (
               <button onClick={() => setCalView("team")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                 style={calView === "team" ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" } : { color: "var(--text-muted)" }}>
-                <Users className="w-3.5 h-3.5" /> Team
+                <Users className="w-3.5 h-3.5" /> {t("views.team")}
               </button>
             )}
           </div>
@@ -288,7 +290,7 @@ export default function CalendarPage() {
               <button key={v} onClick={() => setView(v)}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all"
                 style={view === v ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" } : { color: "var(--text-muted)" }}>
-                {v}
+                {t(`views.${v}`)}
               </button>
             ))}
           </div>
@@ -307,7 +309,7 @@ export default function CalendarPage() {
           <button onClick={() => setBookingOpen(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
             style={{ background: "#A02020" }}>
-            <Plus className="w-4 h-4" /> Book Meeting
+            <Plus className="w-4 h-4" /> {t("book_meeting")}
           </button>
         </div>
       </div>
@@ -341,7 +343,7 @@ export default function CalendarPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="w-full max-w-md rounded-2xl shadow-2xl" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
             <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--card-border)" }}>
-              <h3 className="font-bold" style={{ color: "var(--text-primary)" }}>Meeting Details</h3>
+              <h3 className="font-bold" style={{ color: "var(--text-primary)" }}>{t("meeting.title")}</h3>
               <button onClick={() => setSelectedMeeting(null)} className="p-1.5 rounded-lg" style={{ color: "var(--text-muted)" }}>
                 <X className="w-4 h-4" />
               </button>
@@ -377,19 +379,19 @@ export default function CalendarPage() {
                     disabled={updateStatusMutation.isPending}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white"
                     style={{ background: "#10B981" }}>
-                    <Check className="w-3.5 h-3.5" /> Completed
+                    <Check className="w-3.5 h-3.5" /> {t("meeting.actions.mark_completed")}
                   </button>
                   <button onClick={() => updateStatusMutation.mutate({ id: selectedMeeting.id, status: "no_show" })}
                     disabled={updateStatusMutation.isPending}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white"
                     style={{ background: "#F59E0B" }}>
-                    <AlertTriangle className="w-3.5 h-3.5" /> No show
+                    <AlertTriangle className="w-3.5 h-3.5" /> {t("meeting.actions.mark_no_show")}
                   </button>
                   <button onClick={() => updateStatusMutation.mutate({ id: selectedMeeting.id, status: "cancelled" })}
                     disabled={updateStatusMutation.isPending}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white"
                     style={{ background: "#EF4444" }}>
-                    <X className="w-3.5 h-3.5" /> Cancel
+                    <X className="w-3.5 h-3.5" /> {t("meeting.actions.cancel")}
                   </button>
                 </div>
               )}

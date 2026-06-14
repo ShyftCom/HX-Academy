@@ -1,0 +1,37 @@
+{
+  "title": "Paramètres",
+  "profile": {
+    "title": "Profil",
+    "name": "Nom complet",
+    "email": "Email",
+    "current_password": "Mot de passe actuel",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "save_profile": "Enregistrer le profil",
+    "change_password": "Changer le mot de passe",
+    "language_preference": "Préférence de langue",
+    "avatar": "Photo de profil"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "email_notifications": "Notifications par email",
+    "push_notifications": "Notifications push",
+    "meeting_reminders": "Rappels de réunion",
+    "lead_updates": "Mises à jour des leads"
+  },
+  "availability": {
+    "title": "Ma disponibilité",
+    "subtitle": "Définissez vos horaires de travail et le temps tampon",
+    "save_availability": "Enregistrer la disponibilité",
+    "saved": "Disponibilité enregistrée",
+    "failed": "Échec de l'enregistrement"
+  },
+  "branding": {
+    "title": "Logo & Identité",
+    "logo": "Logo",
+    "primary_color": "Couleur principale",
+    "save_branding": "Enregistrer"
+  },
+  "saved": "Paramètres enregistrés",
+  "save_failed": "Échec de l'enregistrement"
+}

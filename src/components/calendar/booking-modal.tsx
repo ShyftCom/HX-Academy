@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, ChevronLeft, ChevronRight, Loader2, User, Clock, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, startOfDay } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface Agent {
   id: string;
@@ -23,19 +24,19 @@ interface BookingModalProps {
 }
 
 const DURATIONS = [
-  { label: "15 min", value: 15 },
-  { label: "30 min", value: 30 },
-  { label: "45 min", value: 45 },
-  { label: "60 min", value: 60 },
-  { label: "90 min", value: 90 },
-  { label: "Custom", value: 0 },
+  { tKey: "booking.duration_options.15min", value: 15 },
+  { tKey: "booking.duration_options.30min", value: 30 },
+  { tKey: "booking.duration_options.45min", value: 45 },
+  { tKey: "booking.duration_options.60min", value: 60 },
+  { tKey: "booking.duration_options.90min", value: 90 },
+  { tKey: "booking.duration_options.custom", value: 0 },
 ];
 
 const MEETING_TYPES = [
-  { label: "Discovery call", value: "call" },
-  { label: "Follow-up", value: "follow_up" },
-  { label: "Demo", value: "demo" },
-  { label: "Closing", value: "closing" },
+  { tKey: "booking.types.call", value: "call" },
+  { tKey: "booking.types.follow_up", value: "follow_up" },
+  { tKey: "booking.types.demo", value: "demo" },
+  { tKey: "booking.types.closing", value: "closing" },
 ];
 
 function AgentAvatar({ name, image, size = 8 }: { name: string | null; image: string | null; size?: number }) {
@@ -52,6 +53,7 @@ function AgentAvatar({ name, image, size = 8 }: { name: string | null; image: st
 }
 
 export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName, onSuccess }: BookingModalProps) {
+  const { t } = useTranslation("calendar");
   const qc = useQueryClient();
   const [mode, setMode] = useState<"agent_first" | "time_first">("agent_first");
 
@@ -128,7 +130,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
     onSuccess: (meeting) => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
       qc.invalidateQueries({ queryKey: ["lead", leadId] });
-      toast.success(`Meeting booked with ${selectedAgent?.name ?? "agent"} on ${dateStr} at ${selectedTime}`);
+      toast.success(t("booking.success", { agent: selectedAgent?.name ?? "", date: dateStr, time: selectedTime }));
       onSuccess?.(meeting.id);
       onClose();
     },
@@ -162,8 +164,8 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--card-border)" }}>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Book a Meeting</h2>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Schedule a call with a lead</p>
+            <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>{t("booking.title")}</h2>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("booking.subtitle")}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" style={{ color: "var(--text-muted)" }}>
             <X className="w-4 h-4" />
@@ -176,13 +178,13 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
 
             {/* Lead selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Lead</label>
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.lead")}</label>
               {leadId ? (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "var(--muted-bg)", border: "1px solid var(--card-border)" }}>
                   <User className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
                   <span className="flex-1 text-sm font-medium" style={{ color: "var(--text-primary)" }}>{leadName}</span>
                   {!prefilledLeadId && (
-                    <button onClick={() => { setLeadId(""); setLeadName(""); setLeadSearch(""); }} className="text-xs" style={{ color: "var(--text-muted)" }}>Change</button>
+                    <button onClick={() => { setLeadId(""); setLeadName(""); setLeadSearch(""); }} className="text-xs" style={{ color: "var(--text-muted)" }}>{t("booking.agents.change")}</button>
                   )}
                 </div>
               ) : (
@@ -190,7 +192,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                   <input
                     value={leadSearch}
                     onChange={(e) => setLeadSearch(e.target.value)}
-                    placeholder="Search lead by name..."
+                    placeholder={t("booking.fields.lead_search")}
                     className="w-full px-3 py-2 rounded-xl text-sm outline-none"
                     style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
                   />
@@ -204,7 +206,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                       ) : (
                         leadResults?.map((l) => (
                           <button key={l.id} onClick={() => { setLeadId(l.id); setLeadName(l.fullName); setLeadSearch(l.fullName); }}
-                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                            className="w-full text-start px-3 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
                             style={{ color: "var(--text-primary)" }}>
                             {l.fullName}
                           </button>
@@ -224,14 +226,14 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                   style={mode === m
                     ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
                     : { color: "var(--text-muted)" }}>
-                  {m === "agent_first" ? "Pick agent first" : "Pick time first"}
+                  {m === "agent_first" ? t("booking.tabs.agent_first") : t("booking.tabs.time_first")}
                 </button>
               ))}
             </div>
 
             {/* Duration */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Duration</label>
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.duration")}</label>
               <div className="flex flex-wrap gap-2">
                 {DURATIONS.map((d) => {
                   const isCustom = d.value === 0;
@@ -245,7 +247,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                         color: isActive ? "#fff" : "var(--text-secondary)",
                         borderColor: isActive ? "#A02020" : "var(--card-border)",
                       }}>
-                      {d.label}
+                      {t(d.tKey)}
                     </button>
                   );
                 })}
@@ -256,7 +258,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                     onChange={(e) => setCustomDuration(parseInt(e.target.value) || 5)}
                     className="w-24 px-3 py-1.5 rounded-lg text-sm outline-none text-center"
                     style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }} />
-                  <span className="text-sm" style={{ color: "var(--text-muted)" }}>minutes (5–180)</span>
+                  <span className="text-sm" style={{ color: "var(--text-muted)" }}>{t("booking.duration_options.minutes_range")}</span>
                 </div>
               )}
             </div>
@@ -266,20 +268,20 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
               <>
                 {/* Agent selector */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Agent</label>
+                  <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.agent")}</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(agents ?? []).map((a) => {
                       const isActive = selectedAgent?.id === a.id;
                       return (
                         <button key={a.id} onClick={() => { setSelectedAgent(a); setSelectedTime(""); }}
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-left border transition-all"
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-start border transition-all"
                           style={{
                             borderColor: isActive ? "#A02020" : "var(--card-border)",
                             background: isActive ? "rgba(160,32,32,0.06)" : "transparent",
                           }}>
                           <AgentAvatar name={a.name} image={a.image} size={7} />
                           <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{a.name}</span>
-                          {isActive && <Check className="w-3.5 h-3.5 ml-auto flex-shrink-0" style={{ color: "#A02020" }} />}
+                          {isActive && <Check className="w-3.5 h-3.5 ms-auto flex-shrink-0" style={{ color: "#A02020" }} />}
                         </button>
                       );
                     })}
@@ -290,7 +292,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                 {selectedAgent && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Date</label>
+                      <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.date")}</label>
                       <div className="flex gap-1">
                         <button onClick={() => setDateOffset((o) => Math.max(0, o - 1))} disabled={dateOffset === 0}
                           className="p-1 rounded-lg disabled:opacity-30" style={{ color: "var(--text-muted)" }}>
@@ -326,11 +328,11 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                 {/* Time slots */}
                 {selectedAgent && (
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Available slots</label>
+                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.slots.available")}</label>
                     {loadingSlots ? (
                       <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--text-muted)" }} /></div>
                     ) : (slotsData?.slots ?? []).length === 0 ? (
-                      <div className="py-4 text-center text-sm" style={{ color: "var(--text-muted)" }}>No available slots on this date</div>
+                      <div className="py-4 text-center text-sm" style={{ color: "var(--text-muted)" }}>{t("booking.slots.none")}</div>
                     ) : (
                       <div className="flex flex-wrap gap-2">
                         {slotsData!.slots.map((slot) => {
@@ -360,7 +362,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                 {/* Date strip */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Date</label>
+                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.date")}</label>
                     <div className="flex gap-1">
                       <button onClick={() => setDateOffset((o) => Math.max(0, o - 1))} disabled={dateOffset === 0}
                         className="p-1 rounded-lg disabled:opacity-30" style={{ color: "var(--text-muted)" }}>
@@ -394,7 +396,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
 
                 {/* Manual time input */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Time</label>
+                  <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.time")}</label>
                   <input type="time" value={selectedTime} onChange={(e) => { setSelectedTime(e.target.value); setSelectedAgent(null); }}
                     className="px-3 py-2 rounded-xl text-sm outline-none"
                     style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }} />
@@ -403,11 +405,11 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                 {/* Available agents */}
                 {selectedTime && (
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Available agents</label>
+                    <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.agents.available")}</label>
                     {loadingAgents ? (
                       <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--text-muted)" }} /></div>
                     ) : (availableAgents ?? []).length === 0 ? (
-                      <div className="py-4 text-sm text-center" style={{ color: "var(--text-muted)" }}>No agents available at this time</div>
+                      <div className="py-4 text-sm text-center" style={{ color: "var(--text-muted)" }}>{t("booking.agents.none")}</div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2">
                         {availableAgents!.map((a) => {
@@ -415,14 +417,14 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                           return (
                             <button key={a.agent_id}
                               onClick={() => setSelectedAgent({ id: a.agent_id, name: a.name, image: a.avatar, agentAvailability: null })}
-                              className="flex items-center gap-2 px-3 py-2 rounded-xl text-left border transition-all"
+                              className="flex items-center gap-2 px-3 py-2 rounded-xl text-start border transition-all"
                               style={{
                                 borderColor: isActive ? "#A02020" : "var(--card-border)",
                                 background: isActive ? "rgba(160,32,32,0.06)" : "transparent",
                               }}>
                               <AgentAvatar name={a.name} image={a.avatar} size={7} />
                               <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{a.name}</span>
-                              <span className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#10B981" }} />
+                              <span className="ms-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#10B981" }} />
                             </button>
                           );
                         })}
@@ -435,19 +437,19 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
 
             {/* Meeting type */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Type</label>
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.type")}</label>
               <div className="flex flex-wrap gap-2">
-                {MEETING_TYPES.map((t) => {
-                  const isActive = meetingType === t.value;
+                {MEETING_TYPES.map((mt) => {
+                  const isActive = meetingType === mt.value;
                   return (
-                    <button key={t.value} onClick={() => setMeetingType(t.value)}
+                    <button key={mt.value} onClick={() => setMeetingType(mt.value)}
                       className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
                       style={{
                         background: isActive ? "#3B82F6" : "transparent",
                         color: isActive ? "#fff" : "var(--text-secondary)",
                         borderColor: isActive ? "#3B82F6" : "var(--card-border)",
                       }}>
-                      {t.label}
+                      {t(mt.tKey)}
                     </button>
                   );
                 })}
@@ -456,9 +458,9 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
 
             {/* Notes */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Pre-meeting notes (optional)</label>
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{t("booking.fields.notes")}</label>
               <textarea rows={2} value={meetingNotes} onChange={(e) => setMeetingNotes(e.target.value)}
-                placeholder="Any context for this meeting..."
+                placeholder={t("booking.fields.notes_placeholder")}
                 className="w-full resize-none px-3 py-2 rounded-xl text-sm outline-none"
                 style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }} />
             </div>
@@ -467,15 +469,15 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
           {/* RIGHT COLUMN — Summary */}
           <div className="lg:col-span-2">
             <div className="sticky top-0 rounded-2xl p-5 space-y-4" style={{ background: "var(--muted-bg)", border: "1px solid var(--card-border)" }}>
-              <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Booking summary</h3>
+              <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{t("booking.summary.title")}</h3>
 
               <div className="space-y-3">
-                <SummaryRow icon={User} label="Lead" value={leadName || "—"} />
-                <SummaryRow icon={User} label="Agent" value={selectedAgent?.name ?? "—"} />
-                <SummaryRow icon={Calendar} label="Date" value={selectedDate ? format(selectedDate, "EEEE, MMM d yyyy") : "—"} />
-                <SummaryRow icon={Clock} label="Time" value={selectedTime || "—"} />
-                <SummaryRow icon={Clock} label="Duration" value={effectiveDuration ? `${effectiveDuration} min` : "—"} />
-                <SummaryRow icon={Calendar} label="Type" value={MEETING_TYPES.find((t) => t.value === meetingType)?.label ?? "—"} />
+                <SummaryRow icon={User} label={t("booking.fields.lead")} value={leadName || "—"} />
+                <SummaryRow icon={User} label={t("booking.fields.agent")} value={selectedAgent?.name ?? "—"} />
+                <SummaryRow icon={Calendar} label={t("booking.fields.date")} value={selectedDate ? format(selectedDate, "EEEE, MMM d yyyy") : "—"} />
+                <SummaryRow icon={Clock} label={t("booking.fields.time")} value={selectedTime || "—"} />
+                <SummaryRow icon={Clock} label={t("booking.fields.duration")} value={effectiveDuration ? `${effectiveDuration} min` : "—"} />
+                <SummaryRow icon={Calendar} label={t("booking.fields.type")} value={MEETING_TYPES.find((mt) => mt.value === meetingType) ? t(MEETING_TYPES.find((mt) => mt.value === meetingType)!.tKey) : "—"} />
               </div>
 
               <button
@@ -484,12 +486,12 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                 className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: canBook ? "#A02020" : "#6B7280" }}>
                 {bookMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                Confirm Meeting
+                {t("booking.summary.confirm")}
               </button>
 
               {!canBook && (
                 <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-                  {!leadId ? "Select a lead" : !selectedAgent ? "Select an agent" : !selectedTime ? "Pick a time slot" : "Fill all fields"}
+                  {!leadId ? t("booking.validation.select_lead") : !selectedAgent ? t("booking.validation.select_agent") : !selectedTime ? t("booking.validation.select_time") : t("booking.validation.fill_all")}
                 </p>
               )}
             </div>

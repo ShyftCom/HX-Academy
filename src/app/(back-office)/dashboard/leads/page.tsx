@@ -25,6 +25,7 @@ import {
   Plus, MoreHorizontal, Edit, Trash2, UserCheck, MessagesSquare,
   Eye, Settings2, LayoutGrid, List,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -126,12 +127,12 @@ function KanbanCard({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="mr-2 h-4 w-4" />View</Link></DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="me-2 h-4 w-4" />View</Link></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
             {!lead.isConverted && (
-              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="mr-2 h-4 w-4" />Convert</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />Convert</DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -162,6 +163,8 @@ function KanbanCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function LeadsPage() {
+  const { t } = useTranslation("leads");
+  const { t: tc } = useTranslation("common");
   const qc = useQueryClient();
   const [view, setView] = useState<"table" | "kanban">("table");
   const [page, setPage] = useState(1);
@@ -206,19 +209,19 @@ export default function LeadsPage() {
       return res.json();
     },
     onSuccess: () => {
-      toast.success(editLead ? "Lead updated" : "Lead created");
+      toast.success(editLead ? t("actions.edit_lead") : t("actions.add_lead"));
       qc.invalidateQueries({ queryKey: ["leads"] });
       setModalOpen(false);
       reset();
       setEditLead(null);
     },
-    onError: () => toast.error("Failed to save lead"),
+    onError: () => toast.error(tc("errors.failed_to_save")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/leads/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Lead deleted"); qc.invalidateQueries({ queryKey: ["leads"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(tc("errors.failed_to_delete")); qc.invalidateQueries({ queryKey: ["leads"] }); setDeleteId(null); },
+    onError: () => toast.error(tc("errors.failed_to_delete")),
   });
 
   const convertMutation = useMutation({
@@ -227,8 +230,8 @@ export default function LeadsPage() {
       if (!r.ok) throw new Error(json.error ?? "Conversion failed");
       return json;
     }),
-    onSuccess: () => { toast.success("Lead converted to player!"); qc.invalidateQueries({ queryKey: ["leads"] }); setConvertId(null); },
-    onError: (e: any) => toast.error(e.message ?? "Conversion failed"),
+    onSuccess: () => { toast.success(t("convert.success")); qc.invalidateQueries({ queryKey: ["leads"] }); setConvertId(null); },
+    onError: (e: any) => toast.error(e.message ?? t("convert.failed")),
   });
 
   const openAdd = () => { setEditLead(null); reset(); setModalOpen(true); };
@@ -245,7 +248,7 @@ export default function LeadsPage() {
   }, [reset]);
 
   const columns = [
-    { key: "fullName", header: "Name", cell: (r: any) => (
+    { key: "fullName", header: t("table.full_name"), cell: (r: any) => (
       <Link href={`/dashboard/leads/${r.id}`} className="flex items-center gap-2 hover:underline">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-xs font-semibold dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">{getInitials(r.fullName)}</div>
         <div>
@@ -254,10 +257,10 @@ export default function LeadsPage() {
         </div>
       </Link>
     )},
-    { key: "phone", header: "Phone", cell: (r: any) => r.phone ?? "—" },
-    { key: "email", header: "Email", cell: (r: any) => r.email ? <span className="text-xs">{r.email}</span> : "—" },
-    { key: "categoryInterest", header: "Category", cell: (r: any) => r.categoryInterest ? <Badge variant="outline">{r.categoryInterest}</Badge> : "—" },
-    { key: "status", header: "Status", cell: (r: any) => (
+    { key: "phone", header: t("table.phone"), cell: (r: any) => r.phone ?? "—" },
+    { key: "email", header: t("table.email"), cell: (r: any) => r.email ? <span className="text-xs">{r.email}</span> : "—" },
+    { key: "categoryInterest", header: t("table.category"), cell: (r: any) => r.categoryInterest ? <Badge variant="outline">{r.categoryInterest}</Badge> : "—" },
+    { key: "status", header: t("table.status"), cell: (r: any) => (
       <StatusBadge
         leadId={r.id}
         leadName={r.fullName}
@@ -265,20 +268,20 @@ export default function LeadsPage() {
         statuses={statuses ?? []}
       />
     )},
-    { key: "source", header: "Source", cell: (r: any) => r.source ? <Badge variant="secondary">{r.source}</Badge> : "—" },
-    { key: "createdAt", header: "Date", cell: (r: any) => formatDate(r.createdAt) },
+    { key: "source", header: t("table.source"), cell: (r: any) => r.source ? <Badge variant="secondary">{r.source}</Badge> : "—" },
+    { key: "createdAt", header: t("table.created"), cell: (r: any) => formatDate(r.createdAt) },
     { key: "actions", header: "", cell: (r: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="mr-2 h-4 w-4" />View Activity</Link></DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="me-2 h-4 w-4" />View Activity</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
           {!r.isConverted && (
-            <DropdownMenuItem onClick={() => setConvertId(r.id)}><UserCheck className="mr-2 h-4 w-4" />Convert to Player</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setConvertId(r.id)}><UserCheck className="me-2 h-4 w-4" />Convert to Player</DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -286,19 +289,19 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Leads CRM" description="Manage potential players and track conversions">
+      <PageHeader title={t("title")} description="Manage potential players and track conversions">
         <Button variant="outline" asChild>
-          <Link href="/dashboard/leads/pipeline"><Settings2 className="mr-2 h-4 w-4" />Pipeline Stages</Link>
+          <Link href="/dashboard/leads/pipeline"><Settings2 className="me-2 h-4 w-4" />{t("pipeline")}</Link>
         </Button>
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Lead</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("actions.add_lead")}</Button>
       </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search leads..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("filters.search_placeholder")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+          <SelectTrigger className="w-44"><SelectValue placeholder={t("filters.all_statuses")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">{t("filters.all_statuses")}</SelectItem>
             {statuses?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -311,7 +314,7 @@ export default function LeadsPage() {
         </Select>
 
         {/* View toggle */}
-        <div className="ml-auto flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--muted-bg)" }}>
+        <div className="ms-auto flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--muted-bg)" }}>
           <button onClick={() => setView("table")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
             style={view === "table"
@@ -331,7 +334,7 @@ export default function LeadsPage() {
 
       {view === "table" ? (
         <>
-          <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No leads found" emptyIcon={<MessagesSquare className="h-8 w-8" />} />
+          <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty.no_leads")} emptyIcon={<MessagesSquare className="h-8 w-8" />} />
           {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
         </>
       ) : (
@@ -347,58 +350,58 @@ export default function LeadsPage() {
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="2xl">
-          <DialogHeader><DialogTitle>{editLead ? "Edit Lead" : "Add New Lead"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editLead ? t("actions.edit_lead") : t("actions.add_lead")}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("fullName")} label="Full Name *" placeholder="John Doe" error={errors.fullName?.message} className="col-span-2 sm:col-span-1" />
-              <Input {...register("phone")} label="Phone" placeholder="+213 ..." />
-              <Input {...register("email")} label="Email" placeholder="email@example.com" error={errors.email?.message} />
-              <Input {...register("dateOfBirth")} label="Date of Birth" type="date" />
+              <Input {...register("fullName")} label={t("form.full_name")} placeholder={t("form.full_name_placeholder")} error={errors.fullName?.message} className="col-span-2 sm:col-span-1" />
+              <Input {...register("phone")} label={t("form.phone")} placeholder={t("form.phone_placeholder")} />
+              <Input {...register("email")} label={t("form.email")} placeholder={t("form.email_placeholder")} error={errors.email?.message} />
+              <Input {...register("dateOfBirth")} label={t("form.date_of_birth")} type="date" />
               <div className="col-span-2 grid grid-cols-2 gap-4">
-                <Input {...register("parentName")} label="Parent Name" placeholder="Parent full name" />
-                <Input {...register("parentPhone")} label="Parent Phone" placeholder="+213 ..." />
+                <Input {...register("parentName")} label={t("form.parent_name")} placeholder={t("form.full_name_placeholder")} />
+                <Input {...register("parentPhone")} label={t("form.parent_phone")} placeholder={t("form.phone_placeholder")} />
               </div>
-              <Input {...register("address")} label="Address" placeholder="City, Region" className="col-span-2" />
+              <Input {...register("address")} label={t("form.address")} placeholder={t("form.address_placeholder")} className="col-span-2" />
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Category Interest</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("form.category")}</label>
                 <Select onValueChange={(v) => setValue("categoryInterest", v)} defaultValue={editLead?.categoryInterest ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("form.category")} /></SelectTrigger>
                   <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Source</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("form.source")}</label>
                 <Select onValueChange={(v) => setValue("source", v)} defaultValue={editLead?.source ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select source" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("form.source")} /></SelectTrigger>
                   <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Status</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{tc("labels.status")}</label>
                 <Select onValueChange={(v) => setValue("statusId", v)} defaultValue={editLead?.statusId ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tc("labels.status")} /></SelectTrigger>
                   <SelectContent>{statuses?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Assign to Staff</label>
+                <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("form.assign_to")}</label>
                 <Select onValueChange={(v) => setValue("assignedStaffId", v)} defaultValue={editLead?.assignedStaffId ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("form.assign_to")} /></SelectTrigger>
                   <SelectContent>{staff?.data?.map((u: any) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Textarea {...register("notes")} label="Notes" placeholder="Any notes..." className="col-span-2" rows={3} />
+              <Textarea {...register("notes")} label={t("form.notes")} placeholder={t("form.notes_placeholder")} className="col-span-2" rows={3} />
             </DialogBody>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-              <Button type="submit" loading={saveMutation.isPending}>{editLead ? "Save Changes" : "Create Lead"}</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{tc("actions.cancel")}</Button>
+              <Button type="submit" loading={saveMutation.isPending}>{editLead ? tc("actions.save") : tc("actions.create")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Lead" description="This action cannot be undone. The lead will be permanently deleted." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
-      <ConfirmDialog open={!!convertId} onOpenChange={(o) => !o && setConvertId(null)} title="Convert to Player" description="This will create a player account for this lead. The lead's phone number will be used as the temporary password." confirmLabel="Convert" variant="default" onConfirm={() => convertId && convertMutation.mutate(convertId)} loading={convertMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("actions.delete_lead")} description={tc("errors.failed_to_delete")} confirmLabel={tc("actions.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!convertId} onOpenChange={(o) => !o && setConvertId(null)} title={t("actions.convert_to_player")} description={t("convert.success")} confirmLabel={tc("actions.convert")} variant="default" onConfirm={() => convertId && convertMutation.mutate(convertId)} loading={convertMutation.isPending} />
     </div>
   );
 }

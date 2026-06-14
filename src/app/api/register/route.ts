@@ -9,7 +9,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Full name and phone are required" }, { status: 400 });
     }
 
+    const refCode = body.ref || req.nextUrl.searchParams.get("ref");
+
     const defaultStatus = await db.leadStatus.findFirst({ where: { isDefault: true } });
+
+    const notesWithRef = [body.notes, refCode ? `__ref:${refCode}__` : null].filter(Boolean).join(" ").trim() || null;
 
     const lead = await db.lead.create({
       data: {
@@ -20,7 +24,7 @@ export async function POST(req: NextRequest) {
         parentName: body.parentName || null,
         parentPhone: body.parentPhone || null,
         categoryInterest: body.category || null,
-        notes: body.notes || null,
+        notes: notesWithRef,
         source: "website",
         statusId: defaultStatus?.id ?? null,
       },

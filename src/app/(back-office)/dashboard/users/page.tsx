@@ -83,8 +83,8 @@ export default function UsersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -93,7 +93,7 @@ export default function UsersPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Users & Accounts" description="Manage admin and staff accounts">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add User</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add User</Button>
       </PageHeader>
 
       <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search users..." className="w-64" />

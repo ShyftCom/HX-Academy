@@ -1,0 +1,56 @@
+{
+  "title": "اللاعبون",
+  "subtitle": "إدارة اللاعبين المسجلين",
+  "table": {
+    "player": "اللاعب",
+    "category": "الفئة",
+    "team": "الفريق",
+    "status": "الحالة",
+    "subscription": "الاشتراك",
+    "joined": "تاريخ التسجيل",
+    "actions": "الإجراءات"
+  },
+  "filters": {
+    "search_placeholder": "البحث في اللاعبين...",
+    "all_categories": "جميع الفئات",
+    "all_teams": "جميع الفرق"
+  },
+  "actions": {
+    "add_player": "إضافة لاعب",
+    "edit_player": "تعديل اللاعب",
+    "view_profile": "عرض الملف الشخصي"
+  },
+  "form": {
+    "full_name": "الاسم الكامل",
+    "date_of_birth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "parent_name": "اسم ولي الأمر",
+    "parent_phone": "هاتف ولي الأمر",
+    "address": "العنوان",
+    "team": "الفريق",
+    "category": "الفئة",
+    "position": "المركز",
+    "emergency_contact": "جهة الاتصال للطوارئ",
+    "medical_notes": "ملاحظات طبية",
+    "notes": "ملاحظات"
+  },
+  "profile": {
+    "title": "ملف اللاعب",
+    "personal_info": "المعلومات الشخصية",
+    "contact_info": "معلومات الاتصال",
+    "football_info": "معلومات كرة القدم",
+    "subscription_history": "تاريخ الاشتراكات",
+    "payment_history": "تاريخ المدفوعات"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "suspended": "موقوف"
+  },
+  "empty": {
+    "no_players": "لا يوجد لاعبون",
+    "no_players_subtitle": "حوّل العملاء لإضافة لاعبين"
+  }
+}

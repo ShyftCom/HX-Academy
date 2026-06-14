@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -22,6 +23,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 function ResetPasswordForm() {
+  const { t } = useTranslation("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -34,7 +36,7 @@ function ResetPasswordForm() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    if (!token) { toast.error("Invalid reset token"); return; }
+    if (!token) { toast.error(t("reset_password.expired")); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/auth/reset-password", {
@@ -44,13 +46,13 @@ function ResetPasswordForm() {
       });
       const json = await res.json();
       if (res.ok) {
-        toast.success("Password reset successfully");
+        toast.success(t("reset_password.success"));
         router.push("/login");
       } else {
-        toast.error(json.error ?? "Failed to reset password");
+        toast.error(json.error ?? t("reset_password.expired"));
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error(t("reset_password.expired"));
     } finally {
       setLoading(false);
     }
@@ -59,14 +61,14 @@ function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Reset Password</CardTitle>
-        <CardDescription>Enter your new password below</CardDescription>
+        <CardTitle className="text-2xl">{t("reset_password.title")}</CardTitle>
+        <CardDescription>{t("reset_password.password_label")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             {...register("password")}
-            label="New Password"
+            label={t("reset_password.password_label")}
             type="password"
             placeholder="••••••••"
             icon={<Lock className="h-4 w-4" />}
@@ -74,14 +76,14 @@ function ResetPasswordForm() {
           />
           <Input
             {...register("confirmPassword")}
-            label="Confirm Password"
+            label={t("reset_password.confirm_label")}
             type="password"
             placeholder="••••••••"
             icon={<Lock className="h-4 w-4" />}
             error={errors.confirmPassword?.message}
           />
           <Button type="submit" className="w-full" loading={loading}>
-            Reset Password
+            {t("reset_password.reset")}
           </Button>
         </form>
       </CardContent>

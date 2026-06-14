@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -21,6 +22,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  const { t } = useTranslation("auth");
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,13 +45,10 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("Invalid email or password");
+        toast.error(t("login.invalid_credentials"));
         return;
       }
 
-      toast.success("Welcome back!");
-
-      // Check user type and redirect accordingly
       const res = await fetch("/api/auth/me");
       const me = await res.json();
 
@@ -60,7 +59,7 @@ export default function LoginPage() {
       }
       router.refresh();
     } catch {
-      toast.error("An error occurred. Please try again.");
+      toast.error(t("login.invalid_credentials"));
     } finally {
       setLoading(false);
     }
@@ -72,17 +71,17 @@ export default function LoginPage() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-600 text-white font-bold text-sm shadow-lg">
           FSA
         </div>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Foot-Ball Skills Academy</CardDescription>
+        <CardTitle className="text-2xl">{t("login.title")}</CardTitle>
+        <CardDescription>{t("login.subtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Input
               {...register("email")}
-              label="Email address"
+              label={t("login.email_label")}
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("login.email_placeholder")}
               icon={<Mail className="h-4 w-4" />}
               error={errors.email?.message}
               autoComplete="email"
@@ -92,16 +91,16 @@ export default function LoginPage() {
             <div className="relative">
               <Input
                 {...register("password")}
-                label="Password"
+                label={t("login.password_label")}
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t("login.password_placeholder")}
                 icon={<Lock className="h-4 w-4" />}
                 error={errors.password?.message}
                 autoComplete="current-password"
               />
               <button
                 type="button"
-                className="absolute right-3 top-[34px] text-gray-400 hover:text-gray-600"
+                className="absolute end-3 top-[34px] text-gray-400 hover:text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -114,12 +113,12 @@ export default function LoginPage() {
               href="/forgot-password"
               className="text-sm text-blue-600 hover:underline dark:text-blue-400"
             >
-              Forgot password?
+              {t("login.forgot_password")}
             </Link>
           </div>
 
           <Button type="submit" className="w-full" loading={loading}>
-            Sign In
+            {t("login.sign_in")}
           </Button>
         </form>
       </CardContent>

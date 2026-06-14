@@ -78,7 +78,7 @@ export default function FormBuilderPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Order Form Builder" description="Customize the COD order form fields">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Field</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Field</Button>
       </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -120,7 +120,7 @@ export default function FormBuilderPage() {
           <CardContent className="space-y-4">
             {[...(fields ?? [])].sort((a: any, b: any) => a.order - b.order).map((field: any) => (
               <div key={field.id}>
-                <label className="mb-1 block text-sm font-medium text-gray-700">{field.label}{field.isRequired && <span className="text-red-500 ml-1">*</span>}</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{field.label}{field.isRequired && <span className="text-red-500 ms-1">*</span>}</label>
                 {field.fieldType === "textarea" ? (
                   <textarea className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder={field.placeholder ?? ""} rows={2} readOnly />
                 ) : field.fieldType === "select" ? (

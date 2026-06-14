@@ -80,7 +80,7 @@ export default function PlayerStorePage() {
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Store</h1>
         {cart.length > 0 && (
           <Button onClick={() => setCartOpen(true)} className="relative">
-            <ShoppingCart className="mr-2 h-4 w-4" />Cart
+            <ShoppingCart className="me-2 h-4 w-4" />Cart
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
           </Button>
         )}
@@ -116,7 +116,7 @@ export default function PlayerStorePage() {
                       <Button size="icon-sm" variant="outline" onClick={() => updateQty(p.id, 1)} disabled={p.stock <= cartItem.quantity}><Plus className="h-3 w-3" /></Button>
                     </div>
                   ) : (
-                    <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(p)} disabled={p.stock === 0}><Plus className="mr-1 h-3.5 w-3.5" />Add</Button>
+                    <Button size="sm" className="mt-2 w-full" onClick={() => addToCart(p)} disabled={p.stock === 0}><Plus className="me-1 h-3.5 w-3.5" />Add</Button>
                   )}
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function PlayerStorePage() {
                   <span className="w-6 text-center text-sm">{i.quantity}</span>
                   <Button size="icon-sm" variant="outline" onClick={() => updateQty(i.product.id, 1)}><Plus className="h-3 w-3" /></Button>
                 </div>
-                <p className="text-sm font-medium w-20 text-right">{formatCurrency((i.product.discountPrice ?? i.product.price) * i.quantity)}</p>
+                <p className="text-sm font-medium w-20 text-end">{formatCurrency((i.product.discountPrice ?? i.product.price) * i.quantity)}</p>
               </div>
             ))}
             <Separator />

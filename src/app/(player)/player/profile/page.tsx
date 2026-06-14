@@ -98,7 +98,7 @@ export default function PlayerProfilePage() {
             <Input label="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="City, Region" />
             <Input label="Parent Phone" value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} placeholder="+213 ..." />
           </div>
-          <Button className="mt-4 w-full" onClick={() => updateMutation.mutate()} loading={updateMutation.isPending}><Save className="mr-2 h-4 w-4" />Save Changes</Button>
+          <Button className="mt-4 w-full" onClick={() => updateMutation.mutate()} loading={updateMutation.isPending}><Save className="me-2 h-4 w-4" />Save Changes</Button>
         </CardContent>
       </Card>
 

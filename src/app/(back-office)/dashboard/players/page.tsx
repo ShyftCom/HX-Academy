@@ -145,16 +145,16 @@ export default function PlayersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setViewPlayer(r)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setViewPlayer(r)}><Eye className="me-2 h-4 w-4" />View Details</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
           <DropdownMenuSeparator />
           {r.status === "active"
-            ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="mr-2 h-4 w-4" />Suspend</DropdownMenuItem>
-            : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="mr-2 h-4 w-4" />Activate</DropdownMenuItem>
+            ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="me-2 h-4 w-4" />Suspend</DropdownMenuItem>
+            : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />Activate</DropdownMenuItem>
           }
-          <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="mr-2 h-4 w-4" />Reset Password</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />Reset Password</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -163,7 +163,7 @@ export default function PlayersPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Players" description="Manage all academy players">
-        <Button onClick={openAdd}><Plus className="mr-2 h-4 w-4" />Add Player</Button>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Player</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">

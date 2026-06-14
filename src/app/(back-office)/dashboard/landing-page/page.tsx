@@ -99,12 +99,12 @@ export default function LandingPageBuilderPage() {
     <div className="space-y-5">
       <PageHeader title="Landing Page Builder" description="Build and publish your academy website">
         <div className="flex gap-2">
-          <Button variant="outline" asChild><Link href="/"><Eye className="mr-2 h-4 w-4" />Preview</Link></Button>
+          <Button variant="outline" asChild><Link href="/"><Eye className="me-2 h-4 w-4" />Preview</Link></Button>
           <Button variant={page?.isPublished ? "outline" : "default"} onClick={() => publishMutation.mutate(!page?.isPublished)} loading={publishMutation.isPending}>
-            <Globe className="mr-2 h-4 w-4" />
+            <Globe className="me-2 h-4 w-4" />
             {page?.isPublished ? "Unpublish" : "Publish"}
           </Button>
-          <Button onClick={() => setAddOpen(true)}><Plus className="mr-2 h-4 w-4" />Add Section</Button>
+          <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Add Section</Button>
         </div>
       </PageHeader>
 
@@ -121,7 +121,7 @@ export default function LandingPageBuilderPage() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-16 dark:border-gray-700">
           <Globe className="h-10 w-10 text-gray-300 mb-3" />
           <p className="text-gray-500 mb-4">No sections yet — start building your page</p>
-          <Button onClick={() => setAddOpen(true)}><Plus className="mr-2 h-4 w-4" />Add First Section</Button>
+          <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Add First Section</Button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -185,7 +185,7 @@ export default function LandingPageBuilderPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditSection(null)}>Cancel</Button>
-            <Button onClick={() => updateSectionMutation.mutate(editSection)} loading={updateSectionMutation.isPending}><Save className="mr-2 h-4 w-4" />Save Section</Button>
+            <Button onClick={() => updateSectionMutation.mutate(editSection)} loading={updateSectionMutation.isPending}><Save className="me-2 h-4 w-4" />Save Section</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

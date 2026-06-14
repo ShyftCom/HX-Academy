@@ -83,6 +83,14 @@ body {
 h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
 
 /* ============================================================
+   ARABIC / RTL
+   ============================================================ */
+:lang(ar) {
+  font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+  direction: rtl;
+}
+
+/* ============================================================
    AUTO GRAY TEXT ADAPTATION
    Written after @import → later in cascade → wins at same specificity.
    dark: Tailwind variants (0,2,0) still win over these (0,1,0).
