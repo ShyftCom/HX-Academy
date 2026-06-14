@@ -1,33 +1,34 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import HttpBackend from "i18next-http-backend";
-import LanguageDetector from "i18next-browser-languagedetector";
 
-const NAMESPACES = ["common", "auth", "dashboard", "leads", "calendar", "players", "settings", "emails"] as const;
+import engCommon from "../messages/eng.json";
+import frCommon from "../messages/fr.json";
+import arCommon from "../messages/ar.json";
 
-// Only initialize once, client-side
-if (typeof window !== "undefined" && !i18n.isInitialized) {
-  i18n
-    .use(HttpBackend)
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      fallbackLng: "fr",
-      supportedLngs: ["en", "fr", "ar"],
-      defaultNS: "common",
-      ns: NAMESPACES,
-      backend: {
-        loadPath: "/locales/{{lng}}/{{ns}}.json",
-      },
-      detection: {
-        order: ["localStorage", "navigator"],
-        caches: ["localStorage"],
-        lookupLocalStorage: "shyftcom_lang",
-      },
-      interpolation: { escapeValue: false },
-      react: { useSuspense: false },
-    });
+function getInitialLang(): string {
+  if (typeof window === "undefined") return "fr";
+  const stored = localStorage.getItem("shyftcom_lang");
+  if (stored === "eng" || stored === "en") return "en";
+  if (stored === "fr" || stored === "ar") return stored;
+  return "fr";
+}
+
+if (!i18n.isInitialized) {
+  i18n.use(initReactI18next).init({
+    lng: getInitialLang(),
+    fallbackLng: "fr",
+    supportedLngs: ["en", "fr", "ar"],
+    defaultNS: "common",
+    ns: ["common"],
+    resources: {
+      en: { common: engCommon },
+      fr: { common: frCommon },
+      ar: { common: arCommon },
+    },
+    interpolation: { escapeValue: false },
+    react: { useSuspense: false },
+  });
 }
 
 export default i18n;
-export type Namespace = (typeof NAMESPACES)[number];
+export type Namespace = "common";
