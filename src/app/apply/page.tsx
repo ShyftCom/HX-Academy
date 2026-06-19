@@ -53,7 +53,7 @@ function ApplyFormInner() {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("folder", "applications");
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await fetch("/api/public/upload", { method: "POST", body: fd });
       const d = await res.json();
       if (res.ok) {
         setUploadedFiles((p) => ({ ...p, [reqId]: { fileName: file.name, fileUrl: d.url, mimeType: file.type, size: file.size } }));

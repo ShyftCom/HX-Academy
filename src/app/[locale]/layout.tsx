@@ -4,6 +4,8 @@ import { routing } from "@/i18n/routing";
 import { getMessages } from "next-intl/server";
 import { WebsiteHeader } from "@/components/website/WebsiteHeader";
 import { WebsiteFooter } from "@/components/website/WebsiteFooter";
+import { WebsiteSlider } from "@/components/website/WebsiteSlider";
+import { WebsiteSponsors } from "@/components/website/WebsiteSponsors";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -26,7 +28,9 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <div dir={dir} className={locale === "ar" ? "font-arabic" : ""}>
         <WebsiteHeader locale={locale} />
+        <WebsiteSlider locale={locale} />
         {children}
+        <WebsiteSponsors locale={locale} />
         <WebsiteFooter locale={locale} />
       </div>
     </NextIntlClientProvider>

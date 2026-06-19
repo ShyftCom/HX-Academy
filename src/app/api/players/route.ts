@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") ?? "";
   const status = searchParams.get("status") ?? "";
   const category = searchParams.get("category") ?? "";
+  const stationId = searchParams.get("stationId") ?? "";
 
   const where: Record<string, unknown> = {};
   if (q) {
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
   }
   if (status) where.status = status;
   if (category) where.category = category;
+  if (stationId) where.stationId = stationId;
 
   const [data, total] = await Promise.all([
     db.player.findMany({

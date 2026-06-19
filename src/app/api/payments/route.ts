@@ -14,8 +14,13 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get("status") ?? "";
   const playerId = searchParams.get("playerId") ?? "";
 
+  const stationId = searchParams.get("stationId") ?? "";
+
   const where: Record<string, unknown> = {};
-  if (q) where.player = { fullName: { contains: q } };
+  const playerFilter: Record<string, unknown> = {};
+  if (q) playerFilter.fullName = { contains: q };
+  if (stationId) playerFilter.stationId = stationId;
+  if (Object.keys(playerFilter).length > 0) where.player = playerFilter;
   if (status) where.status = status;
   if (playerId) where.playerId = playerId;
 

@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Loader2, GripVertical, Check, X } from "lucide-react";
 
-interface Req { id: string; title: string; description?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number; isActive: boolean; order: number; }
+interface Req { id: string; title: string; description?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number; isActive: boolean; order: number; appliesTo: string; }
 type FormState = Omit<Req, "id">;
 
-const blank: FormState = { title: "", description: "", isRequired: true, allowedTypes: "image/*,.pdf", maxSizeMb: 10, isActive: true, order: 0 };
+const blank: FormState = { title: "", description: "", isRequired: true, allowedTypes: "image/*,.pdf,.docx,.xlsx", maxSizeMb: 10, isActive: true, order: 0, appliesTo: "academy" };
+
+const APPLIES_LABELS: Record<string, string> = { academy: "Academy", summer_camp: "Summer Camp", both: "Both" };
+const APPLIES_COLORS: Record<string, string> = { academy: "bg-green-100 text-green-700", summer_camp: "bg-orange-100 text-orange-700", both: "bg-blue-100 text-blue-700" };
 
 function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormState; onSave: (v: FormState) => void; onCancel: () => void; saving: boolean }) {
   const [form, setForm] = useState(initial);
@@ -33,6 +36,14 @@ function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormS
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Size (MB)</label>
           <input type="number" min={1} max={50} className={inputClass} value={form.maxSizeMb} onChange={(e) => set("maxSizeMb", parseInt(e.target.value) || 10)} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Applies To</label>
+          <select className={inputClass} value={form.appliesTo} onChange={(e) => set("appliesTo", e.target.value)}>
+            <option value="academy">Academy</option>
+            <option value="summer_camp">Summer Camp</option>
+            <option value="both">Both</option>
+          </select>
         </div>
         <div className="flex items-center gap-6">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -132,7 +143,7 @@ export default function FileRequirementsPage() {
           {reqs.map((req) => (
             <div key={req.id}>
               {editId === req.id ? (
-                <RequirementForm initial={{ title: req.title, description: req.description, isRequired: req.isRequired, allowedTypes: req.allowedTypes, maxSizeMb: req.maxSizeMb, isActive: req.isActive, order: req.order }} onSave={(f) => handleEdit(req.id, f)} onCancel={() => setEditId(null)} saving={saving} />
+                <RequirementForm initial={{ title: req.title, description: req.description, isRequired: req.isRequired, allowedTypes: req.allowedTypes, maxSizeMb: req.maxSizeMb, isActive: req.isActive, order: req.order, appliesTo: req.appliesTo ?? "academy" }} onSave={(f) => handleEdit(req.id, f)} onCancel={() => setEditId(null)} saving={saving} />
               ) : (
                 <div className={`bg-white dark:bg-gray-800 rounded-xl border p-4 flex items-center gap-4 ${!req.isActive ? "opacity-50" : "border-gray-200 dark:border-gray-700"}`}>
                   <GripVertical className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
@@ -140,6 +151,7 @@ export default function FileRequirementsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-gray-900 dark:text-white">{req.title}</span>
                       {req.isRequired && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">Required</span>}
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPLIES_COLORS[req.appliesTo ?? "academy"] ?? ""}`}>{APPLIES_LABELS[req.appliesTo ?? "academy"] ?? req.appliesTo}</span>
                       {!req.isActive && <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">Inactive</span>}
                     </div>
                     {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{req.description}</p>}

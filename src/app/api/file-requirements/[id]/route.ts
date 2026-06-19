@@ -32,6 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         ...(body.maxSizeMb !== undefined && { maxSizeMb: body.maxSizeMb }),
         ...(body.isActive !== undefined && { isActive: body.isActive }),
         ...(body.order !== undefined && { order: body.order }),
+        ...(body.appliesTo !== undefined && { appliesTo: body.appliesTo }),
       },
     });
     return NextResponse.json(updated);

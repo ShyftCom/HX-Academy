@@ -15,6 +15,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText } from "lucide-react";
+import { useStation } from "@/context/StationContext";
 
 type Status = "all" | "pending" | "approved" | "rejected";
 
@@ -62,6 +63,7 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
 
 export default function PaymentsPage() {
   const qc = useQueryClient();
+  const { activeStationId } = useStation();
   const proofInputRef = useRef<HTMLInputElement>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -77,11 +79,12 @@ export default function PaymentsPage() {
   const [uploadingAdd, setUploadingAdd] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["payments", page, search, status],
+    queryKey: ["payments", page, search, status, activeStationId],
     queryFn: () => {
       const p = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) p.set("q", search);
       if (status !== "all") p.set("status", status);
+      if (activeStationId) p.set("stationId", activeStationId);
       return fetch(`/api/payments?${p}`).then((r) => r.json());
     },
   });

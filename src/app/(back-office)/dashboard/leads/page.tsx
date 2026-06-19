@@ -26,6 +26,7 @@ import {
   Eye, Settings2, LayoutGrid, List,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useStation } from "@/context/StationContext";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -46,6 +47,26 @@ type FormData = z.infer<typeof schema>;
 
 const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const SOURCES = ["website", "referral", "social media", "walk-in", "other"];
+
+function CampSessionSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data: sessions = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["sc-sessions-select"],
+    queryFn: () => fetch("/api/summer-camp/sessions").then((r) => r.json()),
+  });
+  const list = Array.isArray(sessions) ? sessions : [];
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-1">Camp Session (optional)</label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger><SelectValue placeholder="Select a session..." /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="none">No session</SelectItem>
+          {list.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 // ─── Kanban board ─────────────────────────────────────────────────────────────
 
@@ -130,7 +151,7 @@ function KanbanCard({
             <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="me-2 h-4 w-4" />View</Link></DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
             {!lead.isConverted && (
-              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />Convert</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />{lead.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}</DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
@@ -166,23 +187,29 @@ export default function LeadsPage() {
   const { t } = useTranslation("leads");
   const { t: tc } = useTranslation("common");
   const qc = useQueryClient();
+  const { activeStationId } = useStation();
   const [view, setView] = useState<"table" | "kanban">("table");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
+  const [leadTypeFilter, setLeadTypeFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLead, setEditLead] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [convertId, setConvertId] = useState<string | null>(null);
+  const [convertLead, setConvertLead] = useState<any>(null);
+  const [campConvertSessionId, setCampConvertSessionId] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["leads", page, search, statusFilter, sourceFilter],
+    queryKey: ["leads", page, search, statusFilter, sourceFilter, leadTypeFilter, activeStationId],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: view === "kanban" ? "200" : "20" });
       if (search) params.set("q", search);
       if (statusFilter && statusFilter !== "all") params.set("statusId", statusFilter);
       if (sourceFilter && sourceFilter !== "all") params.set("source", sourceFilter);
+      if (leadTypeFilter && leadTypeFilter !== "all") params.set("leadType", leadTypeFilter);
+      if (activeStationId) params.set("stationId", activeStationId);
       return fetch(`/api/leads?${params}`).then((r) => r.json());
     },
   });
@@ -279,7 +306,9 @@ export default function LeadsPage() {
           <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="me-2 h-4 w-4" />View Activity</Link></DropdownMenuItem>
           <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
           {!r.isConverted && (
-            <DropdownMenuItem onClick={() => setConvertId(r.id)}><UserCheck className="me-2 h-4 w-4" />Convert to Player</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setConvertId(r.id); setConvertLead(r); setCampConvertSessionId(""); }}>
+              <UserCheck className="me-2 h-4 w-4" />{r.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}
+            </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
@@ -310,6 +339,14 @@ export default function LeadsPage() {
           <SelectContent>
             <SelectItem value="all">All Sources</SelectItem>
             {SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={leadTypeFilter} onValueChange={(v) => { setLeadTypeFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="All Programs" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Programs</SelectItem>
+            <SelectItem value="academy">Academy</SelectItem>
+            <SelectItem value="summer_camp">Summer Camp</SelectItem>
           </SelectContent>
         </Select>
 
@@ -401,7 +438,55 @@ export default function LeadsPage() {
       </Dialog>
 
       <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("actions.delete_lead")} description={tc("errors.failed_to_delete")} confirmLabel={tc("actions.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
-      <ConfirmDialog open={!!convertId} onOpenChange={(o) => !o && setConvertId(null)} title={t("actions.convert_to_player")} description={t("convert.success")} confirmLabel={tc("actions.convert")} variant="default" onConfirm={() => convertId && convertMutation.mutate(convertId)} loading={convertMutation.isPending} />
+
+      {/* Academy convert */}
+      {convertLead?.leadType !== "summer_camp" && (
+        <ConfirmDialog
+          open={!!convertId && convertLead?.leadType !== "summer_camp"}
+          onOpenChange={(o) => { if (!o) { setConvertId(null); setConvertLead(null); } }}
+          title={t("actions.convert_to_player")}
+          description={`Convert ${convertLead?.fullName ?? "this lead"} to an Academy player?`}
+          confirmLabel="Convert"
+          variant="default"
+          onConfirm={() => convertId && convertMutation.mutate(convertId)}
+          loading={convertMutation.isPending}
+        />
+      )}
+
+      {/* Summer Camp convert */}
+      {convertLead?.leadType === "summer_camp" && (
+        <Dialog open={!!convertId} onOpenChange={(o) => { if (!o) { setConvertId(null); setConvertLead(null); setCampConvertSessionId(""); } }}>
+          <DialogContent size="md">
+            <DialogHeader><DialogTitle>Convert to Camp Participant</DialogTitle></DialogHeader>
+            <DialogBody className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Convert <strong>{convertLead?.fullName}</strong> to a Summer Camp participant.</p>
+              <CampSessionSelector value={campConvertSessionId} onChange={setCampConvertSessionId} />
+            </DialogBody>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setConvertId(null); setConvertLead(null); setCampConvertSessionId(""); }}>Cancel</Button>
+              <Button
+                loading={convertMutation.isPending}
+                onClick={() => {
+                  if (!convertId) return;
+                  fetch(`/api/leads/${convertId}/convert`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sessionId: campConvertSessionId || undefined }),
+                  }).then(async (r) => {
+                    const json = await r.json();
+                    if (!r.ok) { toast.error(json.error ?? "Conversion failed"); return; }
+                    toast.success("Converted to Summer Camp participant");
+                    qc.invalidateQueries({ queryKey: ["leads"] });
+                    setConvertId(null); setConvertLead(null); setCampConvertSessionId("");
+                  }).catch(() => toast.error("Conversion failed"));
+                }}
+              >
+                Convert
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

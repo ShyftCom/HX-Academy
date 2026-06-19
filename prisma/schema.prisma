@@ -186,6 +186,9 @@ model Lead {
   categoryInterest String?
   notes            String?
   source           String?
+  leadType         String     @default("academy") // "academy" | "summer_camp"
+  // Summer-camp-specific extra fields stored as JSON string
+  summerCampData   String?
   statusId         String?
   status           LeadStatus? @relation(fields: [statusId], references: [id])
   assignedStaffId  String?
@@ -206,6 +209,7 @@ model Lead {
   meetings         Meeting[]
   leadNotes        LeadNote[]
   websiteOrders    WebsiteOrder[]
+  summerCampPlayer SummerCampPlayer?
 
   @@map("leads")
 }
@@ -646,14 +650,17 @@ model FileRequirement {
   title        String
   description  String?
   isRequired   Boolean  @default(true)
-  allowedTypes String   @default("image/*,.pdf")
+  allowedTypes String   @default("image/*,.pdf,.docx,.xlsx")
   maxSizeMb    Int      @default(10)
   isActive     Boolean  @default(true)
   order        Int      @default(0)
+  // "academy" | "summer_camp" | "both"
+  appliesTo    String   @default("academy")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  applicationFiles ApplicationFile[]
+  applicationFiles     ApplicationFile[]
+  summerCampDocuments  SummerCampDocument[]
 
   @@map("file_requirements")
 }
@@ -707,6 +714,10 @@ model Station {
   headerConfig       WebsiteHeaderConfig?
   websiteOrders      WebsiteOrder[]
   reviews            Review[]
+  slides             WebsiteSlide[]
+  sponsors           WebsiteSponsor[]
+  summerCampSessions SummerCampSession[]
+  summerCampPlayers  SummerCampPlayer[]
 
   @@map("stations")
 }
@@ -1192,4 +1203,114 @@ model Review {
   createdAt     DateTime  @default(now())
 
   @@map("reviews")
+}
+
+// ==================== WEBSITE SLIDES ====================
+
+model WebsiteSlide {
+  id          String   @id @default(cuid())
+  stationId   String?
+  station     Station? @relation(fields: [stationId], references: [id])
+  imageUrl    String
+  title       String?
+  titleFr     String?
+  titleAr     String?
+  subtitle    String?
+  subtitleFr  String?
+  subtitleAr  String?
+  ctaLabel    String?
+  ctaUrl      String?
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("website_slides")
+}
+
+// ==================== WEBSITE SPONSORS ====================
+
+model WebsiteSponsor {
+  id        String   @id @default(cuid())
+  stationId String?
+  station   Station? @relation(fields: [stationId], references: [id])
+  name      String
+  logoUrl   String
+  websiteUrl String?
+  position  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("website_sponsors")
+}
+
+// ==================== SUMMER CAMP ====================
+
+model SummerCampSession {
+  id          String   @id @default(cuid())
+  stationId   String?
+  station     Station? @relation(fields: [stationId], references: [id])
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  capacity    Int?
+  price       Decimal? @db.Decimal(10, 2)
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments SummerCampPlayer[]
+
+  @@map("summer_camp_sessions")
+}
+
+model SummerCampPlayer {
+  id               String    @id @default(cuid())
+  leadId           String?   @unique
+  lead             Lead?     @relation(fields: [leadId], references: [id])
+  sessionId        String?
+  session          SummerCampSession? @relation(fields: [sessionId], references: [id])
+  stationId        String?
+  station          Station?  @relation(fields: [stationId], references: [id])
+
+  // Participant info
+  fullName         String
+  dateOfBirth      DateTime?
+  age              Int?
+  gender           String?
+  healthNotes      String?
+  notes            String?
+
+  // Guardian / parent contact
+  guardianName     String?
+  guardianPhone    String?
+  guardianEmail    String?
+  guardianRelation String?   // "mother" | "father" | "other"
+
+  // Admin
+  status           String    @default("active") // "active" | "cancelled" | "completed"
+  paidAmount       Decimal?  @db.Decimal(10, 2)
+  paymentStatus    String    @default("unpaid") // "unpaid" | "partial" | "paid"
+
+  documents        SummerCampDocument[]
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("summer_camp_players")
+}
+
+model SummerCampDocument {
+  id          String           @id @default(cuid())
+  playerId    String
+  player      SummerCampPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  requirementId String?
+  requirement FileRequirement? @relation(fields: [requirementId], references: [id])
+  fileName    String
+  fileUrl     String
+  mimeType    String?
+  size        Int?
+  createdAt   DateTime         @default(now())
+
+  @@map("summer_camp_documents")
 }

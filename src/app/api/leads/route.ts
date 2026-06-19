@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") ?? "";
   const statusId = searchParams.get("statusId") ?? "";
   const source = searchParams.get("source") ?? "";
+  const leadType = searchParams.get("leadType") ?? "";
+  const stationId = searchParams.get("stationId") ?? "";
   const isConverted = searchParams.get("isConverted");
 
   const where: Record<string, unknown> = {};
@@ -44,6 +46,8 @@ export async function GET(req: NextRequest) {
   }
   if (statusId) where.statusId = statusId;
   if (source) where.source = source;
+  if (leadType) where.leadType = leadType;
+  if (stationId) where.stationId = stationId;
   if (isConverted !== null && isConverted !== undefined && isConverted !== "") {
     where.isConverted = isConverted === "true";
   }

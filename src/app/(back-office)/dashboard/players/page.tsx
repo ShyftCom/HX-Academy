@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useStation } from "@/context/StationContext";
 
 const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward", "Winger"];
@@ -47,6 +48,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function PlayersPage() {
   const qc = useQueryClient();
+  const { activeStationId } = useStation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -60,12 +62,13 @@ export default function PlayersPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["players", page, search, statusFilter, categoryFilter],
+    queryKey: ["players", page, search, statusFilter, categoryFilter, activeStationId],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) params.set("q", search);
       if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
       if (categoryFilter && categoryFilter !== "all") params.set("category", categoryFilter);
+      if (activeStationId) params.set("stationId", activeStationId);
       return fetch(`/api/players?${params}`).then((r) => r.json());
     },
   });

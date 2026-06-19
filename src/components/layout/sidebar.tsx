@@ -43,6 +43,8 @@ import {
   Layers,
   Store,
   ShoppingCart,
+  ImagePlay,
+  Handshake,
 } from "lucide-react";
 
 interface NavItem {
@@ -105,6 +107,8 @@ const navItems: NavItem[] = [
       { tKey: "landing", href: "/dashboard/website/landing", icon: PanelsTopLeft },
       { tKey: "header", href: "/dashboard/website/header", icon: Navigation },
       { tKey: "footer", href: "/dashboard/website/footer", icon: Layers },
+      { tKey: "slides", href: "/dashboard/website/slides", icon: ImagePlay },
+      { tKey: "sponsors", href: "/dashboard/website/sponsors", icon: Handshake },
       { tKey: "store_settings", href: "/dashboard/website/store", icon: Store },
       { tKey: "reviews", href: "/dashboard/website/reviews", icon: Star },
       { tKey: "surveys", href: "/dashboard/surveys", icon: FileText },

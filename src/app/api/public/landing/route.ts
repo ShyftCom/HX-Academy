@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     }
 
     const fileRequirements = await db.fileRequirement.findMany({
-      where: { isActive: true },
+      where: { isActive: true, appliesTo: { in: ["academy", "both"] } },
       orderBy: { order: "asc" },
     });
 

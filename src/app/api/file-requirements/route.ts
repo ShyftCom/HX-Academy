@@ -10,7 +10,7 @@ export async function GET() {
     orderBy: { order: "asc" },
     include: { _count: { select: { applicationFiles: true } } },
   });
-  return NextResponse.json(requirements);
+  return NextResponse.json({ requirements });
 }
 
 export async function POST(req: NextRequest) {
@@ -29,10 +29,11 @@ export async function POST(req: NextRequest) {
         title: body.title,
         description: body.description ?? null,
         isRequired: body.isRequired ?? true,
-        allowedTypes: body.allowedTypes ?? "image/*,.pdf",
+        allowedTypes: body.allowedTypes ?? "image/*,.pdf,.docx,.xlsx",
         maxSizeMb: body.maxSizeMb ?? 10,
         isActive: body.isActive ?? true,
         order: body.order ?? nextOrder,
+        appliesTo: body.appliesTo ?? "academy",
       },
     });
     return NextResponse.json(req_, { status: 201 });
