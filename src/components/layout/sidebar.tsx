@@ -45,6 +45,8 @@ import {
   ShoppingCart,
   ImagePlay,
   Handshake,
+  Sun,
+  Ticket,
 } from "lucide-react";
 
 interface NavItem {
@@ -101,6 +103,14 @@ const navItems: NavItem[] = [
   },
   { tKey: "orders", href: "/dashboard/orders", icon: ClipboardList },
   {
+    tKey: "summer_camp",
+    icon: Sun,
+    children: [
+      { tKey: "sc_plans", href: "/dashboard/summer-camp/plans", icon: Sun },
+    ],
+  },
+  { tKey: "tickets", href: "/dashboard/tickets", icon: Ticket },
+  {
     tKey: "website",
     icon: Globe,
     children: [
@@ -112,6 +122,7 @@ const navItems: NavItem[] = [
       { tKey: "store_settings", href: "/dashboard/website/store", icon: Store },
       { tKey: "reviews", href: "/dashboard/website/reviews", icon: Star },
       { tKey: "surveys", href: "/dashboard/surveys", icon: FileText },
+      { tKey: "sc_page", href: "/dashboard/website/summer-camp", icon: Sun },
       { tKey: "file_requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud },
       { tKey: "applications", href: "/dashboard/website/applications", icon: Inbox },
       { tKey: "pixels", href: "/dashboard/settings/pixels", icon: Zap },

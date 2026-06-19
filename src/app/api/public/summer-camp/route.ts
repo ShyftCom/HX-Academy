@@ -98,15 +98,26 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const stationId = searchParams.get("station_id");
 
-  const sessions = await db.summerCampSession.findMany({
-    where: { isActive: true, ...(stationId ? { stationId } : {}) },
-    orderBy: { startDate: "asc" },
-  });
+  const [sessions, plans, requirements, settings] = await Promise.all([
+    db.summerCampSession.findMany({
+      where: { isActive: true, ...(stationId ? { stationId } : {}) },
+      orderBy: { startDate: "asc" },
+    }),
+    db.summerCampPlan.findMany({
+      where: { isActive: true, ...(stationId ? { stationId } : {}) },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    }),
+    db.fileRequirement.findMany({
+      where: { isActive: true, appliesTo: { in: ["summer_camp", "both"] } },
+      orderBy: { order: "asc" },
+    }),
+    db.setting.findMany({
+      where: { key: { in: ["sc_page_title", "sc_page_hero_image", "sc_page_description", "sc_page_cta_label", "academy_name"] } },
+    }),
+  ]);
 
-  const requirements = await db.fileRequirement.findMany({
-    where: { isActive: true, appliesTo: { in: ["summer_camp", "both"] } },
-    orderBy: { order: "asc" },
-  });
+  const settingsMap: Record<string, string> = {};
+  for (const s of settings) settingsMap[s.key] = s.value;
 
-  return NextResponse.json({ sessions, requirements });
+  return NextResponse.json({ sessions, plans, requirements, settings: settingsMap });
 }

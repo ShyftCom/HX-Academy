@@ -52,6 +52,11 @@ model User {
   approvedLeaves     LeaveRequest[]     @relation("LeaveApprover")
   paidPayrolls       Payroll[]          @relation("PayrollPaidBy")
 
+  // Tickets
+  ticketsCreated     Ticket[]           @relation("TicketCreatedBy")
+  ticketsAssigned    Ticket[]           @relation("TicketAssignedTo")
+  ticketComments     TicketComment[]    @relation("TicketComments")
+
   @@map("users")
 }
 
@@ -718,6 +723,7 @@ model Station {
   sponsors           WebsiteSponsor[]
   summerCampSessions SummerCampSession[]
   summerCampPlayers  SummerCampPlayer[]
+  summerCampPlans    SummerCampPlan[]
 
   @@map("stations")
 }
@@ -1313,4 +1319,54 @@ model SummerCampDocument {
   createdAt   DateTime         @default(now())
 
   @@map("summer_camp_documents")
+}
+
+// ==================== SUMMER CAMP PLANS ====================
+
+model SummerCampPlan {
+  id           String   @id @default(cuid())
+  name         String
+  programTrack String?
+  price        Float    @default(0)
+  description  String?
+  isActive     Boolean  @default(true)
+  order        Int      @default(0)
+  stationId    String?
+  station      Station? @relation(fields: [stationId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("summer_camp_plans")
+}
+
+// ==================== TICKETS ====================
+
+model Ticket {
+  id           String    @id @default(cuid())
+  title        String
+  description  String
+  status       String    @default("open")   // open | in_progress | resolved | closed
+  priority     String    @default("medium") // low | medium | high | urgent
+  createdById  String
+  createdBy    User      @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  assignedToId String?
+  assignedTo   User?     @relation("TicketAssignedTo", fields: [assignedToId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  comments     TicketComment[]
+
+  @@map("tickets")
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("TicketComments", fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@map("ticket_comments")
 }

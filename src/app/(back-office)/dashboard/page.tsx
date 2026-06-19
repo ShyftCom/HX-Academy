@@ -14,11 +14,18 @@ import {
 } from "recharts";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import Link from "next/link";
+import { useStation } from "@/context/StationContext";
 
 export default function DashboardPage() {
+  const { activeStationId } = useStation();
+
   const { data: stats, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: () => fetch("/api/dashboard/stats").then((r) => r.json()),
+    queryKey: ["dashboard-stats", activeStationId],
+    queryFn: () => {
+      const p = new URLSearchParams();
+      if (activeStationId) p.set("stationId", activeStationId);
+      return fetch(`/api/dashboard/stats?${p}`).then((r) => r.json());
+    },
     refetchInterval: 60000,
   });
 
