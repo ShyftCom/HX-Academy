@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation } from "lucide-react";
+import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun } from "lucide-react";
 
 export default function WebsiteHubPage() {
   const [stats, setStats] = useState({ total: 0, pending: 0, converted: 0 });
@@ -22,6 +22,7 @@ export default function WebsiteHubPage() {
     { href: "/dashboard/website/footer", icon: Layers, title: "Footer Editor", desc: "Customize footer links, social icons, colors, and copyright text.", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-900/30" },
     { href: "/dashboard/website/store", icon: Store, title: "Store Settings", desc: "Enable the product store, configure shipping fees and page content.", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
     { href: "/dashboard/website/reviews", icon: Star, title: "Reviews", desc: "Moderate customer reviews, reply to feedback, and feature top reviews.", color: "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30" },
+    { href: "/dashboard/website/summer-camp", icon: Sun, title: "Summer Camp Page", desc: "Configure the Summer Camp landing page title, hero image, description, and CTA button.", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
     { href: "/dashboard/website/file-requirements", icon: UploadCloud, title: "File Requirements", desc: "Manage documents applicants must upload (ID, birth certificate, photo, etc.).", color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
     { href: "/dashboard/website/applications", icon: Inbox, title: "Applications", desc: "View, filter, and manage all applications submitted through the public website.", color: "text-green-600 bg-green-50 dark:bg-green-900/30" },
     { href: "/dashboard/surveys", icon: Globe, title: "Survey Builder", desc: "Build the questionnaire shown to applicants during the application process.", color: "text-purple-600 bg-purple-50 dark:bg-purple-900/30" },
