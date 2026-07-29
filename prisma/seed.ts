@@ -139,35 +139,45 @@ async function main() {
   }
   console.log("✅ Roles created");
 
-  // Create Super Admin User
-  const adminPassword = await bcrypt.hash("admin123", 12);
-  await db.user.upsert({
-    where: { email: "admin@hxacademy.com" },
-    update: {},
-    create: {
-      name: "Super Admin",
-      email: "admin@hxacademy.com",
-      password: adminPassword,
-      roleId: superAdminRole.id,
-      isActive: true,
-    },
-  });
-  console.log("✅ Super Admin created: admin@hxacademy.com / admin123");
+  // ==================== BOOTSTRAP ADMIN ====================
+  // This seed runs on EVERY deploy (see package.json build script), so it must
+  // never create a well-known account on a live system. It previously created
+  // admin@hxacademy.com/admin123 and admin@admin.com/12345678 — both Super
+  // Admin, both hardcoded in this repo, on a public login page — and printed
+  // the passwords into the build logs.
+  //
+  // Now: only bootstraps an admin when the database has no users at all, takes
+  // the credentials from the environment, and never logs a password.
+  const userCount = await db.user.count();
 
-  // Create Secondary Admin
-  const adminPassword2 = await bcrypt.hash("12345678", 12);
-  await db.user.upsert({
-    where: { email: "admin@admin.com" },
-    update: {},
-    create: {
-      name: "Admin",
-      email: "admin@admin.com",
-      password: adminPassword2,
-      roleId: superAdminRole.id,
-      isActive: true,
-    },
-  });
-  console.log("✅ Admin created: admin@admin.com / 12345678");
+  if (userCount > 0) {
+    console.log(`⏭️  ${userCount} user(s) already exist — no bootstrap admin created`);
+  } else {
+    const bootstrapEmail = process.env.SEED_ADMIN_EMAIL?.trim();
+    const bootstrapPassword = process.env.SEED_ADMIN_PASSWORD;
+
+    if (!bootstrapEmail || !bootstrapPassword) {
+      // Empty database and no credentials supplied — fail loudly rather than
+      // silently creating a guessable account.
+      throw new Error(
+        "Database has no users. Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to bootstrap the first Super Admin."
+      );
+    }
+    if (bootstrapPassword.length < 12) {
+      throw new Error("SEED_ADMIN_PASSWORD must be at least 12 characters.");
+    }
+
+    await db.user.create({
+      data: {
+        name: "Super Admin",
+        email: bootstrapEmail,
+        password: await bcrypt.hash(bootstrapPassword, 12),
+        roleId: superAdminRole.id,
+        isActive: true,
+      },
+    });
+    console.log(`✅ Bootstrap Super Admin created: ${bootstrapEmail}`);
+  }
 
   // Create Default Settings
   const defaultSettings = [
@@ -971,8 +981,6 @@ async function main() {
   console.log("✅ Attribute groups created");
 
   console.log("\n🎉 Seeding complete!");
-  console.log("   Email:    admin@hxacademy.com");
-  console.log("   Password: admin123");
 }
 
 main()
