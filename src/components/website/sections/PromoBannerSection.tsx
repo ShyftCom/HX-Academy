@@ -26,7 +26,10 @@ export function PromoBannerSection({ content, locale }: { content: Record<string
           color: content.imageUrl ? "#fff" : undefined,
         }}
       >
-        {heading && <h2 className="font-fsa-display text-3xl font-bold uppercase tracking-tight sm:text-5xl">{heading}</h2>}
+        {/* text-current so the heading follows the banner's own colour (set by
+            bgClass, or #fff over a background image). globals.css colours h1-h6
+            directly, which otherwise beats the inherited value. */}
+        {heading && <h2 className="font-fsa-display text-3xl font-bold uppercase tracking-tight text-current sm:text-5xl">{heading}</h2>}
         {body && <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">{body}</p>}
         {content.ctaUrl && ctaLabel && (
           <div className="mt-8 flex justify-center">

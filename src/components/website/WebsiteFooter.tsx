@@ -123,7 +123,10 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
       <div className="border-b border-white/10">
         <div className="mx-auto flex flex-col items-start justify-between gap-6 px-[var(--fsa-container-pad)] py-10 lg:flex-row lg:items-center" style={{ maxWidth: "var(--fsa-container-max)" }}>
           <div>
-            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight">{t.newsletterTitle}</h3>
+            {/* text-current is required, not cosmetic: globals.css sets a colour
+                on h1-h6 directly, which beats the colour inherited from <footer>.
+                Without it this heading renders in the admin text colour. */}
+            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight text-current">{t.newsletterTitle}</h3>
             <p className="mt-1 max-w-md text-sm" style={{ color: text, opacity: 0.75 }}>{t.newsletterBody}</p>
           </div>
           <NewsletterForm locale={locale} textColor={text} />
