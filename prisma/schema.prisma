@@ -23,39 +23,39 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  player        Player?
-  assignedLeads      Lead[]             @relation("AssignedStaff")
-  activityLogs       ActivityLog[]
-  notifications      Notification[]     @relation("UserNotifications")
-  agentAvailability  AgentAvailability?
-  agentMeetings      Meeting[]          @relation("AgentMeetings")
+  sessions          Session[]
+  accounts          Account[]
+  player            Player?
+  assignedLeads     Lead[]             @relation("AssignedStaff")
+  activityLogs      ActivityLog[]
+  notifications     Notification[]     @relation("UserNotifications")
+  agentAvailability AgentAvailability?
+  agentMeetings     Meeting[]          @relation("AgentMeetings")
 
   // Station relations
-  stationStaff       StationStaff[]
+  stationStaff StationStaff[]
 
   // Affiliate relations
-  affiliate          Affiliate?         @relation("AffiliateUser")
-  createdAffiliates  Affiliate[]        @relation("AffiliateCreatedBy")
+  affiliate            Affiliate?            @relation("AffiliateUser")
+  createdAffiliates    Affiliate[]           @relation("AffiliateCreatedBy")
   processedWithdrawals AffiliateWithdrawal[]
 
   // Charges
-  paidCharges        Charge[]           @relation("ChargePaidBy")
+  paidCharges Charge[] @relation("ChargePaidBy")
 
   // Reviews
-  reviewReplies      Review[]           @relation("ReviewReplyBy")
+  reviewReplies Review[] @relation("ReviewReplyBy")
 
   // HRM
-  staffProfile       StaffProfile?
-  recordedAttendances Attendance[]      @relation("AttendanceRecorder")
-  approvedLeaves     LeaveRequest[]     @relation("LeaveApprover")
-  paidPayrolls       Payroll[]          @relation("PayrollPaidBy")
+  staffProfile        StaffProfile?
+  recordedAttendances Attendance[]   @relation("AttendanceRecorder")
+  approvedLeaves      LeaveRequest[] @relation("LeaveApprover")
+  paidPayrolls        Payroll[]      @relation("PayrollPaidBy")
 
   // Tickets
-  ticketsCreated     Ticket[]           @relation("TicketCreatedBy")
-  ticketsAssigned    Ticket[]           @relation("TicketAssignedTo")
-  ticketComments     TicketComment[]    @relation("TicketComments")
+  ticketsCreated  Ticket[]        @relation("TicketCreatedBy")
+  ticketsAssigned Ticket[]        @relation("TicketAssignedTo")
+  ticketComments  TicketComment[] @relation("TicketComments")
 
   @@map("users")
 }
@@ -132,7 +132,7 @@ model Permission {
   action      String
   createdAt   DateTime @default(now())
 
-  roles       RolePermission[]
+  roles RolePermission[]
 
   @@map("permissions")
 }
@@ -173,13 +173,13 @@ model LeadStatus {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  leads      Lead[]
+  leads Lead[]
 
   @@map("lead_statuses")
 }
 
 model Lead {
-  id               String     @id @default(cuid())
+  id               String      @id @default(cuid())
   fullName         String
   phone            String?
   email            String?
@@ -191,7 +191,7 @@ model Lead {
   categoryInterest String?
   notes            String?
   source           String?
-  leadType         String     @default("academy") // "academy" | "summer_camp"
+  leadType         String      @default("academy") // "academy" | "summer_camp"
   // Summer-camp-specific extra fields stored as JSON string
   summerCampData   String?
   statusId         String?
@@ -199,11 +199,11 @@ model Lead {
   assignedStaffId  String?
   assignedStaff    User?       @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
   convertedAt      DateTime?
-  isConverted      Boolean    @default(false)
+  isConverted      Boolean     @default(false)
   stationId        String?
-  station          Station?   @relation(fields: [stationId], references: [id])
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  station          Station?    @relation(fields: [stationId], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   surveyAnswers    SurveyAnswer[]
   selectedPlanId   String?
@@ -215,6 +215,12 @@ model Lead {
   leadNotes        LeadNote[]
   websiteOrders    WebsiteOrder[]
   summerCampPlayer SummerCampPlayer?
+
+  // ---- Showcase Website: Contact / Squad Registration / Newsletter reuse ----
+  // leadType also takes "contact" | "squad_registration" | "newsletter" by convention (no schema enum, matches existing "academy"/"summer_camp" pattern)
+  programmeId String?
+  programme   Programme? @relation(fields: [programmeId], references: [id])
+  extraData   String? // JSON blob for form-specific extra fields, sibling to summerCampData
 
   @@map("leads")
 }
@@ -240,31 +246,31 @@ model LeadActivity {
 // ==================== PLAYERS ====================
 
 model Player {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photo           String?
-  fullName        String
-  dateOfBirth     DateTime?
-  age             Int?
-  gender          String?
-  phone           String?
-  email           String?
-  parentName      String?
-  parentPhone     String?
-  address         String?
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photo            String?
+  fullName         String
+  dateOfBirth      DateTime?
+  age              Int?
+  gender           String?
+  phone            String?
+  email            String?
+  parentName       String?
+  parentPhone      String?
+  address          String?
   emergencyContact String?
-  team            String?
-  category        String?
-  position        String?
-  medicalNotes    String?
-  notes           String?
-  status          String    @default("active")
-  referralCode    String?
-  stationId       String?
-  station         Station?  @relation(fields: [stationId], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  team             String?
+  category         String?
+  position         String?
+  medicalNotes     String?
+  notes            String?
+  status           String    @default("active")
+  referralCode     String?
+  stationId        String?
+  station          Station?  @relation(fields: [stationId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   subscriptions      Subscription[]
   payments           Payment[]
@@ -278,20 +284,20 @@ model Player {
 // ==================== SUBSCRIPTIONS ====================
 
 model SubscriptionPlan {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  duration    Int
-  durationType String  @default("month")
-  price       Float
-  color       String   @default("#3B82F6")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  duration     Int
+  durationType String   @default("month")
+  price        Float
+  color        String   @default("#3B82F6")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   subscriptions Subscription[]
   payments      Payment[]
-  applications  Lead[]           @relation("ApplicationPlan")
+  applications  Lead[]         @relation("ApplicationPlan")
 
   @@map("subscription_plans")
 }
@@ -309,7 +315,7 @@ model Subscription {
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
-  payments  Payment[]
+  payments Payment[]
 
   @@map("subscriptions")
 }
@@ -325,31 +331,31 @@ model PaymentMethod {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  payments       Payment[]
+  payments Payment[]
 
   @@map("payment_methods")
 }
 
 model Payment {
-  id               String            @id @default(cuid())
-  playerId         String
-  subscriptionId   String?
-  planId           String?
-  player           Player            @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  subscription     Subscription?     @relation(fields: [subscriptionId], references: [id])
-  plan             SubscriptionPlan? @relation(fields: [planId], references: [id])
-  paymentMethodId  String?
-  paymentMethod    PaymentMethod?    @relation(fields: [paymentMethodId], references: [id])
-  amount           Float
-  proof            String?
-  status           String            @default("pending")
-  adminNotes       String?
-  approvalDate     DateTime?
-  rejectionReason  String?
-  stationId        String?
-  station          Station?          @relation(fields: [stationId], references: [id])
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id              String            @id @default(cuid())
+  playerId        String
+  subscriptionId  String?
+  planId          String?
+  player          Player            @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  subscription    Subscription?     @relation(fields: [subscriptionId], references: [id])
+  plan            SubscriptionPlan? @relation(fields: [planId], references: [id])
+  paymentMethodId String?
+  paymentMethod   PaymentMethod?    @relation(fields: [paymentMethodId], references: [id])
+  amount          Float
+  proof           String?
+  status          String            @default("pending")
+  adminNotes      String?
+  approvalDate    DateTime?
+  rejectionReason String?
+  stationId       String?
+  station         Station?          @relation(fields: [stationId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@map("payments")
 }
@@ -357,42 +363,42 @@ model Payment {
 // ==================== STORE ====================
 
 model ProductCategory {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   image       String?
-  isActive    Boolean   @default(true)
-  order       Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  products    Product[]
+  products Product[]
 
   @@map("product_categories")
 }
 
 model Product {
-  id            String          @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String
-  slug          String?         @unique
+  slug          String?          @unique
   description   String?
-  images        String          @default("[]")
+  images        String           @default("[]")
   price         Float
   discountPrice Float?
-  stock         Int             @default(0)
-  sku           String?         @unique
+  stock         Int              @default(0)
+  sku           String?          @unique
   categoryId    String?
   category      ProductCategory? @relation(fields: [categoryId], references: [id])
-  status        String          @default("active")
-  isFeatured    Boolean         @default(false)
+  status        String           @default("active")
+  isFeatured    Boolean          @default(false)
   weight        Float?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
-  orderItems    OrderItem[]
-  variants      ProductVariant[]
+  orderItems        OrderItem[]
+  variants          ProductVariant[]
   websiteOrderItems WebsiteOrderItem[]
-  reviews       Review[]
+  reviews           Review[]
 
   @@map("products")
 }
@@ -400,18 +406,18 @@ model Product {
 // ==================== COD FORM ====================
 
 model FormField {
-  id           String   @id @default(cuid())
-  label        String
-  fieldName    String
-  fieldType    String   @default("text")
-  placeholder  String?
-  options      String?
-  isRequired   Boolean  @default(false)
-  isDefault    Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  order        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  label       String
+  fieldName   String
+  fieldType   String   @default("text")
+  placeholder String?
+  options     String?
+  isRequired  Boolean  @default(false)
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("form_fields")
 }
@@ -427,37 +433,37 @@ model OrderStatus {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders    Order[]
+  orders Order[]
 
   @@map("order_statuses")
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  orderNumber String      @unique
+  id          String       @id @default(cuid())
+  orderNumber String       @unique
   playerId    String?
-  player      Player?     @relation(fields: [playerId], references: [id])
+  player      Player?      @relation(fields: [playerId], references: [id])
   statusId    String?
   status      OrderStatus? @relation(fields: [statusId], references: [id])
   totalAmount Float
-  codData     String      @default("{}")
+  codData     String       @default("{}")
   notes       String?
   stationId   String?
-  station     Station?    @relation(fields: [stationId], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  station     Station?     @relation(fields: [stationId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-  items       OrderItem[]
+  items OrderItem[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   orderId   String
   productId String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
   quantity  Int
   price     Float
   createdAt DateTime @default(now())
@@ -468,12 +474,25 @@ model OrderItem {
 // ==================== LANDING PAGE ====================
 
 model LandingPage {
-  id          String          @id @default(cuid())
-  isPublished Boolean         @default(false)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id          String  @id @default(cuid())
+  isPublished Boolean @default(false)
 
-  sections    LandingSection[]
+  // ---- Showcase Website: generalized multi-page section builder ----
+  slug            String? @unique // e.g. "home", "programmes", "who-we-are" — nullable for safe additive migration, always set by application code
+  title           String?
+  template        String? @default("default")
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+  canonicalUrl    String?
+  noindex         Boolean @default(false)
+  nofollow        Boolean @default(false)
+  breadcrumbLabel String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sections LandingSection[]
 
   @@map("landing_pages")
 }
@@ -496,15 +515,15 @@ model LandingSection {
 // ==================== SURVEYS ====================
 
 model Survey {
-  id          String           @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
   description String?
-  isActive    Boolean          @default(true)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  questions   SurveyQuestion[]
-  answers     SurveyAnswer[]
+  questions SurveyQuestion[]
+  answers   SurveyAnswer[]
 
   @@map("surveys")
 }
@@ -521,21 +540,21 @@ model SurveyQuestion {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  answers      SurveyAnswer[]
+  answers SurveyAnswer[]
 
   @@map("survey_questions")
 }
 
 model SurveyAnswer {
-  id         String          @id @default(cuid())
+  id         String         @id @default(cuid())
   surveyId   String
   questionId String
   leadId     String?
-  survey     Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  question   SurveyQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  lead       Lead?           @relation(fields: [leadId], references: [id])
+  survey     Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  lead       Lead?          @relation(fields: [leadId], references: [id])
   answer     String
-  createdAt  DateTime        @default(now())
+  createdAt  DateTime       @default(now())
 
   @@map("survey_answers")
 }
@@ -602,14 +621,14 @@ model Meeting {
 }
 
 model LeadNote {
-  id              String   @id @default(cuid())
-  leadId          String
-  lead            Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  content         String
-  createdById     String?
-  createdByName   String   @default("System")
-  createdByRole   String   @default("agent")
-  createdAt       DateTime @default(now())
+  id            String   @id @default(cuid())
+  leadId        String
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  content       String
+  createdById   String?
+  createdByName String   @default("System")
+  createdByRole String   @default("agent")
+  createdAt     DateTime @default(now())
 
   @@index([leadId])
   @@map("lead_notes")
@@ -664,8 +683,8 @@ model FileRequirement {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  applicationFiles     ApplicationFile[]
-  summerCampDocuments  SummerCampDocument[]
+  applicationFiles    ApplicationFile[]
+  summerCampDocuments SummerCampDocument[]
 
   @@map("file_requirements")
 }
@@ -688,18 +707,47 @@ model ApplicationFile {
 // ==================== STATIONS ====================
 
 model Station {
-  id          String   @id @default(cuid())
-  name        String
-  wilaya      String
-  wilayaCode  Int?
-  address     String?
-  phone       String?
-  email       String?
-  whatsapp    String?
-  logoUrl     String?
-  status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String  @id @default(cuid())
+  name       String
+  wilaya     String
+  wilayaCode Int?
+  address    String?
+  phone      String?
+  email      String?
+  whatsapp   String?
+  logoUrl    String?
+  status     String  @default("active")
+
+  // ---- Showcase Website: Venue marketing fields ----
+  slug                String? @unique
+  heroImageUrl        String?
+  galleryImages       String? // JSON array of image URLs
+  shortDescription    String?
+  shortDescriptionFr  String?
+  shortDescriptionAr  String?
+  fullDescription     String?
+  fullDescriptionFr   String?
+  fullDescriptionAr   String?
+  facilities          String? // JSON array of strings
+  pitchType           String?
+  changingRooms       String?
+  parkingInfo         String?
+  parkingInfoFr       String?
+  parkingInfoAr       String?
+  transportInfo       String?
+  transportInfoFr     String?
+  transportInfoAr     String?
+  accessibilityInfo   String?
+  accessibilityInfoFr String?
+  accessibilityInfoAr String?
+  googleMapsUrl       String?
+  latitude            Float?
+  longitude           Float?
+  displayOrder        Int     @default(0)
+  isPubliclyListed    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   stationStaff       StationStaff[]
   leads              Lead[]
@@ -724,6 +772,12 @@ model Station {
   summerCampSessions SummerCampSession[]
   summerCampPlayers  SummerCampPlayer[]
   summerCampPlans    SummerCampPlan[]
+
+  // ---- Showcase Website relations ----
+  programmeSchedules ProgrammeSchedule[]
+  programmeVenues    ProgrammeVenue[]
+  coaches            Coach[]
+  faqs               Faq[]
 
   @@map("stations")
 }
@@ -765,9 +819,9 @@ model Affiliate {
   createdBy      User?    @relation("AffiliateCreatedBy", fields: [createdById], references: [id])
   createdAt      DateTime @default(now())
 
-  referrals    AffiliateReferral[]
-  earnings     AffiliateEarning[]
-  withdrawals  AffiliateWithdrawal[]
+  referrals   AffiliateReferral[]
+  earnings    AffiliateEarning[]
+  withdrawals AffiliateWithdrawal[]
 
   @@map("affiliates")
 }
@@ -804,16 +858,16 @@ model AffiliateEarning {
 }
 
 model AffiliateWithdrawal {
-  id             String    @id @default(cuid())
-  affiliateId    String
-  affiliate      Affiliate @relation(fields: [affiliateId], references: [id])
-  amount         Decimal   @db.Decimal(10, 2)
-  status         String    @default("pending")
-  requestedAt    DateTime  @default(now())
-  processedAt    DateTime?
-  processedById  String?
-  processedBy    User?     @relation(fields: [processedById], references: [id])
-  notes          String?
+  id            String    @id @default(cuid())
+  affiliateId   String
+  affiliate     Affiliate @relation(fields: [affiliateId], references: [id])
+  amount        Decimal   @db.Decimal(10, 2)
+  status        String    @default("pending")
+  requestedAt   DateTime  @default(now())
+  processedAt   DateTime?
+  processedById String?
+  processedBy   User?     @relation(fields: [processedById], references: [id])
+  notes         String?
 
   @@map("affiliate_withdrawals")
 }
@@ -828,7 +882,7 @@ model ChargeCategory {
   color     String?
   isGlobal  Boolean  @default(false)
 
-  charges   Charge[]
+  charges Charge[]
 
   @@map("charge_categories")
 }
@@ -1022,9 +1076,9 @@ model WebsiteFooterConfig {
   trustpilotUrl   String?
   updatedAt       DateTime @updatedAt
 
-  linkColumns     FooterLinkColumn[]
-  socialLinks     FooterSocialLink[]
-  bottomLinks     FooterBottomLink[]
+  linkColumns FooterLinkColumn[]
+  socialLinks FooterSocialLink[]
+  bottomLinks FooterBottomLink[]
 
   @@map("website_footer_configs")
 }
@@ -1038,7 +1092,7 @@ model FooterLinkColumn {
   titleAr  String?
   position Int                 @default(0)
 
-  links    FooterLink[]
+  links FooterLink[]
 
   @@map("footer_link_columns")
 }
@@ -1102,22 +1156,22 @@ model WebsiteHeaderConfig {
   ctaStyle             String   @default("filled")
   updatedAt            DateTime @updatedAt
 
-  navItems             HeaderNavItem[]
+  navItems HeaderNavItem[]
 
   @@map("website_header_configs")
 }
 
 model HeaderNavItem {
-  id           String              @id @default(cuid())
-  headerId     String
-  header       WebsiteHeaderConfig @relation(fields: [headerId], references: [id], onDelete: Cascade)
-  label        String
-  labelFr      String?
-  labelAr      String?
-  url          String?
-  hasDropdown  Boolean             @default(false)
-  position     Int                 @default(0)
-  isActive     Boolean             @default(true)
+  id          String              @id @default(cuid())
+  headerId    String
+  header      WebsiteHeaderConfig @relation(fields: [headerId], references: [id], onDelete: Cascade)
+  label       String
+  labelFr     String?
+  labelAr     String?
+  url         String?
+  hasDropdown Boolean             @default(false)
+  position    Int                 @default(0)
+  isActive    Boolean             @default(true)
 
   dropdownItems HeaderNavDropdownItem[]
 
@@ -1145,10 +1199,10 @@ model HeaderNavDropdownItem {
 // ==================== WEBSITE STORE ORDERS ====================
 
 model WebsiteOrder {
-  id            String    @id @default(cuid())
-  orderNumber   String    @unique
+  id            String   @id @default(cuid())
+  orderNumber   String   @unique
   stationId     String?
-  station       Station?  @relation(fields: [stationId], references: [id])
+  station       Station? @relation(fields: [stationId], references: [id])
   customerName  String
   customerPhone String
   customerEmail String?
@@ -1156,30 +1210,30 @@ model WebsiteOrder {
   city          String?
   address       String?
   deliveryNotes String?
-  subtotal      Decimal   @db.Decimal(10, 2)
-  shippingFee   Decimal   @default(0) @db.Decimal(10, 2)
-  total         Decimal   @db.Decimal(10, 2)
-  status        String    @default("pending")
+  subtotal      Decimal  @db.Decimal(10, 2)
+  shippingFee   Decimal  @default(0) @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
+  status        String   @default("pending")
   leadId        String?
-  lead          Lead?     @relation(fields: [leadId], references: [id])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  lead          Lead?    @relation(fields: [leadId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  items         WebsiteOrderItem[]
+  items WebsiteOrderItem[]
 
   @@map("website_orders")
 }
 
 model WebsiteOrderItem {
-  id        String       @id @default(cuid())
-  orderId   String
-  order     WebsiteOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product      @relation(fields: [productId], references: [id])
-  variantId String?
+  id          String       @id @default(cuid())
+  orderId     String
+  order       WebsiteOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id])
+  variantId   String?
   variantInfo String?
-  quantity  Int
-  price     Decimal      @db.Decimal(10, 2)
+  quantity    Int
+  price       Decimal      @db.Decimal(10, 2)
 
   @@map("website_order_items")
 }
@@ -1214,21 +1268,21 @@ model Review {
 // ==================== WEBSITE SLIDES ====================
 
 model WebsiteSlide {
-  id          String   @id @default(cuid())
-  stationId   String?
-  station     Station? @relation(fields: [stationId], references: [id])
-  imageUrl    String
-  title       String?
-  titleFr     String?
-  titleAr     String?
-  subtitle    String?
-  subtitleFr  String?
-  subtitleAr  String?
-  ctaLabel    String?
-  ctaUrl      String?
-  position    Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  stationId  String?
+  station    Station? @relation(fields: [stationId], references: [id])
+  imageUrl   String
+  title      String?
+  titleFr    String?
+  titleAr    String?
+  subtitle   String?
+  subtitleFr String?
+  subtitleAr String?
+  ctaLabel   String?
+  ctaUrl     String?
+  position   Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
 
   @@map("website_slides")
 }
@@ -1236,15 +1290,15 @@ model WebsiteSlide {
 // ==================== WEBSITE SPONSORS ====================
 
 model WebsiteSponsor {
-  id        String   @id @default(cuid())
-  stationId String?
-  station   Station? @relation(fields: [stationId], references: [id])
-  name      String
-  logoUrl   String
+  id         String   @id @default(cuid())
+  stationId  String?
+  station    Station? @relation(fields: [stationId], references: [id])
+  name       String
+  logoUrl    String
   websiteUrl String?
-  position  Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  position   Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
 
   @@map("website_sponsors")
 }
@@ -1271,52 +1325,52 @@ model SummerCampSession {
 }
 
 model SummerCampPlayer {
-  id               String    @id @default(cuid())
-  leadId           String?   @unique
-  lead             Lead?     @relation(fields: [leadId], references: [id])
-  sessionId        String?
-  session          SummerCampSession? @relation(fields: [sessionId], references: [id])
-  stationId        String?
-  station          Station?  @relation(fields: [stationId], references: [id])
+  id        String             @id @default(cuid())
+  leadId    String?            @unique
+  lead      Lead?              @relation(fields: [leadId], references: [id])
+  sessionId String?
+  session   SummerCampSession? @relation(fields: [sessionId], references: [id])
+  stationId String?
+  station   Station?           @relation(fields: [stationId], references: [id])
 
   // Participant info
-  fullName         String
-  dateOfBirth      DateTime?
-  age              Int?
-  gender           String?
-  healthNotes      String?
-  notes            String?
+  fullName    String
+  dateOfBirth DateTime?
+  age         Int?
+  gender      String?
+  healthNotes String?
+  notes       String?
 
   // Guardian / parent contact
   guardianName     String?
   guardianPhone    String?
   guardianEmail    String?
-  guardianRelation String?   // "mother" | "father" | "other"
+  guardianRelation String? // "mother" | "father" | "other"
 
   // Admin
-  status           String    @default("active") // "active" | "cancelled" | "completed"
-  paidAmount       Decimal?  @db.Decimal(10, 2)
-  paymentStatus    String    @default("unpaid") // "unpaid" | "partial" | "paid"
+  status        String   @default("active") // "active" | "cancelled" | "completed"
+  paidAmount    Decimal? @db.Decimal(10, 2)
+  paymentStatus String   @default("unpaid") // "unpaid" | "partial" | "paid"
 
-  documents        SummerCampDocument[]
+  documents SummerCampDocument[]
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("summer_camp_players")
 }
 
 model SummerCampDocument {
-  id          String           @id @default(cuid())
-  playerId    String
-  player      SummerCampPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id            String           @id @default(cuid())
+  playerId      String
+  player        SummerCampPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
   requirementId String?
-  requirement FileRequirement? @relation(fields: [requirementId], references: [id])
-  fileName    String
-  fileUrl     String
-  mimeType    String?
-  size        Int?
-  createdAt   DateTime         @default(now())
+  requirement   FileRequirement? @relation(fields: [requirementId], references: [id])
+  fileName      String
+  fileUrl       String
+  mimeType      String?
+  size          Int?
+  createdAt     DateTime         @default(now())
 
   @@map("summer_camp_documents")
 }
@@ -1339,22 +1393,284 @@ model SummerCampPlan {
   @@map("summer_camp_plans")
 }
 
+// ==================== SHOWCASE WEBSITE: PROGRAMMES ====================
+
+model ProgrammeCategory {
+  id        String   @id @default(cuid())
+  name      String
+  nameFr    String?
+  nameAr    String?
+  slug      String   @unique
+  colorTag  String   @default("#3996D6")
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  programmes Programme[]
+
+  @@map("programme_categories")
+}
+
+model Programme {
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  name               String
+  nameFr             String?
+  nameAr             String?
+  shortDescription   String?
+  shortDescriptionFr String?
+  shortDescriptionAr String?
+  fullDescription    String?
+  fullDescriptionFr  String?
+  fullDescriptionAr  String?
+  heroImageUrl       String?
+  cardImageUrl       String?
+  categoryId         String?
+  category           ProgrammeCategory? @relation(fields: [categoryId], references: [id])
+  ageRangeLabel      String?
+  ageRangeLabelFr    String?
+  ageRangeLabelAr    String?
+  minAge             Int?
+  maxAge             Int?
+  priceFrom          Float?
+  priceLabel         String?
+  priceLabelFr       String?
+  priceLabelAr       String?
+  promoBannerText    String?
+  promoBannerTextFr  String?
+  promoBannerTextAr  String?
+  promoBannerUrl     String?
+  bookingUrl         String?
+  metaTitle          String?
+  metaDescription    String?
+  ogImage            String?
+  isFeatured         Boolean            @default(false)
+  isPubliclyListed   Boolean            @default(true)
+  displayOrder       Int                @default(0)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  schedules     ProgrammeSchedule[]
+  venues        ProgrammeVenue[]
+  coaches       ProgrammeCoach[]
+  faqs          Faq[]
+  leads         Lead[]
+  pathwayLevels PathwayLevel[]
+
+  @@map("programmes")
+}
+
+model ProgrammeSchedule {
+  id                 String    @id @default(cuid())
+  programmeId        String
+  programme          Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  ageGroup           String
+  minAge             Int?
+  maxAge             Int?
+  dobStart           DateTime?
+  dobEnd             DateTime?
+  sessionName        String?
+  sessionType        String?
+  day                String?
+  startTime          String?
+  endTime            String?
+  venueId            String?
+  venue              Station?  @relation(fields: [venueId], references: [id])
+  coachId            String?
+  coach              Coach?    @relation(fields: [coachId], references: [id])
+  capacity           Int?
+  availableSpaces    Int?
+  price              Float?
+  registrationStatus String    @default("open")
+  order              Int       @default(0)
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("programme_schedules")
+}
+
+model ProgrammeVenue {
+  id          String    @id @default(cuid())
+  programmeId String
+  programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  venueId     String
+  venue       Station   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  order       Int       @default(0)
+
+  @@unique([programmeId, venueId])
+  @@map("programme_venues")
+}
+
+model ProgrammeCoach {
+  id          String    @id @default(cuid())
+  programmeId String
+  programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  coachId     String
+  coach       Coach     @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  order       Int       @default(0)
+
+  @@unique([programmeId, coachId])
+  @@map("programme_coaches")
+}
+
+// ==================== SHOWCASE WEBSITE: COACHES ====================
+
+model Coach {
+  id             String   @id @default(cuid())
+  fullName       String
+  photoUrl       String?
+  role           String?
+  roleFr         String?
+  roleAr         String?
+  bio            String?
+  bioFr          String?
+  bioAr          String?
+  certifications String? // JSON array of strings
+  stationId      String?
+  station        Station? @relation(fields: [stationId], references: [id])
+  order          Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  programmes         ProgrammeCoach[]
+  programmeSchedules ProgrammeSchedule[]
+
+  @@map("coaches")
+}
+
+// ==================== SHOWCASE WEBSITE: PATHWAY ====================
+
+model PathwayLevel {
+  id                  String     @id @default(cuid())
+  name                String
+  nameFr              String?
+  nameAr              String?
+  ageRangeLabel       String?
+  ageRangeLabelFr     String?
+  ageRangeLabelAr     String?
+  color               String     @default("#3996D6")
+  icon                String?
+  description         String?
+  descriptionFr       String?
+  descriptionAr       String?
+  entryRequirements   String?
+  entryRequirementsFr String?
+  entryRequirementsAr String?
+  objectives          String?
+  objectivesFr        String?
+  objectivesAr        String?
+  programmeId         String?
+  programme           Programme? @relation(fields: [programmeId], references: [id])
+  order               Int        @default(0)
+  isActive            Boolean    @default(true)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@map("pathway_levels")
+}
+
+// ==================== SHOWCASE WEBSITE: FAQ ====================
+
+model Faq {
+  id          String     @id @default(cuid())
+  question    String
+  questionFr  String?
+  questionAr  String?
+  answer      String
+  answerFr    String?
+  answerAr    String?
+  category    String?
+  programmeId String?
+  programme   Programme? @relation(fields: [programmeId], references: [id])
+  stationId   String?
+  station     Station?   @relation(fields: [stationId], references: [id])
+  order       Int        @default(0)
+  isPublished Boolean    @default(true)
+  isFeatured  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("faqs")
+}
+
+// ==================== SHOWCASE WEBSITE: NEWS ====================
+
+model NewsCategory {
+  id        String   @id @default(cuid())
+  name      String
+  nameFr    String?
+  nameAr    String?
+  slug      String   @unique
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  articles NewsArticle[]
+
+  @@map("news_categories")
+}
+
+model NewsArticle {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  titleFr         String?
+  titleAr         String?
+  excerpt         String?
+  excerptFr       String?
+  excerptAr       String?
+  body            String?
+  bodyFr          String?
+  bodyAr          String?
+  coverImageUrl   String?
+  categoryId      String?
+  category        NewsCategory? @relation(fields: [categoryId], references: [id])
+  authorName      String?
+  publishedAt     DateTime?
+  isPublished     Boolean       @default(false)
+  isFeatured      Boolean       @default(false)
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("news_articles")
+}
+
+// ==================== REDIRECTS ====================
+
+model Redirect {
+  id         String   @id @default(cuid())
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(308)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("redirects")
+}
+
 // ==================== TICKETS ====================
 
 model Ticket {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   title        String
   description  String
-  status       String    @default("open")   // open | in_progress | resolved | closed
-  priority     String    @default("medium") // low | medium | high | urgent
+  status       String   @default("open") // open | in_progress | resolved | closed
+  priority     String   @default("medium") // low | medium | high | urgent
   createdById  String
-  createdBy    User      @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  createdBy    User     @relation("TicketCreatedBy", fields: [createdById], references: [id])
   assignedToId String?
-  assignedTo   User?     @relation("TicketAssignedTo", fields: [assignedToId], references: [id])
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  assignedTo   User?    @relation("TicketAssignedTo", fields: [assignedToId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  comments     TicketComment[]
+  comments TicketComment[]
 
   @@map("tickets")
 }

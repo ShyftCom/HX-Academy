@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../components/website/design-tokens/tokens.css";
 
 /* ============================================================
    BRAND PALETTE — Football Academy
@@ -80,7 +81,14 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+/* Kept in @layer base so Tailwind utilities (which live in @layer utilities)
+   can still override it. Unlayered, this rule beat every `text-*` class on a
+   heading regardless of specificity — cascade layers are resolved before
+   specificity — which forced all public-site headings (hero, footer, FAQ) to
+   black. Admin headings that set no explicit text color are unaffected. */
+@layer base {
+  h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+}
 
 /* ============================================================
    ARABIC / RTL

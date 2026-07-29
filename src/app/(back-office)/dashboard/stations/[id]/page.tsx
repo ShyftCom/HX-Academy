@@ -8,10 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Phone, Mail, Users, Building2 } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Mail, Users, Building2, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 
 function formatDA(n: number) { return n.toLocaleString("fr-DZ") + " DA"; }
 
@@ -27,6 +31,14 @@ export default function StationDetailPage() {
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<any>({});
+  const [marketing, setMarketing] = useState<Record<string, unknown>>({});
+  const setMarketingField = (patch: Record<string, unknown>) => setMarketing((m) => ({ ...m, ...patch }));
+
+  const saveMarketingMut = useMutation({
+    mutationFn: (data: Record<string, unknown>) => fetch(`/api/stations/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["station", id] }); toast.success("Public page saved"); },
+    onError: () => toast.error("Save failed"),
+  });
 
   const updateMut = useMutation({
     mutationFn: (data: any) => fetch(`/api/stations/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -38,6 +50,8 @@ export default function StationDetailPage() {
     mutationFn: () => fetch(`/api/stations/${id}`, { method: "DELETE" }),
     onSuccess: () => { toast.success("Station deleted"); router.push("/dashboard/stations"); },
   });
+
+  useEffect(() => { if (station && !station.error) setMarketing(station); }, [station]);
 
   if (isLoading) return <div className="p-8 text-center text-sm text-gray-400">Loading...</div>;
   if (!station || station.error) return <div className="p-8 text-center text-sm text-red-400">Station not found</div>;
@@ -66,6 +80,7 @@ export default function StationDetailPage() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="staff">Staff ({station.stationStaff?.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="marketing">Public / Marketing</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -103,6 +118,58 @@ export default function StationDetailPage() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="marketing" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Public Venue Page</CardTitle>
+                {station.slug && (
+                  <a href={`/fr/venues/${station.slug}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 hover:underline flex items-center gap-1">
+                    View public page <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                <div>
+                  <Label>Show on public Venues page</Label>
+                  <p className="text-xs text-gray-400">When off, this station will not appear on the public website.</p>
+                </div>
+                <Switch checked={!!marketing.isPubliclyListed} onCheckedChange={(v) => setMarketingField({ isPubliclyListed: v })} />
+              </div>
+              <div className="space-y-1">
+                <Label>URL slug</Label>
+                <Input value={(marketing.slug as string) ?? ""} onChange={(e) => setMarketingField({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-") })} placeholder="e.g. city-football-academy" />
+              </div>
+              <ImageUrlInput label="Hero image" value={(marketing.heroImageUrl as string) ?? ""} onChange={(url) => setMarketingField({ heroImageUrl: url })} />
+              <LocaleTextInput baseKey="shortDescription" values={marketing} onChange={setMarketingField} label="Short description (used on venue cards)" multiline />
+              <LocaleTextInput baseKey="fullDescription" values={marketing} onChange={setMarketingField} label="Full description (used on venue page)" multiline />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1"><Label>Pitch type</Label><Input value={(marketing.pitchType as string) ?? ""} onChange={(e) => setMarketingField({ pitchType: e.target.value })} placeholder="e.g. 3G artificial turf" /></div>
+                <div className="space-y-1"><Label>Changing rooms</Label><Input value={(marketing.changingRooms as string) ?? ""} onChange={(e) => setMarketingField({ changingRooms: e.target.value })} /></div>
+              </div>
+              <div className="space-y-1">
+                <Label>Facilities (one per line)</Label>
+                <Textarea
+                  value={Array.isArray(marketing.facilities) ? (marketing.facilities as string[]).join("\n") : (() => { try { return JSON.parse((marketing.facilities as string) ?? "[]").join("\n"); } catch { return ""; } })()}
+                  onChange={(e) => setMarketingField({ facilities: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
+                  placeholder={"3 full-size pitches\nIndoor training hall\nParking on site"}
+                  rows={4}
+                />
+              </div>
+              <div className="space-y-1"><Label>Google Maps URL</Label><Input value={(marketing.googleMapsUrl as string) ?? ""} onChange={(e) => setMarketingField({ googleMapsUrl: e.target.value })} placeholder="https://maps.google.com/…" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1"><Label>Parking info</Label><Textarea value={(marketing.parkingInfo as string) ?? ""} onChange={(e) => setMarketingField({ parkingInfo: e.target.value })} rows={2} /></div>
+                <div className="space-y-1"><Label>Public transport info</Label><Textarea value={(marketing.transportInfo as string) ?? ""} onChange={(e) => setMarketingField({ transportInfo: e.target.value })} rows={2} /></div>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={() => saveMarketingMut.mutate(marketing)} disabled={saveMarketingMut.isPending}>{saveMarketingMut.isPending ? "Saving…" : "Save Public Page"}</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useId, useCallback } from "react";
 import Link from "next/link";
-import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
+import { Menu, X, ShoppingCart, ChevronDown, MapPin } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useHeaderOverlay } from "./HeaderOverlayContext";
+import { FsaButton } from "./buttons/FsaButton";
 
-interface DropdownItem { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string; icon: string | null; description: string | null; descriptionFr: string | null; descriptionAr: string | null; position: number }
+interface DropdownItem { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string; icon: string | null; description: string | null; descriptionFr: string | null; descriptionAr: string | null; position: number; isActive: boolean }
 interface NavItem { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string | null; hasDropdown: boolean; isActive: boolean; position: number; dropdownItems: DropdownItem[] }
 interface HeaderConfig {
   logoUrl: string | null; backgroundColor: string; textColor: string; accentColor: string;
@@ -14,17 +16,18 @@ interface HeaderConfig {
   ctaUrl: string | null; ctaStyle: string;
   navItems: NavItem[];
 }
+interface Venue { id: string; slug: string | null; name: string; wilaya: string }
 
 function getLabel(item: { label: string; labelFr?: string | null; labelAr?: string | null }, locale: string): string {
   if (locale === "ar" && item.labelAr) return item.labelAr;
-  if ((locale === "fr" || locale === "fr") && item.labelFr) return item.labelFr;
+  if (locale === "fr" && item.labelFr) return item.labelFr;
   return item.label;
 }
 
 function getCtaLabel(config: HeaderConfig, locale: string): string {
   if (locale === "ar" && config.ctaLabelAr) return config.ctaLabelAr;
   if (locale === "fr" && config.ctaLabelFr) return config.ctaLabelFr;
-  return config.ctaLabel ?? "Join now";
+  return config.ctaLabel ?? "Book Now";
 }
 
 function useCartCount() {
@@ -43,13 +46,223 @@ function useCartCount() {
   return count;
 }
 
+/** Disclosure-pattern dropdown (button + region, not a full ARIA menu) — the
+ *  simpler, more robust pattern for a set of plain links. Opens on click or
+ *  hover, closes on Escape/outside-click/blur-out, no layout shift. */
+function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; dark: boolean }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelId = useId();
+  const isRtl = locale === "ar";
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const onClick = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onClick);
+    };
+  }, [open]);
+
+  const items = item.dropdownItems.filter((d) => d.isActive).sort((a, b) => a.position - b.position);
+  const cancelClose = () => { if (closeTimer.current) clearTimeout(closeTimer.current); };
+  const delayedClose = () => { closeTimer.current = setTimeout(() => setOpen(false), 150); };
+
+  return (
+    <div
+      ref={wrapRef}
+      className="relative"
+      onMouseEnter={() => { cancelClose(); setOpen(true); }}
+      onMouseLeave={delayedClose}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] font-medium transition-colors ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
+      >
+        {getLabel(item, locale)}
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+      </button>
+
+      {open && items.length > 0 && (
+        <div
+          id={panelId}
+          role="region"
+          aria-label={getLabel(item, locale)}
+          onMouseEnter={cancelClose}
+          onMouseLeave={delayedClose}
+          className={`absolute top-full ${isRtl ? "right-0" : "left-0"} z-50 mt-2 min-w-[240px] overflow-hidden rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]`}
+        >
+          {items.map((d) => (
+            <Link
+              key={d.id}
+              href={d.url}
+              onClick={() => setOpen(false)}
+              className="block px-5 py-3 text-[15px] font-semibold text-fsa-navy-900 transition-colors hover:bg-fsa-pale-bg focus-visible:bg-fsa-pale-bg focus-visible:outline-none"
+            >
+              {getLabel(d, locale)}
+              {d.description && <span className="mt-0.5 block text-xs font-normal text-fsa-text-muted">{d.description}</span>}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/public/venues").then((r) => r.json()).then((d) => Array.isArray(d) && setVenues(d)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("click", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("click", onClick); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  if (venues.length === 0) return null;
+
+  return (
+    <div ref={ref} className="relative hidden lg:block">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex items-center gap-1.5 rounded-fsa-pill border px-4 py-1.5 text-sm font-semibold transition-colors ${dark ? "border-white/40 text-white hover:bg-white/10" : "border-fsa-navy-900/20 text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
+      >
+        <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+        {venues.length === 1 ? venues[0].name : "Locations"}
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-2 max-h-80 min-w-[220px] overflow-auto rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]">
+          {venues.map((v) => (
+            <Link
+              key={v.id}
+              href={`/${locale}/venues${v.slug ? `/${v.slug}` : ""}`}
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-sm font-medium text-fsa-navy-900 hover:bg-fsa-pale-bg"
+            >
+              {v.name}
+              <span className="ms-1.5 text-xs font-normal text-fsa-text-muted">{v.wilaya}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale: string; onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [openSub, setOpenSub] = useState<string | null>(null);
+  const isRtl = locale === "ar";
+  const navItems = [...(config.navItems ?? [])].sort((a, b) => a.position - b.position).filter((i) => i.isActive);
+  const ctaLabel = getCtaLabel(config, locale);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    panelRef.current?.querySelector<HTMLElement>("button, a")?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusables = panelRef.current.querySelectorAll<HTMLElement>('a, button, [tabindex]:not([tabindex="-1"])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus();
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Site navigation">
+      <div className="absolute inset-0 bg-fsa-navy-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        ref={panelRef}
+        dir={isRtl ? "rtl" : "ltr"}
+        className={`absolute top-0 ${isRtl ? "left-0" : "right-0"} flex h-full w-[86%] max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ease-[var(--ease-fsa-standard)]`}
+      >
+        <div className="flex items-center justify-between border-b border-fsa-border px-5 py-4">
+          <span className="font-fsa-display text-lg font-bold uppercase text-fsa-navy-900">Menu</span>
+          <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-9 w-9 items-center justify-center rounded-lg text-fsa-navy-900 hover:bg-fsa-pale-bg">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
+          {navItems.map((item) => (
+            <div key={item.id} className="border-b border-fsa-border/60 last:border-none">
+              {item.hasDropdown ? (
+                <>
+                  <button
+                    type="button"
+                    aria-expanded={openSub === item.id}
+                    onClick={() => setOpenSub(openSub === item.id ? null : item.id)}
+                    className="flex w-full items-center justify-between px-3 py-3.5 text-[15px] font-semibold text-fsa-navy-900"
+                  >
+                    {getLabel(item, locale)}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openSub === item.id ? "rotate-180" : ""}`} />
+                  </button>
+                  {openSub === item.id && (
+                    <div className="pb-2 ps-3">
+                      {item.dropdownItems.filter((d) => d.isActive).sort((a, b) => a.position - b.position).map((d) => (
+                        <Link key={d.id} href={d.url} onClick={onClose} className="block rounded-lg px-3 py-2.5 text-sm text-fsa-text-muted hover:bg-fsa-pale-bg hover:text-fsa-navy-900">
+                          {getLabel(d, locale)}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link href={item.url ?? "#"} onClick={onClose} className="block px-3 py-3.5 text-[15px] font-semibold text-fsa-navy-900">
+                  {getLabel(item, locale)}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
+        <div className="border-t border-fsa-border p-4">
+          {config.ctaUrl && ctaLabel && (
+            <FsaButton href={config.ctaUrl} variant="navy" className="w-full">
+              {ctaLabel}
+            </FsaButton>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function WebsiteHeader({ locale, stationId }: { locale: string; stationId?: string }) {
   const [config, setConfig] = useState<HeaderConfig | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const cartCount = useCartCount();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { overlay } = useHeaderOverlay();
 
   useEffect(() => {
     const url = stationId ? `/api/website/header?station_id=${stationId}` : "/api/website/header";
@@ -57,190 +270,103 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
   }, [stationId]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 48);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setActiveDropdown(null);
-      }
-    };
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, []);
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   if (!config) return null;
 
   const isRtl = locale === "ar";
-  const bg = config.backgroundColor ?? "#ffffff";
-  const text = config.textColor ?? "#0a1628";
-  const accent = config.accentColor ?? "#0a1628";
+  const transparentPhase = overlay && !scrolled;
   const navItems = [...(config.navItems ?? [])].sort((a, b) => a.position - b.position).filter((i) => i.isActive);
-
-  const ctaStyle = config.ctaStyle ?? "filled";
   const ctaLabel = getCtaLabel(config, locale);
 
+  const bg = transparentPhase ? "transparent" : config.backgroundColor || "#ffffff";
+  const dark = transparentPhase; // "dark" = header sits on a dark hero, so header text/icons are white
+
   return (
-    <header
-      style={{
-        backgroundColor: bg,
-        color: text,
-        position: config.sticky ? "sticky" : "relative",
-        top: 0,
-        zIndex: 50,
-        borderBottom: scrolled ? `1px solid rgba(0,0,0,0.08)` : "1px solid transparent",
-        transition: "border-color 0.2s, box-shadow 0.2s",
-        boxShadow: scrolled ? "0 1px 6px rgba(0,0,0,0.06)" : "none",
-      }}
-      dir={isRtl ? "rtl" : "ltr"}
-    >
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <Link href={`/${locale}`} className={isRtl ? "order-last" : "order-first"}>
-          {config.logoUrl ? (
-            <img src={config.logoUrl} alt="Logo" className="h-9 object-contain" />
-          ) : (
-            <span className="text-lg font-bold" style={{ color: accent }}>⚽ Academy</span>
-          )}
-        </Link>
-
-        {/* Desktop nav */}
-        <nav ref={dropdownRef} className="hidden md:flex items-center gap-1 flex-1 justify-center">
-          {(isRtl ? [...navItems].reverse() : navItems).map((item) => (
-            <div key={item.id} className="relative">
-              {item.hasDropdown ? (
-                <button
-                  onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-black/5"
-                  style={{ color: text }}
-                >
-                  {getLabel(item, locale)}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activeDropdown === item.id ? "rotate-180" : ""}`} />
-                </button>
-              ) : (
-                <Link
-                  href={item.url ?? "#"}
-                  className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-black/5"
-                  style={{ color: text }}
-                >
-                  {getLabel(item, locale)}
-                </Link>
-              )}
-
-              {item.hasDropdown && activeDropdown === item.id && item.dropdownItems?.length > 0 && (
-                <div
-                  className={`absolute top-full mt-1 ${isRtl ? "right-0" : "left-0"} min-w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden z-50`}
-                  style={{ minWidth: item.dropdownItems.length > 4 ? "480px" : "220px" }}
-                >
-                  <div className={item.dropdownItems.length > 4 ? "grid grid-cols-2 p-2" : "p-2"}>
-                    {item.dropdownItems.sort((a, b) => a.position - b.position).map((d) => (
-                      <Link
-                        key={d.id}
-                        href={d.url}
-                        className="flex items-start gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        {d.icon && <span className="text-gray-400 mt-0.5 flex-shrink-0 text-base">{d.icon}</span>}
-                        <div>
-                          <p className="text-sm font-medium text-gray-800 dark:text-white">{getLabel(d, locale)}</p>
-                          {d.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{d.description}</p>}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* Right side: lang switcher + cart + CTA */}
-        <div className={`flex items-center gap-2 ${isRtl ? "order-first" : "order-last"}`}>
-          {config.showLanguageSwitcher && <LanguageSwitcher variant="public" />}
-
-          <Link href={`/${locale}/store/cart`} className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-black/5 transition-colors" style={{ color: text }}>
-            <ShoppingCart className="w-5 h-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 text-xs font-bold rounded-full bg-red-500 text-white flex items-center justify-center">
-                {cartCount > 9 ? "9+" : cartCount}
+    <>
+      <header
+        className="left-0 right-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300"
+        style={{
+          position: overlay ? "fixed" : config.sticky ? "sticky" : "static",
+          backgroundColor: bg,
+          borderBottom: !transparentPhase ? "1px solid var(--color-fsa-border)" : "1px solid transparent",
+          boxShadow: scrolled && !transparentPhase ? "var(--shadow-fsa-header)" : "none",
+        }}
+        dir={isRtl ? "rtl" : "ltr"}
+      >
+        <div className="mx-auto flex h-20 items-center justify-between gap-4 px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
+          {/* Logo */}
+          <Link href={`/${locale}`} className="shrink-0">
+            {config.logoUrl ? (
+              <img src={config.logoUrl} alt="Football Skills Academy" className="h-10 object-contain" />
+            ) : (
+              <span className={`font-fsa-display text-xl font-extrabold uppercase tracking-tight ${dark ? "text-white" : "text-fsa-navy-900"}`}>
+                Football Skills Academy
               </span>
             )}
           </Link>
 
-          {config.ctaUrl && ctaLabel && (
-            <Link
-              href={config.ctaUrl}
-              style={
-                ctaStyle === "filled"
-                  ? { backgroundColor: accent, color: "#fff", borderColor: accent }
-                  : ctaStyle === "outlined"
-                  ? { color: accent, borderColor: accent }
-                  : { color: accent }
-              }
-              className={`hidden md:inline-flex items-center px-4 py-1.5 text-sm font-semibold rounded-lg transition-opacity hover:opacity-80 border ${ctaStyle === "text" ? "border-transparent" : "border-2"}`}
-            >
-              {ctaLabel}
-            </Link>
-          )}
-
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-black/5 transition-colors"
-            style={{ color: text }}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div style={{ backgroundColor: bg, borderTop: "1px solid rgba(0,0,0,0.06)" }} className="md:hidden">
-          <div className="px-4 py-3 space-y-1">
-            {navItems.map((item) => (
-              <div key={item.id}>
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-1 lg:flex">
+            {(isRtl ? [...navItems].reverse() : navItems).map((item) =>
+              item.hasDropdown ? (
+                <NavDropdown key={item.id} item={item} locale={locale} dark={dark} />
+              ) : (
                 <Link
+                  key={item.id}
                   href={item.url ?? "#"}
-                  className="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-black/5"
-                  style={{ color: text }}
-                  onClick={() => setMobileOpen(false)}
+                  className={`rounded-lg px-3 py-2 text-[15px] font-medium transition-colors ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
                 >
                   {getLabel(item, locale)}
                 </Link>
-                {item.hasDropdown && item.dropdownItems?.length > 0 && (
-                  <div className="pl-4 space-y-1">
-                    {item.dropdownItems.sort((a, b) => a.position - b.position).map((d) => (
-                      <Link
-                        key={d.id}
-                        href={d.url}
-                        className="block px-3 py-2 rounded-lg text-sm transition-colors hover:bg-black/5"
-                        style={{ color: text, opacity: 0.8 }}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {getLabel(d, locale)}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-            {config.ctaUrl && ctaLabel && (
-              <Link
-                href={config.ctaUrl}
-                className="block mt-2 px-4 py-2.5 text-sm font-semibold rounded-xl text-center"
-                style={{ backgroundColor: accent, color: "#fff" }}
-                onClick={() => setMobileOpen(false)}
-              >
-                {ctaLabel}
-              </Link>
+              )
             )}
+          </nav>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2.5">
+            <LocationSelector locale={locale} dark={dark} />
+            {config.showLanguageSwitcher && <LanguageSwitcher variant="public" />}
+
+            <Link
+              href={`/${locale}/store/cart`}
+              className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
+              aria-label="Cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-fsa-error text-[10px] font-bold text-white">
+                  {cartCount > 9 ? "9+" : cartCount}
+                </span>
+              )}
+            </Link>
+
+            {config.ctaUrl && ctaLabel && (
+              <FsaButton href={config.ctaUrl} variant="sky" size="sm" className="hidden md:inline-flex">
+                {ctaLabel}
+              </FsaButton>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-expanded={mobileOpen}
+              aria-label="Open menu"
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors lg:hidden ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
-      )}
-    </header>
+      </header>
+
+      {mobileOpen && <MobileMenu config={config} locale={locale} onClose={closeMobile} />}
+    </>
   );
 }

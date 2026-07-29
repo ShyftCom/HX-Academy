@@ -30,7 +30,7 @@ export async function getAllSettings(): Promise<Record<string, string>> {
 }
 
 export const DEFAULT_SETTINGS = {
-  academy_name: "Foot-Ball Skills Academy",
+  academy_name: "Football Skills Academy",
   academy_email: "contact@footballskillsacademy.com",
   academy_phone: "+213 000 000 000",
   academy_whatsapp: "+213 000 000 000",
@@ -52,9 +52,27 @@ export const DEFAULT_SETTINGS = {
   card_dark_color: "#202020",
   font_family: "Inter",
   footer_copyright: "",
-  footer_text: "© 2024 Foot-Ball Skills Academy. All rights reserved.",
+  footer_text: "© 2024 Football Skills Academy. All rights reserved.",
   terms_url: "",
   privacy_url: "",
   currency: "DZD",
   currency_symbol: "DA",
+
+  // ---- Showcase Website theme (public site only — independent of the admin
+  // primary_color/secondary_color above; see ThemeVars.tsx) ----
+  website_booking_url: "/apply",
+  website_color_navy_900: "#001F49",
+  website_color_navy_800: "#002B5C",
+  website_color_sky: "#43C7ED",
+  website_color_heading_blue: "#3996D6",
+  website_color_pale_bg: "#EEF5FC",
+  website_color_text: "#071E41",
+  website_color_text_muted: "#5E6D82",
+  website_color_border: "#DCE6F1",
+  website_color_success: "#168A55",
+  website_color_error: "#C0392B",
+  website_font_display: "Barlow Condensed",
+  website_font_body: "Inter",
+  website_heading_weight: "700",
+  website_heading_uppercase: "false",
 };

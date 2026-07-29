@@ -36,6 +36,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       whatsapp: body.whatsapp,
       logoUrl: body.logoUrl,
       status: body.status,
+      // ---- Showcase Website: Venue marketing fields (additive) ----
+      slug: body.slug !== undefined ? body.slug || null : undefined,
+      heroImageUrl: body.heroImageUrl,
+      galleryImages: body.galleryImages !== undefined ? JSON.stringify(body.galleryImages ?? []) : undefined,
+      shortDescription: body.shortDescription, shortDescriptionFr: body.shortDescriptionFr, shortDescriptionAr: body.shortDescriptionAr,
+      fullDescription: body.fullDescription, fullDescriptionFr: body.fullDescriptionFr, fullDescriptionAr: body.fullDescriptionAr,
+      facilities: body.facilities !== undefined ? JSON.stringify(body.facilities ?? []) : undefined,
+      pitchType: body.pitchType,
+      changingRooms: body.changingRooms,
+      parkingInfo: body.parkingInfo, parkingInfoFr: body.parkingInfoFr, parkingInfoAr: body.parkingInfoAr,
+      transportInfo: body.transportInfo, transportInfoFr: body.transportInfoFr, transportInfoAr: body.transportInfoAr,
+      accessibilityInfo: body.accessibilityInfo, accessibilityInfoFr: body.accessibilityInfoFr, accessibilityInfoAr: body.accessibilityInfoAr,
+      googleMapsUrl: body.googleMapsUrl,
+      latitude: body.latitude !== undefined ? (body.latitude === null ? null : Number(body.latitude)) : undefined,
+      longitude: body.longitude !== undefined ? (body.longitude === null ? null : Number(body.longitude)) : undefined,
+      displayOrder: body.displayOrder !== undefined ? Number(body.displayOrder) : undefined,
+      isPubliclyListed: body.isPubliclyListed,
     },
   });
   return NextResponse.json(station);

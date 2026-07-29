@@ -6,10 +6,23 @@ import { getSettings } from "@/lib/settings";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Foot-Ball Skills Academy",
-  description: "Complete Football Academy Management Platform",
-};
+// Read from the Setting table rather than hardcoding, so renaming the academy
+// in Super Admin propagates to the document title. Falls back to the canonical
+// name if the DB is unavailable. Locale pages override this with their own
+// generateMetadata.
+export async function generateMetadata(): Promise<Metadata> {
+  let academyName = "Football Skills Academy";
+  try {
+    const s = await getSettings(["academy_name"]);
+    if (s.academy_name) academyName = s.academy_name;
+  } catch {
+    // DB unavailable — keep the fallback.
+  }
+  return {
+    title: academyName,
+    description: "Complete Football Academy Management Platform",
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let brandCss = "";

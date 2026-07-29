@@ -49,7 +49,7 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
 
   return (
     <div
-      className="relative w-full overflow-hidden bg-gray-900"
+      className="relative w-full overflow-hidden bg-fsa-navy-900"
       style={{ aspectRatio: "16/6", minHeight: "280px", maxHeight: "560px" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -72,7 +72,7 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
         <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-12">
           <div className={`max-w-2xl ${isRtl ? "mr-auto text-right" : "ml-0 text-left"}`}>
             {title && (
-              <h2 className="text-white text-2xl md:text-4xl font-bold mb-2 drop-shadow-md" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+              <h2 className="font-fsa-display text-2xl md:text-4xl font-bold uppercase mb-2 text-white drop-shadow-md" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
                 {title}
               </h2>
             )}
@@ -84,7 +84,7 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
             {slide.ctaLabel && slide.ctaUrl && (
               <Link
                 href={slide.ctaUrl}
-                className="inline-flex items-center px-5 py-2.5 bg-white text-gray-900 font-semibold text-sm rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
+                className="inline-flex items-center px-5 py-2.5 bg-fsa-sky text-fsa-navy-900 font-semibold text-sm rounded-fsa-pill hover:brightness-95 transition-all shadow-lg"
               >
                 {slide.ctaLabel}
               </Link>

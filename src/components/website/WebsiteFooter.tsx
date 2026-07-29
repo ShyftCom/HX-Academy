@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowUp, Star, CheckCircle2 } from "lucide-react";
+import { FsaButton } from "./buttons/FsaButton";
 
 interface FooterLink { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string; openInNewTab: boolean }
 interface FooterColumn { id: string; title: string; titleFr: string | null; titleAr: string | null; position: number; links: FooterLink[] }
@@ -30,17 +32,70 @@ function getLabel(item: { label: string; labelFr: string | null; labelAr: string
   if (locale === "fr" && item.labelFr) return item.labelFr;
   return item.label;
 }
-
 function getTitle(col: FooterColumn, locale: string): string {
   if (locale === "ar" && col.titleAr) return col.titleAr;
   if (locale === "fr" && col.titleFr) return col.titleFr;
   return col.title;
 }
-
 function getTagline(config: FooterConfig, locale: string): string | null {
   if (locale === "ar" && config.taglineAr) return config.taglineAr;
   if (locale === "fr" && config.taglineFr) return config.taglineFr;
   return config.tagline;
+}
+
+const COPY: Record<string, { newsletterTitle: string; newsletterBody: string; emailPlaceholder: string; subscribe: string; subscribed: string; backToTop: string }> = {
+  eng: { newsletterTitle: "Stay in the loop", newsletterBody: "Programme updates, trial dates and academy news — straight to your inbox.", emailPlaceholder: "Your email address", subscribe: "Subscribe", subscribed: "You're subscribed", backToTop: "Back to top" },
+  fr: { newsletterTitle: "Restez informé", newsletterBody: "Programmes, dates d'essais et actualités de l'académie, directement dans votre boîte mail.", emailPlaceholder: "Votre adresse e-mail", subscribe: "S'inscrire", subscribed: "Inscription confirmée", backToTop: "Haut de page" },
+  ar: { newsletterTitle: "ابقَ على اطلاع", newsletterBody: "تحديثات البرامج ومواعيد التجارب وأخبار الأكاديمية مباشرة إلى بريدك.", emailPlaceholder: "بريدك الإلكتروني", subscribe: "اشترك", subscribed: "تم الاشتراك", backToTop: "العودة إلى الأعلى" },
+};
+
+function NewsletterForm({ locale, textColor }: { locale: string; textColor: string }) {
+  const t = COPY[locale] ?? COPY.eng;
+  const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/public/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, website }),
+      });
+      setStatus(res.ok ? "done" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <div className="flex items-center gap-2 rounded-fsa-pill bg-white/10 px-4 py-3 text-sm font-medium" style={{ color: textColor }}>
+        <CheckCircle2 className="h-4 w-4 text-fsa-sky" /> {t.subscribed}
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-2 sm:flex-row">
+      {/* Honeypot — hidden from real users, bots tend to fill every field */}
+      <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={t.emailPlaceholder}
+        className="h-11 min-w-0 flex-1 rounded-fsa-pill border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:border-fsa-sky focus:outline-none"
+      />
+      <FsaButton type="submit" variant="sky" size="sm" icon={false} loading={status === "loading"} disabled={status === "loading"}>
+        {t.subscribe}
+      </FsaButton>
+    </form>
+  );
 }
 
 export function WebsiteFooter({ locale, stationId }: { locale: string; stationId?: string }) {
@@ -54,37 +109,63 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
   if (!config) return null;
 
   const isRtl = locale === "ar";
-  const bg = config.backgroundColor ?? "#0a1628";
-  const text = config.textColor ?? "#ffffff";
-  const accent = config.accentColor ?? "#1da1f2";
+  const bg = config.backgroundColor || "#001F49";
+  const text = config.textColor || "#ffffff";
+  const accent = config.accentColor || "#43C7ED";
   const columns = [...(config.linkColumns ?? [])].sort((a, b) => a.position - b.position);
   const socials = config.socialLinks?.filter((s) => s.url);
   const tagline = getTagline(config, locale);
+  const t = COPY[locale] ?? COPY.eng;
 
   return (
     <footer style={{ backgroundColor: bg, color: text }} dir={isRtl ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* Newsletter band */}
+      <div className="border-b border-white/10">
+        <div className="mx-auto flex flex-col items-start justify-between gap-6 px-[var(--fsa-container-pad)] py-10 lg:flex-row lg:items-center" style={{ maxWidth: "var(--fsa-container-max)" }}>
+          <div>
+            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight">{t.newsletterTitle}</h3>
+            <p className="mt-1 max-w-md text-sm" style={{ color: text, opacity: 0.75 }}>{t.newsletterBody}</p>
+          </div>
+          <NewsletterForm locale={locale} textColor={text} />
+        </div>
+      </div>
+
+      <div className="mx-auto px-[var(--fsa-container-pad)] py-12" style={{ maxWidth: "var(--fsa-container-max)" }}>
         {/* Top: logo + tagline + socials */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-10">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className={isRtl ? "md:order-last" : ""}>
             {config.logoUrl ? (
-              <img src={config.logoUrl} alt="Logo" className="h-10 object-contain mb-3" />
+              <img src={config.logoUrl} alt="Football Skills Academy" className="mb-3 h-10 object-contain" />
             ) : (
-              <div className="text-xl font-bold mb-3" style={{ color: accent }}>⚽ Academy</div>
+              <div className="mb-3 font-fsa-display text-xl font-extrabold uppercase tracking-tight" style={{ color: accent }}>
+                Football Skills Academy
+              </div>
             )}
-            {tagline && <p style={{ color: text, opacity: 0.7 }} className="text-sm max-w-xs">{tagline}</p>}
+            {tagline && <p style={{ color: text, opacity: 0.7 }} className="max-w-xs text-sm">{tagline}</p>}
+            {config.showTrustpilot && config.trustpilotUrl && (
+              <a
+                href={config.trustpilotUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/20"
+                style={{ color: text }}
+              >
+                <Star className="h-4 w-4 fill-current text-fsa-sky" /> Rated on Trustpilot
+              </a>
+            )}
           </div>
 
           {socials && socials.length > 0 && (
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex flex-wrap gap-3">
               {socials.map((s) => (
                 <a
                   key={s.id}
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={s.platform}
                   style={{ backgroundColor: "rgba(255,255,255,0.1)", color: text }}
-                  className="w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+                  className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/20"
                 >
                   {SOCIAL_ICONS[s.platform] ?? <span className="text-xs uppercase">{s.platform.slice(0, 2)}</span>}
                 </a>
@@ -95,13 +176,10 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
 
         {/* Link columns */}
         {columns.length > 0 && (
-          <div
-            className="grid gap-8 mb-10"
-            style={{ gridTemplateColumns: `repeat(${Math.min(columns.length, 4)}, minmax(0, 1fr))` }}
-          >
+          <div className="mb-10 grid gap-8" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))` }}>
             {(isRtl ? [...columns].reverse() : columns).map((col) => (
               <div key={col.id}>
-                <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: accent }}>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: accent }}>
                   {getTitle(col, locale)}
                 </h3>
                 <ul className="space-y-2">
@@ -112,7 +190,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
                         target={link.openInNewTab ? "_blank" : undefined}
                         rel={link.openInNewTab ? "noopener noreferrer" : undefined}
                         style={{ color: text, opacity: 0.8 }}
-                        className="text-sm hover:opacity-100 transition-opacity"
+                        className="text-sm transition-opacity hover:opacity-100"
                       >
                         {getLabel(link, locale)}
                       </Link>
@@ -125,18 +203,24 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
         )}
 
         {/* Bottom bar */}
-        <div
-          className="border-t pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-          style={{ borderColor: "rgba(255,255,255,0.1)" }}
-        >
+        <div className="flex flex-col gap-4 border-t pt-6 md:flex-row md:items-center md:justify-between" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
           <div className={`flex flex-wrap gap-4 ${isRtl ? "flex-row-reverse" : ""}`}>
             {config.bottomLinks?.map((l) => (
-              <Link key={l.id} href={l.url} style={{ color: text, opacity: 0.6 }} className="text-xs hover:opacity-100 transition-opacity">
+              <Link key={l.id} href={l.url} style={{ color: text, opacity: 0.6 }} className="text-xs transition-opacity hover:opacity-100">
                 {getLabel(l, locale)}
               </Link>
             ))}
           </div>
-          <p style={{ color: text, opacity: 0.5 }} className="text-xs">{config.copyrightText}</p>
+          <div className="flex items-center gap-4">
+            <p style={{ color: text, opacity: 0.5 }} className="text-xs">{config.copyrightText}</p>
+            <a
+              href="#top"
+              style={{ color: text, opacity: 0.6 }}
+              className="inline-flex items-center gap-1 text-xs font-medium transition-opacity hover:opacity-100"
+            >
+              <ArrowUp className="h-3.5 w-3.5" /> {t.backToTop}
+            </a>
+          </div>
         </div>
       </div>
     </footer>

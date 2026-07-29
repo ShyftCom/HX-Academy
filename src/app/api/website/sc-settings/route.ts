@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 const SC_KEYS = ["sc_page_title", "sc_page_hero_image", "sc_page_description", "sc_page_cta_label"];
 
@@ -12,8 +12,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.WEBSITE_EDIT);
+  if (denied) return denied;
 
   const body = await req.json();
 

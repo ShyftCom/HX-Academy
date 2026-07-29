@@ -22,17 +22,17 @@ export function WebsiteSponsors({ locale, stationId }: { locale: string; station
   const items = [...sponsors, ...sponsors];
 
   return (
-    <section className="py-8 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto px-4 mb-5">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+    <section className="py-8 border-t border-fsa-border bg-white overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
+      <div className="mx-auto px-[var(--fsa-container-pad)] mb-5" style={{ maxWidth: "var(--fsa-container-max)" }}>
+        <p className="text-center text-xs font-semibold uppercase tracking-widest text-fsa-text-muted">
           {locale === "ar" ? "رعاة وشركاء" : locale === "fr" ? "Sponsors & Partenaires" : "Sponsors & Partners"}
         </p>
       </div>
 
       <div className="relative">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
 
         <div
           className="flex items-center gap-12"
