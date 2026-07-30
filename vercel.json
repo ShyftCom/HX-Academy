@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then echo 'Preview builds are intentionally skipped: the build runs `prisma db push && npm run seed`, and the Preview environment has no DATABASE_URL. To re-enable, add DATABASE_URL (a Neon branch, never production) to the Preview environment and delete ignoreCommand from vercel.json.'; exit 0; else exit 1; fi"
+}
