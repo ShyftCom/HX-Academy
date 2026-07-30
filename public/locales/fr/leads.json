@@ -1,6 +1,20 @@
 {
   "title": "Leads CRM",
-  "pipeline": "Pipeline",
+  "pipeline": {
+    "title": "Étapes du pipeline",
+    "terminal": "Terminal",
+    "new_stage": "Nouvelle étape",
+    "move_to": "Déplacer les prospects vers",
+    "no_status": "— Aucun statut (effacer) —",
+    "stage_name": "Nom de l'étape",
+    "stage_name_max": "Nom de l'étape (max 40 caractères)",
+    "cannot_delete": "Les étapes par défaut ne peuvent pas être supprimées",
+    "updated": "Étape mise à jour",
+    "created": "Étape créée",
+    "deleted": "Étape supprimée",
+    "reorder_failed": "Échec du réordonnancement",
+    "name_required": "Le nom est requis"
+  },
   "table": {
     "full_name": "Nom complet",
     "phone": "Téléphone",
@@ -75,7 +89,9 @@
     "details": "Détails",
     "edit_lead": "Modifier le lead",
     "converted_badge": "Converti",
-    "added": "Ajouté le {{date}}"
+    "added": "Ajouté le {{date}}",
+    "not_found": "Prospect introuvable",
+    "back": "Retour aux prospects"
   },
   "convert": {
     "success": "Lead converti en joueur",
@@ -88,5 +104,25 @@
   },
   "count_one": "{{count}} lead",
   "count_other": "{{count}} leads",
-  "count_zero": "Aucun lead"
+  "count_zero": "Aucun lead",
+  "page": {
+    "subtitle": "Gérer les joueurs potentiels et suivre les conversions",
+    "no_leads": "Aucun prospect",
+    "all_sources": "Toutes les sources",
+    "all_programs": "Tous les programmes",
+    "academy": "Académie",
+    "summer_camp": "Camp d'été",
+    "list": "Liste",
+    "board": "Tableau",
+    "view_activity": "Voir l'activité",
+    "converted": "Converti",
+    "convert_camp": "Convertir en participant au camp",
+    "convert": "Convertir",
+    "camp_session": "Session du camp (optionnel)",
+    "no_session": "Aucune session",
+    "select_session": "Choisir une session…",
+    "converted_camp": "Converti en participant au camp d'été",
+    "conversion_failed": "Échec de la conversion",
+    "convert_tail": "en participant au camp d'été."
+  }
 }

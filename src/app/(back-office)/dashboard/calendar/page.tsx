@@ -350,16 +350,16 @@ export default function CalendarPage() {
             </div>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <DetailItem label="Lead">
+                <DetailItem label={t("common:ui.lead")}>
                   <Link href={`/dashboard/leads/${selectedMeeting.leadId}`} className="text-sm font-medium hover:underline" style={{ color: "#3B82F6" }}>
                     {selectedMeeting.leadName}
                   </Link>
                 </DetailItem>
-                <DetailItem label="Agent"><span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{selectedMeeting.agentName}</span></DetailItem>
-                <DetailItem label="Date"><span className="text-sm" style={{ color: "var(--text-primary)" }}>{selectedMeeting.date}</span></DetailItem>
-                <DetailItem label="Time"><span className="text-sm" style={{ color: "var(--text-primary)" }}>{selectedMeeting.time} · {selectedMeeting.durationMinutes}m</span></DetailItem>
-                <DetailItem label="Type"><span className="text-sm capitalize" style={{ color: "var(--text-primary)" }}>{selectedMeeting.type}</span></DetailItem>
-                <DetailItem label="Status">
+                <DetailItem label={t("common:ui.agent")}><span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{selectedMeeting.agentName}</span></DetailItem>
+                <DetailItem label={t("common:ui.date")}><span className="text-sm" style={{ color: "var(--text-primary)" }}>{selectedMeeting.date}</span></DetailItem>
+                <DetailItem label={t("common:ui.time")}><span className="text-sm" style={{ color: "var(--text-primary)" }}>{selectedMeeting.time} · {selectedMeeting.durationMinutes}m</span></DetailItem>
+                <DetailItem label={t("common:ui.type")}><span className="text-sm capitalize" style={{ color: "var(--text-primary)" }}>{selectedMeeting.type}</span></DetailItem>
+                <DetailItem label={t("common:ui.status")}>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: hexToRgba(STATUS_COLORS[selectedMeeting.status] ?? "#6B7280", 0.15), color: STATUS_COLORS[selectedMeeting.status] ?? "#6B7280" }}>
                     {selectedMeeting.status}
                   </span>
@@ -367,7 +367,7 @@ export default function CalendarPage() {
               </div>
               {selectedMeeting.notes && (
                 <div>
-                  <p className="text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>Notes</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: "var(--text-muted)" }}>{t("common:ui.notes")}</p>
                   <p className="text-sm" style={{ color: "var(--text-primary)" }}>{selectedMeeting.notes}</p>
                 </div>
               )}

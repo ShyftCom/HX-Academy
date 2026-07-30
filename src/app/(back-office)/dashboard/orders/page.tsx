@@ -16,8 +16,10 @@ import { formatCurrency, formatDate, parseJsonSafe } from "@/lib/utils";
 import { Eye, Trash2, ClipboardList, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "react-i18next";
 
 export default function OrdersPage() {
+  const { t } = useTranslation("orders");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -40,19 +42,19 @@ export default function OrdersPage() {
   const statusMutation = useMutation({
     mutationFn: ({ id, statusId }: { id: string; statusId: string }) =>
       fetch(`/api/orders/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ statusId }) }).then((r) => r.json()),
-    onSuccess: (data) => { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["orders"] }); if (viewOrder) setViewOrder(data); },
-    onError: () => toast.error("Update failed"),
+    onSuccess: (data) => { toast.success(t("toast.status_updated")); qc.invalidateQueries({ queryKey: ["orders"] }); if (viewOrder) setViewOrder(data); },
+    onError: () => toast.error(t("toast.update_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/orders/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Order deleted"); qc.invalidateQueries({ queryKey: ["orders"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["orders"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const getStatusBadge = (s: any) => s ? (
     <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: (s.color ?? "#6B7280") + "20", color: s.color ?? "#6B7280" }}>{s.name}</span>
-  ) : <Badge variant="secondary">Unknown</Badge>;
+  ) : <Badge variant="secondary">{t("unknown")}</Badge>;
 
   const columns = [
     { key: "orderNumber", header: "Order #", cell: (r: any) => <span className="font-mono text-sm font-medium">#{r.orderNumber}</span> },
@@ -68,8 +70,8 @@ export default function OrdersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setViewOrder(r)}><Eye className="me-2 h-4 w-4" />View</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setViewOrder(r)}><Eye className="me-2 h-4 w-4" />{t("common:ui.view")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -77,21 +79,21 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Orders" description="Manage store orders">
+      <PageHeader title={t("title")} description={t("subtitle")}>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search orders..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("search")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue placeholder={t("common:ui.all_status")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_status")}</SelectItem>
             {statuses?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No orders yet" emptyIcon={<ClipboardList className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<ClipboardList className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       {/* Order Detail Dialog */}
@@ -102,15 +104,15 @@ export default function OrdersPage() {
             {viewOrder && <>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-400">Date</p>
+                  <p className="text-xs text-gray-400">{t("common:ui.date")}</p>
                   <p className="text-sm font-medium">{formatDate(viewOrder.createdAt)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">Status</p>
+                  <p className="text-xs text-gray-400 mb-1">{t("common:ui.status")}</p>
                   {getStatusBadge(viewOrder.status)}
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-gray-400">Change Status</label>
+                  <label className="mb-1 block text-xs text-gray-400">{t("change_status")}</label>
                   <Select value={viewOrder.statusId ?? ""} onValueChange={(v) => statusMutation.mutate({ id: viewOrder.id, statusId: v })}>
                     <SelectTrigger className="h-8 text-xs w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>{statuses?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
@@ -119,7 +121,7 @@ export default function OrdersPage() {
               </div>
               <Separator />
               <div>
-                <p className="text-sm font-semibold mb-2">Customer Info</p>
+                <p className="text-sm font-semibold mb-2">{t("customer_info")}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(parseJsonSafe<any>(viewOrder.codData, {})).map(([k, v]: [string, any]) => (
                     <div key={k}><p className="text-xs text-gray-400 capitalize">{k}</p><p className="text-sm">{v}</p></div>
@@ -128,7 +130,7 @@ export default function OrdersPage() {
               </div>
               <Separator />
               <div>
-                <p className="text-sm font-semibold mb-2">Items</p>
+                <p className="text-sm font-semibold mb-2">{t("items")}</p>
                 <div className="space-y-2">
                   {viewOrder.items?.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2">
@@ -138,7 +140,7 @@ export default function OrdersPage() {
                   ))}
                 </div>
                 <div className="mt-3 flex justify-between border-t pt-3 dark:border-gray-700">
-                  <p className="font-semibold">Total</p>
+                  <p className="font-semibold">{t("total")}</p>
                   <p className="font-bold text-lg">{formatCurrency(viewOrder.totalAmount)}</p>
                 </div>
               </div>
@@ -147,7 +149,7 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Order" description="This will permanently delete the order." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("delete.title")} description={t("delete.body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

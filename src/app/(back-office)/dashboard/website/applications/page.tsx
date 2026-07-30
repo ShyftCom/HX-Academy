@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2, Search, Download, Eye, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 interface App { id: string; fullName: string; phone?: string; email?: string; selectedPlan?: { name: string }; status?: { name: string; color?: string }; createdAt: string; isConverted: boolean; }
 
@@ -20,6 +21,7 @@ function getStatusClass(name?: string) {
 }
 
 export default function ApplicationsPage() {
+  const { t } = useTranslation("website");
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -36,7 +38,7 @@ export default function ApplicationsPage() {
       const d = await r.json();
       setApps(d.data ?? []);
       setTotal(d.total ?? 0);
-    } catch { toast.error("Failed to load"); }
+    } catch { toast.error(t("common:errors.failed_to_load")); }
     setLoading(false);
   }, [page, search]);
 
@@ -51,8 +53,8 @@ export default function ApplicationsPage() {
       const a = document.createElement("a");
       a.href = url; a.download = "applications.csv"; a.click();
       URL.revokeObjectURL(url);
-      toast.success("Exported");
-    } catch { toast.error("Export failed"); }
+      toast.success(t("applications.exported"));
+    } catch { toast.error(t("applications.export_failed")); }
     setExporting(false);
   }
 
@@ -62,7 +64,7 @@ export default function ApplicationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("applications.title")}</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">{total} total applications from website</p>
         </div>
         <button onClick={handleExport} disabled={exporting} className="flex items-center gap-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
@@ -73,7 +75,7 @@ export default function ApplicationsPage() {
       {/* Search */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input type="text" placeholder="Search by name, phone or email..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full ps-9 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+        <input type="text" placeholder={t("applications.search")} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-full ps-9 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
       </div>
 
       {/* Table */}
@@ -83,7 +85,7 @@ export default function ApplicationsPage() {
         ) : apps.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-gray-400 dark:text-gray-500">
             <Filter className="w-8 h-8 mb-2 opacity-50" />
-            <p>No applications found</p>
+            <p>{t("applications.empty")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -112,12 +114,12 @@ export default function ApplicationsPage() {
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{new Date(app.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
                       {app.isConverted
-                        ? <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Yes</span>
-                        : <span className="text-xs text-gray-400 dark:text-gray-500">No</span>}
+                        ? <span className="text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">{t("applications.yes")}</span>
+                        : <span className="text-xs text-gray-400 dark:text-gray-500">{t("applications.no")}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <Link href={`/dashboard/website/applications/${app.id}`} className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-xs">
-                        <Eye className="w-3.5 h-3.5" /> View
+                        <Eye className="w-3.5 h-3.5" /> {t("common:ui.view")}
                       </Link>
                     </td>
                   </tr>

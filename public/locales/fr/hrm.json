@@ -1,0 +1,70 @@
+{
+  "title": "Gestion RH",
+  "subtitle": "Personnel, présences, congés et paie",
+  "staff": {
+    "title": "Personnel",
+    "subtitle": "Gérer votre équipe",
+    "add": "Ajouter un employé",
+    "add_title": "Ajouter un membre du personnel",
+    "user_account": "Compte utilisateur",
+    "select_user": "Choisir un utilisateur…",
+    "full_name": "Nom complet",
+    "role": "Rôle",
+    "role_ph": "Entraîneur, responsable…",
+    "hire_date": "Date d'embauche",
+    "base_salary_da": "Salaire de base (DA)",
+    "list": "Liste du personnel",
+    "base_salary": "Salaire de base",
+    "station": "Station",
+    "empty": "Aucun membre du personnel.",
+    "added": "Membre du personnel ajouté"
+  },
+  "attendance": {
+    "title": "Présences",
+    "subtitle": "Grille de présence mensuelle",
+    "empty": "Aucun membre du personnel trouvé."
+  },
+  "leave": {
+    "title": "Demandes de congé",
+    "subtitle": "Gérer les congés du personnel",
+    "add": "Ajouter un congé",
+    "create_title": "Créer une demande de congé",
+    "staff_member": "Membre du personnel",
+    "select_staff": "Choisir un employé…",
+    "type": "Type de congé",
+    "start": "Date de début",
+    "end": "Date de fin",
+    "reason": "Motif",
+    "empty": "Aucune demande de congé.",
+    "updated": "Demande de congé mise à jour",
+    "created": "Demande de congé créée"
+  },
+  "payroll": {
+    "title": "Paie",
+    "subtitle": "Gestion mensuelle des salaires",
+    "bonuses": "Primes",
+    "deductions": "Retenues",
+    "absences": "Absences",
+    "net": "Salaire net",
+    "pay": "Payer",
+    "empty": "Aucune paie générée. Cliquez sur « Générer la paie » pour commencer.",
+    "generated": "Paie générée",
+    "generate_failed": "Échec de la génération de la paie",
+    "updated": "Paie mise à jour",
+    "paid": "Paie marquée comme payée et charge créée"
+  },
+  "detail": {
+    "not_found": "Membre du personnel introuvable.",
+    "national_id": "Numéro d'identité",
+    "attendance_history": "Historique de présence",
+    "no_attendance": "Aucun enregistrement de présence",
+    "no_leave": "Aucune demande de congé",
+    "payroll_history": "Historique de paie",
+    "no_payroll": "Aucun enregistrement de paie",
+    "period": "Période",
+    "base": "Base",
+    "net": "Net",
+    "leave_updated": "Demande de congé mise à jour",
+    "leave_failed": "Échec de la mise à jour de la demande"
+  }
+}

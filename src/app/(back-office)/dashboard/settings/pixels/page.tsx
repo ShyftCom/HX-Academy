@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 
 type PixelConfig = {
   id: string | null;
@@ -29,6 +30,7 @@ const PLATFORMS = [
 ];
 
 function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: string }) {
+  const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [form, setForm] = useState<PixelConfig>({ ...config });
   const platform = PLATFORMS.find((p) => p.key === config.platform);
@@ -55,7 +57,7 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
       toast.success(`${platform?.label} config saved`);
       qc.invalidateQueries({ queryKey: ["pixel-configs", stationId] });
     },
-    onError: () => toast.error("Save failed"),
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   return (
@@ -65,7 +67,7 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
           <h3 className="font-semibold text-sm">{platform?.label ?? config.platform}</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Active</span>
+          <span className="text-xs text-gray-500">{t("common:ui.active")}</span>
           <Switch
             checked={form.isActive}
             onCheckedChange={(v) => setForm((prev) => ({ ...prev, isActive: v }))}
@@ -74,7 +76,7 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
       </div>
 
       <Input
-        label="Pixel ID / Measurement ID"
+        label={t("pixels.pixel_id")}
         value={form.pixelId}
         onChange={(e) => setForm((prev) => ({ ...prev, pixelId: e.target.value }))}
         placeholder={`Enter ${platform?.label ?? config.platform} Pixel ID`}
@@ -85,11 +87,11 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
           <Separator />
 
           <Input
-            label="Access Token"
+            label={t("pixels.access_token")}
             type="password"
             value={form.accessToken}
             onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}
-            placeholder="Access token / API secret"
+            placeholder={t("pixels.access_token_ph")}
           />
 
           <div className="flex items-center gap-3">
@@ -97,15 +99,15 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
               checked={form.useConversionApi}
               onCheckedChange={(v) => setForm((prev) => ({ ...prev, useConversionApi: v }))}
             />
-            <span className="text-sm">Enable Conversion API (server-side events)</span>
+            <span className="text-sm">{t("pixels.enable_capi")}</span>
           </div>
 
           {form.useConversionApi && (
             <Input
-              label="Test Event Code"
+              label={t("pixels.test_code")}
               value={form.testEventCode}
               onChange={(e) => setForm((prev) => ({ ...prev, testEventCode: e.target.value }))}
-              placeholder="TEST12345 (optional)"
+              placeholder={t("pixels.test_code_ph")}
             />
           )}
         </>
@@ -113,7 +115,7 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
 
       <div className="flex justify-end">
         <Button size="sm" onClick={() => saveMutation.mutate()} loading={saveMutation.isPending}>
-          Save
+          {t("common:actions.save")}
         </Button>
       </div>
     </Card>
@@ -121,6 +123,7 @@ function PlatformCard({ config, stationId }: { config: PixelConfig; stationId: s
 }
 
 export default function PixelsSettingsPage() {
+  const { t } = useTranslation("admin");
   const { data: session } = useSession();
   const stationId = (session?.user as any)?.stationId ?? "";
 
@@ -133,14 +136,14 @@ export default function PixelsSettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Pixel & Tracking"
-        description="Configure ad pixels and server-side conversion APIs for all platforms"
+        title={t("pixels.title")}
+        description={t("pixels.subtitle")}
       />
 
-      {isLoading && <p className="text-sm text-gray-400">Loading configurations...</p>}
+      {isLoading && <p className="text-sm text-gray-400">{t("pixels.loading")}</p>}
 
       {!stationId && !isLoading && (
-        <p className="text-sm text-gray-400">No station associated with your account.</p>
+        <p className="text-sm text-gray-400">{t("pixels.no_station")}</p>
       )}
 
       <div className="grid gap-5 md:grid-cols-2">

@@ -18,7 +18,12 @@
   "actions": {
     "add_player": "Add Player",
     "edit_player": "Edit Player",
-    "view_profile": "View Profile"
+    "view_profile": "View Profile",
+    "add": "Add Player",
+    "view_details": "View Details",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "reset_password": "Reset Password"
   },
   "form": {
     "full_name": "Full Name",
@@ -34,7 +39,22 @@
     "position": "Position",
     "emergency_contact": "Emergency Contact",
     "medical_notes": "Medical Notes",
-    "notes": "Notes"
+    "notes": "Notes",
+    "full_name_req": "Full Name *",
+    "full_name_ph": "John Doe",
+    "email_req": "Email *",
+    "email_ph": "player@example.com",
+    "select_gender": "Select gender",
+    "select_category": "Select category",
+    "select_position": "Select position",
+    "team_ph": "Team A",
+    "parent_name_ph": "Parent full name",
+    "address_ph": "City, Region",
+    "emergency_ph": "Name & Phone",
+    "medical_ph": "Any medical conditions...",
+    "notes_ph": "Additional notes...",
+    "male": "Male",
+    "female": "Female"
   },
   "profile": {
     "title": "Player Profile",
@@ -52,5 +72,37 @@
   "empty": {
     "no_players": "No players yet",
     "no_players_subtitle": "Convert leads to add players"
+  },
+  "page": {
+    "title": "Players",
+    "subtitle": "Manage all academy players",
+    "search": "Search players...",
+    "empty": "No players found"
+  },
+  "tabs": {
+    "profile": "Profile",
+    "subscriptions": "Subscriptions",
+    "payments": "Payments",
+    "orders": "Orders",
+    "no_subscriptions": "No subscriptions",
+    "no_payments": "No payments",
+    "no_orders": "No orders"
+  },
+  "no_plan": "No Plan",
+  "delete": {
+    "title": "Delete Player",
+    "body": "This will permanently delete the player and their account. This cannot be undone."
+  },
+  "password": {
+    "new": "New Password",
+    "min": "Min. 6 characters",
+    "confirm": "Confirm Password",
+    "repeat": "Repeat new password"
+  },
+  "toast": {
+    "status_updated": "Player status updated",
+    "deleted": "Player deleted",
+    "password_updated": "Password updated",
+    "update_failed": "Update failed"
   }
 }

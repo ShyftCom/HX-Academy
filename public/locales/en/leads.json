@@ -1,6 +1,20 @@
 {
   "title": "Leads CRM",
-  "pipeline": "Pipeline",
+  "pipeline": {
+    "title": "Pipeline Stages",
+    "terminal": "Terminal",
+    "new_stage": "New Stage",
+    "move_to": "Move leads to",
+    "no_status": "— No status (clear) —",
+    "stage_name": "Stage name",
+    "stage_name_max": "Stage name (max 40 chars)",
+    "cannot_delete": "Default stages cannot be deleted",
+    "updated": "Stage updated",
+    "created": "Stage created",
+    "deleted": "Stage deleted",
+    "reorder_failed": "Reorder failed",
+    "name_required": "Name is required"
+  },
   "table": {
     "full_name": "Full Name",
     "phone": "Phone",
@@ -75,7 +89,9 @@
     "details": "Details",
     "edit_lead": "Edit Lead Info",
     "converted_badge": "Converted",
-    "added": "Added {{date}}"
+    "added": "Added {{date}}",
+    "not_found": "Lead not found",
+    "back": "Back to Leads"
   },
   "convert": {
     "success": "Lead converted to player",
@@ -88,5 +104,25 @@
   },
   "count_one": "{{count}} lead",
   "count_other": "{{count}} leads",
-  "count_zero": "No leads"
+  "count_zero": "No leads",
+  "page": {
+    "subtitle": "Manage potential players and track conversions",
+    "no_leads": "No leads",
+    "all_sources": "All Sources",
+    "all_programs": "All Programs",
+    "academy": "Academy",
+    "summer_camp": "Summer Camp",
+    "list": "List",
+    "board": "Board",
+    "view_activity": "View Activity",
+    "converted": "Converted",
+    "convert_camp": "Convert to Camp Participant",
+    "convert": "Convert",
+    "camp_session": "Camp Session (optional)",
+    "no_session": "No session",
+    "select_session": "Select a session...",
+    "converted_camp": "Converted to Summer Camp participant",
+    "conversion_failed": "Conversion failed",
+    "convert_tail": "to a Summer Camp participant."
+  }
 }

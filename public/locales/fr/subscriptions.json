@@ -1,0 +1,48 @@
+{
+  "title": "Abonnements",
+  "subtitle": "Gérer les abonnements des joueurs",
+  "add": "Ajouter un abonnement",
+  "empty": "Aucun abonnement trouvé",
+  "form": {
+    "player": "Joueur *",
+    "plan": "Formule *",
+    "select_player": "Choisir un joueur",
+    "select_plan": "Choisir une formule",
+    "initial_status": "Statut initial",
+    "active_now": "Actif (démarrer maintenant)"
+  },
+  "actions": {
+    "activate": "Activer",
+    "suspend": "Suspendre",
+    "mark_expired": "Marquer comme expiré"
+  },
+  "delete": {
+    "title": "Supprimer l'abonnement",
+    "body": "Voulez-vous vraiment supprimer cet abonnement ?"
+  },
+  "toast": {
+    "status_updated": "Statut mis à jour",
+    "update_failed": "Échec de la mise à jour",
+    "created": "Abonnement créé",
+    "create_failed": "Échec de la création"
+  },
+  "plans": {
+    "title": "Formules d'abonnement",
+    "subtitle": "Gérer les formules d'adhésion",
+    "add": "Ajouter une formule",
+    "empty": "Aucune formule pour le moment",
+    "empty_body": "Créez votre première formule pour commencer",
+    "name": "Nom de la formule *",
+    "name_ph": "ex. Formule mensuelle",
+    "description_ph": "Ce qui est inclus…",
+    "duration": "Durée *",
+    "unit": "Unité",
+    "months": "Mois",
+    "years": "Année(s)",
+    "price": "Prix (DA) *",
+    "color": "Couleur",
+    "delete_title": "Supprimer la formule",
+    "delete_body": "Voulez-vous vraiment supprimer cette formule ? Les abonnements existants ne seront pas affectés.",
+    "deleted": "Formule supprimée"
+  }
+}

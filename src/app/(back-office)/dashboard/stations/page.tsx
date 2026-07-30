@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Plus, Users, TrendingUp, Globe } from "lucide-react";
 import Link from "next/link";
 import { useQuery as useGlobalQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 function formatDA(n: number) {
   return n.toLocaleString("fr-DZ") + " DA";
 }
 
 export default function StationsPage() {
+  const { t } = useTranslation("stations");
   const { data: globalStats, isLoading } = useGlobalQuery({
     queryKey: ["global-stats"],
     queryFn: () => fetch("/api/stations/global-stats").then((r) => r.json()),
@@ -22,8 +24,8 @@ export default function StationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Stations</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Manage your academy locations</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/stations/new">
@@ -37,25 +39,25 @@ export default function StationsPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-gray-500">Total Players</p>
+            <p className="text-xs text-gray-500">{t("total_players")}</p>
             <p className="text-2xl font-bold">{globalStats?.totalPlayers ?? 0}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-gray-500">Total Revenue</p>
+            <p className="text-xs text-gray-500">{t("total_revenue")}</p>
             <p className="text-2xl font-bold">{formatDA(globalStats?.totalRevenue ?? 0)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-gray-500">Active Leads</p>
+            <p className="text-xs text-gray-500">{t("active_leads")}</p>
             <p className="text-2xl font-bold">{globalStats?.totalActiveLeads ?? 0}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-gray-500">Meetings This Week</p>
+            <p className="text-xs text-gray-500">{t("meetings_week")}</p>
             <p className="text-2xl font-bold">{globalStats?.totalMeetingsThisWeek ?? 0}</p>
           </CardContent>
         </Card>
@@ -71,19 +73,19 @@ export default function StationsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-gray-400 py-4 text-center">Loading...</p>
+            <p className="text-sm text-gray-400 py-4 text-center">{t("common:ui.loading")}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">
-                    <th className="text-start py-2 pe-4">Station</th>
-                    <th className="text-start py-2 pe-4">Wilaya</th>
-                    <th className="text-end py-2 pe-4">Players</th>
-                    <th className="text-end py-2 pe-4">Revenue</th>
-                    <th className="text-end py-2 pe-4">Active Leads</th>
-                    <th className="text-end py-2 pe-4">Conversion</th>
-                    <th className="text-end py-2">Actions</th>
+                    <th className="text-start py-2 pe-4">{t("table.station")}</th>
+                    <th className="text-start py-2 pe-4">{t("table.wilaya")}</th>
+                    <th className="text-end py-2 pe-4">{t("table.players")}</th>
+                    <th className="text-end py-2 pe-4">{t("table.revenue")}</th>
+                    <th className="text-end py-2 pe-4">{t("active_leads")}</th>
+                    <th className="text-end py-2 pe-4">{t("table.conversion")}</th>
+                    <th className="text-end py-2">{t("common:ui.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -103,7 +105,7 @@ export default function StationsPage() {
                       </td>
                       <td className="py-3 text-end">
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/dashboard/stations/${s.id}`}>View</Link>
+                          <Link href={`/dashboard/stations/${s.id}`}>{t("common:ui.view")}</Link>
                         </Button>
                       </td>
                     </tr>
@@ -111,7 +113,7 @@ export default function StationsPage() {
                 </tbody>
               </table>
               {!(globalStats?.stations?.length) && (
-                <p className="py-8 text-center text-sm text-gray-400">No stations yet. Create your first one.</p>
+                <p className="py-8 text-center text-sm text-gray-400">{t("empty")}</p>
               )}
             </div>
           )}

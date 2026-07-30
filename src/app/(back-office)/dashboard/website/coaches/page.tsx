@@ -13,10 +13,12 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
+import { useTranslation } from "react-i18next";
 
 interface Coach { id: string; fullName: string; role: string | null; bio: string | null; photoUrl: string | null; isActive: boolean }
 
 export default function CoachesAdminPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: coaches = [] } = useQuery<Coach[]>({ queryKey: ["admin-coaches"], queryFn: () => fetch("/api/coaches").then((r) => r.json()) });
@@ -26,7 +28,7 @@ export default function CoachesAdminPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-coaches"] });
   const { mutate: create } = useMutation({
     mutationFn: () => fetch("/api/coaches", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fullName: "New Coach" }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Coach added"); invalidate(); },
+    onSuccess: () => { toast.success(t("coaches.added")); invalidate(); },
   });
   const { mutate: update } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Coach>) => fetch(`/api/coaches/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -34,7 +36,7 @@ export default function CoachesAdminPage() {
   });
   const { mutate: remove, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/coaches/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); invalidate(); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
   });
 
   function handleReorder(next: Coach[]) {
@@ -44,12 +46,12 @@ export default function CoachesAdminPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Coaches" description="Public-facing coach profiles shown on programme pages and Who We Are.">
-        <Button onClick={() => create()}><Plus className="h-4 w-4" /> Add Coach</Button>
+      <PageHeader title={t("coaches.title")} description={t("coaches.subtitle")}>
+        <Button onClick={() => create()}><Plus className="h-4 w-4" /> {t("coaches.add")}</Button>
       </PageHeader>
 
       {list.length === 0 ? (
-        <EmptyState icon={UserCheck} title="No coaches yet" description="Add your first coach profile." action={{ label: "Add Coach", onClick: () => create() }} />
+        <EmptyState icon={UserCheck} title={t("coaches.empty")} description={t("coaches.empty_body")} action={{ label: t("coaches.add"), onClick: () => create() }} />
       ) : (
         <SortableList
           items={list}
@@ -61,9 +63,9 @@ export default function CoachesAdminPage() {
                 <ImageUrlInput value={c.photoUrl ?? ""} onChange={(url) => update({ id: c.id, photoUrl: url })} />
               </div>
               <div className="flex-1 space-y-2">
-                <Input defaultValue={c.fullName} onBlur={(e) => update({ id: c.id, fullName: e.target.value })} placeholder="Full name" />
-                <Input defaultValue={c.role ?? ""} onBlur={(e) => update({ id: c.id, role: e.target.value })} placeholder="Role (e.g. Head of Coaching)" />
-                <Textarea defaultValue={c.bio ?? ""} onBlur={(e) => update({ id: c.id, bio: e.target.value })} placeholder="Short bio" rows={2} />
+                <Input defaultValue={c.fullName} onBlur={(e) => update({ id: c.id, fullName: e.target.value })} placeholder={t("coaches.full_name")} />
+                <Input defaultValue={c.role ?? ""} onBlur={(e) => update({ id: c.id, role: e.target.value })} placeholder={t("coaches.role_ph")} />
+                <Textarea defaultValue={c.bio ?? ""} onBlur={(e) => update({ id: c.id, bio: e.target.value })} placeholder={t("coaches.bio")} rows={2} />
               </div>
               <div className="flex flex-col items-end justify-between">
                 <Switch checked={c.isActive} onCheckedChange={(v) => update({ id: c.id, isActive: v })} />
@@ -76,7 +78,7 @@ export default function CoachesAdminPage() {
         />
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete coach" description="This permanently removes the coach profile." onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("coaches.delete")} description={t("coaches.delete_body")} onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

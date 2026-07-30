@@ -15,8 +15,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Edit, Trash2, Shield } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 export default function RolesPage() {
+  const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editRole, setEditRole] = useState<any>(null);
@@ -39,7 +41,7 @@ export default function RolesPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/roles/${id}`, { method: "DELETE" }).then(async (r) => { if (!r.ok) { const e = await r.json(); throw new Error(e.error); } }),
-    onSuccess: () => { toast.success("Role deleted"); qc.invalidateQueries({ queryKey: ["roles"] }); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("roles.deleted")); qc.invalidateQueries({ queryKey: ["roles"] }); setDeleteId(null); },
     onError: (e: any) => toast.error(e.message ?? "Delete failed"),
   });
 
@@ -58,12 +60,12 @@ export default function RolesPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Roles & Permissions" description="Manage access control">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Role</Button>
+      <PageHeader title={t("roles.title")} description={t("roles.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("roles.add")}</Button>
       </PageHeader>
 
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
-        : roles?.length === 0 ? <EmptyState icon={Shield} title="No roles" description="Create roles to manage access control" action={{ label: "Add Role", onClick: openAdd }} />
+        : roles?.length === 0 ? <EmptyState icon={Shield} title={t("roles.empty")} description={t("roles.empty_body")} action={{ label: t("roles.add"), onClick: openAdd }} />
         : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {roles?.map((role: any) => (
@@ -73,7 +75,7 @@ export default function RolesPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-gray-900 dark:text-gray-100">{role.name}</h3>
-                        {role.isSystem && <Badge variant="secondary">System</Badge>}
+                        {role.isSystem && <Badge variant="secondary">{t("roles.system")}</Badge>}
                       </div>
                       {role.description && <p className="text-sm text-gray-500 mt-0.5">{role.description}</p>}
                       <p className="text-xs text-gray-400 mt-1">{role._count?.users ?? 0} user(s)</p>
@@ -86,7 +88,7 @@ export default function RolesPage() {
                     {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">+{role.permissions.length - 6} more</span>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />Edit</Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>
                     {!role.isSystem && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteId(role.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </CardContent>
@@ -100,10 +102,10 @@ export default function RolesPage() {
         <DialogContent size="lg">
           <DialogHeader><DialogTitle>{editRole ? "Edit Role" : "Create Role"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Role Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Staff" />
-            <Textarea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What can this role do?" rows={2} />
+            <Input label={t("roles.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("roles.name_ph")} />
+            <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("roles.desc_ph")} rows={2} />
             <div>
-              <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Permissions</p>
+              <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">{t("roles.permissions")}</p>
               <ScrollArea className="h-64 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                 {Object.entries(grouped ?? {}).map(([module, perms]: [string, any]) => (
                   <div key={module} className="mb-4">
@@ -123,13 +125,13 @@ export default function RolesPage() {
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editRole ? "Save Changes" : "Create Role"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Role" description="Users with this role will lose their permissions." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("roles.delete")} description={t("roles.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

@@ -1,0 +1,25 @@
+{
+  "title": "Aperçu financier",
+  "subtitle": "Analyse des profits et des charges",
+  "manage_charges": "Gérer les charges",
+  "daily_profit": "Évolution quotidienne du profit",
+  "by_category": "Charges par catégorie",
+  "no_charges_period": "Aucune charge sur cette période",
+  "charges": {
+    "title": "Charges",
+    "subtitle": "Suivre les dépenses de l'académie",
+    "manage_categories": "Gérer les catégories",
+    "add": "Ajouter une charge",
+    "categories_title": "Catégories de charges",
+    "list": "Liste des charges",
+    "no_category": "Sans catégorie",
+    "amount_da": "Montant (DA)",
+    "salary": "Salaire",
+    "empty": "Aucune charge enregistrée.",
+    "category_ph": "Nom de la catégorie…",
+    "added": "Charge ajoutée",
+    "add_failed": "Échec de l'ajout de la charge",
+    "deleted": "Charge supprimée",
+    "category_created": "Catégorie créée"
+  }
+}

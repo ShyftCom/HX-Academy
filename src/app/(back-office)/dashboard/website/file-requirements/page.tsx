@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Loader2, GripVertical, Check, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Req { id: string; title: string; description?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number; isActive: boolean; order: number; appliesTo: string; }
 type FormState = Omit<Req, "id">;
@@ -13,6 +14,7 @@ const APPLIES_LABELS: Record<string, string> = { academy: "Academy", summer_camp
 const APPLIES_COLORS: Record<string, string> = { academy: "bg-green-100 text-green-700", summer_camp: "bg-orange-100 text-orange-700", both: "bg-blue-100 text-blue-700" };
 
 function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormState; onSave: (v: FormState) => void; onCancel: () => void; saving: boolean }) {
+  const { t } = useTranslation("website");
   const [form, setForm] = useState(initial);
   const set = (k: keyof FormState, v: unknown) => setForm((p) => ({ ...p, [k]: v }));
   const inputClass = "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500";
@@ -21,44 +23,44 @@ function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormS
     <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title <span className="text-red-500">*</span></label>
-          <input type="text" className={inputClass} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. ID Card / Passport" />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("common:ui.title_field")} <span className="text-red-500">*</span></label>
+          <input type="text" className={inputClass} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder={t("filereq.title_ph")} />
         </div>
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-          <textarea rows={2} className={inputClass} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Instructions for the applicant..." />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("common:ui.description")}</label>
+          <textarea rows={2} className={inputClass} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder={t("filereq.instructions_ph")} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Allowed Types</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("filereq.allowed_types")}</label>
           <input type="text" className={inputClass} value={form.allowedTypes} onChange={(e) => set("allowedTypes", e.target.value)} placeholder="image/*,.pdf" />
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Comma-separated MIME types or extensions</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t("filereq.allowed_hint")}</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Size (MB)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("filereq.max_size")}</label>
           <input type="number" min={1} max={50} className={inputClass} value={form.maxSizeMb} onChange={(e) => set("maxSizeMb", parseInt(e.target.value) || 10)} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Applies To</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("filereq.applies_to")}</label>
           <select className={inputClass} value={form.appliesTo} onChange={(e) => set("appliesTo", e.target.value)}>
-            <option value="academy">Academy</option>
-            <option value="summer_camp">Summer Camp</option>
-            <option value="both">Both</option>
+            <option value="academy">{t("filereq.academy")}</option>
+            <option value="summer_camp">{t("filereq.summer_camp")}</option>
+            <option value="both">{t("filereq.both")}</option>
           </select>
         </div>
         <div className="flex items-center gap-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.isRequired} onChange={(e) => set("isRequired", e.target.checked)} className="rounded text-green-600" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Required</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:misc.required")}</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.isActive} onChange={(e) => set("isActive", e.target.checked)} className="rounded text-green-600" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.active")}</span>
           </label>
         </div>
       </div>
       <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-        <button onClick={onCancel} className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><X className="w-4 h-4" /> Cancel</button>
-        <button onClick={() => { if (!form.title.trim()) { toast.error("Title is required"); return; } onSave(form); }} disabled={saving} className="flex items-center gap-1.5 text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-60">
+        <button onClick={onCancel} className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"><X className="w-4 h-4" /> {t("common:ui.cancel")}</button>
+        <button onClick={() => { if (!form.title.trim()) { toast.error(t("filereq.title_required")); return; } onSave(form); }} disabled={saving} className="flex items-center gap-1.5 text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-60">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Save
         </button>
       </div>
@@ -67,6 +69,7 @@ function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormS
 }
 
 export default function FileRequirementsPage() {
+  const { t } = useTranslation("website");
   const [reqs, setReqs] = useState<Req[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -79,7 +82,7 @@ export default function FileRequirementsPage() {
       const r = await fetch("/api/file-requirements");
       const d = await r.json();
       setReqs(d.requirements ?? []);
-    } catch { toast.error("Failed to load"); }
+    } catch { toast.error(t("common:errors.failed_to_load")); }
     setLoading(false);
   }
 
@@ -89,9 +92,9 @@ export default function FileRequirementsPage() {
     setSaving(true);
     try {
       const r = await fetch("/api/file-requirements", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, order: reqs.length }) });
-      if (r.ok) { toast.success("Created"); setCreating(false); await load(); }
+      if (r.ok) { toast.success(t("common:labels.created_at")); setCreating(false); await load(); }
       else { const d = await r.json(); toast.error(d.error || "Failed to create"); }
-    } catch { toast.error("Failed to create"); }
+    } catch { toast.error(t("common:toast.create_failed_alt")); }
     setSaving(false);
   }
 
@@ -99,9 +102,9 @@ export default function FileRequirementsPage() {
     setSaving(true);
     try {
       const r = await fetch(`/api/file-requirements/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-      if (r.ok) { toast.success("Updated"); setEditId(null); await load(); }
+      if (r.ok) { toast.success(t("common:toast.updated")); setEditId(null); await load(); }
       else { const d = await r.json(); toast.error(d.error || "Failed to update"); }
-    } catch { toast.error("Failed to update"); }
+    } catch { toast.error(t("common:toast.update_failed_alt")); }
     setSaving(false);
   }
 
@@ -111,9 +114,9 @@ export default function FileRequirementsPage() {
     try {
       const r = await fetch(`/api/file-requirements/${id}`, { method: "DELETE" });
       const d = await r.json();
-      if (r.ok) { toast.success("Deleted"); setReqs((p) => p.filter((x) => x.id !== id)); }
+      if (r.ok) { toast.success(t("common:toast.deleted")); setReqs((p) => p.filter((x) => x.id !== id)); }
       else toast.error(d.error || "Failed to delete");
-    } catch { toast.error("Failed to delete"); }
+    } catch { toast.error(t("reviews.delete_failed")); }
     setDeletingId(null);
   }
 
@@ -123,11 +126,11 @@ export default function FileRequirementsPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">File Requirements</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">Documents applicants must upload when applying.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("filereq.title")}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">{t("filereq.subtitle")}</p>
         </div>
         <button onClick={() => { setCreating(true); setEditId(null); }} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-          <Plus className="w-4 h-4" /> Add Requirement
+          <Plus className="w-4 h-4" /> {t("filereq.add")}
         </button>
       </div>
 
@@ -135,8 +138,8 @@ export default function FileRequirementsPage() {
 
       {reqs.length === 0 && !creating ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-12 text-center">
-          <p className="text-gray-400 dark:text-gray-500 font-medium">No requirements yet</p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Add documents applicants need to upload.</p>
+          <p className="text-gray-400 dark:text-gray-500 font-medium">{t("filereq.empty")}</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">{t("filereq.empty_body")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -150,9 +153,9 @@ export default function FileRequirementsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-gray-900 dark:text-white">{req.title}</span>
-                      {req.isRequired && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">Required</span>}
+                      {req.isRequired && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">{t("common:misc.required")}</span>}
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPLIES_COLORS[req.appliesTo ?? "academy"] ?? ""}`}>{APPLIES_LABELS[req.appliesTo ?? "academy"] ?? req.appliesTo}</span>
-                      {!req.isActive && <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">Inactive</span>}
+                      {!req.isActive && <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">{t("filereq.inactive")}</span>}
                     </div>
                     {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{req.description}</p>}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{req.allowedTypes} · Max {req.maxSizeMb}MB</p>

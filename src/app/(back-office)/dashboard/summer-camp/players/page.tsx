@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -45,6 +46,7 @@ interface DetailPlayer extends CampPlayer {
 }
 
 export default function SummerCampPlayersPage() {
+  const { t } = useTranslation("summercamp");
   const qc = useQueryClient();
   const { activeStationId } = useStation();
   const [page, setPage] = useState(1);
@@ -84,41 +86,41 @@ export default function SummerCampPlayersPage() {
     mutationFn: ({ id, ...patch }: { id: string } & Record<string, unknown>) =>
       fetch(`/api/summer-camp/players/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) }).then((r) => r.json()),
     onSuccess: (updated) => {
-      toast.success("Updated");
+      toast.success(t("common:toast.updated"));
       qc.invalidateQueries({ queryKey: ["sc-players"] });
       if (detail?.id === updated.id) setDetail((d) => d ? { ...d, ...updated } : d);
     },
-    onError: () => toast.error("Failed"),
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: deletePlayer, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/summer-camp/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["sc-players"] }); setDeleteId(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-players"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const players: CampPlayer[] = data?.data ?? [];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Summer Camp Participants" description="All enrolled summer camp participants." />
+      <PageHeader title={t("players.title")} description={t("players.subtitle")} />
 
       <div className="flex gap-3 flex-wrap">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search participants..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("players.search")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("common:ui.status")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_status")}</SelectItem>
+            <SelectItem value="active">{t("common:ui.active")}</SelectItem>
+            <SelectItem value="cancelled">{t("players.cancelled")}</SelectItem>
+            <SelectItem value="completed">{t("players.completed")}</SelectItem>
           </SelectContent>
         </Select>
         {Array.isArray(sessions) && sessions.length > 0 && (
           <Select value={sessionFilter} onValueChange={(v) => { setSessionFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="All Sessions" /></SelectTrigger>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("players.all_sessions")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Sessions</SelectItem>
+              <SelectItem value="all">{t("players.all_sessions")}</SelectItem>
               {sessions.map((s: { id: string; name: string }) => (
                 <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
               ))}
@@ -128,9 +130,9 @@ export default function SummerCampPlayersPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : players.length === 0 ? (
-        <EmptyState icon={Users} title="No participants yet" description="Summer camp participants converted from leads will appear here." />
+        <EmptyState icon={Users} title={t("players.empty")} description={t("players.empty_body")} />
       ) : (
         <>
           <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
@@ -185,7 +187,7 @@ export default function SummerCampPlayersPage() {
             <DialogBody className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-medium mb-1">Participant</p>
+                  <p className="text-xs text-gray-500 uppercase font-medium mb-1">{t("players.participant")}</p>
                   <p className="font-medium">{detail.fullName}</p>
                   {detail.dateOfBirth && <p className="text-gray-600">DOB: {new Date(detail.dateOfBirth).toLocaleDateString()}</p>}
                   {detail.age && <p className="text-gray-600">Age: {detail.age}</p>}
@@ -193,7 +195,7 @@ export default function SummerCampPlayersPage() {
                   {detail.healthNotes && <p className="text-gray-600 mt-1 text-xs">Health: {detail.healthNotes}</p>}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-medium mb-1">Guardian</p>
+                  <p className="text-xs text-gray-500 uppercase font-medium mb-1">{t("players.guardian")}</p>
                   <p className="font-medium">{detail.guardianName ?? "—"}</p>
                   {detail.guardianPhone && <p className="text-gray-600">{detail.guardianPhone}</p>}
                   {detail.guardianEmail && <p className="text-gray-600">{detail.guardianEmail}</p>}
@@ -209,22 +211,22 @@ export default function SummerCampPlayersPage() {
               )}
 
               <div className="flex gap-3 items-center text-sm">
-                <span className="text-gray-500">Status:</span>
+                <span className="text-gray-500">{t("players.status_label")}</span>
                 <Select value={detail.status} onValueChange={(v) => updatePlayer({ id: detail.id, status: v })}>
                   <SelectTrigger className="w-36 h-8"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="active">{t("common:ui.active")}</SelectItem>
+                    <SelectItem value="cancelled">{t("players.cancelled")}</SelectItem>
+                    <SelectItem value="completed">{t("players.completed")}</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-gray-500">Payment:</span>
+                <span className="text-gray-500">{t("players.payment_label")}</span>
                 <Select value={detail.paymentStatus} onValueChange={(v) => updatePlayer({ id: detail.id, paymentStatus: v })}>
                   <SelectTrigger className="w-32 h-8"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unpaid">Unpaid</SelectItem>
-                    <SelectItem value="partial">Partial</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="unpaid">{t("players.unpaid")}</SelectItem>
+                    <SelectItem value="partial">{t("players.partial")}</SelectItem>
+                    <SelectItem value="paid">{t("players.paid")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -237,7 +239,7 @@ export default function SummerCampPlayersPage() {
                       <a key={doc.id} href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm">
                         <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className="truncate">{doc.requirement?.title ?? doc.fileName}</span>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-auto">View</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0 ml-auto">{t("common:ui.view")}</span>
                       </a>
                     ))}
                   </div>
@@ -246,7 +248,7 @@ export default function SummerCampPlayersPage() {
 
               {detail.notes && (
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-300">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Notes</p>
+                  <p className="text-xs font-medium text-gray-500 mb-1">{t("common:ui.notes")}</p>
                   {detail.notes}
                 </div>
               )}
@@ -255,7 +257,7 @@ export default function SummerCampPlayersPage() {
         </Dialog>
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete Participant" description="This will permanently delete the participant record." onConfirm={() => deleteId && deletePlayer(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("players.delete")} description={t("players.delete_body")} onConfirm={() => deleteId && deletePlayer(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

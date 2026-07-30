@@ -1,38 +1,40 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { format, formatDistanceToNow } from "date-fns";
+import { format as dateFnsFormat } from "date-fns";
+import * as fmt from "@/lib/format";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date | string | null | undefined, fmt = "MMM d, yyyy") {
+// The four helpers below are thin adapters over src/lib/format.ts, which is now
+// the single source of truth for how a date / number / dinar is rendered — so a
+// chart tooltip, a table cell and a metric card can no longer disagree. They
+// keep their original names and signatures because ~60 pages import them; new
+// code should import "@/lib/format" directly for the richer options.
+
+/** `pattern` is an explicit date-fns escape hatch used by a few pages that need
+ *  a fixed shape (e.g. "yyyy-MM"). Omit it and the user's locale decides. */
+export function formatDate(date: Date | string | null | undefined, pattern?: string) {
   if (!date) return "—";
-  return format(new Date(date), fmt);
+  if (pattern) return dateFnsFormat(new Date(date), pattern);
+  return fmt.date(date);
 }
 
 export function formatDateTime(date: Date | string | null | undefined) {
-  if (!date) return "—";
-  return format(new Date(date), "MMM d, yyyy HH:mm");
+  return fmt.dateTime(date);
 }
 
 export function timeAgo(date: Date | string | null | undefined) {
-  if (!date) return "—";
-  return formatDistanceToNow(new Date(date), { addSuffix: true });
+  return fmt.relativeTime(date);
 }
 
 export function formatCurrency(amount: number | null | undefined, currency = "DZD") {
-  if (amount === null || amount === undefined) return "—";
-  return new Intl.NumberFormat("fr-DZ", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-  }).format(amount);
+  return fmt.currency(amount, { currency });
 }
 
 export function formatNumber(n: number | null | undefined) {
-  if (n === null || n === undefined) return "—";
-  return new Intl.NumberFormat("fr-DZ").format(n);
+  return fmt.number(n);
 }
 
 export function generateOrderNumber() {
@@ -98,13 +100,20 @@ export function parseJsonSafe<T>(json: string | null | undefined, fallback: T): 
   }
 }
 
+/**
+ * Legacy status class map. Prefer <StatusBadge status="…" /> — it renders the
+ * label in JetBrains Mono with a tinted low-opacity fill and, crucially, does
+ * not rely on colour alone to convey state. These class strings are kept for
+ * the pages that still interpolate them directly; the Tailwind names resolve
+ * to Obsidian tokens through the compatibility layer in globals.css.
+ */
 export const STATUS_COLORS: Record<string, string> = {
-  active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  inactive: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  approved: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  expired: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  suspended: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-  converted: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  active:    "bg-green-100 text-green-700",
+  inactive:  "bg-gray-100 text-gray-600",
+  pending:   "bg-yellow-100 text-yellow-700",
+  approved:  "bg-green-100 text-green-700",
+  rejected:  "bg-red-100 text-red-700",
+  expired:   "bg-red-100 text-red-700",
+  suspended: "bg-orange-100 text-orange-700",
+  converted: "bg-blue-100 text-blue-700",
 };

@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { ArrowLeft, Copy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const APP_URL = typeof window !== "undefined" ? window.location.origin : "";
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 function formatDate(d: string) { return new Date(d).toLocaleDateString("fr-DZ"); }
 
 export default function AffiliateDetailPage() {
+  const { t } = useTranslation("affiliates");
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -29,22 +31,22 @@ export default function AffiliateDetailPage() {
   const markPaidMut = useMutation({
     mutationFn: ({ refId, amount }: { refId: string; amount: number }) =>
       fetch(`/api/affiliates/referrals/${refId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amountPaid: amount }) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["affiliate", id] }); toast.success("Referral marked as paid"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["affiliate", id] }); toast.success(t("referral_paid")); },
   });
 
   const withdrawalActionMut = useMutation({
     mutationFn: ({ wId, action }: { wId: string; action: string }) =>
       fetch(`/api/affiliates/withdrawals/${wId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, notes: notes[wId] }) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["affiliate", id] }); toast.success("Withdrawal updated"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["affiliate", id] }); toast.success(t("withdrawal_updated")); },
   });
 
   const copyLink = () => {
     navigator.clipboard.writeText(`${APP_URL}/register?ref=${affiliate?.code}`);
-    toast.success("Link copied");
+    toast.success(t("link_copied"));
   };
 
-  if (isLoading) return <div className="p-8 text-center text-sm text-gray-400">Loading...</div>;
-  if (!affiliate || affiliate.error) return <div className="p-8 text-center text-sm text-red-400">Not found</div>;
+  if (isLoading) return <div className="p-8 text-center text-sm text-gray-400">{t("common:ui.loading")}</div>;
+  if (!affiliate || affiliate.error) return <div className="p-8 text-center text-sm text-red-400">{t("not_found")}</div>;
 
   return (
     <div className="space-y-6">
@@ -58,12 +60,12 @@ export default function AffiliateDetailPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Referrals</p><p className="text-2xl font-bold">{affiliate.referrals?.length ?? 0}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Commission Rate</p><p className="text-2xl font-bold">{Number(affiliate.commissionRate).toFixed(1)}%</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Balance</p><p className="text-2xl font-bold text-green-600">{formatDA(affiliate.balance ?? 0)}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("referrals")}</p><p className="text-2xl font-bold">{affiliate.referrals?.length ?? 0}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("commission_rate_short")}</p><p className="text-2xl font-bold">{Number(affiliate.commissionRate).toFixed(1)}%</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("balance")}</p><p className="text-2xl font-bold text-green-600">{formatDA(affiliate.balance ?? 0)}</p></CardContent></Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-gray-500 mb-1">Affiliate Link</p>
+            <p className="text-xs text-gray-500 mb-1">{t("affiliate_link")}</p>
             <div className="flex items-center gap-2">
               <code className="text-xs truncate flex-1 rounded bg-gray-100 dark:bg-gray-800 px-2 py-1">{APP_URL}/register?ref={affiliate.code}</code>
               <button onClick={copyLink}><Copy className="h-4 w-4 text-gray-400 hover:text-gray-600" /></button>
@@ -83,12 +85,12 @@ export default function AffiliateDetailPage() {
           <Card><CardContent className="pt-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b text-gray-500">
-                <th className="text-start py-2 pe-4">Player</th>
-                <th className="text-start py-2 pe-4">Date</th>
-                <th className="text-start py-2 pe-4">Station</th>
-                <th className="text-end py-2 pe-4">Status</th>
-                <th className="text-end py-2 pe-4">Amount Paid</th>
-                <th className="text-end py-2">Action</th>
+                <th className="text-start py-2 pe-4">{t("common:ui.player")}</th>
+                <th className="text-start py-2 pe-4">{t("common:ui.date")}</th>
+                <th className="text-start py-2 pe-4">{t("common:ui.station")}</th>
+                <th className="text-end py-2 pe-4">{t("common:ui.status")}</th>
+                <th className="text-end py-2 pe-4">{t("amount_paid")}</th>
+                <th className="text-end py-2">{t("action")}</th>
               </tr></thead>
               <tbody>
                 {affiliate.referrals?.map((r: any) => (
@@ -105,7 +107,7 @@ export default function AffiliateDetailPage() {
                         <Button size="sm" onClick={() => {
                           const amt = prompt("Enter amount paid (DA):");
                           if (amt && !isNaN(Number(amt))) markPaidMut.mutate({ refId: r.id, amount: Number(amt) });
-                        }}>Mark Paid</Button>
+                        }}>{t("mark_paid")}</Button>
                       )}
                     </td>
                   </tr>
@@ -127,14 +129,14 @@ export default function AffiliateDetailPage() {
                 <Badge variant={w.status === "approved" ? "default" : w.status === "rejected" ? "destructive" : "secondary"}>{w.status}</Badge>
                 {w.status === "pending" && (
                   <div className="flex gap-2 items-center">
-                    <Input className="w-48 h-8 text-xs" placeholder="Note (optional)" value={notes[w.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [w.id]: e.target.value }))} />
-                    <Button size="sm" onClick={() => withdrawalActionMut.mutate({ wId: w.id, action: "approve" })}>Approve</Button>
-                    <Button size="sm" variant="destructive" onClick={() => withdrawalActionMut.mutate({ wId: w.id, action: "reject" })}>Reject</Button>
+                    <Input className="w-48 h-8 text-xs" placeholder={t("note_optional")} value={notes[w.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [w.id]: e.target.value }))} />
+                    <Button size="sm" onClick={() => withdrawalActionMut.mutate({ wId: w.id, action: "approve" })}>{t("common:ui.approve")}</Button>
+                    <Button size="sm" variant="destructive" onClick={() => withdrawalActionMut.mutate({ wId: w.id, action: "reject" })}>{t("common:ui.reject")}</Button>
                   </div>
                 )}
               </div>
             ))}
-            {!affiliate.withdrawals?.length && <p className="text-center text-sm text-gray-400 py-4">No withdrawal requests.</p>}
+            {!affiliate.withdrawals?.length && <p className="text-center text-sm text-gray-400 py-4">{t("no_withdrawals")}</p>}
           </CardContent></Card>
         </TabsContent>
 
@@ -142,9 +144,9 @@ export default function AffiliateDetailPage() {
           <Card><CardContent className="pt-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b text-gray-500">
-                <th className="text-start py-2 pe-4">Date</th>
-                <th className="text-end py-2 pe-4">Amount</th>
-                <th className="text-end py-2">Status</th>
+                <th className="text-start py-2 pe-4">{t("common:ui.date")}</th>
+                <th className="text-end py-2 pe-4">{t("common:ui.amount")}</th>
+                <th className="text-end py-2">{t("common:ui.status")}</th>
               </tr></thead>
               <tbody>
                 {affiliate.earnings?.map((e: any) => (

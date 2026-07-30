@@ -16,12 +16,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatDate } from "@/lib/utils";
 import { differenceInDays, parseISO } from "date-fns";
 import { Plus, MoreHorizontal, Trash2, CreditCard, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "success", pending: "warning", expired: "destructive", suspended: "orange",
 };
 
 export default function SubscriptionsPage() {
+  const { t } = useTranslation("subscriptions");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -45,29 +47,29 @@ export default function SubscriptionsPage() {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       fetch(`/api/subscriptions/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["subscriptions"] }); },
-    onError: () => toast.error("Update failed"),
+    onSuccess: () => { toast.success(t("toast.status_updated")); qc.invalidateQueries({ queryKey: ["subscriptions"] }); },
+    onError: () => toast.error(t("toast.update_failed")),
   });
 
   const addMutation = useMutation({
     mutationFn: () => fetch("/api/subscriptions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(addForm) }).then(async (r) => { if (!r.ok) throw new Error("Failed"); return r.json(); }),
-    onSuccess: () => { toast.success("Subscription created"); qc.invalidateQueries({ queryKey: ["subscriptions"] }); setAddOpen(false); setAddForm({ playerId: "", planId: "", status: "pending", notes: "" }); },
-    onError: () => toast.error("Create failed"),
+    onSuccess: () => { toast.success(t("toast.created")); qc.invalidateQueries({ queryKey: ["subscriptions"] }); setAddOpen(false); setAddForm({ playerId: "", planId: "", status: "pending", notes: "" }); },
+    onError: () => toast.error(t("toast.create_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/subscriptions/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["subscriptions"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["subscriptions"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const getDaysRemaining = (sub: any) => {
-    if (sub.status === "expired") return <span className="text-red-500 text-xs">Expired</span>;
-    if (sub.status === "pending") return <span className="text-yellow-500 text-xs">Pending</span>;
-    if (sub.status === "suspended") return <span className="text-orange-500 text-xs">Suspended</span>;
+    if (sub.status === "expired") return <span className="text-red-500 text-xs">{t("common:ui.expired")}</span>;
+    if (sub.status === "pending") return <span className="text-yellow-500 text-xs">{t("common:ui.pending")}</span>;
+    if (sub.status === "suspended") return <span className="text-orange-500 text-xs">{t("common:ui.suspended")}</span>;
     if (!sub.endDate) return "—";
     const days = differenceInDays(parseISO(sub.endDate), new Date());
-    if (days < 0) return <span className="text-red-500 text-xs">Expired</span>;
+    if (days < 0) return <span className="text-red-500 text-xs">{t("common:ui.expired")}</span>;
     if (days <= 7) return <span className="text-orange-500 text-xs font-medium">{days}d left</span>;
     return <span className="text-green-600 text-xs font-medium">{days}d left</span>;
   };
@@ -88,10 +90,10 @@ export default function SubscriptionsPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="me-2 h-3.5 w-3.5" />Activate</DropdownMenuItem>}
-          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}>Suspend</DropdownMenuItem>}
-          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "expired" })}>Mark Expired</DropdownMenuItem>}
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-3.5 w-3.5" />Delete</DropdownMenuItem>
+          {r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="me-2 h-3.5 w-3.5" />{t("actions.activate")}</DropdownMenuItem>}
+          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}>{t("actions.suspend")}</DropdownMenuItem>}
+          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "expired" })}>{t("actions.mark_expired")}</DropdownMenuItem>}
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-3.5 w-3.5" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -99,63 +101,63 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Subscriptions" description="Manage player subscriptions">
-        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Add Subscription</Button>
+      <PageHeader title={t("title")} description={t("subtitle")}>
+        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("add")}</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue placeholder={t("common:ui.all_status")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_status")}</SelectItem>
+            <SelectItem value="active">{t("common:ui.active")}</SelectItem>
+            <SelectItem value="pending">{t("common:ui.pending")}</SelectItem>
+            <SelectItem value="expired">{t("common:ui.expired")}</SelectItem>
+            <SelectItem value="suspended">{t("common:ui.suspended")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No subscriptions found" emptyIcon={<CreditCard className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<CreditCard className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>Add Subscription</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("add")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Player *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.player")}</label>
               <Select value={addForm.playerId} onValueChange={(v) => setAddForm({ ...addForm, playerId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select player" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("form.select_player")} /></SelectTrigger>
                 <SelectContent>{players?.data?.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.fullName}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Plan *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.plan")}</label>
               <Select value={addForm.planId} onValueChange={(v) => setAddForm({ ...addForm, planId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("form.select_plan")} /></SelectTrigger>
                 <SelectContent>{plans?.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.name} — {p.price} DA</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Status</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.initial_status")}</label>
               <Select value={addForm.status} onValueChange={(v) => setAddForm({ ...addForm, status: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="active">Active (start now)</SelectItem>
+                  <SelectItem value="pending">{t("common:ui.pending")}</SelectItem>
+                  <SelectItem value="active">{t("form.active_now")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={() => addMutation.mutate()} loading={addMutation.isPending} disabled={!addForm.playerId || !addForm.planId}>Create</Button>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>{t("common:ui.cancel")}</Button>
+            <Button onClick={() => addMutation.mutate()} loading={addMutation.isPending} disabled={!addForm.playerId || !addForm.planId}>{t("common:ui.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Subscription" description="Are you sure you want to delete this subscription?" confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("delete.title")} description={t("delete.body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

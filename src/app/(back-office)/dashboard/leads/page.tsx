@@ -49,6 +49,7 @@ const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const SOURCES = ["website", "referral", "social media", "walk-in", "other"];
 
 function CampSessionSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation("leads");
   const { data: sessions = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ["sc-sessions-select"],
     queryFn: () => fetch("/api/summer-camp/sessions").then((r) => r.json()),
@@ -56,11 +57,11 @@ function CampSessionSelector({ value, onChange }: { value: string; onChange: (v:
   const list = Array.isArray(sessions) ? sessions : [];
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">Camp Session (optional)</label>
+      <label className="block text-sm font-medium mb-1">{t("page.camp_session")}</label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger><SelectValue placeholder="Select a session..." /></SelectTrigger>
+        <SelectTrigger><SelectValue placeholder={t("page.select_session")} /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="none">No session</SelectItem>
+          <SelectItem value="none">{t("page.no_session")}</SelectItem>
           {list.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
         </SelectContent>
       </Select>
@@ -89,6 +90,7 @@ function KanbanBoard({
   onDelete: (id: string) => void;
   onConvert: (id: string) => void;
 }) {
+  const { t } = useTranslation("leads");
   const sorted = [...statuses].sort((a, b) => a.order - b.order);
 
   return (
@@ -112,7 +114,7 @@ function KanbanBoard({
                 <KanbanCard key={lead.id} lead={lead} statuses={statuses} onEdit={onEdit} onDelete={onDelete} onConvert={onConvert} />
               ))}
               {columnLeads.length === 0 && (
-                <div className="text-center py-6 text-xs" style={{ color: "var(--text-muted)" }}>No leads</div>
+                <div className="text-center py-6 text-xs" style={{ color: "var(--text-muted)" }}>{t("page.no_leads")}</div>
               )}
             </div>
           </div>
@@ -135,6 +137,7 @@ function KanbanCard({
   onDelete: (id: string) => void;
   onConvert: (id: string) => void;
 }) {
+  const { t } = useTranslation("leads");
   return (
     <div className="rounded-lg p-3 space-y-2.5 hover:shadow-sm transition-shadow" style={{ background: "var(--muted-bg)", border: "1px solid var(--card-border)" }}>
       <div className="flex items-start justify-between gap-1">
@@ -148,12 +151,12 @@ function KanbanCard({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="me-2 h-4 w-4" />View</Link></DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="me-2 h-4 w-4" />{t("common:ui.view")}</Link></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
             {!lead.isConverted && (
               <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />{lead.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}</DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -174,7 +177,7 @@ function KanbanCard({
           </span>
         )}
         {lead.isConverted && (
-          <span className="text-xs font-semibold" style={{ color: "#10B981" }}>Converted</span>
+          <span className="text-xs font-semibold" style={{ color: "#10B981" }}>{t("page.converted")}</span>
         )}
       </div>
     </div>
@@ -280,7 +283,7 @@ export default function LeadsPage() {
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-xs font-semibold dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">{getInitials(r.fullName)}</div>
         <div>
           <p className="font-medium text-sm">{r.fullName}</p>
-          {r.isConverted && <span className="text-xs" style={{ color: "#10B981" }}>Converted</span>}
+          {r.isConverted && <span className="text-xs" style={{ color: "#10B981" }}>{t("page.converted")}</span>}
         </div>
       </Link>
     )},
@@ -303,14 +306,14 @@ export default function LeadsPage() {
           <Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="me-2 h-4 w-4" />View Activity</Link></DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem asChild><Link href={`/dashboard/leads/${r.id}`}><Eye className="me-2 h-4 w-4" />{t("page.view_activity")}</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
           {!r.isConverted && (
             <DropdownMenuItem onClick={() => { setConvertId(r.id); setConvertLead(r); setCampConvertSessionId(""); }}>
               <UserCheck className="me-2 h-4 w-4" />{r.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -318,7 +321,7 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title={t("title")} description="Manage potential players and track conversions">
+      <PageHeader title={t("title")} description={t("page.subtitle")}>
         <Button variant="outline" asChild>
           <Link href="/dashboard/leads/pipeline"><Settings2 className="me-2 h-4 w-4" />{t("pipeline")}</Link>
         </Button>
@@ -335,18 +338,18 @@ export default function LeadsPage() {
           </SelectContent>
         </Select>
         <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Sources" /></SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue placeholder={t("page.all_sources")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Sources</SelectItem>
+            <SelectItem value="all">{t("page.all_sources")}</SelectItem>
             {SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={leadTypeFilter} onValueChange={(v) => { setLeadTypeFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="All Programs" /></SelectTrigger>
+          <SelectTrigger className="w-44"><SelectValue placeholder={t("page.all_programs")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
-            <SelectItem value="academy">Academy</SelectItem>
-            <SelectItem value="summer_camp">Summer Camp</SelectItem>
+            <SelectItem value="all">{t("page.all_programs")}</SelectItem>
+            <SelectItem value="academy">{t("page.academy")}</SelectItem>
+            <SelectItem value="summer_camp">{t("page.summer_camp")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -357,14 +360,14 @@ export default function LeadsPage() {
             style={view === "table"
               ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
               : { color: "var(--text-muted)" }}>
-            <List className="w-3.5 h-3.5" /> List
+            <List className="w-3.5 h-3.5" /> {t("page.list")}
           </button>
           <button onClick={() => setView("kanban")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
             style={view === "kanban"
               ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
               : { color: "var(--text-muted)" }}>
-            <LayoutGrid className="w-3.5 h-3.5" /> Board
+            <LayoutGrid className="w-3.5 h-3.5" /> {t("page.board")}
           </button>
         </div>
       </div>
@@ -446,7 +449,7 @@ export default function LeadsPage() {
           onOpenChange={(o) => { if (!o) { setConvertId(null); setConvertLead(null); } }}
           title={t("actions.convert_to_player")}
           description={`Convert ${convertLead?.fullName ?? "this lead"} to an Academy player?`}
-          confirmLabel="Convert"
+          confirmLabel={t("page.convert")}
           variant="default"
           onConfirm={() => convertId && convertMutation.mutate(convertId)}
           loading={convertMutation.isPending}
@@ -457,13 +460,13 @@ export default function LeadsPage() {
       {convertLead?.leadType === "summer_camp" && (
         <Dialog open={!!convertId} onOpenChange={(o) => { if (!o) { setConvertId(null); setConvertLead(null); setCampConvertSessionId(""); } }}>
           <DialogContent size="md">
-            <DialogHeader><DialogTitle>Convert to Camp Participant</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{t("page.convert_camp")}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Convert <strong>{convertLead?.fullName}</strong> to a Summer Camp participant.</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t("page.convert")} <strong>{convertLead?.fullName}</strong> {t("page.convert_tail")}</p>
               <CampSessionSelector value={campConvertSessionId} onChange={setCampConvertSessionId} />
             </DialogBody>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setConvertId(null); setConvertLead(null); setCampConvertSessionId(""); }}>Cancel</Button>
+              <Button variant="outline" onClick={() => { setConvertId(null); setConvertLead(null); setCampConvertSessionId(""); }}>{t("common:ui.cancel")}</Button>
               <Button
                 loading={convertMutation.isPending}
                 onClick={() => {
@@ -475,13 +478,13 @@ export default function LeadsPage() {
                   }).then(async (r) => {
                     const json = await r.json();
                     if (!r.ok) { toast.error(json.error ?? "Conversion failed"); return; }
-                    toast.success("Converted to Summer Camp participant");
+                    toast.success(t("page.converted_camp"));
                     qc.invalidateQueries({ queryKey: ["leads"] });
                     setConvertId(null); setConvertLead(null); setCampConvertSessionId("");
-                  }).catch(() => toast.error("Conversion failed"));
+                  }).catch(() => toast.error(t("page.conversion_failed")));
                 }}
               >
-                Convert
+                {t("page.convert")}
               </Button>
             </DialogFooter>
           </DialogContent>

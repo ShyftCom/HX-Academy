@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatDate, timeAgo } from "@/lib/utils";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-blue-100 text-blue-700",
@@ -36,6 +37,7 @@ interface FullTicket {
 }
 
 export default function TicketDetailPage() {
+  const { t } = useTranslation("tickets");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
@@ -56,8 +58,8 @@ export default function TicketDetailPage() {
   const { mutate: updateTicket } = useMutation({
     mutationFn: (patch: Record<string, string | null>) =>
       fetch(`/api/tickets/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["ticket", id] }); qc.invalidateQueries({ queryKey: ["tickets"] }); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.updated")); qc.invalidateQueries({ queryKey: ["ticket", id] }); qc.invalidateQueries({ queryKey: ["tickets"] }); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: addComment, isPending: commenting } = useMutation({
@@ -68,17 +70,17 @@ export default function TicketDetailPage() {
       setComment("");
       qc.invalidateQueries({ queryKey: ["ticket", id] });
     },
-    onError: () => toast.error("Failed"),
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: deleteTicket, isPending: deleting } = useMutation({
     mutationFn: () => fetch(`/api/tickets/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Ticket deleted"); router.push("/dashboard/tickets"); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("detail.deleted")); router.push("/dashboard/tickets"); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
-  if (isLoading) return <div className="text-center py-20 text-gray-500">Loading...</div>;
-  if (!ticket || (ticket as { error?: string }).error) return <div className="text-center py-20 text-gray-400">Ticket not found</div>;
+  if (isLoading) return <div className="text-center py-20 text-gray-500">{t("common:ui.loading")}</div>;
+  if (!ticket || (ticket as { error?: string }).error) return <div className="text-center py-20 text-gray-400">{t("detail.not_found")}</div>;
 
   const staffList = Array.isArray(staff) ? staff : [];
 
@@ -86,10 +88,10 @@ export default function TicketDetailPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/dashboard/tickets" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to Tickets
+          <ArrowLeft className="w-4 h-4" /> {t("detail.back")}
         </Link>
         <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => setDeleteOpen(true)}>
-          <Trash2 className="w-4 h-4 mr-1" /> Delete
+          <Trash2 className="w-4 h-4 mr-1" /> {t("common:ui.delete")}
         </Button>
       </div>
 
@@ -105,45 +107,45 @@ export default function TicketDetailPage() {
         <p className="text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap mb-4">{ticket.description}</p>
 
         <div className="text-xs text-gray-400 space-y-1">
-          <p>Created by <span className="font-medium">{ticket.createdBy.name ?? ticket.createdBy.email}</span> · {formatDate(ticket.createdAt)}</p>
-          {ticket.assignedTo && <p>Assigned to <span className="font-medium">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span></p>}
+          <p>{t("detail.created_by")} <span className="font-medium">{ticket.createdBy.name ?? ticket.createdBy.email}</span> · {formatDate(ticket.createdAt)}</p>
+          {ticket.assignedTo && <p>{t("detail.assigned_to")} <span className="font-medium">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span></p>}
         </div>
       </div>
 
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Manage Ticket</h2>
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">{t("detail.manage")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Status</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t("common:ui.status")}</label>
             <Select value={ticket.status} onValueChange={(v) => updateTicket({ status: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="open">{t("common:status.open")}</SelectItem>
+                <SelectItem value="in_progress">{t("common:status.in_progress")}</SelectItem>
+                <SelectItem value="resolved">{t("common:status.resolved")}</SelectItem>
+                <SelectItem value="closed">{t("common:status.closed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Priority</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t("common:ui.priority")}</label>
             <Select value={ticket.priority} onValueChange={(v) => updateTicket({ priority: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="low">{t("common:priority.low")}</SelectItem>
+                <SelectItem value="medium">{t("common:priority.medium")}</SelectItem>
+                <SelectItem value="high">{t("common:priority.high")}</SelectItem>
+                <SelectItem value="urgent">{t("common:priority.urgent")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Assigned To</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t("common:ui.assigned_to")}</label>
             <Select value={ticket.assignedTo?.id ?? "unassigned"} onValueChange={(v) => updateTicket({ assignedToId: v === "unassigned" ? null : v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="unassigned">{t("common:ui.unassigned")}</SelectItem>
                 {staffList.map((u: { id: string; name: string | null; email: string }) => (
                   <SelectItem key={u.id} value={u.id}>{u.name ?? u.email}</SelectItem>
                 ))}
@@ -160,7 +162,7 @@ export default function TicketDetailPage() {
         </h2>
 
         {ticket.comments.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-6">No comments yet. Be the first to reply.</p>
+          <p className="text-sm text-gray-400 text-center py-6">{t("detail.no_comments")}</p>
         ) : (
           <div className="space-y-4 mb-6">
             {ticket.comments.map((c) => (
@@ -184,7 +186,7 @@ export default function TicketDetailPage() {
           <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Write a comment..."
+            placeholder={t("detail.comment_ph")}
             rows={3}
             onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && comment.trim()) addComment(comment.trim()); }}
             className="flex-1"
@@ -193,14 +195,14 @@ export default function TicketDetailPage() {
             <Send className="w-4 h-4" />
           </Button>
         </div>
-        <p className="text-xs text-gray-400 mt-1">Ctrl+Enter to submit</p>
+        <p className="text-xs text-gray-400 mt-1">{t("detail.submit_hint")}</p>
       </div>
 
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Delete Ticket"
-        description="This will permanently delete the ticket and all its comments."
+        title={t("detail.delete")}
+        description={t("detail.delete_body")}
         onConfirm={() => deleteTicket()}
         loading={deleting}
         variant="destructive"

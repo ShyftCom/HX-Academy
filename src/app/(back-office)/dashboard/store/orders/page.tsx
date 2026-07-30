@@ -14,6 +14,7 @@ import { SearchInput } from "@/components/shared/search-input";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const ORDER_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"];
 
@@ -36,6 +37,7 @@ interface WebsiteOrder {
 }
 
 export default function StoreOrdersPage() {
+  const { t } = useTranslation("orders");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -61,11 +63,11 @@ export default function StoreOrdersPage() {
         body: JSON.stringify({ status }),
       }).then((r) => r.json()),
     onSuccess: (updated) => {
-      toast.success("Status updated");
+      toast.success(t("toast.status_updated"));
       qc.invalidateQueries({ queryKey: ["website-orders"] });
       if (selectedOrder) setSelectedOrder({ ...selectedOrder, status: updated.status });
     },
-    onError: () => toast.error("Failed to update"),
+    onError: () => toast.error(t("store.update_failed")),
   });
 
   const orders: WebsiteOrder[] = data?.data ?? [];
@@ -74,14 +76,14 @@ export default function StoreOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Store Orders" description="Manage all orders placed through the website store." />
+      <PageHeader title={t("store.title")} description={t("store.subtitle")} />
 
       <div className="flex gap-3 flex-wrap">
-        <SearchInput value={search} onChange={setSearch} placeholder="Search orders..." className="w-64" />
+        <SearchInput value={search} onChange={setSearch} placeholder={t("search")} className="w-64" />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All statuses" /></SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue placeholder={t("common:ui.all_statuses_lc")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">{t("store.all_statuses")}</SelectItem>
             {ORDER_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
             ))}
@@ -90,9 +92,9 @@ export default function StoreOrdersPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : orders.length === 0 ? (
-        <EmptyState icon={Package} title="No orders yet" description="Orders placed through the website store will appear here." />
+        <EmptyState icon={Package} title={t("empty")} description={t("store.empty_body")} />
       ) : (
         <>
           <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
@@ -142,13 +144,13 @@ export default function StoreOrdersPage() {
             <DialogBody className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500 text-xs uppercase font-medium mb-1">Customer</p>
+                  <p className="text-gray-500 text-xs uppercase font-medium mb-1">{t("store.customer")}</p>
                   <p className="font-medium">{selectedOrder.customerName}</p>
                   <p className="text-gray-600">{selectedOrder.customerPhone}</p>
                   {selectedOrder.customerEmail && <p className="text-gray-600">{selectedOrder.customerEmail}</p>}
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs uppercase font-medium mb-1">Delivery</p>
+                  <p className="text-gray-500 text-xs uppercase font-medium mb-1">{t("store.delivery")}</p>
                   <p>{selectedOrder.wilaya}{selectedOrder.city ? `, ${selectedOrder.city}` : ""}</p>
                   {selectedOrder.address && <p className="text-gray-600">{selectedOrder.address}</p>}
                   {selectedOrder.deliveryNotes && <p className="text-gray-400 text-xs mt-1">{selectedOrder.deliveryNotes}</p>}
@@ -159,9 +161,9 @@ export default function StoreOrdersPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="text-left p-3 font-medium">Product</th>
-                      <th className="text-right p-3 font-medium">Qty</th>
-                      <th className="text-right p-3 font-medium">Price</th>
+                      <th className="text-left p-3 font-medium">{t("store.product")}</th>
+                      <th className="text-right p-3 font-medium">{t("store.qty")}</th>
+                      <th className="text-right p-3 font-medium">{t("store.price")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -175,15 +177,15 @@ export default function StoreOrdersPage() {
                   </tbody>
                   <tfoot className="border-t-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <td className="p-3 text-gray-500" colSpan={2}>Subtotal</td>
+                      <td className="p-3 text-gray-500" colSpan={2}>{t("store.subtotal")}</td>
                       <td className="p-3 text-right">{Number(selectedOrder.subtotal).toLocaleString()} DA</td>
                     </tr>
                     <tr>
-                      <td className="p-3 text-gray-500" colSpan={2}>Shipping</td>
+                      <td className="p-3 text-gray-500" colSpan={2}>{t("store.shipping")}</td>
                       <td className="p-3 text-right">{Number(selectedOrder.shippingFee) === 0 ? "Free" : `${Number(selectedOrder.shippingFee).toLocaleString()} DA`}</td>
                     </tr>
                     <tr>
-                      <td className="p-3 font-semibold" colSpan={2}>Total</td>
+                      <td className="p-3 font-semibold" colSpan={2}>{t("total")}</td>
                       <td className="p-3 text-right font-semibold">{Number(selectedOrder.total).toLocaleString()} DA</td>
                     </tr>
                   </tfoot>
@@ -191,7 +193,7 @@ export default function StoreOrdersPage() {
               </div>
 
               <div className="flex gap-3 items-center">
-                <label className="text-sm font-medium">Status:</label>
+                <label className="text-sm font-medium">{t("common:ui.status_colon")}</label>
                 <Select value={newStatus} onValueChange={setNewStatus}>
                   <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                   <SelectContent>

@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 interface SCPlan {
   id: string; name: string; programTrack: string | null; price: number;
@@ -23,6 +24,7 @@ interface SCPlan {
 const EMPTY = { name: "", programTrack: "", price: "", description: "" };
 
 export default function SummerCampPlansPage() {
+  const { t } = useTranslation("summercamp");
   const qc = useQueryClient();
   const { activeStationId } = useStation();
   const [modal, setModal] = useState<"new" | SCPlan | null>(null);
@@ -44,8 +46,8 @@ export default function SummerCampPlansPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, stationId: activeStationId ?? undefined }),
       }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Plan created"); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setModal(null); },
-    onError: () => toast.error("Failed to create"),
+    onSuccess: () => { toast.success(t("plans.created")); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.create_failed_alt")),
   });
 
   const { mutate: updatePlan, isPending: updating } = useMutation({
@@ -53,14 +55,14 @@ export default function SummerCampPlansPage() {
       fetch(`/api/summer-camp/plans/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
       }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setModal(null); },
-    onError: () => toast.error("Failed to save"),
+    onSuccess: () => { toast.success(t("common:toast.saved")); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.save_failed_alt")),
   });
 
   const { mutate: deletePlan, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/summer-camp/plans/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setDeleteId(null); },
-    onError: () => toast.error("Failed to delete"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:errors.failed_to_delete")),
   });
 
   const { mutate: toggleActive } = useMutation({
@@ -78,7 +80,7 @@ export default function SummerCampPlansPage() {
   };
 
   const save = () => {
-    if (!form.name.trim()) { toast.error("Name is required"); return; }
+    if (!form.name.trim()) { toast.error(t("plans.name_required")); return; }
     if (modal === "new") createPlan(form);
     else if (modal) updatePlan({ id: (modal as SCPlan).id, ...form });
   };
@@ -87,14 +89,14 @@ export default function SummerCampPlansPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Summer Camp Plans" description="Define the programs and pricing for summer camp enrollment.">
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New Plan</Button>
+      <PageHeader title={t("plans.title")} description={t("plans.subtitle")}>
+        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> {t("plans.new")}</Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : allPlans.length === 0 ? (
-        <EmptyState icon={Sun} title="No plans yet" description="Create your first summer camp plan." action={{ label: "New Plan", onClick: openNew }} />
+        <EmptyState icon={Sun} title={t("plans.empty")} description={t("plans.empty_body")} action={{ label: t("plans.new"), onClick: openNew }} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {allPlans.map((plan) => (
@@ -130,24 +132,24 @@ export default function SummerCampPlansPage() {
             <DialogHeader><DialogTitle>{modal === "new" ? "New Plan" : "Edit Plan"}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
               <div>
-                <Label>Plan Name *</Label>
-                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Junior Goalkeeper Training" className="mt-1" />
+                <Label>{t("plans.name")}</Label>
+                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("plans.name_ph")} className="mt-1" />
               </div>
               <div>
-                <Label>Program / Track</Label>
-                <Input value={form.programTrack} onChange={(e) => setForm((f) => ({ ...f, programTrack: e.target.value }))} placeholder="e.g. U10 Outfield" className="mt-1" />
+                <Label>{t("plans.track")}</Label>
+                <Input value={form.programTrack} onChange={(e) => setForm((f) => ({ ...f, programTrack: e.target.value }))} placeholder={t("plans.track_ph")} className="mt-1" />
               </div>
               <div>
-                <Label>Price (DA) *</Label>
+                <Label>{t("common:ui.price_da_req")}</Label>
                 <Input type="number" min={0} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="0" className="mt-1" />
               </div>
               <div>
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Brief description of this plan..." rows={2} className="mt-1" />
+                <Label>{t("common:ui.description")}</Label>
+                <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder={t("plans.desc_ph")} rows={2} className="mt-1" />
               </div>
             </DialogBody>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>{creating || updating ? "Saving..." : "Save"}</Button>
             </DialogFooter>
           </DialogContent>
@@ -157,8 +159,8 @@ export default function SummerCampPlansPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Plan"
-        description="This will permanently delete this plan."
+        title={t("plans.delete")}
+        description={t("plans.delete_body")}
         onConfirm={() => deleteId && deletePlan(deleteId)}
         loading={deleting}
         variant="destructive"

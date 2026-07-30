@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFoo
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface LandingPageRow {
   id: string;
@@ -22,6 +23,7 @@ interface LandingPageRow {
 }
 
 export default function WebsitePagesPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -40,7 +42,7 @@ export default function WebsitePagesPage() {
         if (!r.ok) throw new Error(data.error ?? "Failed");
         return data;
       }),
-    onSuccess: () => { toast.success("Page created"); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setCreating(false); setNewTitle(""); setNewSlug(""); },
+    onSuccess: () => { toast.success(t("pages.created")); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setCreating(false); setNewTitle(""); setNewSlug(""); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -56,7 +58,7 @@ export default function WebsitePagesPage() {
       if (!r.ok) throw new Error(data.error ?? "Failed");
       return data;
     }),
-    onSuccess: () => { toast.success("Page deleted"); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("pages.deleted")); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setDeleteId(null); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -66,23 +68,23 @@ export default function WebsitePagesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Pages" description="Build every Showcase Website page from reusable, drag-and-drop sections.">
-        <Button onClick={() => setCreating(true)}><Plus className="w-4 h-4 mr-1" /> New Page</Button>
+      <PageHeader title={t("pages.title")} description={t("pages.subtitle")}>
+        <Button onClick={() => setCreating(true)}><Plus className="w-4 h-4 mr-1" /> {t("pages.new")}</Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="py-12 text-center text-gray-500">Loading…</div>
+        <div className="py-12 text-center text-gray-500">{t("common:ui.loading_alt")}</div>
       ) : pages.length === 0 ? (
-        <EmptyState icon={FileText} title="No pages yet" description="Create your first page to start building the public site." action={{ label: "New Page", onClick: () => setCreating(true) }} />
+        <EmptyState icon={FileText} title={t("pages.empty")} description={t("pages.empty_body")} action={{ label: t("pages.new"), onClick: () => setCreating(true) }} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-start text-xs uppercase text-gray-500 dark:bg-gray-800/50">
               <tr>
-                <th className="px-4 py-3 text-start font-medium">Title</th>
-                <th className="px-4 py-3 text-start font-medium">Slug</th>
-                <th className="px-4 py-3 text-start font-medium">Sections</th>
-                <th className="px-4 py-3 text-start font-medium">Status</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.title_field")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("pages.slug")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("pages.sections")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.status")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -126,23 +128,23 @@ export default function WebsitePagesPage() {
 
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Page</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("pages.new")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-3">
             <div>
-              <Label>Title</Label>
+              <Label>{t("common:ui.title_field")}</Label>
               <Input
                 value={newTitle}
                 onChange={(e) => { setNewTitle(e.target.value); if (!newSlug) setNewSlug(slugify(e.target.value)); }}
-                placeholder="e.g. Who We Are"
+                placeholder={t("pages.name_ph")}
               />
             </div>
             <div>
-              <Label>URL slug</Label>
+              <Label>{t("pages.url_slug")}</Label>
               <Input value={newSlug} onChange={(e) => setNewSlug(slugify(e.target.value))} placeholder="who-we-are" />
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreating(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => createPage()} disabled={isPending || !newSlug}>{isPending ? "Creating…" : "Create Page"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -151,8 +153,8 @@ export default function WebsitePagesPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Page"
-        description="This permanently removes the page and all of its sections."
+        title={t("pages.delete")}
+        description={t("pages.delete_body")}
         onConfirm={() => deleteId && deletePage(deleteId)}
         loading={deleting}
         variant="destructive"

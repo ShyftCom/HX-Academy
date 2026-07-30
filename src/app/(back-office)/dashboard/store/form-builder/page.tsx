@@ -13,10 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTi
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, GripVertical, Trash2, Edit, ChevronUp, ChevronDown, ClipboardList, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const FIELD_TYPES = ["text", "number", "phone", "email", "select", "checkbox", "radio", "textarea", "file"];
 
 export default function FormBuilderPage() {
+  const { t } = useTranslation("store");
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editField, setEditField] = useState<any>(null);
@@ -37,12 +39,12 @@ export default function FormBuilderPage() {
       return res.json();
     },
     onSuccess: () => { toast.success(editField ? "Field updated" : "Field added"); qc.invalidateQueries({ queryKey: ["form-fields"] }); setModalOpen(false); setEditField(null); setForm({ label: "", fieldType: "text", placeholder: "", isRequired: false, options: [] }); },
-    onError: () => toast.error("Save failed"),
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/form-fields/${id}`, { method: "DELETE" }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); }),
-    onSuccess: () => { toast.success("Field deleted"); qc.invalidateQueries({ queryKey: ["form-fields"] }); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("form.field_deleted")); qc.invalidateQueries({ queryKey: ["form-fields"] }); setDeleteId(null); },
     onError: (e: any) => toast.error(e.message ?? "Delete failed"),
   });
 
@@ -50,7 +52,7 @@ export default function FormBuilderPage() {
     mutationFn: (items: { id: string; order: number }[]) =>
       fetch("/api/form-fields", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }).then((r) => r.json()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["form-fields"] }),
-    onError: () => toast.error("Reorder failed"),
+    onError: () => toast.error(t("form.reorder_failed")),
   });
 
   const openAdd = () => { setEditField(null); setForm({ label: "", fieldType: "text", placeholder: "", isRequired: false, options: [] }); setModalOpen(true); };
@@ -77,19 +79,19 @@ export default function FormBuilderPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Order Form Builder" description="Customize the COD order form fields">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Field</Button>
+      <PageHeader title={t("form.title")} description={t("form.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("form.add_field")}</Button>
       </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Form Fields</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("form.fields")}</h3>
           {isLoading ? (
             <div className="flex justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
           ) : fields?.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-12 dark:border-gray-700">
               <ClipboardList className="h-8 w-8 text-gray-300 mb-2" />
-              <p className="text-sm text-gray-400">No form fields yet</p>
+              <p className="text-sm text-gray-400">{t("form.empty")}</p>
             </div>
           ) : (
             [...(fields ?? [])].sort((a: any, b: any) => a.order - b.order).map((field: any, idx: number) => (
@@ -99,8 +101,8 @@ export default function FormBuilderPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-medium">{field.label}</p>
                     <Badge variant="outline" className="text-xs">{field.fieldType}</Badge>
-                    {field.isRequired && <Badge variant="destructive" className="text-xs">Required</Badge>}
-                    {field.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
+                    {field.isRequired && <Badge variant="destructive" className="text-xs">{t("form.required")}</Badge>}
+                    {field.isDefault && <Badge variant="secondary" className="text-xs">{t("form.default")}</Badge>}
                   </div>
                   {field.placeholder && <p className="text-xs text-gray-400 mt-0.5">Placeholder: {field.placeholder}</p>}
                 </div>
@@ -116,7 +118,7 @@ export default function FormBuilderPage() {
         </div>
 
         <Card>
-          <CardHeader><CardTitle>Form Preview</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("form.preview")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {[...(fields ?? [])].sort((a: any, b: any) => a.order - b.order).map((field: any) => (
               <div key={field.id}>
@@ -124,7 +126,7 @@ export default function FormBuilderPage() {
                 {field.fieldType === "textarea" ? (
                   <textarea className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder={field.placeholder ?? ""} rows={2} readOnly />
                 ) : field.fieldType === "select" ? (
-                  <select className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"><option>Select...</option></select>
+                  <select className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"><option>{t("form.select_ph")}</option></select>
                 ) : (
                   <input type={field.fieldType} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder={field.placeholder ?? ""} readOnly />
                 )}
@@ -138,18 +140,18 @@ export default function FormBuilderPage() {
         <DialogContent size="md">
           <DialogHeader><DialogTitle>{editField ? "Edit Field" : "Add Form Field"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Field Label *" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="e.g. Full Name" />
+            <Input label={t("form.label")} value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder={t("form.label_ph")} />
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Field Type</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.field_type")}</label>
               <Select value={form.fieldType} onValueChange={(v) => setForm({ ...form, fieldType: v, options: [] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{FIELD_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            {!needsOptions && <Input label="Placeholder" value={form.placeholder} onChange={(e) => setForm({ ...form, placeholder: e.target.value })} placeholder="Enter placeholder text" />}
+            {!needsOptions && <Input label={t("form.placeholder")} value={form.placeholder} onChange={(e) => setForm({ ...form, placeholder: e.target.value })} placeholder={t("form.placeholder_ph")} />}
             {needsOptions && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.options")}</label>
                 <div className="space-y-2 mb-2">
                   {form.options.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2">
@@ -159,24 +161,24 @@ export default function FormBuilderPage() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={newOption} onChange={(e) => setNewOption(e.target.value)} placeholder="Add option..." className="flex-1" />
-                  <Button type="button" variant="outline" size="sm" onClick={() => { if (newOption.trim()) { setForm({ ...form, options: [...form.options, newOption.trim()] }); setNewOption(""); } }}>Add</Button>
+                  <Input value={newOption} onChange={(e) => setNewOption(e.target.value)} placeholder={t("form.add_option")} className="flex-1" />
+                  <Button type="button" variant="outline" size="sm" onClick={() => { if (newOption.trim()) { setForm({ ...form, options: [...form.options, newOption.trim()] }); setNewOption(""); } }}>{t("common:ui.add")}</Button>
                 </div>
               </div>
             )}
             <div className="flex items-center gap-3">
               <Switch checked={form.isRequired} onCheckedChange={(v) => setForm({ ...form, isRequired: v })} />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Required field</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t("form.required_toggle")}</span>
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.label}>{editField ? "Save" : "Add Field"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Field" description="This field will be removed from the order form." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("form.delete_title")} description={t("form.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

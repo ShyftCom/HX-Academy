@@ -4,29 +4,59 @@ import { cn } from "@/lib/utils";
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string;
   label?: string;
+  hint?: string;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, error, label, id, ...props }, ref) => {
-    const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+  ({ className, error, label, hint, id, required, ...props }, ref) => {
+    const reactId = React.useId();
+    const textareaId = id ?? `textarea-${reactId}`;
+    const errorId = `${textareaId}-error`;
+    const hintId = `${textareaId}-hint`;
+
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={textareaId} className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor={textareaId}
+            className="mb-1.5 block text-[13px] font-medium text-[var(--ob-text-secondary)]"
+          >
             {label}
+            {required && (
+              <span className="ms-1 text-[var(--ob-error)]" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
         <textarea
           id={textareaId}
+          ref={ref}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : hint ? hintId : undefined}
           className={cn(
-            "flex min-h-[80px] w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500",
-            error && "border-red-500 focus-visible:ring-red-500",
+            "flex min-h-[88px] w-full rounded-[var(--ob-radius-control)] border px-3 py-2 text-sm",
+            "border-[var(--ob-line-strong)] bg-[var(--ob-surface)] text-[var(--ob-text)]",
+            "transition-[border-color,box-shadow] duration-150",
+            "placeholder:text-[var(--ob-text-muted)]",
+            "focus-visible:border-[var(--ob-primary)] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--ob-primary-glow)]",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            error &&
+              "border-[var(--ob-error)] focus-visible:border-[var(--ob-error)] focus-visible:shadow-[0_0_0_3px_rgba(255,180,171,0.2)]",
             className
           )}
-          ref={ref}
           {...props}
         />
-        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+        {error ? (
+          <p id={errorId} role="alert" className="mt-1.5 text-xs text-[var(--ob-error)]">
+            {error}
+          </p>
+        ) : hint ? (
+          <p id={hintId} className="mt-1.5 text-xs text-[var(--ob-text-muted)]">
+            {hint}
+          </p>
+        ) : null}
       </div>
     );
   }

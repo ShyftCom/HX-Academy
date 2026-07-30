@@ -11,11 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Calendar } from "lucide-react";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 const LEAVE_TYPES = ["Annual", "Sick", "Unpaid", "Emergency", "Maternity"];
 function formatDate(d: string) { return new Date(d).toLocaleDateString("fr-DZ"); }
 
 export default function LeavePage() {
+  const { t } = useTranslation("hrm");
   const { activeStationId } = useStation();
   const qc = useQueryClient();
   const [filter, setFilter] = useState("pending");
@@ -36,12 +38,12 @@ export default function LeavePage() {
   const actionMut = useMutation({
     mutationFn: ({ id, action }: { id: string; action: string }) =>
       fetch(`/api/hrm/leave/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["leaves"] }); toast.success("Leave request updated"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["leaves"] }); toast.success(t("leave.updated")); },
   });
 
   const createMut = useMutation({
     mutationFn: (data: any) => fetch("/api/hrm/leave", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["leaves"] }); toast.success("Leave request created"); setOpen(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["leaves"] }); toast.success(t("leave.created")); setOpen(false); },
   });
 
   const statusBadge = (s: string) => {
@@ -52,7 +54,7 @@ export default function LeavePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold">Leave Requests</h1><p className="text-sm text-gray-500">Manage staff leave</p></div>
+        <div><h1 className="text-2xl font-bold">{t("leave.title")}</h1><p className="text-sm text-gray-500">{t("leave.subtitle")}</p></div>
         <div className="flex gap-2">
           <div className="flex rounded-lg border overflow-hidden">
             {["pending", "approved", "rejected", ""].map((s) => (
@@ -62,28 +64,28 @@ export default function LeavePage() {
             ))}
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="me-2 h-4 w-4" />Add Leave</Button></DialogTrigger>
+            <DialogTrigger asChild><Button><Plus className="me-2 h-4 w-4" />{t("leave.add")}</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Create Leave Request</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t("leave.create_title")}</DialogTitle></DialogHeader>
               <div className="space-y-3 py-2">
                 <div className="space-y-1">
-                  <Label>Staff Member</Label>
+                  <Label>{t("leave.staff_member")}</Label>
                   <select className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" value={form.staffId} onChange={(e) => setForm((f) => ({ ...f, staffId: e.target.value }))}>
-                    <option value="">Select staff...</option>
+                    <option value="">{t("leave.select_staff")}</option>
                     {staff.map((s: any) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <Label>Leave Type</Label>
+                  <Label>{t("leave.type")}</Label>
                   <select className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" value={form.leaveType} onChange={(e) => setForm((f) => ({ ...f, leaveType: e.target.value }))}>
                     {LEAVE_TYPES.map((t) => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>Start Date</Label><Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} /></div>
-                  <div className="space-y-1"><Label>End Date</Label><Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} /></div>
+                  <div className="space-y-1"><Label>{t("leave.start")}</Label><Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} /></div>
+                  <div className="space-y-1"><Label>{t("leave.end")}</Label><Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} /></div>
                 </div>
-                <div className="space-y-1"><Label>Reason</Label><Input value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} /></div>
+                <div className="space-y-1"><Label>{t("leave.reason")}</Label><Input value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} /></div>
                 <Button className="w-full" disabled={!form.staffId || !form.startDate || !form.endDate || createMut.isPending} onClick={() => createMut.mutate(form)}>
                   {createMut.isPending ? "Creating..." : "Create Request"}
                 </Button>
@@ -109,13 +111,13 @@ export default function LeavePage() {
               </div>
               {l.status === "pending" && (
                 <div className="flex gap-2 shrink-0">
-                  <Button size="sm" onClick={() => actionMut.mutate({ id: l.id, action: "approve" })}>Approve</Button>
-                  <Button size="sm" variant="destructive" onClick={() => actionMut.mutate({ id: l.id, action: "reject" })}>Reject</Button>
+                  <Button size="sm" onClick={() => actionMut.mutate({ id: l.id, action: "approve" })}>{t("common:ui.approve")}</Button>
+                  <Button size="sm" variant="destructive" onClick={() => actionMut.mutate({ id: l.id, action: "reject" })}>{t("common:ui.reject")}</Button>
                 </div>
               )}
             </div>
           ))}
-          {!leaves.length && <p className="py-8 text-center text-sm text-gray-400">No leave requests found.</p>}
+          {!leaves.length && <p className="py-8 text-center text-sm text-gray-400">{t("leave.empty")}</p>}
         </CardContent>
       </Card>
     </div>

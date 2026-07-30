@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export default function NewStationPage() {
+  const { t } = useTranslation("stations");
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [wilayaSearch, setWilayaSearch] = useState("");
@@ -39,7 +41,7 @@ export default function NewStationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.wilaya) { toast.error("Name and wilaya are required"); return; }
+    if (!form.name || !form.wilaya) { toast.error(t("new.required")); return; }
     setSaving(true);
     try {
       const res = await fetch("/api/stations", {
@@ -48,10 +50,10 @@ export default function NewStationPage() {
         body: JSON.stringify({ ...form, wilayaCode: form.wilayaCode ? Number(form.wilayaCode) : null }),
       });
       if (!res.ok) throw new Error();
-      toast.success("Station created");
+      toast.success(t("new.created"));
       router.push("/dashboard/stations");
     } catch {
-      toast.error("Failed to create station");
+      toast.error(t("new.create_failed"));
     } finally {
       setSaving(false);
     }
@@ -64,28 +66,28 @@ export default function NewStationPage() {
           <Link href="/dashboard/stations"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">New Station</h1>
-          <p className="text-sm text-gray-500">Add a new academy location</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t("new.title")}</h1>
+          <p className="text-sm text-gray-500">{t("new.subtitle")}</p>
         </div>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5" />Station Details</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><MapPin className="h-5 w-5" />{t("new.details")}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1">
-                <Label>Station Name <span className="text-red-500">*</span></Label>
-                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. HX Academy — Alger" />
+                <Label>{t("new.name")} <span className="text-red-500">*</span></Label>
+                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("new.name_ph")} />
               </div>
 
               <div className="col-span-2 space-y-1 relative">
-                <Label>Wilaya <span className="text-red-500">*</span></Label>
+                <Label>{t("common:ui.wilaya")} <span className="text-red-500">*</span></Label>
                 <Input
                   value={wilayaSearch}
                   onChange={(e) => { setWilayaSearch(e.target.value); setShowWilayas(true); }}
                   onFocus={() => setShowWilayas(true)}
-                  placeholder="Search wilaya..."
+                  placeholder={t("new.search_wilaya")}
                   autoComplete="off"
                 />
                 {showWilayas && filtered.length > 0 && (
@@ -107,29 +109,29 @@ export default function NewStationPage() {
               </div>
 
               <div className="space-y-1">
-                <Label>Phone</Label>
+                <Label>{t("common:ui.phone")}</Label>
                 <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+213 ..." />
               </div>
               <div className="space-y-1">
-                <Label>WhatsApp</Label>
+                <Label>{t("common:ui.whatsapp")}</Label>
                 <Input value={form.whatsapp} onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))} placeholder="+213 ..." />
               </div>
               <div className="space-y-1">
-                <Label>Email</Label>
+                <Label>{t("common:ui.email")}</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
               </div>
               <div className="space-y-1">
-                <Label>Logo URL</Label>
+                <Label>{t("common:ui.logo_url")}</Label>
                 <Input value={form.logoUrl} onChange={(e) => setForm((f) => ({ ...f, logoUrl: e.target.value }))} placeholder="https://..." />
               </div>
               <div className="col-span-2 space-y-1">
-                <Label>Address</Label>
-                <Input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} placeholder="Street, neighborhood..." />
+                <Label>{t("common:ui.address")}</Label>
+                <Input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} placeholder={t("new.address_ph")} />
               </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" type="button" asChild><Link href="/dashboard/stations">Cancel</Link></Button>
+              <Button variant="outline" type="button" asChild><Link href="/dashboard/stations">{t("common:ui.cancel")}</Link></Button>
               <Button type="submit" disabled={saving}>{saving ? "Creating..." : "Create Station"}</Button>
             </div>
           </form>

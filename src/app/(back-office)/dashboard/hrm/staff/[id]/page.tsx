@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Attendance {
   id: string;
@@ -77,6 +78,7 @@ const leaveStatusColors: Record<string, string> = {
 };
 
 export default function StaffProfilePage() {
+  const { t } = useTranslation("hrm");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
@@ -95,11 +97,11 @@ export default function StaffProfilePage() {
         body: JSON.stringify({ status: action }),
       }).then((r) => r.json()),
     onSuccess: () => {
-      toast.success("Leave request updated");
+      toast.success(t("detail.leave_updated"));
       qc.invalidateQueries({ queryKey: ["hrm-staff", id] });
       setLeaveActionId(null);
     },
-    onError: () => toast.error("Failed to update leave request"),
+    onError: () => toast.error(t("detail.leave_failed")),
   });
 
   if (isLoading) {
@@ -112,7 +114,7 @@ export default function StaffProfilePage() {
 
   if (!staff) {
     return (
-      <div className="p-6 text-center text-red-500">Staff member not found.</div>
+      <div className="p-6 text-center text-red-500">{t("detail.not_found")}</div>
     );
   }
 
@@ -141,7 +143,7 @@ export default function StaffProfilePage() {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 mb-1">
               <User className="h-4 w-4 text-blue-500" />
-              <span className="text-xs text-muted-foreground">Email</span>
+              <span className="text-xs text-muted-foreground">{t("common:ui.email")}</span>
             </div>
             <p className="text-sm font-medium truncate">{staff.user?.email ?? "—"}</p>
           </CardContent>
@@ -150,7 +152,7 @@ export default function StaffProfilePage() {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="h-4 w-4 text-green-500" />
-              <span className="text-xs text-muted-foreground">Hire Date</span>
+              <span className="text-xs text-muted-foreground">{t("common:ui.hire_date")}</span>
             </div>
             <p className="text-sm font-medium">
               {staff.hireDate ? new Date(staff.hireDate).toLocaleDateString() : "—"}
@@ -161,7 +163,7 @@ export default function StaffProfilePage() {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="h-4 w-4 text-purple-500" />
-              <span className="text-xs text-muted-foreground">Base Salary</span>
+              <span className="text-xs text-muted-foreground">{t("common:ui.base_salary")}</span>
             </div>
             <p className="text-sm font-medium">{Number(staff.baseSalary).toLocaleString()} DA</p>
           </CardContent>
@@ -170,7 +172,7 @@ export default function StaffProfilePage() {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 mb-1">
               <ClipboardList className="h-4 w-4 text-orange-500" />
-              <span className="text-xs text-muted-foreground">National ID</span>
+              <span className="text-xs text-muted-foreground">{t("detail.national_id")}</span>
             </div>
             <p className="text-sm font-medium">{staff.nationalId ?? "—"}</p>
           </CardContent>
@@ -193,11 +195,11 @@ export default function StaffProfilePage() {
         <TabsContent value="attendance" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Attendance History</CardTitle>
+              <CardTitle className="text-base">{t("detail.attendance_history")}</CardTitle>
             </CardHeader>
             <CardContent>
               {staff.attendances.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">No attendance records</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">{t("detail.no_attendance")}</p>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {staff.attendances
@@ -224,11 +226,11 @@ export default function StaffProfilePage() {
         <TabsContent value="leave" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Leave Requests</CardTitle>
+              <CardTitle className="text-base">{t("common:ui.leave_requests")}</CardTitle>
             </CardHeader>
             <CardContent>
               {staff.leaveRequests.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">No leave requests</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">{t("detail.no_leave")}</p>
               ) : (
                 <div className="space-y-3">
                   {staff.leaveRequests
@@ -263,7 +265,7 @@ export default function StaffProfilePage() {
                                 leaveActionMutation.mutate({ leaveId: lr.id, action: "approved" });
                               }}
                             >
-                              Approve
+                              {t("common:ui.approve")}
                             </Button>
                             <Button
                               size="sm"
@@ -275,7 +277,7 @@ export default function StaffProfilePage() {
                                 leaveActionMutation.mutate({ leaveId: lr.id, action: "rejected" });
                               }}
                             >
-                              Reject
+                              {t("common:ui.reject")}
                             </Button>
                           </div>
                         )}
@@ -290,22 +292,22 @@ export default function StaffProfilePage() {
         <TabsContent value="payroll" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Payroll History</CardTitle>
+              <CardTitle className="text-base">{t("detail.payroll_history")}</CardTitle>
             </CardHeader>
             <CardContent>
               {staff.payrolls.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">No payroll records</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">{t("detail.no_payroll")}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 text-muted-foreground font-medium">Period</th>
-                        <th className="text-right py-2 text-muted-foreground font-medium">Base</th>
-                        <th className="text-right py-2 text-muted-foreground font-medium">Bonuses</th>
-                        <th className="text-right py-2 text-muted-foreground font-medium">Deductions</th>
-                        <th className="text-right py-2 text-muted-foreground font-medium">Net</th>
-                        <th className="text-center py-2 text-muted-foreground font-medium">Status</th>
+                        <th className="text-left py-2 text-muted-foreground font-medium">{t("detail.period")}</th>
+                        <th className="text-right py-2 text-muted-foreground font-medium">{t("detail.base")}</th>
+                        <th className="text-right py-2 text-muted-foreground font-medium">{t("common:ui.bonuses")}</th>
+                        <th className="text-right py-2 text-muted-foreground font-medium">{t("common:ui.deductions")}</th>
+                        <th className="text-right py-2 text-muted-foreground font-medium">{t("detail.net")}</th>
+                        <th className="text-center py-2 text-muted-foreground font-medium">{t("common:ui.status")}</th>
                       </tr>
                     </thead>
                     <tbody>

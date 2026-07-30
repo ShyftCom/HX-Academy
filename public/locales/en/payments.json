@@ -1,0 +1,43 @@
+{
+  "title": "Payments",
+  "subtitle": "Manage payment verification",
+  "search": "Search by player...",
+  "empty": "No payments found",
+  "create": "Create Payment",
+  "form": {
+    "player": "Player *",
+    "plan": "Plan *",
+    "select_player": "Select player",
+    "select_plan": "Select plan",
+    "amount": "Amount (DA) *",
+    "method": "Payment Method",
+    "select_method": "Select method"
+  },
+  "proof": {
+    "label": "Payment Proof",
+    "uploaded": "✓ Proof uploaded successfully",
+    "pdf": "Payment proof PDF",
+    "image": "Payment proof",
+    "none": "No proof",
+    "preview": "Preview"
+  },
+  "approve": {
+    "title": "Approve Payment",
+    "body": "The payment will be approved and the subscription will be activated.",
+    "note": "Admin Note (optional)",
+    "note_ph": "Optional note..."
+  },
+  "reject": {
+    "title": "Reject Payment",
+    "reason": "Rejection Reason *",
+    "reason_ph": "Explain why the payment is rejected..."
+  },
+  "toast": {
+    "approved": "Payment approved & subscription activated",
+    "rejected": "Payment rejected",
+    "reject_failed": "Rejection failed",
+    "created": "Payment created",
+    "create_failed": "Create failed",
+    "proof_uploaded": "Proof uploaded"
+  }
+}

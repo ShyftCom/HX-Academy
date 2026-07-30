@@ -17,6 +17,7 @@ import { SectionContentForm } from "@/components/website/admin/SectionContentFor
 import { SECTION_TYPES, SECTION_TYPE_KEYS, type SectionType } from "@/components/website/sections/sectionTypes";
 import { SECTION_FIELD_SCHEMAS } from "@/components/website/sections/sectionFieldSchemas";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface SectionRow {
   id: string;
@@ -47,6 +48,7 @@ function SectionEditorRow({
   onToggleEnabled: (enabled: boolean) => void;
   dragHandle: React.ReactNode;
 }) {
+  const { t } = useTranslation("website");
   const [content, setContent] = useState<Record<string, unknown>>(() => parseContent(section.content));
   const [dirty, setDirty] = useState(false);
   const meta = SECTION_TYPES[section.type as SectionType];
@@ -63,7 +65,7 @@ function SectionEditorRow({
           <span className="font-medium text-gray-900 dark:text-gray-100">{meta?.label ?? section.type}</span>
           <span className="text-xs text-gray-400">{meta?.description}</span>
         </button>
-        <Switch checked={section.isEnabled} onCheckedChange={onToggleEnabled} aria-label="Enabled" />
+        <Switch checked={section.isEnabled} onCheckedChange={onToggleEnabled} aria-label={t("pages.enabled")} />
         <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950">
           <Trash2 className="h-4 w-4" />
         </button>
@@ -73,14 +75,14 @@ function SectionEditorRow({
           {schema ? (
             <SectionContentForm schema={schema} value={content} onChange={(next) => { setContent(next); setDirty(true); }} />
           ) : meta?.isDataDriven ? (
-            <p className="text-sm text-gray-500">This section pulls live data automatically — no manual configuration needed yet.</p>
+            <p className="text-sm text-gray-500">{t("pages.auto_section")}</p>
           ) : (
-            <p className="text-sm text-gray-500">No editor built for this section type yet.</p>
+            <p className="text-sm text-gray-500">{t("pages.no_editor")}</p>
           )}
           {schema && (
             <div className="mt-4 flex justify-end">
               <Button size="sm" onClick={() => { onSave(content); setDirty(false); }} disabled={!dirty}>
-                <Save className="h-3.5 w-3.5" /> Save section
+                <Save className="h-3.5 w-3.5" /> {t("pages.save_section")}
               </Button>
             </div>
           )}
@@ -91,6 +93,7 @@ function SectionEditorRow({
 }
 
 export default function PageBuilderPage() {
+  const { t } = useTranslation("website");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
@@ -116,8 +119,8 @@ export default function PageBuilderPage() {
 
   const { mutate: savePageMeta, isPending: savingMeta } = useMutation({
     mutationFn: () => fetch(`/api/pages/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(meta) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Page settings saved"); invalidate(); setSettingsOpen(false); },
-    onError: () => toast.error("Save failed"),
+    onSuccess: () => { toast.success(t("pages.settings_saved")); invalidate(); setSettingsOpen(false); },
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const { mutate: togglePublish } = useMutation({
@@ -128,15 +131,15 @@ export default function PageBuilderPage() {
   const { mutate: addSection } = useMutation({
     mutationFn: (type: SectionType) =>
       fetch(`/api/pages/${id}/sections`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, content: SECTION_TYPES[type].defaultContent }) }).then((r) => r.json()),
-    onSuccess: (created: SectionRow) => { toast.success("Section added"); invalidate(); setAddOpen(false); setExpandedId(created.id); },
-    onError: () => toast.error("Failed to add section"),
+    onSuccess: (created: SectionRow) => { toast.success(t("pages.section_added")); invalidate(); setAddOpen(false); setExpandedId(created.id); },
+    onError: () => toast.error(t("pages.section_add_failed")),
   });
 
   const { mutate: saveSectionContent } = useMutation({
     mutationFn: ({ sectionId, content }: { sectionId: string; content: Record<string, unknown> }) =>
       fetch(`/api/pages/${id}/sections/${sectionId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Section saved"); invalidate(); },
-    onError: () => toast.error("Save failed"),
+    onSuccess: () => { toast.success(t("pages.section_saved")); invalidate(); },
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const { mutate: toggleSectionEnabled } = useMutation({
@@ -147,7 +150,7 @@ export default function PageBuilderPage() {
 
   const { mutate: deleteSection, isPending: deletingSection } = useMutation({
     mutationFn: (sectionId: string) => fetch(`/api/pages/${id}/sections/${sectionId}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Section removed"); invalidate(); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("pages.section_removed")); invalidate(); setDeleteId(null); },
   });
 
   const { mutate: persistOrder } = useMutation({
@@ -160,7 +163,7 @@ export default function PageBuilderPage() {
     persistOrder(next.map((s, i) => ({ id: s.id, order: i })));
   }
 
-  if (isLoading || !page) return <div className="py-12 text-center text-gray-500">Loading…</div>;
+  if (isLoading || !page) return <div className="py-12 text-center text-gray-500">{t("common:ui.loading_alt")}</div>;
 
   return (
     <div className="space-y-6 pb-16">
@@ -176,7 +179,7 @@ export default function PageBuilderPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
-            <Settings2 className="h-3.5 w-3.5" /> Page Settings
+            <Settings2 className="h-3.5 w-3.5" /> {t("pages.settings")}
           </Button>
           <Button size="sm" variant={page.isPublished ? "outline" : "default"} onClick={() => togglePublish(!page.isPublished)}>
             {page.isPublished ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -208,12 +211,12 @@ export default function PageBuilderPage() {
       )}
 
       <Button variant="outline" onClick={() => setAddOpen(true)} className="w-full border-dashed">
-        <Plus className="h-4 w-4" /> Add Section
+        <Plus className="h-4 w-4" /> {t("pages.add_section")}
       </Button>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Add a section</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("pages.add_a_section")}</DialogTitle></DialogHeader>
           <DialogBody>
             <div className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
               {SECTION_TYPE_KEYS.map((type) => (
@@ -233,15 +236,15 @@ export default function PageBuilderPage() {
 
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Page Settings</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("pages.settings")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-3">
-            <div><Label>Title</Label><Input value={meta.title} onChange={(e) => setMeta((m) => ({ ...m, title: e.target.value }))} /></div>
+            <div><Label>{t("common:ui.title_field")}</Label><Input value={meta.title} onChange={(e) => setMeta((m) => ({ ...m, title: e.target.value }))} /></div>
             {page.slug !== "home" && (
-              <div><Label>URL slug</Label><Input value={meta.slug} onChange={(e) => setMeta((m) => ({ ...m, slug: e.target.value }))} /></div>
+              <div><Label>{t("pages.url_slug")}</Label><Input value={meta.slug} onChange={(e) => setMeta((m) => ({ ...m, slug: e.target.value }))} /></div>
             )}
-            <div><Label>Breadcrumb label</Label><Input value={meta.breadcrumbLabel} onChange={(e) => setMeta((m) => ({ ...m, breadcrumbLabel: e.target.value }))} placeholder="Defaults to title" /></div>
-            <div><Label>SEO title</Label><Input value={meta.metaTitle} onChange={(e) => setMeta((m) => ({ ...m, metaTitle: e.target.value }))} /></div>
-            <div><Label>SEO description</Label><Textarea value={meta.metaDescription} onChange={(e) => setMeta((m) => ({ ...m, metaDescription: e.target.value }))} /></div>
+            <div><Label>{t("pages.breadcrumb")}</Label><Input value={meta.breadcrumbLabel} onChange={(e) => setMeta((m) => ({ ...m, breadcrumbLabel: e.target.value }))} placeholder={t("pages.defaults_to_title")} /></div>
+            <div><Label>{t("news.seo_title")}</Label><Input value={meta.metaTitle} onChange={(e) => setMeta((m) => ({ ...m, metaTitle: e.target.value }))} /></div>
+            <div><Label>{t("news.seo_description")}</Label><Textarea value={meta.metaDescription} onChange={(e) => setMeta((m) => ({ ...m, metaDescription: e.target.value }))} /></div>
             <Button onClick={() => savePageMeta()} disabled={savingMeta} className="w-full">{savingMeta ? "Saving…" : "Save Settings"}</Button>
           </DialogBody>
         </DialogContent>
@@ -250,8 +253,8 @@ export default function PageBuilderPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Remove Section"
-        description="This permanently removes the section from the page."
+        title={t("pages.remove_section")}
+        description={t("pages.remove_section_body")}
         onConfirm={() => deleteId && deleteSection(deleteId)}
         loading={deletingSection}
         variant="destructive"

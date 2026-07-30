@@ -23,6 +23,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency, parseJsonSafe } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Upload, Package, X, Layers } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const schema = z.object({
   name: z.string().min(1, "Name required"),
@@ -38,6 +39,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function ProductsPage() {
+  const { t } = useTranslation("store");
   const qc = useQueryClient();
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -75,13 +77,13 @@ export default function ProductsPage() {
       return res.json();
     },
     onSuccess: () => { toast.success(editProduct ? "Product updated" : "Product created"); qc.invalidateQueries({ queryKey: ["products"] }); setModalOpen(false); reset(); setImages([]); setEditProduct(null); },
-    onError: () => toast.error("Save failed"),
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/products/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Product deleted"); qc.invalidateQueries({ queryKey: ["products"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("products.deleted")); qc.invalidateQueries({ queryKey: ["products"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const openAdd = () => { setEditProduct(null); setImages([]); reset({ name: "", description: "", price: "", discountPrice: "", stock: "0", sku: "", categoryId: "", status: "active", isFeatured: false }); setModalOpen(true); };
@@ -93,13 +95,13 @@ export default function ProductsPage() {
     const fd = new FormData(); fd.append("file", file); fd.append("folder", "products");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const d = await res.json();
-    if (res.ok) { setImages([...images, d.url]); toast.success("Image uploaded"); }
-    else toast.error("Upload failed");
+    if (res.ok) { setImages([...images, d.url]); toast.success(t("products.image_uploaded")); }
+    else toast.error(t("common:toast.upload_failed"));
     setUploadingImg(false);
   };
 
   const getStockBadge = (stock: number) => {
-    if (stock === 0) return <Badge variant="destructive">Out of Stock</Badge>;
+    if (stock === 0) return <Badge variant="destructive">{t("products.out_of_stock")}</Badge>;
     if (stock < 5) return <Badge variant="warning">{stock} left</Badge>;
     return <Badge variant="success">{stock}</Badge>;
   };
@@ -122,14 +124,14 @@ export default function ProductsPage() {
     )},
     { key: "stock", header: "Stock", cell: (r: any) => getStockBadge(r.stock) },
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.status === "active" ? "success" : "secondary"}>{r.status}</Badge> },
-    { key: "featured", header: "Featured", cell: (r: any) => r.isFeatured ? <Badge variant="default">Featured</Badge> : null },
+    { key: "featured", header: "Featured", cell: (r: any) => r.isFeatured ? <Badge variant="default">{t("products.featured")}</Badge> : null },
     { key: "actions", header: "", cell: (r: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/dashboard/store/products/${r.id}/variants`)}><Layers className="me-2 h-4 w-4" />Manage Variants</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push(`/dashboard/store/products/${r.id}/variants`)}><Layers className="me-2 h-4 w-4" />{t("products.manage_variants")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -137,22 +139,22 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Products" description="Manage academy store products">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Product</Button>
+      <PageHeader title={t("products.title")} description={t("products.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("products.add")}</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search products..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("products.search")} className="w-64" />
         <Select value={catFilter} onValueChange={(v) => { setCatFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectTrigger className="w-44"><SelectValue placeholder={t("common:ui.all_categories")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_categories")}</SelectItem>
             {categories?.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No products yet" emptyIcon={<Package className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("products.empty")} emptyIcon={<Package className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -160,32 +162,32 @@ export default function ProductsPage() {
           <DialogHeader><DialogTitle>{editProduct ? "Edit Product" : "Add Product"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("name")} label="Product Name *" placeholder="e.g. Training Jersey" error={errors.name?.message} className="col-span-2" />
-              <Textarea {...register("description")} label="Description" placeholder="Product description..." className="col-span-2" rows={2} />
-              <Input {...register("price")} label="Price (DA) *" type="number" min="0" placeholder="2500" error={errors.price?.message} />
-              <Input {...register("discountPrice")} label="Discount Price (DA)" type="number" min="0" placeholder="Optional" />
-              <Input {...register("stock")} label="Stock *" type="number" min="0" placeholder="0" />
-              <Input {...register("sku")} label="SKU" placeholder="SKU-001" />
+              <Input {...register("name")} label={t("products.name")} placeholder={t("products.name_ph")} error={errors.name?.message} className="col-span-2" />
+              <Textarea {...register("description")} label={t("common:ui.description")} placeholder={t("products.description_ph")} className="col-span-2" rows={2} />
+              <Input {...register("price")} label={t("products.price")} type="number" min="0" placeholder="2500" error={errors.price?.message} />
+              <Input {...register("discountPrice")} label={t("products.discount_price")} type="number" min="0" placeholder={t("products.optional")} />
+              <Input {...register("stock")} label={t("products.stock")} type="number" min="0" placeholder="0" />
+              <Input {...register("sku")} label={t("common:ui.sku")} placeholder={t("products.sku_ph")} />
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.category")}</label>
                 <Select onValueChange={(v) => setValue("categoryId", v)} defaultValue={editProduct?.categoryId ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("products.select_category")} /></SelectTrigger>
                   <SelectContent>{categories?.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.status")}</label>
                 <Select onValueChange={(v) => setValue("status", v)} defaultValue={editProduct?.status ?? "active"}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent>
+                  <SelectContent><SelectItem value="active">{t("common:ui.active")}</SelectItem><SelectItem value="inactive">{t("products.inactive")}</SelectItem></SelectContent>
                 </Select>
               </div>
               <div className="col-span-2 flex items-center gap-3">
                 <Switch checked={watch("isFeatured")} onCheckedChange={(v) => setValue("isFeatured", v)} />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Featured product</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{t("products.featured_toggle")}</span>
               </div>
               <div className="col-span-2">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Images</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("products.images")}</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {images.map((img, i) => (
                     <div key={i} className="relative"><img src={img} className="h-16 w-16 rounded-lg object-cover border" /><button type="button" onClick={() => setImages(images.filter((_, j) => j !== i))} className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"><X className="h-2.5 w-2.5" /></button></div>
@@ -198,14 +200,14 @@ export default function ProductsPage() {
               </div>
             </DialogBody>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
               <Button type="submit" loading={saveMutation.isPending}>{editProduct ? "Save Changes" : "Add Product"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Product" description="Are you sure? This cannot be undone." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("products.delete_title")} description={t("products.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

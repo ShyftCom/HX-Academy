@@ -1,0 +1,43 @@
+{
+  "title": "Paiements",
+  "subtitle": "Gérer la validation des paiements",
+  "search": "Rechercher par joueur…",
+  "empty": "Aucun paiement trouvé",
+  "create": "Créer un paiement",
+  "form": {
+    "player": "Joueur *",
+    "plan": "Formule *",
+    "select_player": "Choisir un joueur",
+    "select_plan": "Choisir une formule",
+    "amount": "Montant (DA) *",
+    "method": "Mode de paiement",
+    "select_method": "Choisir un mode"
+  },
+  "proof": {
+    "label": "Justificatif de paiement",
+    "uploaded": "✓ Justificatif téléversé",
+    "pdf": "Justificatif de paiement (PDF)",
+    "image": "Justificatif de paiement",
+    "none": "Aucun justificatif",
+    "preview": "Aperçu"
+  },
+  "approve": {
+    "title": "Approuver le paiement",
+    "body": "Le paiement sera approuvé et l'abonnement sera activé.",
+    "note": "Note administrative (optionnel)",
+    "note_ph": "Note facultative…"
+  },
+  "reject": {
+    "title": "Rejeter le paiement",
+    "reason": "Motif du rejet *",
+    "reason_ph": "Expliquez le motif du rejet…"
+  },
+  "toast": {
+    "approved": "Paiement approuvé et abonnement activé",
+    "rejected": "Paiement rejeté",
+    "reject_failed": "Échec du rejet",
+    "created": "Paiement créé",
+    "create_failed": "Échec de la création",
+    "proof_uploaded": "Justificatif téléversé"
+  }
+}

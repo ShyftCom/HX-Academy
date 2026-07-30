@@ -24,6 +24,7 @@ import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward", "Winger"];
@@ -47,6 +48,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function PlayersPage() {
+  const { t } = useTranslation("players");
   const qc = useQueryClient();
   const { activeStationId } = useStation();
   const [page, setPage] = useState(1);
@@ -95,14 +97,14 @@ export default function PlayersPage() {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       fetch(`/api/players/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Player status updated"); qc.invalidateQueries({ queryKey: ["players"] }); },
-    onError: () => toast.error("Update failed"),
+    onSuccess: () => { toast.success(t("toast.status_updated")); qc.invalidateQueries({ queryKey: ["players"] }); },
+    onError: () => toast.error(t("toast.update_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Player deleted"); qc.invalidateQueries({ queryKey: ["players"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["players"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const resetPwdMutation = useMutation({
@@ -111,7 +113,7 @@ export default function PlayersPage() {
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Failed"); }
       return res.json();
     },
-    onSuccess: () => { toast.success("Password updated"); setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); },
+    onSuccess: () => { toast.success(t("toast.password_updated")); setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); },
     onError: (e: any) => toast.error(e.message ?? "Failed to update password"),
   });
 
@@ -124,9 +126,9 @@ export default function PlayersPage() {
 
   const getSubStatus = (p: any) => {
     const sub = p.subscriptions?.[0];
-    if (!sub) return <Badge variant="secondary">No Plan</Badge>;
-    if (sub.status === "active") return <Badge variant="success">Active</Badge>;
-    if (sub.status === "expired") return <Badge variant="destructive">Expired</Badge>;
+    if (!sub) return <Badge variant="secondary">{t("no_plan")}</Badge>;
+    if (sub.status === "active") return <Badge variant="success">{t("common:ui.active")}</Badge>;
+    if (sub.status === "expired") return <Badge variant="destructive">{t("common:ui.expired")}</Badge>;
     return <Badge variant="warning">{sub.status}</Badge>;
   };
 
@@ -148,16 +150,16 @@ export default function PlayersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setViewPlayer(r)}><Eye className="me-2 h-4 w-4" />View Details</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setViewPlayer(r)}><Eye className="me-2 h-4 w-4" />{t("actions.view_details")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
           <DropdownMenuSeparator />
           {r.status === "active"
-            ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="me-2 h-4 w-4" />Suspend</DropdownMenuItem>
-            : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />Activate</DropdownMenuItem>
+            ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="me-2 h-4 w-4" />{t("actions.suspend")}</DropdownMenuItem>
+            : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />{t("actions.activate")}</DropdownMenuItem>
           }
-          <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />Reset Password</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -165,30 +167,30 @@ export default function PlayersPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Players" description="Manage all academy players">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Player</Button>
+      <PageHeader title={t("page.title")} description={t("page.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("actions.add")}</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search players..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("page.search")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("common:ui.all_status")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_status")}</SelectItem>
+            <SelectItem value="active">{t("common:ui.active")}</SelectItem>
+            <SelectItem value="suspended">{t("common:ui.suspended")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("common:ui.all_categories")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_categories")}</SelectItem>
             {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No players found" emptyIcon={<Users className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("page.empty")} emptyIcon={<Users className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       {/* Add/Edit Modal */}
@@ -197,41 +199,41 @@ export default function PlayersPage() {
           <DialogHeader><DialogTitle>{editPlayer ? "Edit Player" : "Add New Player"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("fullName")} label="Full Name *" placeholder="John Doe" error={errors.fullName?.message} />
-              <Input {...register("email")} label="Email *" placeholder="player@example.com" error={errors.email?.message} />
-              <Input {...register("phone")} label="Phone" placeholder="+213 ..." />
-              <Input {...register("dateOfBirth")} label="Date of Birth" type="date" />
+              <Input {...register("fullName")} label={t("form.full_name_req")} placeholder={t("form.full_name_ph")} error={errors.fullName?.message} />
+              <Input {...register("email")} label={t("form.email_req")} placeholder={t("form.email_ph")} error={errors.email?.message} />
+              <Input {...register("phone")} label={t("common:ui.phone")} placeholder="+213 ..." />
+              <Input {...register("dateOfBirth")} label={t("common:ui.date_of_birth")} type="date" />
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.gender")}</label>
                 <Select onValueChange={(v) => setValue("gender", v)} defaultValue={editPlayer?.gender ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
-                  <SelectContent><SelectItem value="M">Male</SelectItem><SelectItem value="F">Female</SelectItem></SelectContent>
+                  <SelectTrigger><SelectValue placeholder={t("form.select_gender")} /></SelectTrigger>
+                  <SelectContent><SelectItem value="M">{t("form.male")}</SelectItem><SelectItem value="F">{t("form.female")}</SelectItem></SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.category")}</label>
                 <Select onValueChange={(v) => setValue("category", v)} defaultValue={editPlayer?.category ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("form.select_category")} /></SelectTrigger>
                   <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Input {...register("team")} label="Team" placeholder="Team A" />
+              <Input {...register("team")} label={t("common:ui.team")} placeholder={t("form.team_ph")} />
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Position</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("common:ui.position")}</label>
                 <Select onValueChange={(v) => setValue("position", v)} defaultValue={editPlayer?.position ?? ""}>
-                  <SelectTrigger><SelectValue placeholder="Select position" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("form.select_position")} /></SelectTrigger>
                   <SelectContent>{POSITIONS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Input {...register("parentName")} label="Parent Name" placeholder="Parent full name" />
-              <Input {...register("parentPhone")} label="Parent Phone" placeholder="+213 ..." />
-              <Input {...register("address")} label="Address" placeholder="City, Region" className="col-span-2" />
-              <Input {...register("emergencyContact")} label="Emergency Contact" placeholder="Name & Phone" className="col-span-2" />
-              <Textarea {...register("medicalNotes")} label="Medical Notes" placeholder="Any medical conditions..." className="col-span-2" rows={2} />
-              <Textarea {...register("notes")} label="Notes" placeholder="Additional notes..." className="col-span-2" rows={2} />
+              <Input {...register("parentName")} label={t("common:ui.parent_name")} placeholder={t("form.parent_name_ph")} />
+              <Input {...register("parentPhone")} label={t("common:ui.parent_phone")} placeholder="+213 ..." />
+              <Input {...register("address")} label={t("common:ui.address")} placeholder={t("form.address_ph")} className="col-span-2" />
+              <Input {...register("emergencyContact")} label={t("common:ui.emergency_contact")} placeholder={t("form.emergency_ph")} className="col-span-2" />
+              <Textarea {...register("medicalNotes")} label={t("common:ui.medical_notes")} placeholder={t("form.medical_ph")} className="col-span-2" rows={2} />
+              <Textarea {...register("notes")} label={t("common:ui.notes")} placeholder={t("form.notes_ph")} className="col-span-2" rows={2} />
             </DialogBody>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
               <Button type="submit" loading={saveMutation.isPending}>{editPlayer ? "Save Changes" : "Create Player"}</Button>
             </DialogFooter>
           </form>
@@ -248,10 +250,10 @@ export default function PlayersPage() {
             {playerDetail ? (
               <Tabs defaultValue="info">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="info">Profile</TabsTrigger>
-                  <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-                  <TabsTrigger value="payments">Payments</TabsTrigger>
-                  <TabsTrigger value="orders">Orders</TabsTrigger>
+                  <TabsTrigger value="info">{t("tabs.profile")}</TabsTrigger>
+                  <TabsTrigger value="subscriptions">{t("tabs.subscriptions")}</TabsTrigger>
+                  <TabsTrigger value="payments">{t("tabs.payments")}</TabsTrigger>
+                  <TabsTrigger value="orders">{t("tabs.orders")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="info">
                   <div className="grid grid-cols-2 gap-3 text-sm">
@@ -267,7 +269,7 @@ export default function PlayersPage() {
                         <div><p className="font-medium text-sm">{s.plan?.name}</p><p className="text-xs text-gray-400">{formatDate(s.startDate)} → {formatDate(s.endDate)}</p></div>
                         <Badge variant={s.status === "active" ? "success" : s.status === "expired" ? "destructive" : "secondary"}>{s.status}</Badge>
                       </div>
-                    )) : <p className="text-sm text-gray-400">No subscriptions</p>}
+                    )) : <p className="text-sm text-gray-400">{t("tabs.no_subscriptions")}</p>}
                   </div>
                 </TabsContent>
                 <TabsContent value="payments">
@@ -277,7 +279,7 @@ export default function PlayersPage() {
                         <div><p className="font-medium text-sm">{formatCurrency(p.amount)}</p><p className="text-xs text-gray-400">{p.plan?.name} · {formatDate(p.createdAt)}</p></div>
                         <Badge variant={p.status === "approved" ? "success" : p.status === "rejected" ? "destructive" : "warning"}>{p.status}</Badge>
                       </div>
-                    )) : <p className="text-sm text-gray-400">No payments</p>}
+                    )) : <p className="text-sm text-gray-400">{t("tabs.no_payments")}</p>}
                   </div>
                 </TabsContent>
                 <TabsContent value="orders">
@@ -287,7 +289,7 @@ export default function PlayersPage() {
                         <div><p className="font-medium text-sm">#{o.orderNumber}</p><p className="text-xs text-gray-400">{o.items?.length} items · {formatDate(o.createdAt)}</p></div>
                         <span className="text-sm font-medium">{formatCurrency(o.totalAmount)}</span>
                       </div>
-                    )) : <p className="text-sm text-gray-400">No orders</p>}
+                    )) : <p className="text-sm text-gray-400">{t("tabs.no_orders")}</p>}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -296,7 +298,7 @@ export default function PlayersPage() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Player" description="This will permanently delete the player and their account. This cannot be undone." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("delete.title")} description={t("delete.body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
 
       {/* Reset Password Dialog */}
       <Dialog open={!!resetPwdPlayer} onOpenChange={(o) => { if (!o) { setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); } }}>
@@ -304,22 +306,22 @@ export default function PlayersPage() {
           <DialogHeader><DialogTitle>Reset Password — {resetPwdPlayer?.fullName}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input
-              label="New Password"
+              label={t("password.new")}
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Min. 6 characters"
+              placeholder={t("password.min")}
             />
             <Input
-              label="Confirm Password"
+              label={t("password.confirm")}
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repeat new password"
+              placeholder={t("password.repeat")}
             />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); }}>{t("common:ui.cancel")}</Button>
             <Button
               loading={resetPwdMutation.isPending}
               disabled={!newPassword || newPassword !== confirmPassword || newPassword.length < 6}

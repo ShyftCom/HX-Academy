@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/shared/page-header";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useTranslation } from "react-i18next";
 
 interface Category { id: string; name: string; colorTag: string; isActive: boolean; _count: { programmes: number } }
 
 export default function ProgrammeCategoriesPage() {
+  const { t } = useTranslation("website");
   const router = useRouter();
   const qc = useQueryClient();
   const [newName, setNewName] = useState("");
@@ -27,7 +29,7 @@ export default function ProgrammeCategoriesPage() {
 
   const { mutate: create } = useMutation({
     mutationFn: () => fetch("/api/programmes/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newName }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Category added"); invalidate(); setNewName(""); },
+    onSuccess: () => { toast.success(t("programmes.category_added")); invalidate(); setNewName(""); },
   });
   const { mutate: update } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Category>) => fetch(`/api/programmes/categories/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -35,7 +37,7 @@ export default function ProgrammeCategoriesPage() {
   });
   const { mutate: remove } = useMutation({
     mutationFn: (id: string) => fetch(`/api/programmes/categories/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); invalidate(); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
   });
 
   function handleReorder(next: Category[]) {
@@ -45,13 +47,13 @@ export default function ProgrammeCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Programme Categories">
-        <Button variant="outline" onClick={() => router.push("/dashboard/website/programmes")}><ArrowLeft className="h-4 w-4" /> Back to Programmes</Button>
+      <PageHeader title={t("programmes.categories_title")}>
+        <Button variant="outline" onClick={() => router.push("/dashboard/website/programmes")}><ArrowLeft className="h-4 w-4" /> {t("programmes.back")}</Button>
       </PageHeader>
 
       <div className="flex gap-2">
-        <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="New category name" />
-        <Button onClick={() => create()} disabled={!newName}><Plus className="h-4 w-4" /> Add</Button>
+        <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("programmes.new_category")} />
+        <Button onClick={() => create()} disabled={!newName}><Plus className="h-4 w-4" /> {t("common:ui.add")}</Button>
       </div>
 
       {list.length > 0 && (
@@ -71,7 +73,7 @@ export default function ProgrammeCategoriesPage() {
         />
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete category" description="Programmes in this category will become uncategorized." onConfirm={() => deleteId && remove(deleteId)} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("programmes.delete_category")} description={t("programmes.delete_category_body")} onConfirm={() => deleteId && remove(deleteId)} variant="destructive" />
     </div>
   );
 }

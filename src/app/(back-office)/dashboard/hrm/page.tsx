@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useStation } from "@/context/StationContext";
 import { Users, UserCheck, UserX, Calendar, Banknote, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
 export default function HRMDashboardPage() {
+  const { t } = useTranslation("hrm");
   const { activeStationId } = useStation();
   const params = activeStationId ? `?stationId=${activeStationId}` : "";
 
@@ -37,8 +39,8 @@ export default function HRMDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">HR Management</h1>
-        <p className="text-sm text-gray-500">Staff, attendance, leave, and payroll</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-sm text-gray-500">{t("subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">

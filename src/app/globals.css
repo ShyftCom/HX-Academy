@@ -2,75 +2,202 @@
 @import "../components/website/design-tokens/tokens.css";
 
 /* ============================================================
-   BRAND PALETTE — Football Academy
+   OBSIDIAN FLUX — design tokens
+   ============================================================
+   Canonical palette. The TypeScript mirror lives in
+   src/lib/design-tokens.ts (for recharts / inline SVG, which
+   cannot read CSS vars). Keep the two in sync.
+
+   Elevation is TONAL: a surface reads as "higher" because its
+   background is lighter and it carries a hairline border — not
+   because it casts a shadow.
    ============================================================ */
 :root {
-  --primary-red:   #A02020;
+  /* ---- Tonal surface ladder ---- */
+  --ob-surface-lowest:  #0e0e0e;
+  --ob-surface-base:    #131313;
+  --ob-surface-low:     #1c1b1b;
+  --ob-surface:         #201f1f;
+  --ob-surface-high:    #2a2a2a;
+  --ob-surface-highest: #353534;
+  --ob-surface-bright:  #393939;
+
+  /* ---- Type ---- */
+  --ob-text:           #e5e2e1;
+  --ob-text-secondary: #c1c6d7;
+  --ob-text-muted:     #8b90a0;
+  --ob-on-primary:     #ffffff;
+
+  /* ---- Brand ---- */
+  --ob-primary:        #0070f3;
+  --ob-primary-hover:  #1a84ff;
+  --ob-primary-active: #0059c5;
+  --ob-primary-light:  #aec6ff;
+  --ob-primary-soft:   rgba(0, 112, 243, 0.12);
+  --ob-primary-glow:   rgba(0, 112, 243, 0.28);
+  --ob-accent:         #3cd7ff;
+  --ob-accent-soft:    rgba(60, 215, 255, 0.12);
+
+  /* ---- Status. Never the only signal: always pair with an icon or label. ---- */
+  --ob-success:      #3cd7ff;
+  --ob-success-soft: rgba(60, 215, 255, 0.12);
+  --ob-warning:      #f5b544;
+  --ob-warning-soft: rgba(245, 181, 68, 0.12);
+  --ob-error:        #ffb4ab;
+  --ob-error-strong: #93000a;
+  --ob-error-soft:   rgba(255, 180, 171, 0.12);
+  --ob-neutral-soft: rgba(229, 226, 225, 0.08);
+
+  /* ---- Lines. Hairlines, never heavy rules. ---- */
+  --ob-line:        rgba(229, 226, 225, 0.10);
+  --ob-line-strong: rgba(229, 226, 225, 0.20);
+  --ob-line-faint:  rgba(229, 226, 225, 0.055);
+  --ob-outline:         #8b90a0;
+  --ob-outline-variant: #414754;
+
+  /* ---- Shape ---- */
+  --ob-radius-control:   4px;
+  --ob-radius-container: 8px;
+  --ob-radius-feature:   12px;
+
+  /* ---- Layout rhythm (4px base) ---- */
+  --ob-gutter: 24px;
+  --ob-margin: 16px;
+  --ob-sidebar-w: 264px;
+  --ob-sidebar-collapsed-w: 76px;
+  --ob-topbar-h: 60px;
+
+  /* ---- Type ramp ---- */
+  --ob-font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ob-font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (min-width: 768px)  { :root { --ob-margin: 24px; } }
+@media (min-width: 1440px) { :root { --ob-margin: 40px; } }
+
+/* ============================================================
+   LEGACY TOKEN BRIDGE
+   ============================================================
+   ~40 components set `style={{ background: "var(--card)" }}` and
+   friends directly. Rather than touch all of them, the old names
+   are re-pointed at Obsidian values. New code should use --ob-*.
+   ============================================================ */
+:root {
+  --background:     var(--ob-surface-base);
+  --foreground:     var(--ob-text);
+  --card:           var(--ob-surface-low);
+  --card-border:    var(--ob-line);
+  --sidebar-bg:     var(--ob-surface-lowest);
+  --sidebar-border: var(--ob-line);
+  --header-bg:      var(--ob-surface-lowest);
+  --header-border:  var(--ob-line);
+  --input-bg:       var(--ob-surface);
+  --input-border:   var(--ob-line-strong);
+  --muted-bg:       var(--ob-surface);
+  --text-primary:   var(--ob-text);
+  --text-secondary: var(--ob-text-secondary);
+  --text-muted:     var(--ob-text-muted);
+  --accent:         var(--ob-primary);
+  --accent-hover:   var(--ob-primary-hover);
+  --ring:           var(--ob-primary);
+  --destructive:    var(--ob-error);
+
+  /* Kept because RootLayout's admin-branding <style> block still writes
+     these, and the public showcase site reads --primary-red. */
+  --primary-red:   #a02020;
   --secondary-red: #903030;
-  --dark-red:      #701C1C;
-  --deep-red:      #500F0F;
-  --black:         #000000;
-  --soft-black:    #101010;
-  --white:         #FFFFFF;
-  --light-gray:    #F0F0F0;
-  --border-gray:   #D0D0D0;
 }
 
-/* ============================================================
-   LIGHT MODE TOKENS
-   ============================================================ */
-:root {
-  --background:     #FFFFFF;
-  --card:           #FFFFFF;
-  --card-border:    #D0D0D0;
-  --sidebar-bg:     #FFFFFF;
-  --sidebar-border: #D0D0D0;
-  --header-bg:      #FFFFFF;
-  --header-border:  #D0D0D0;
-  --input-bg:       #FFFFFF;
-  --input-border:   #D0D0D0;
-  --muted-bg:       #F0F0F0;
-  --text-primary:   #000000;
-  --text-secondary: #374151;
-  --text-muted:     #6B7280;
-  --foreground:     #000000;
-  --accent:         #A02020;
-  --accent-hover:   #903030;
-  --ring:           #A02020;
-  --destructive:    #A02020;
-}
+.dark { color-scheme: dark; }
 
 /* ============================================================
-   DARK MODE TOKENS
+   LIGHT COUNTERPART
+   ============================================================
+   Obsidian Flux is a dark system and dark is the default, but the theme
+   toggle is an existing feature and next-themes persists a light choice —
+   without this block that button sets `html.light` and nothing happens.
+
+   Only the token values are redefined. Every component and the whole Tailwind
+   compatibility layer below reference `var(--ob-*)` rather than literals, so
+   re-pointing the tokens re-themes the entire back-office with no component
+   changes. The tonal ladder inverts (lowest = white, highest = darkest grey)
+   so "elevated" still means "further from the page background".
+
+   Electric blue stays the action colour; the light/accent tones are darkened
+   because #aec6ff and #3cd7ff have far too little contrast on white.
    ============================================================ */
-.dark {
-  --background:     #101010;
-  --card:           #202020;
-  --card-border:    #2a2a2a;
-  --sidebar-bg:     #181818;
-  --sidebar-border: #2a2a2a;
-  --header-bg:      #181818;
-  --header-border:  #2a2a2a;
-  --input-bg:       #1a1a1a;
-  --input-border:   #333333;
-  --muted-bg:       #202020;
-  --text-primary:   #FFFFFF;
-  --text-secondary: #D0D0D0;
-  --text-muted:     #888888;
-  --foreground:     #FFFFFF;
-  --accent:         #A02020;
-  --accent-hover:   #903030;
-  --ring:           #A02020;
-  --destructive:    #ef4444;
+.light {
+  color-scheme: light;
+
+  --ob-surface-lowest:  #ffffff;
+  --ob-surface-base:    #f6f7f9;
+  --ob-surface-low:     #ffffff;
+  --ob-surface:         #f1f3f6;
+  --ob-surface-high:    #e7eaef;
+  --ob-surface-highest: #dbe0e8;
+  --ob-surface-bright:  #cfd5de;
+
+  --ob-text:           #14161a;
+  --ob-text-secondary: #40464f;
+  --ob-text-muted:     #6a7280;
+  --ob-on-primary:     #ffffff;
+
+  --ob-primary:        #0070f3;
+  --ob-primary-hover:  #005fd1;
+  --ob-primary-active: #004ba8;
+  /* The "light" primary is used as *text* on a soft fill, so on a white
+     background it has to go darker, not lighter — 4.5:1 against #ffffff. */
+  --ob-primary-light:  #0059c5;
+  --ob-primary-soft:   rgba(0, 112, 243, 0.10);
+  --ob-primary-glow:   rgba(0, 112, 243, 0.22);
+  --ob-accent:         #00758f;
+  --ob-accent-soft:    rgba(0, 117, 143, 0.10);
+
+  --ob-success:      #00758f;
+  --ob-success-soft: rgba(0, 117, 143, 0.10);
+  --ob-warning:      #9a5b00;
+  --ob-warning-soft: rgba(154, 91, 0, 0.10);
+  --ob-error:        #b3261e;
+  --ob-error-strong: #8c1d18;
+  --ob-error-soft:   rgba(179, 38, 30, 0.09);
+  --ob-neutral-soft: rgba(20, 22, 26, 0.06);
+
+  --ob-line:        rgba(20, 22, 26, 0.10);
+  --ob-line-strong: rgba(20, 22, 26, 0.18);
+  --ob-line-faint:  rgba(20, 22, 26, 0.06);
+  --ob-outline:         #6a7280;
+  --ob-outline-variant: #c3c9d2;
 }
+
+/* Glass has to re-tint: a dark translucent panel over a light page reads as
+   a smudge rather than as an elevated surface. */
+.light .ob-glass {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: var(--ob-line-strong);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .light .ob-glass { background: #ffffff; }
+}
+
+.light .ob-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(20, 22, 26, 0.06), transparent);
+}
+
+.light .ob-app table tbody tr:hover { background: rgba(20, 22, 26, 0.025); }
+.light .ob-app [class*="bg-white/"] { background-color: rgba(20, 22, 26, 0.05); }
+.light .ob-app [class*="bg-black/"] { background-color: rgba(20, 22, 26, 0.45); }
+.light .ob-app [class*="bg-gray-800/"],
+.light .ob-app [class*="bg-gray-900/"] { background-color: rgba(246, 247, 249, 0.85); }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: var(--ob-font-sans);
+  --font-mono: var(--ob-font-mono);
 }
 
 /* ============================================================
-   BASE RESET
+   BASE
    ============================================================ */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -78,245 +205,369 @@ html, body { height: 100%; }
 body {
   background: var(--background);
   color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--ob-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Geist ships tabular lining figures; enable them globally so numbers
+     in dashboard tables align on the decimal without per-cell classes. */
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-/* Kept in @layer base so Tailwind utilities (which live in @layer utilities)
-   can still override it. Unlayered, this rule beat every `text-*` class on a
-   heading regardless of specificity — cascade layers are resolved before
-   specificity — which forced all public-site headings (hero, footer, FAQ) to
-   black. Admin headings that set no explicit text color are unaffected. */
 @layer base {
   h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
 }
 
+/* Headline tracking per the type ramp — tight and heavy to anchor sections. */
+.ob-app :is(h1, h2, h3) { letter-spacing: -0.02em; }
+.ob-app h1 { letter-spacing: -0.025em; }
+
 /* ============================================================
-   ARABIC / RTL
+   OBSIDIAN UTILITIES
    ============================================================ */
-:lang(ar) {
-  font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
-  direction: rtl;
+
+/* Technical readouts: IDs, codes, statuses, timestamps, metadata. */
+.ob-mono {
+  font-family: var(--ob-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Level 1 — cards, sidebar, panels. */
+.ob-surface {
+  background: var(--ob-surface-low);
+  border: 1px solid var(--ob-line);
+  border-radius: var(--ob-radius-container);
+  color: var(--ob-text);
+}
+
+/* "Featured" card — very subtle tonal gradient, top-left to bottom-right. */
+.ob-surface-featured {
+  background: linear-gradient(135deg, var(--ob-surface-low) 0%, var(--ob-surface-high) 100%);
+  border: 1px solid var(--ob-line-strong);
+  border-radius: var(--ob-radius-container);
+}
+
+/* Level 2 — modals, popovers, dropdowns. Glassmorphism.
+
+   Only the standard `backdrop-filter` is declared here. Writing the
+   `-webkit-` alias alongside it made Lightning CSS (Tailwind v4's
+   transformer) collapse the pair and emit *only* the prefixed form, which
+   Chrome no longer accepts and Firefox never did — so the blur silently
+   vanished and every overlay became an unblurred translucent panel with page
+   content legible through it. Let the build add prefixes; don't hand-write
+   them. */
+.ob-glass {
+  background: rgba(32, 31, 31, 0.82);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--ob-line-strong);
+}
+/* Opaque fallback where the compositor can't blur — otherwise the
+   translucent panel would sit unreadably over page content. */
+@supports not (backdrop-filter: blur(1px)) {
+  .ob-glass { background: var(--ob-surface-high); }
+}
+
+/* Energized state — soft primary outer glow, per DESIGN.md. */
+.ob-glow { box-shadow: 0 0 0 3px var(--ob-primary-glow); }
+
+.ob-hairline { border-color: var(--ob-line); }
+
+/* ============================================================
+   FOCUS
+   ============================================================
+   One visible focus treatment for the whole app. :focus-visible so
+   pointer users never see a ring, keyboard users always do.
+   ============================================================ */
+.ob-app :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--ob-primary);
+  outline-offset: 2px;
+  border-radius: var(--ob-radius-control);
+}
+
+.ob-app ::selection {
+  background: var(--ob-primary-soft);
+  color: var(--ob-text);
+}
+
+.ob-app ::placeholder { color: var(--ob-text-muted); opacity: 1; }
+
+/* ============================================================
+   TAILWIND PALETTE COMPATIBILITY LAYER
+   ============================================================
+   ~100 pages are written in raw Tailwind palette utilities
+   (text-gray-400 ×314, bg-gray-800 ×144, …). Rather than edit every
+   call site — which would be a 100-file mechanical diff with a high
+   chance of missing states — those utilities are re-pointed at
+   Obsidian tokens here.
+
+   Two things make this work:
+   1. Scope. Everything is under `.ob-app`, which only the back-office,
+      auth and player shells set. The public showcase site (.fsa-site)
+      keeps stock Tailwind and its own fsa-* tokens, untouched.
+   2. Cascade layers. `@import "tailwindcss"` puts utilities in a layer;
+      unlayered rules beat layered ones at ANY specificity. So one rule
+      per utility name wins over both the base class and its `dark:`
+      variant — hence the :is() pairs below, which also catch elements
+      that only ever declare the `dark:` form.
+
+   Greys are inverted onto the tonal ladder: light-mode "paper" values
+   (50-200) become low surfaces, dark-mode values (700-950) become the
+   deep end, and both converge on the same ramp.
+   ============================================================ */
+
+/* ---- Neutral backgrounds ---- */
+.ob-app :is(.bg-white, .dark\:bg-white)          { background-color: var(--ob-surface-low); }
+.ob-app :is(.bg-gray-50, .dark\:bg-gray-50)      { background-color: var(--ob-surface-low); }
+.ob-app :is(.bg-gray-100, .dark\:bg-gray-100)    { background-color: var(--ob-surface); }
+.ob-app :is(.bg-gray-200, .dark\:bg-gray-200)    { background-color: var(--ob-surface-high); }
+.ob-app :is(.bg-gray-300, .dark\:bg-gray-300)    { background-color: var(--ob-surface-highest); }
+.ob-app :is(.bg-gray-400, .dark\:bg-gray-400)    { background-color: var(--ob-surface-bright); }
+.ob-app :is(.bg-gray-500, .dark\:bg-gray-500)    { background-color: var(--ob-surface-highest); }
+.ob-app :is(.bg-gray-600, .dark\:bg-gray-600)    { background-color: var(--ob-surface-high); }
+.ob-app :is(.bg-gray-700, .dark\:bg-gray-700)    { background-color: var(--ob-surface-high); }
+.ob-app :is(.bg-gray-750, .dark\:bg-gray-750)    { background-color: var(--ob-surface); }
+.ob-app :is(.bg-gray-800, .dark\:bg-gray-800)    { background-color: var(--ob-surface-low); }
+.ob-app :is(.bg-gray-900, .dark\:bg-gray-900)    { background-color: var(--ob-surface-base); }
+.ob-app :is(.bg-gray-950, .dark\:bg-gray-950)    { background-color: var(--ob-surface-lowest); }
+.ob-app :is(.bg-slate-50, .bg-zinc-50, .bg-neutral-50, .bg-stone-50)       { background-color: var(--ob-surface-low); }
+.ob-app :is(.bg-slate-100, .bg-zinc-100, .bg-neutral-100, .bg-stone-100)   { background-color: var(--ob-surface); }
+.ob-app :is(.bg-slate-800, .bg-zinc-800, .bg-neutral-800, .bg-stone-800)   { background-color: var(--ob-surface-low); }
+.ob-app :is(.bg-slate-900, .bg-zinc-900, .bg-neutral-900, .bg-stone-900)   { background-color: var(--ob-surface-base); }
+
+/* Translucent neutral overlays keep their alpha but re-tint to the ramp. */
+.ob-app [class*="bg-gray-800/"], .ob-app [class*="bg-gray-900/"] { background-color: rgba(19, 19, 19, 0.7); }
+.ob-app [class*="bg-white/"]  { background-color: rgba(229, 226, 225, 0.06); }
+.ob-app [class*="bg-black/"]  { background-color: rgba(6, 6, 6, 0.66); }
+
+/* ---- Neutral text ---- */
+.ob-app :is(.text-black, .dark\:text-black)         { color: var(--ob-text); }
+.ob-app :is(.text-gray-950, .dark\:text-gray-950)   { color: var(--ob-text); }
+.ob-app :is(.text-gray-900, .dark\:text-gray-900)   { color: var(--ob-text); }
+.ob-app :is(.text-gray-800, .dark\:text-gray-800)   { color: var(--ob-text); }
+.ob-app :is(.text-gray-700, .dark\:text-gray-700)   { color: var(--ob-text-secondary); }
+.ob-app :is(.text-gray-600, .dark\:text-gray-600)   { color: var(--ob-text-secondary); }
+.ob-app :is(.text-gray-500, .dark\:text-gray-500)   { color: var(--ob-text-muted); }
+.ob-app :is(.text-gray-400, .dark\:text-gray-400)   { color: var(--ob-text-muted); }
+.ob-app :is(.text-gray-300, .dark\:text-gray-300)   { color: var(--ob-text-secondary); }
+.ob-app :is(.text-gray-200, .dark\:text-gray-200)   { color: var(--ob-text); }
+.ob-app :is(.text-gray-100, .dark\:text-gray-100)   { color: var(--ob-text); }
+.ob-app :is(.text-slate-500, .text-zinc-500, .text-neutral-500, .text-stone-500) { color: var(--ob-text-muted); }
+.ob-app :is(.text-slate-900, .text-zinc-900, .text-neutral-900, .text-stone-900) { color: var(--ob-text); }
+
+/* ---- Neutral borders & dividers → hairlines ---- */
+.ob-app :is(.border-gray-100, .dark\:border-gray-100,
+            .border-gray-200, .dark\:border-gray-200,
+            .border-gray-300, .dark\:border-gray-300,
+            .border-gray-600, .dark\:border-gray-600,
+            .border-gray-700, .dark\:border-gray-700,
+            .border-gray-800, .dark\:border-gray-800,
+            .border-gray-900, .dark\:border-gray-900,
+            .border-slate-200, .border-slate-700,
+            .border-zinc-200,  .border-zinc-700,
+            .border-neutral-200, .border-neutral-700) { border-color: var(--ob-line); }
+.ob-app :is(.border-gray-400, .dark\:border-gray-400, .border-gray-500, .dark\:border-gray-500) { border-color: var(--ob-line-strong); }
+.ob-app :is(.divide-gray-100, .divide-gray-200, .divide-gray-700, .divide-gray-800) > * + * { border-color: var(--ob-line); }
+.ob-app :is(.placeholder-gray-400, .placeholder-gray-500)::placeholder { color: var(--ob-text-muted); }
+
+/* ---- Blue → electric blue (primary action) ---- */
+.ob-app :is(.bg-blue-50, .dark\:bg-blue-50, .bg-blue-100, .dark\:bg-blue-100)     { background-color: var(--ob-primary-soft); }
+.ob-app :is(.bg-blue-200, .bg-blue-500, .bg-blue-600, .dark\:bg-blue-600)         { background-color: var(--ob-primary); }
+.ob-app :is(.bg-blue-700, .bg-blue-800)                                           { background-color: var(--ob-primary-active); }
+.ob-app :is(.bg-blue-900, .dark\:bg-blue-900, .bg-blue-950, .dark\:bg-blue-950)   { background-color: var(--ob-primary-soft); }
+.ob-app [class*="bg-blue-900/"], .ob-app [class*="bg-blue-500/"], .ob-app [class*="bg-blue-600/"] { background-color: var(--ob-primary-soft); }
+.ob-app :is(.text-blue-300, .dark\:text-blue-300, .text-blue-400, .dark\:text-blue-400) { color: var(--ob-primary-light); }
+.ob-app :is(.text-blue-500, .text-blue-600, .text-blue-700, .text-blue-800, .text-blue-900) { color: var(--ob-primary-light); }
+.ob-app :is(.border-blue-200, .border-blue-300, .border-blue-400, .border-blue-500, .border-blue-600, .dark\:border-blue-800) { border-color: var(--ob-primary); }
+.ob-app :is(.ring-blue-500, .focus\:ring-blue-500, .focus-visible\:ring-blue-500) { --tw-ring-color: var(--ob-primary); }
+.ob-app :is(.hover\:bg-blue-600:hover, .hover\:bg-blue-700:hover) { background-color: var(--ob-primary-hover); }
+
+/* ---- Green / emerald / teal → cyan tertiary (success) ----
+   DESIGN.md assigns success states to the cyan-leaning tertiary; there is
+   no green in the palette, and letting one through would break the
+   "technical, not colourful" read. */
+.ob-app :is(.bg-green-50, .bg-green-100, .bg-green-200,
+            .bg-emerald-50, .bg-emerald-100, .bg-teal-50, .bg-teal-100) { background-color: var(--ob-success-soft); }
+.ob-app :is(.bg-green-500, .bg-green-600, .bg-green-700, .bg-green-800,
+            .bg-emerald-600, .bg-teal-600) { background-color: var(--ob-accent-soft); }
+.ob-app :is(.bg-green-900, .dark\:bg-green-900, .bg-green-950, .bg-emerald-900, .dark\:bg-emerald-900) { background-color: var(--ob-success-soft); }
+.ob-app [class*="bg-green-900/"], .ob-app [class*="bg-green-600/"], .ob-app [class*="bg-emerald-900/"] { background-color: var(--ob-success-soft); }
+.ob-app :is(.text-green-100, .text-green-200, .text-green-300, .text-green-400, .dark\:text-green-400,
+            .text-green-500, .text-green-600, .text-green-700, .text-green-800,
+            .text-emerald-600, .dark\:text-emerald-400, .text-teal-600) { color: var(--ob-success); }
+.ob-app :is(.border-green-200, .border-green-500, .border-green-600, .dark\:border-green-800) { border-color: rgba(60, 215, 255, 0.35); }
+.ob-app :is(.ring-green-500, .focus\:ring-green-500) { --tw-ring-color: var(--ob-success); }
+
+/* ---- Red / rose → error ---- */
+.ob-app :is(.bg-red-50, .bg-red-100, .bg-red-900, .dark\:bg-red-900, .bg-red-950,
+            .bg-rose-50, .bg-rose-100, .bg-rose-900) { background-color: var(--ob-error-soft); }
+.ob-app [class*="bg-red-900/"], .ob-app [class*="bg-red-500/"], .ob-app [class*="bg-rose-900/"] { background-color: var(--ob-error-soft); }
+.ob-app :is(.bg-red-500, .bg-red-600, .bg-red-700) { background-color: var(--ob-error-strong); }
+.ob-app :is(.text-red-300, .text-red-400, .dark\:text-red-400, .text-red-500,
+            .text-red-600, .text-red-700, .text-red-800,
+            .text-rose-600, .dark\:text-rose-400) { color: var(--ob-error); }
+.ob-app :is(.border-red-200, .border-red-500, .border-red-600, .dark\:border-red-800) { border-color: rgba(255, 180, 171, 0.35); }
+.ob-app :is(.ring-red-500, .focus\:ring-red-500, .focus-visible\:ring-red-500) { --tw-ring-color: var(--ob-error); }
+
+/* ---- Amber / yellow / orange → warning ---- */
+.ob-app :is(.bg-amber-50, .bg-amber-100, .bg-amber-900, .dark\:bg-amber-900,
+            .bg-yellow-100, .bg-yellow-900, .dark\:bg-yellow-900,
+            .bg-orange-50, .bg-orange-100, .bg-orange-900, .dark\:bg-orange-900) { background-color: var(--ob-warning-soft); }
+.ob-app [class*="bg-amber-900/"], .ob-app [class*="bg-orange-900/"], .ob-app [class*="bg-yellow-900/"] { background-color: var(--ob-warning-soft); }
+.ob-app :is(.bg-orange-500, .bg-orange-600, .bg-amber-500) { background-color: rgba(245, 181, 68, 0.28); }
+.ob-app :is(.text-amber-400, .text-amber-500, .text-amber-600, .text-amber-700, .text-amber-800,
+            .text-yellow-300, .text-yellow-400, .text-yellow-600, .text-yellow-700, .text-yellow-800,
+            .text-orange-100, .text-orange-300, .text-orange-400, .text-orange-500,
+            .text-orange-600, .text-orange-700, .text-orange-800) { color: var(--ob-warning); }
+.ob-app :is(.border-amber-200, .border-amber-800, .border-orange-200, .border-orange-400,
+            .border-orange-500, .border-orange-800, .ring-orange-400) { border-color: rgba(245, 181, 68, 0.35); }
+
+/* ---- Purple / indigo / violet / pink → primary family ----
+   Folded into blue rather than kept distinct: the source pages used these
+   purely to differentiate metric-card icons, and six unrelated hues is
+   exactly the "colourful, generic admin template" look being replaced. */
+.ob-app :is(.bg-purple-50, .bg-purple-100, .bg-purple-900, .dark\:bg-purple-900,
+            .bg-indigo-50, .bg-indigo-100, .bg-indigo-900, .dark\:bg-indigo-900,
+            .bg-violet-50, .bg-pink-50, .bg-pink-100, .bg-fuchsia-50) { background-color: var(--ob-primary-soft); }
+.ob-app [class*="bg-purple-900/"], .ob-app [class*="bg-indigo-900/"] { background-color: var(--ob-primary-soft); }
+.ob-app :is(.bg-purple-600, .bg-indigo-600, .bg-violet-600) { background-color: var(--ob-primary); }
+.ob-app :is(.text-purple-600, .dark\:text-purple-400, .text-purple-800,
+            .text-indigo-600, .dark\:text-indigo-400, .text-indigo-800,
+            .text-violet-600, .text-pink-600, .text-sky-600, .text-cyan-600) { color: var(--ob-primary-light); }
+
+/* ---- Gradients: collapse to flat tonal surfaces ----
+   DESIGN.md rules out heavy gradients; the source pages used from-/to-
+   pairs for hero panels which now read as a single elevated surface. */
+.ob-app :is([class*="from-gray-"], [class*="from-blue-"], [class*="from-orange-"],
+            [class*="from-green-"], [class*="from-purple-"], [class*="from-red-"]) {
+  background-image: none;
+  background-color: var(--ob-surface);
 }
 
 /* ============================================================
-   AUTO GRAY TEXT ADAPTATION
-   Written after @import → later in cascade → wins at same specificity.
-   dark: Tailwind variants (0,2,0) still win over these (0,1,0).
+   CONTROLS
    ============================================================ */
-.text-gray-950, .text-gray-900, .text-gray-800 { color: var(--text-primary); }
-.text-gray-700, .text-gray-600                  { color: var(--text-secondary); }
-.text-gray-500, .text-gray-400                  { color: var(--text-muted); }
-
-/* ============================================================
-   BRAND COLOR REMAPPING
-   All blue / green / indigo / purple / emerald → brand red.
-   Semantic amber/yellow (warnings) are intentionally kept.
-   No !important needed: same specificity, later in file → wins.
-   ============================================================ */
-
-/* ---- BLUE → BRAND RED ---- */
-.bg-blue-50  { background-color: #FEF2F2; }
-.bg-blue-100 { background-color: #FEE2E2; }
-.bg-blue-200 { background-color: #FECACA; }
-.bg-blue-600 { background-color: var(--primary-red); }
-.bg-blue-700 { background-color: var(--secondary-red); }
-.bg-blue-800 { background-color: var(--dark-red); }
-.bg-blue-900 { background-color: var(--deep-red); }
-
-.text-blue-500 { color: var(--primary-red); }
-.text-blue-600 { color: var(--primary-red); }
-.text-blue-700 { color: var(--secondary-red); }
-.text-blue-800 { color: var(--dark-red); }
-.text-blue-900 { color: var(--deep-red); }
-
-.border-blue-200 { border-color: #FECACA; }
-.border-blue-500 { border-color: var(--primary-red); }
-.border-blue-600 { border-color: var(--primary-red); }
-
-.hover\:bg-blue-600:hover   { background-color: var(--primary-red); }
-.hover\:bg-blue-700:hover   { background-color: var(--secondary-red); }
-.hover\:bg-blue-800:hover   { background-color: var(--dark-red); }
-.hover\:text-blue-600:hover { color: var(--primary-red); }
-.active\:bg-blue-800:active { background-color: var(--dark-red); }
-.focus\:ring-blue-500:focus                     { --tw-ring-color: var(--primary-red); }
-.focus-visible\:ring-blue-500:focus-visible     { --tw-ring-color: var(--primary-red); }
-.focus\:border-blue-500:focus                   { border-color: var(--primary-red); }
-.focus-visible\:border-transparent:focus-visible { border-color: transparent; }
-
-/* dark: blue */
-.dark .dark\:bg-blue-900\/20 { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:bg-blue-900\/30 { background-color: rgba(160,32,32,0.30); }
-.dark .dark\:text-blue-400   { color: #c04040; }
-.dark .dark\:text-blue-300   { color: #d05050; }
-.dark .dark\:border-blue-800 { border-color: #701C1C; }
-
-/* ---- GREEN → BRAND RED ---- */
-.bg-green-50  { background-color: #FEF2F2; }
-.bg-green-100 { background-color: #FEE2E2; }
-.bg-green-200 { background-color: #FECACA; }
-.bg-green-600 { background-color: var(--primary-red); }
-.bg-green-700 { background-color: var(--secondary-red); }
-.bg-green-800 { background-color: var(--dark-red); }
-.bg-green-900 { background-color: var(--deep-red); }
-.bg-green-950 { background-color: var(--deep-red); }
-
-.text-green-100 { color: #FEE2E2; }
-.text-green-200 { color: #FECACA; }
-.text-green-300 { color: #f08080; }
-.text-green-400 { color: #c04040; }
-.text-green-500 { color: var(--primary-red); }
-.text-green-600 { color: var(--primary-red); }
-.text-green-700 { color: var(--secondary-red); }
-.text-green-800 { color: var(--dark-red); }
-
-.border-green-200 { border-color: #FECACA; }
-.border-green-500 { border-color: var(--primary-red); }
-.border-green-600 { border-color: var(--primary-red); }
-
-.hover\:bg-green-50:hover   { background-color: #FEF2F2; }
-.hover\:bg-green-600:hover  { background-color: var(--primary-red); }
-.hover\:bg-green-700:hover  { background-color: var(--secondary-red); }
-.hover\:text-green-600:hover { color: var(--primary-red); }
-.hover\:bg-green-100:hover  { background-color: #FEE2E2; }
-.focus\:ring-green-500:focus { --tw-ring-color: var(--primary-red); }
-
-/* dark: green */
-.dark .dark\:bg-green-900\/20  { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:bg-green-900\/30  { background-color: rgba(160,32,32,0.30); }
-.dark .dark\:text-green-400    { color: #c04040; }
-.dark .dark\:border-green-800  { border-color: #701C1C; }
-.dark .dark\:hover\:bg-green-900\/30:hover { background-color: rgba(160,32,32,0.30); }
-
-/* ---- INDIGO → BRAND RED ---- */
-.bg-indigo-50  { background-color: #FEF2F2; }
-.bg-indigo-100 { background-color: #FEE2E2; }
-.bg-indigo-600 { background-color: var(--primary-red); }
-.text-indigo-600 { color: var(--primary-red); }
-.text-indigo-800 { color: var(--dark-red); }
-.dark .dark\:bg-indigo-900\/20 { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:text-indigo-400   { color: #c04040; }
-
-/* ---- PURPLE → BRAND RED ---- */
-.bg-purple-50  { background-color: #FEF2F2; }
-.bg-purple-100 { background-color: #FEE2E2; }
-.bg-purple-600 { background-color: var(--primary-red); }
-.text-purple-600 { color: var(--primary-red); }
-.text-purple-800 { color: var(--dark-red); }
-.dark .dark\:bg-purple-900\/20 { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:text-purple-400   { color: #c04040; }
-
-/* ---- EMERALD / TEAL → BRAND RED ---- */
-.bg-emerald-50  { background-color: #FEF2F2; }
-.bg-emerald-100 { background-color: #FEE2E2; }
-.bg-emerald-600 { background-color: var(--primary-red); }
-.text-emerald-600 { color: var(--primary-red); }
-.dark .dark\:bg-emerald-900\/20 { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:text-emerald-400   { color: #c04040; }
-.bg-teal-50  { background-color: #FEF2F2; }
-.bg-teal-100 { background-color: #FEE2E2; }
-.bg-teal-600 { background-color: var(--primary-red); }
-.text-teal-600 { color: var(--primary-red); }
-
-/* ---- ROSE / VIOLET → BRAND RED ---- */
-.bg-rose-50  { background-color: #FEF2F2; }
-.bg-rose-100 { background-color: #FEE2E2; }
-.bg-rose-600 { background-color: var(--primary-red); }
-.text-rose-600 { color: var(--primary-red); }
-.dark .dark\:bg-rose-900\/20 { background-color: rgba(160,32,32,0.20); }
-.dark .dark\:text-rose-400   { color: #c04040; }
-.bg-violet-50  { background-color: #FEF2F2; }
-.bg-violet-600 { background-color: var(--primary-red); }
-.text-violet-600 { color: var(--primary-red); }
-
-/* ---- OPACITY VARIANT OVERRIDES (attribute selector, scoped to context) ---- */
-/* Landing page always-dark sections */
-[class*="bg-green-600/"]  { background-color: rgba(160,32,32,0.20); }
-[class*="border-green-5"] { border-color: rgba(160,32,32,0.30); }
-/* Dark mode icon bg opacity variants */
-.dark [class*="bg-blue-900/"]    { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-green-900/"]   { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-indigo-900/"]  { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-purple-900/"]  { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-emerald-900/"] { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-rose-900/"]    { background-color: rgba(160,32,32,0.20); }
-.dark [class*="bg-amber-900/"]   { background-color: rgba(180,100,0,0.20); }
-
-/* ============================================================
-   DARK MODE SURFACE REMAPPING
-   Remap Tailwind slate/gray dark backgrounds to brand dark palette.
-   Only applies inside .dark to avoid affecting intentional dark sections
-   on the public landing page (hero, navbar — always dark by design).
-   ============================================================ */
-.dark .bg-gray-950,
-.dark .dark\:bg-gray-950 { background-color: #101010; }
-
-.dark .bg-gray-900,
-.dark .dark\:bg-gray-900 { background-color: #181818; }
-
-.dark .bg-gray-800,
-.dark .dark\:bg-gray-800 { background-color: #202020; }
-
-.dark .bg-gray-750,
-.dark .dark\:bg-gray-750 { background-color: #252525; }
-
-.dark .bg-gray-700,
-.dark .dark\:bg-gray-700 { background-color: #2a2a2a; }
-
-.dark .dark\:border-gray-700 { border-color: #2a2a2a; }
-.dark .dark\:border-gray-600 { border-color: #333333; }
-.dark .dark\:border-gray-800 { border-color: #1a1a1a; }
-
-/* ============================================================
-   GLOBAL CARD UTILITY
-   ============================================================ */
-.theme-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 0.75rem;
-  color: var(--text-primary);
+.ob-app :is(input, textarea, select) {
+  background-color: var(--ob-surface);
+  color: var(--ob-text);
+  border-color: var(--ob-line-strong);
+  border-radius: var(--ob-radius-control);
 }
-
-/* ============================================================
-   INPUTS, TEXTAREAS, SELECTS
-   ============================================================ */
-input, textarea, select {
-  background-color: var(--input-bg);
-  color: var(--text-primary);
-  border-color: var(--input-border);
+.ob-app :is(input, textarea, select):focus-visible,
+.ob-app :is(input, textarea, select):focus {
+  border-color: var(--ob-primary);
+  box-shadow: 0 0 0 3px var(--ob-primary-glow);
+  outline: none;
 }
-input::placeholder, textarea::placeholder { color: var(--text-muted); }
+.ob-app :is(input, textarea, select):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* The dark surface leaves native date/time/search glyphs black-on-black. */
+.ob-app input[type="date"]::-webkit-calendar-picker-indicator,
+.ob-app input[type="time"]::-webkit-calendar-picker-indicator,
+.ob-app input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.75);
+  cursor: pointer;
+}
+.ob-app input[type="search"]::-webkit-search-cancel-button { filter: invert(0.7); }
 
 /* ============================================================
    TABLES
    ============================================================ */
-table            { color: var(--text-primary); }
-table thead      { color: var(--text-secondary); }
-.dark table thead           { background: #202020; }
-.dark table tbody tr:hover  { background: #1a1a1a; }
+.ob-app table { color: var(--ob-text); border-collapse: separate; border-spacing: 0; }
+.ob-app table thead {
+  background: var(--ob-surface);
+  color: var(--ob-text-secondary);
+}
+.ob-app table thead th {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ob-text-muted);
+}
+.ob-app table tbody tr { border-color: var(--ob-line-faint); }
+.ob-app table tbody tr:hover { background: rgba(229, 226, 225, 0.03); }
+/* Numeric cells align on the decimal — Geist's tabular figures do the work. */
+.ob-app table :is(td, th) { font-variant-numeric: tabular-nums lining-nums; }
 
 /* ============================================================
-   RTL SUPPORT
+   ARABIC / RTL
    ============================================================ */
-[dir="rtl"] { font-family: "Segoe UI", Tahoma, sans-serif; }
-[dir="rtl"] .space-x-2 > * + * { margin-right: 0.5rem; margin-left: 0; }
+:lang(ar), [dir="rtl"] {
+  font-family: "Cairo", var(--ob-font-sans), "Segoe UI", sans-serif;
+}
+[dir="rtl"] { direction: rtl; }
+/* space-x-* is a physical-direction utility and does not flip on its own. */
+[dir="rtl"] .space-x-1 > * + * { margin-right: 0.25rem; margin-left: 0; }
+[dir="rtl"] .space-x-2 > * + * { margin-right: 0.5rem;  margin-left: 0; }
+[dir="rtl"] .space-x-3 > * + * { margin-right: 0.75rem; margin-left: 0; }
+[dir="rtl"] .space-x-4 > * + * { margin-right: 1rem;    margin-left: 0; }
+/* Directional glyphs (chevrons, arrows) must mirror with the layout. */
+[dir="rtl"] .ob-flip-rtl { transform: scaleX(-1); }
 
 /* ============================================================
    SCROLLBAR
    ============================================================ */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D0D0D0; border-radius: 3px; }
-.dark ::-webkit-scrollbar-thumb { background: #333333; }
+.ob-app { scrollbar-color: var(--ob-surface-highest) transparent; scrollbar-width: thin; }
+.ob-app ::-webkit-scrollbar { width: 8px; height: 8px; }
+.ob-app ::-webkit-scrollbar-track { background: transparent; }
+.ob-app ::-webkit-scrollbar-thumb {
+  background: var(--ob-surface-highest);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.ob-app ::-webkit-scrollbar-thumb:hover { background: var(--ob-outline-variant); background-clip: content-box; }
 
 /* ============================================================
-   ANIMATIONS
+   ANIMATION
    ============================================================ */
-@keyframes spin    { to { transform: rotate(360deg); } }
-@keyframes pulse   { 50% { opacity: .5; } }
-@keyframes fadeIn  {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes ob-spin   { to { transform: rotate(360deg); } }
+@keyframes ob-pulse  { 50% { opacity: 0.45; } }
+@keyframes ob-fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes ob-shimmer { 100% { transform: translateX(100%); } }
+
+.animate-spin   { animation: ob-spin 1s linear infinite; }
+.animate-pulse  { animation: ob-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-fadeIn { animation: ob-fade-in 0.18s ease; }
+
+/* Loading skeleton: a shimmer that sweeps a low surface. */
+.ob-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--ob-surface);
+  border-radius: var(--ob-radius-control);
 }
-.animate-spin   { animation: spin 1s linear infinite; }
-.animate-pulse  { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
-.animate-fadeIn { animation: fadeIn 0.2s ease; }
+.ob-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(229, 226, 225, 0.055), transparent);
+  animation: ob-shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-app *, .ob-app *::before, .ob-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ob-skeleton::after { animation: none; }
+}
+
+/* Screen-reader-only text — for icon-only controls and chart summaries. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

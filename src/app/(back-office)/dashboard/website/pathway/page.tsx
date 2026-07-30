@@ -12,10 +12,12 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SortableList } from "@/components/website/admin/SortableList";
+import { useTranslation } from "react-i18next";
 
 interface Level { id: string; name: string; ageRangeLabel: string | null; color: string; description: string | null; isActive: boolean }
 
 export default function PathwayAdminPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: levels = [] } = useQuery<Level[]>({ queryKey: ["admin-pathway"], queryFn: () => fetch("/api/pathway").then((r) => r.json()) });
@@ -25,7 +27,7 @@ export default function PathwayAdminPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-pathway"] });
   const { mutate: create } = useMutation({
     mutationFn: () => fetch("/api/pathway", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "New Stage" }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Stage added"); invalidate(); },
+    onSuccess: () => { toast.success(t("pathway.added")); invalidate(); },
   });
   const { mutate: update } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Level>) => fetch(`/api/pathway/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -33,7 +35,7 @@ export default function PathwayAdminPage() {
   });
   const { mutate: remove, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/pathway/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); invalidate(); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
   });
 
   function handleReorder(next: Level[]) {
@@ -43,12 +45,12 @@ export default function PathwayAdminPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Player Pathway" description="Stages shown on the public Pathway timeline, in order.">
-        <Button onClick={() => create()}><Plus className="h-4 w-4" /> Add Stage</Button>
+      <PageHeader title={t("pathway.title")} description={t("pathway.subtitle")}>
+        <Button onClick={() => create()}><Plus className="h-4 w-4" /> {t("pathway.add")}</Button>
       </PageHeader>
 
       {list.length === 0 ? (
-        <EmptyState icon={TrendingUp} title="No pathway stages yet" description="Add your first stage." action={{ label: "Add Stage", onClick: () => create() }} />
+        <EmptyState icon={TrendingUp} title={t("pathway.empty")} description={t("pathway.empty_body")} action={{ label: t("pathway.add"), onClick: () => create() }} />
       ) : (
         <SortableList
           items={list}
@@ -59,10 +61,10 @@ export default function PathwayAdminPage() {
               <input type="color" defaultValue={l.color} onBlur={(e) => update({ id: l.id, color: e.target.value })} className="h-10 w-10 shrink-0 cursor-pointer rounded border border-gray-200" />
               <div className="flex-1 space-y-2">
                 <div className="flex gap-2">
-                  <Input defaultValue={l.name} onBlur={(e) => update({ id: l.id, name: e.target.value })} placeholder="Stage name" className="flex-1" />
-                  <Input defaultValue={l.ageRangeLabel ?? ""} onBlur={(e) => update({ id: l.id, ageRangeLabel: e.target.value })} placeholder="Age range" className="w-40" />
+                  <Input defaultValue={l.name} onBlur={(e) => update({ id: l.id, name: e.target.value })} placeholder={t("pathway.name")} className="flex-1" />
+                  <Input defaultValue={l.ageRangeLabel ?? ""} onBlur={(e) => update({ id: l.id, ageRangeLabel: e.target.value })} placeholder={t("pathway.age_range")} className="w-40" />
                 </div>
-                <Textarea defaultValue={l.description ?? ""} onBlur={(e) => update({ id: l.id, description: e.target.value })} placeholder="Description" rows={2} />
+                <Textarea defaultValue={l.description ?? ""} onBlur={(e) => update({ id: l.id, description: e.target.value })} placeholder={t("common:ui.description")} rows={2} />
               </div>
               <div className="flex flex-col items-end justify-between">
                 <Switch checked={l.isActive} onCheckedChange={(v) => update({ id: l.id, isActive: v })} />
@@ -75,7 +77,7 @@ export default function PathwayAdminPage() {
         />
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete stage" description="This permanently removes this pathway stage." onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("pathway.delete")} description={t("pathway.delete_body")} onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

@@ -1,0 +1,25 @@
+{
+  "title": "Finance Overview",
+  "subtitle": "Profit and expense analysis",
+  "manage_charges": "Manage Charges",
+  "daily_profit": "Daily Profit Trend",
+  "by_category": "Charges by Category",
+  "no_charges_period": "No charges in this period",
+  "charges": {
+    "title": "Charges",
+    "subtitle": "Track academy expenses",
+    "manage_categories": "Manage Categories",
+    "add": "Add Charge",
+    "categories_title": "Charge Categories",
+    "list": "Charges List",
+    "no_category": "No category",
+    "amount_da": "Amount (DA)",
+    "salary": "Salary",
+    "empty": "No charges recorded yet.",
+    "category_ph": "Category name...",
+    "added": "Charge added",
+    "add_failed": "Failed to add charge",
+    "deleted": "Charge deleted",
+    "category_created": "Category created"
+  }
+}
