@@ -188,8 +188,14 @@ async function main() {
     { key: "academy_address", value: "Algiers, Algeria" },
     { key: "academy_logo", value: "" },
     { key: "academy_favicon", value: "" },
-    { key: "primary_color", value: "#1e40af" },
-    { key: "secondary_color", value: "#0f172a" },
+    // Obsidian Flux: electric blue primary, with its pressed tone as secondary.
+    // These feed --ob-primary / --ob-primary-hover / the surface ladder in
+    // RootLayout. The upsert below passes `update: {}`, so an academy that has
+    // customised its branding keeps its own values — this seeds fresh installs.
+    { key: "primary_color", value: "#0070f3" },
+    { key: "secondary_color", value: "#0059c5" },
+    { key: "dark_bg_color", value: "#131313" },
+    { key: "card_dark_color", value: "#1c1b1b" },
     { key: "footer_text", value: "© 2024 Football Skills Academy. All rights reserved." },
     { key: "currency", value: "DZD" },
     { key: "currency_symbol", value: "DA" },
@@ -299,6 +305,46 @@ async function main() {
     if (!existing) await db.formField.create({ data: f });
   }
   console.log("✅ COD form fields created");
+
+  // ==================== VENUE SLUG BACKFILL ====================
+  // station.slug was added as a nullable column so the migration stayed
+  // additive, which means every station that predates it has slug = NULL.
+  // A publicly listed venue without a slug renders as a card that cannot be
+  // clicked and has no /venues/[slug] page behind it. Derive one from the
+  // name so those venues become reachable.
+  //
+  // Deliberately outside the SEED_DEMO_CONTENT gate: this repairs real data
+  // rather than inserting demo data. It only ever fills a NULL — an existing
+  // slug is never rewritten, because that would break live URLs.
+  const slugifyName = (s: string) =>
+    s
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Béjaïa -> Bejaia, Sétif -> Setif
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const stationsMissingSlug = await db.station.findMany({ where: { slug: null } });
+  let slugsBackfilled = 0;
+  for (const station of stationsMissingSlug) {
+    // A name of only punctuation would slugify to "", which is not a usable
+    // URL — fall back to something stable and unique instead.
+    const base = slugifyName(station.name) || `venue-${station.id.slice(-6)}`;
+    let candidate = base;
+    let suffix = 2;
+    while (await db.station.findFirst({ where: { slug: candidate, NOT: { id: station.id } } })) {
+      candidate = `${base}-${suffix++}`;
+    }
+    await db.station.update({ where: { id: station.id }, data: { slug: candidate } });
+    console.log(`   ${station.name} -> /venues/${candidate}`);
+    slugsBackfilled++;
+  }
+  console.log(
+    slugsBackfilled > 0
+      ? `✅ Backfilled ${slugsBackfilled} venue slug(s)`
+      : "⏭️  No venue slugs needed backfilling"
+  );
 
   // ==================== SHOWCASE WEBSITE DEMO CONTENT ====================
   // Gated behind SEED_DEMO_CONTENT because package.json's build script runs
