@@ -2,6 +2,7 @@
 
 import "@/i18n";
 import { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import i18n from "@/i18n";
 
@@ -31,20 +32,56 @@ function getStoredLocale(): LocaleCode {
   return "fr";
 }
 
+// The public site routes as /fr, /eng, /ar and renders its content on the
+// server from that segment, so the URL — not localStorage — is what the
+// visitor is actually looking at. Returns null on the admin and other
+// non-localised routes, where the stored preference is the only signal.
+//
+// Note the spelling difference: the URL segment is "eng", the i18n code "en".
+function localeFromPathname(pathname: string | null): LocaleCode | null {
+  const segment = (pathname ?? "").split("/")[1];
+  if (segment === "eng") return "en";
+  if (segment === "fr" || segment === "ar") return segment;
+  return null;
+}
+
+function toUrlSegment(code: LocaleCode): string {
+  return code === "en" ? "eng" : code;
+}
+
 interface LanguageSwitcherProps {
   variant?: "public" | "admin";
 }
 
 export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState<LocaleCode>("fr");
+  const [storedLocale, setStoredLocale] = useState<LocaleCode>("fr");
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // On a localised route the URL is authoritative and needs no state at all,
+  // so the correct flag renders on the first pass. Only the admin, whose URLs
+  // carry no locale, falls back to the stored preference — and reading
+  // localStorage can only happen after hydration.
+  const urlLocale = localeFromPathname(pathname);
+  const current = urlLocale ?? storedLocale;
 
   useEffect(() => {
-    const stored = getStoredLocale();
-    setCurrent(stored);
-    applyLocale(stored);
-  }, []);
+    if (urlLocale) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is unavailable during render
+    setStoredLocale(getStoredLocale());
+  }, [urlLocale]);
+
+  // Keep <html lang/dir> and i18n in step with whatever is current. This used
+  // to apply the *stored* preference unconditionally, so a visitor who had
+  // once chosen Arabic got dir="rtl" on <html> for every page including /fr,
+  // whose content is French. Tailwind's rtl: variant matches any descendant
+  // of [dir="rtl"], so the layout's own dir="ltr" wrapper could not undo it
+  // and French pages laid themselves out right-to-left.
+  useEffect(() => {
+    applyLocale(current);
+  }, [current]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -56,7 +93,7 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
 
   function switchLocale(code: LocaleCode) {
     setOpen(false);
-    setCurrent(code);
+    setStoredLocale(code);
     applyLocale(code);
 
     // Persist preference to server
@@ -65,6 +102,17 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ language: code }),
     }).catch(() => {});
+
+    // Public pages are rendered on the server from the locale in the URL, so
+    // changing only the client state left the visitor on French content with
+    // an Arabic layout. Move to the same path under the chosen locale and let
+    // the server re-render it. Admin routes are not localised by URL, so they
+    // keep working purely off the client state above.
+    if (urlLocale) {
+      const segments = (pathname ?? "/").split("/");
+      segments[1] = toUrlSegment(code);
+      router.push(segments.join("/") + window.location.search);
+    }
   }
 
   const active = LOCALES.find((l) => l.code === current) ?? LOCALES[0];
