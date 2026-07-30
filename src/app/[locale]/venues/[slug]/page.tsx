@@ -45,7 +45,10 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
 
   return (
     <>
-      <Hero desktopImageUrl={venue.heroImageUrl || "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1600&q=80"} title={venue.name} subtitle={venue.wilaya} minHeight="55vh" />
+      {/* No stock fallback: an unphotographed venue gets the brand panel, so the
+          page never shows a stadium that is not this one. Real photos go in
+          Dashboard → Stations → [station] → Public / Marketing. */}
+      <Hero desktopImageUrl={venue.heroImageUrl || undefined} title={venue.name} subtitle={venue.wilaya} minHeight="55vh" />
       <Breadcrumb locale={locale} items={[{ label: "Venues", href: `/${locale}/venues` }, { label: venue.name }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">

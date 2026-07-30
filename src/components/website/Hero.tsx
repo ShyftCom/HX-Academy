@@ -12,7 +12,13 @@ export interface HeroCta {
 }
 
 export interface HeroProps {
-  desktopImageUrl: string;
+  /**
+   * Omit for an entity that has no photo yet: the hero then renders a plain
+   * brand panel instead of stock imagery. A stock pitch beneath a named venue
+   * reads as a photograph *of that venue*, which is a claim we cannot make on
+   * the academy's behalf.
+   */
+  desktopImageUrl?: string;
   mobileImageUrl?: string;
   videoUrl?: string;
   /** CSS object-position value, e.g. "center 30%" — lets admins keep the subject in frame on crop. */
@@ -76,7 +82,7 @@ export function Hero({
             playsInline
             poster={desktopImageUrl}
           />
-        ) : (
+        ) : desktopImageUrl ? (
           <>
             <Image
               src={desktopImageUrl}
@@ -91,9 +97,26 @@ export function Hero({
               <Image src={mobileImageUrl} alt="" fill priority sizes="100vw" className="object-cover sm:hidden" style={{ objectPosition: focalPoint }} />
             )}
           </>
+        ) : (
+          /* No photo: a deliberate brand panel. Reads as "no image yet"
+             rather than as a picture of this place. */
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-fsa-navy-900) 0%, var(--color-fsa-navy-800) 55%, color-mix(in srgb, var(--color-fsa-sky) 18%, var(--color-fsa-navy-800)) 100%)",
+            }}
+          />
         )}
-        <div className="absolute inset-0" style={{ backgroundColor: overlayColor, opacity: overlayOpacity }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        {/* The overlay and bottom scrim exist to keep white text legible over a
+            photograph. Over the brand panel they would only muddy a colour that
+            is already dark enough, so skip both when there is no media. */}
+        {(videoUrl || desktopImageUrl) && (
+          <>
+            <div className="absolute inset-0" style={{ backgroundColor: overlayColor, opacity: overlayOpacity }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          </>
+        )}
       </div>
 
       {/* Content */}
