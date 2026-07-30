@@ -1,0 +1,139 @@
+/* ============================================================
+   SHOWCASE WEBSITE DESIGN TOKENS
+   ============================================================
+   Independent token namespace (fsa-) for the public Football
+   Skills Academy showcase site. Deliberately not named after Tailwind
+   colors like "blue" or "sky", because globals.css hard-remaps every
+   Tailwind blue/green/indigo/
+   purple/emerald/rose/violet utility class to the admin red brand
+   color -- reusing those names here would render red, not navy/sky.
+   These @theme values are the build-time fallback defaults; the
+   actual admin-editable values are injected at runtime, scoped to
+   .fsa-site, by ThemeVars (see ThemeVars.tsx) -- see that file
+   for how a Setting-table edit ends up overriding these.
+   ============================================================ */
+
+@theme {
+  /* ---- Color tokens ---- */
+  --color-fsa-navy-900: #001f49;
+  --color-fsa-navy-800: #002b5c;
+  --color-fsa-sky: #43c7ed;
+  --color-fsa-heading-blue: #3996d6;
+  --color-fsa-pale-bg: #eef5fc;
+  --color-fsa-text: #071e41;
+  --color-fsa-text-muted: #5e6d82;
+  --color-fsa-border: #dce6f1;
+  --color-fsa-success: #168a55;
+  --color-fsa-error: #c0392b;
+  --color-fsa-white: #ffffff;
+
+  /* ---- Typography tokens (fonts registered as CSS vars in fonts.ts / applied in [locale]/layout.tsx) ---- */
+  --font-fsa-display: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-fsa-body: var(--font-fsa-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Radius tokens ---- */
+  --radius-fsa-sm: 8px;
+  --radius-fsa-md: 14px;
+  --radius-fsa-lg: 24px;
+  --radius-fsa-pill: 999px;
+
+  /* ---- Shadow tokens ---- */
+  --shadow-fsa-card: 0 1px 2px rgba(7, 30, 65, 0.04), 0 8px 24px rgba(7, 30, 65, 0.08);
+  --shadow-fsa-header: 0 1px 6px rgba(0, 0, 0, 0.08);
+
+  /* ---- Animation tokens ---- */
+  --ease-fsa-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   NON-TAILWIND CUSTOM PROPERTIES
+   Layout knobs that do not need a matching utility class generated
+   (container width, spacing rhythm) -- consumed directly by
+   components via inline style / arbitrary values.
+   ============================================================ */
+.fsa-site {
+  --fsa-container-max: 1400px;
+  --fsa-container-pad: clamp(1.25rem, 4vw, 3rem);
+  --fsa-section-y: clamp(3rem, 6vw, 6rem);
+
+  font-family: var(--font-fsa-body);
+  color: var(--color-fsa-text);
+}
+
+.fsa-site :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-fsa-display);
+}
+
+/* ============================================================
+   ACCESSIBLE FOCUS STATES
+   Baseline visible focus ring for every interactive element, so
+   individual components do not each need to opt in by hand.
+   ============================================================ */
+.fsa-site a:focus-visible,
+.fsa-site button:focus-visible,
+.fsa-site input:focus-visible,
+.fsa-site select:focus-visible,
+.fsa-site textarea:focus-visible,
+.fsa-site [tabindex]:focus-visible {
+  outline: 2px solid var(--color-fsa-sky);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fsa-site * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   RICH TEXT (admin-authored HTML blocks -- no typography plugin
+   dependency, hand-styled to match the fsa-* token system)
+   ============================================================ */
+.fsa-richtext > * + * {
+  margin-top: 1.1em;
+}
+.fsa-richtext h2 {
+  font-family: var(--font-fsa-display);
+  color: var(--color-fsa-navy-900);
+  font-size: 1.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.fsa-richtext h3 {
+  font-family: var(--font-fsa-display);
+  color: var(--color-fsa-navy-900);
+  font-size: 1.35em;
+  font-weight: 700;
+}
+.fsa-richtext a {
+  color: var(--color-fsa-heading-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.fsa-richtext ul,
+.fsa-richtext ol {
+  padding-inline-start: 1.4em;
+}
+.fsa-richtext ul {
+  list-style: disc;
+}
+.fsa-richtext ol {
+  list-style: decimal;
+}
+.fsa-richtext li + li {
+  margin-top: 0.4em;
+}
+.fsa-richtext blockquote {
+  border-inline-start: 3px solid var(--color-fsa-sky);
+  padding-inline-start: 1em;
+  color: var(--color-fsa-text-muted);
+  font-style: italic;
+}
+.fsa-richtext strong {
+  font-weight: 700;
+  color: var(--color-fsa-navy-900);
+}

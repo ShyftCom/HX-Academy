@@ -47,7 +47,7 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
       <header style={{ background: "var(--header-bg)", borderColor: "var(--header-border)", color: "var(--text-primary)" }} className="flex h-14 items-center justify-between border-b px-4">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600 text-white font-bold text-xs">FSA</div>
-          <span className="font-semibold text-sm">Foot-Ball Skills Academy</span>
+          <span className="font-semibold text-sm">Football Skills Academy</span>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher variant="admin" />

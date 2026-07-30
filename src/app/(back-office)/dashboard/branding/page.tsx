@@ -308,7 +308,7 @@ export default function BrandingPage() {
             onChange={(e) => setFooterCopyright(e.target.value)}
             className="w-full text-sm rounded-lg px-3 py-2 outline-none"
             style={{ background: "var(--input-bg)", border: "1px solid var(--input-border)", color: "var(--text-primary)" }}
-            placeholder={`© ${new Date().getFullYear()} Foot-Ball Skills Academy. All rights reserved.`}
+            placeholder={`© ${new Date().getFullYear()} Football Skills Academy. All rights reserved.`}
           />
         </div>
 

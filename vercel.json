@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then echo 'Preview builds skipped: build runs prisma db push+seed and Preview has no DATABASE_URL. Undo: remove ignoreCommand.'; exit 0; else exit 1; fi"
+}

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       plans,
       survey,
       fileRequirements,
-      academyName: settings["academy_name"] ?? "Foot-Ball Skills Academy",
+      academyName: settings["academy_name"] ?? "Football Skills Academy",
     });
   } catch (error) {
     console.error(error);

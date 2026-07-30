@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun } from "lucide-react";
+import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun, Trophy, MapPin, Users2, UserCheck, TrendingUp, HelpCircle, Newspaper, Mail, ArrowRightLeft } from "lucide-react";
 
 export default function WebsiteHubPage() {
   const [stats, setStats] = useState({ total: 0, pending: 0, converted: 0 });
@@ -17,7 +17,16 @@ export default function WebsiteHubPage() {
   }, []);
 
   const cards = [
-    { href: "/dashboard/website/landing", icon: PanelsTopLeft, title: "Landing Page", desc: "Edit hero text, about section, benefits, VSL video URL, and footer content.", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30" },
+    { href: "/dashboard/website/pages", icon: PanelsTopLeft, title: "Pages", desc: "Build the homepage and every Showcase Website page from reusable, drag-and-drop sections.", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30" },
+    { href: "/dashboard/website/programmes", icon: Trophy, title: "Programmes", desc: "Manage programmes, categories, schedules and pricing shown on the public site.", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" },
+    { href: "/dashboard/website/venues", icon: MapPin, title: "Venues", desc: "Control which stations appear on the public Venues page and their order.", color: "text-rose-600 bg-rose-50 dark:bg-rose-900/30" },
+    { href: "/dashboard/website/squads", icon: Users2, title: "Squad Registrations", desc: "Review Development Squad interest registrations submitted from the public site.", color: "text-violet-600 bg-violet-50 dark:bg-violet-900/30" },
+    { href: "/dashboard/website/contact", icon: Mail, title: "Contact Submissions", desc: "Messages submitted from the public Contact Us page.", color: "text-sky-600 bg-sky-50 dark:bg-sky-900/30" },
+    { href: "/dashboard/website/coaches", icon: UserCheck, title: "Coaches", desc: "Public-facing coach profiles shown on programme and Who We Are pages.", color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
+    { href: "/dashboard/website/pathway", icon: TrendingUp, title: "Pathway", desc: "Stages shown on the public Pathway timeline.", color: "text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/30" },
+    { href: "/dashboard/website/faqs", icon: HelpCircle, title: "FAQs", desc: "Manage frequently asked questions shown across the public site.", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/30" },
+    { href: "/dashboard/website/news", icon: Newspaper, title: "News", desc: "Publish news articles shown on the public News page.", color: "text-lime-600 bg-lime-50 dark:bg-lime-900/30" },
+    { href: "/dashboard/website/redirects", icon: ArrowRightLeft, title: "Redirects", desc: "Record legacy URLs that should redirect to a new page.", color: "text-slate-600 bg-slate-50 dark:bg-slate-900/30" },
     { href: "/dashboard/website/header", icon: Navigation, title: "Header Editor", desc: "Configure navigation, logo, CTA button, and mobile menu.", color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
     { href: "/dashboard/website/footer", icon: Layers, title: "Footer Editor", desc: "Customize footer links, social icons, colors, and copyright text.", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-900/30" },
     { href: "/dashboard/website/store", icon: Store, title: "Store Settings", desc: "Enable the product store, configure shipping fees and page content.", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },

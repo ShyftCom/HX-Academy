@@ -47,6 +47,7 @@ import {
   Handshake,
   Sun,
   Ticket,
+  Trophy,
 } from "lucide-react";
 
 interface NavItem {
@@ -114,7 +115,16 @@ const navItems: NavItem[] = [
     tKey: "website",
     icon: Globe,
     children: [
-      { tKey: "landing", href: "/dashboard/website/landing", icon: PanelsTopLeft },
+      { tKey: "pages", href: "/dashboard/website/pages", icon: PanelsTopLeft },
+    { tKey: "programmes", href: "/dashboard/website/programmes", icon: Trophy },
+    { tKey: "venues_website", href: "/dashboard/website/venues", icon: MapPin },
+    { tKey: "squads_website", href: "/dashboard/website/squads", icon: Users2 },
+    { tKey: "contact_website", href: "/dashboard/website/contact", icon: Inbox },
+    { tKey: "coaches", href: "/dashboard/website/coaches", icon: UserCheck },
+    { tKey: "pathway", href: "/dashboard/website/pathway", icon: TrendingUp },
+    { tKey: "faqs", href: "/dashboard/website/faqs", icon: MessagesSquare },
+    { tKey: "news", href: "/dashboard/website/news", icon: FileText },
+    { tKey: "redirects", href: "/dashboard/website/redirects", icon: Link2 },
       { tKey: "header", href: "/dashboard/website/header", icon: Navigation },
       { tKey: "footer", href: "/dashboard/website/footer", icon: Layers },
       { tKey: "slides", href: "/dashboard/website/slides", icon: ImagePlay },

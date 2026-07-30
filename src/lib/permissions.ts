@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
@@ -37,6 +38,24 @@ export async function requirePermission(permission: string) {
     throw new Error("Forbidden");
   }
   return session;
+}
+
+/**
+ * Route-handler-friendly variant: returns `null` when the caller is
+ * authorized, or a ready-to-return NextResponse (401/403) otherwise —
+ * `const denied = await requirePermissionResponse(...); if (denied) return denied;`
+ * avoids every route re-implementing its own try/catch around requirePermission().
+ */
+export async function requirePermissionResponse(permission: string): Promise<NextResponse | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const allowed = await hasPermission(session.user.id, permission);
+  if (!allowed) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
 }
 
 export const PERMISSIONS = {

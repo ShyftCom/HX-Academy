@@ -214,7 +214,7 @@ function ApplyFormInner() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center font-bold text-xs">FSA</div>
-            <span className="font-semibold">Foot-Ball Skills Academy</span>
+            <span className="font-semibold">Football Skills Academy</span>
           </Link>
           <span className="text-sm text-gray-400">Application Form</span>
         </div>
