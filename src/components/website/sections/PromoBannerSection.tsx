@@ -1,5 +1,6 @@
 import { lf } from "./localeField";
 import { FsaButton } from "../buttons/FsaButton";
+import { localeHref } from "../localeHref";
 
 const BG_MAP: Record<string, string> = {
   sky: "bg-gradient-to-br from-fsa-sky to-fsa-heading-blue text-fsa-navy-900",
@@ -33,7 +34,7 @@ export function PromoBannerSection({ content, locale }: { content: Record<string
         {body && <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">{body}</p>}
         {content.ctaUrl && ctaLabel && (
           <div className="mt-8 flex justify-center">
-            <FsaButton href={content.ctaUrl} variant={isNavyBg ? "sky" : "navy"} size="lg">
+            <FsaButton href={localeHref(content.ctaUrl, locale)} variant={isNavyBg ? "sky" : "navy"} size="lg">
               {ctaLabel}
             </FsaButton>
           </div>

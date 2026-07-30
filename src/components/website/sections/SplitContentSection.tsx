@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 import { lf } from "./localeField";
 import { FsaButton } from "../buttons/FsaButton";
+import { localeHref } from "../localeHref";
 
 export function SplitContentSection({ content, locale }: { content: Record<string, any>; locale: string }) {
   const heading = lf(content, "heading", locale);
@@ -32,7 +33,7 @@ export function SplitContentSection({ content, locale }: { content: Record<strin
       )}
       {content.ctaUrl && ctaLabel && (
         <div className="mt-8">
-          <FsaButton href={content.ctaUrl} variant="navy">
+          <FsaButton href={localeHref(content.ctaUrl, locale)} variant="navy">
             {ctaLabel}
           </FsaButton>
         </div>

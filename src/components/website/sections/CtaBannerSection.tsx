@@ -1,5 +1,6 @@
 import { lf } from "./localeField";
 import { FsaButton } from "../buttons/FsaButton";
+import { localeHref } from "../localeHref";
 
 const STYLE_MAP: Record<string, { section: string; heading: string; body: string; button: "sky" | "navy" | "white" }> = {
   navy: { section: "bg-fsa-navy-900", heading: "text-white", body: "text-white/80", button: "sky" },
@@ -21,7 +22,7 @@ export function CtaBannerSection({ content, locale }: { content: Record<string, 
         {body && <p className={`mt-4 text-lg ${s.body}`}>{body}</p>}
         {content.ctaUrl && ctaLabel && (
           <div className="mt-8 flex justify-center">
-            <FsaButton href={content.ctaUrl} variant={s.button} size="lg">
+            <FsaButton href={localeHref(content.ctaUrl, locale)} variant={s.button} size="lg">
               {ctaLabel}
             </FsaButton>
           </div>

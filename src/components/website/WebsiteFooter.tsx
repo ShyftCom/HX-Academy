@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUp, Star, CheckCircle2 } from "lucide-react";
 import { FsaButton } from "./buttons/FsaButton";
+import { localeHref } from "./localeHref";
 
 interface FooterLink { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string; openInNewTab: boolean }
 interface FooterColumn { id: string; title: string; titleFr: string | null; titleAr: string | null; position: number; links: FooterLink[] }
@@ -189,7 +190,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
                   {col.links?.map((link) => (
                     <li key={link.id}>
                       <Link
-                        href={link.url}
+                        href={localeHref(link.url, locale)}
                         target={link.openInNewTab ? "_blank" : undefined}
                         rel={link.openInNewTab ? "noopener noreferrer" : undefined}
                         style={{ color: text, opacity: 0.8 }}
@@ -209,7 +210,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
         <div className="flex flex-col gap-4 border-t pt-6 md:flex-row md:items-center md:justify-between" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
           <div className={`flex flex-wrap gap-4 ${isRtl ? "flex-row-reverse" : ""}`}>
             {config.bottomLinks?.map((l) => (
-              <Link key={l.id} href={l.url} style={{ color: text, opacity: 0.6 }} className="text-xs transition-opacity hover:opacity-100">
+              <Link key={l.id} href={localeHref(l.url, locale)} style={{ color: text, opacity: 0.6 }} className="text-xs transition-opacity hover:opacity-100">
                 {getLabel(l, locale)}
               </Link>
             ))}

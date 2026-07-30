@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useId, useCallback } from "react";
 import Link from "next/link";
 import { Menu, X, ShoppingCart, ChevronDown, MapPin } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { localeHref } from "./localeHref";
 import { useHeaderOverlay } from "./HeaderOverlayContext";
 import { FsaButton } from "./buttons/FsaButton";
 
@@ -104,7 +105,7 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
           {items.map((d) => (
             <Link
               key={d.id}
-              href={d.url}
+              href={localeHref(d.url, locale)}
               onClick={() => setOpen(false)}
               className="block px-5 py-3 text-[15px] font-semibold text-fsa-navy-900 transition-colors hover:bg-fsa-pale-bg focus-visible:bg-fsa-pale-bg focus-visible:outline-none"
             >
@@ -230,7 +231,7 @@ function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale:
                   {openSub === item.id && (
                     <div className="pb-2 ps-3">
                       {item.dropdownItems.filter((d) => d.isActive).sort((a, b) => a.position - b.position).map((d) => (
-                        <Link key={d.id} href={d.url} onClick={onClose} className="block rounded-lg px-3 py-2.5 text-sm text-fsa-text-muted hover:bg-fsa-pale-bg hover:text-fsa-navy-900">
+                        <Link key={d.id} href={localeHref(d.url, locale)} onClick={onClose} className="block rounded-lg px-3 py-2.5 text-sm text-fsa-text-muted hover:bg-fsa-pale-bg hover:text-fsa-navy-900">
                           {getLabel(d, locale)}
                         </Link>
                       ))}
@@ -238,7 +239,7 @@ function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale:
                   )}
                 </>
               ) : (
-                <Link href={item.url ?? "#"} onClick={onClose} className="block px-3 py-3.5 text-[15px] font-semibold text-fsa-navy-900">
+                <Link href={localeHref(item.url, locale)} onClick={onClose} className="block px-3 py-3.5 text-[15px] font-semibold text-fsa-navy-900">
                   {getLabel(item, locale)}
                 </Link>
               )}
@@ -247,7 +248,7 @@ function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale:
         </nav>
         <div className="border-t border-fsa-border p-4">
           {config.ctaUrl && ctaLabel && (
-            <FsaButton href={config.ctaUrl} variant="navy" className="w-full">
+            <FsaButton href={localeHref(config.ctaUrl, locale)} variant="navy" className="w-full">
               {ctaLabel}
             </FsaButton>
           )}
@@ -320,7 +321,7 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
               ) : (
                 <Link
                   key={item.id}
-                  href={item.url ?? "#"}
+                  href={localeHref(item.url, locale)}
                   className={`rounded-lg px-3 py-2 text-[15px] font-medium transition-colors ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
                 >
                   {getLabel(item, locale)}
@@ -348,7 +349,7 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
             </Link>
 
             {config.ctaUrl && ctaLabel && (
-              <FsaButton href={config.ctaUrl} variant="sky" size="sm" className="hidden md:inline-flex">
+              <FsaButton href={localeHref(config.ctaUrl, locale)} variant="sky" size="sm" className="hidden md:inline-flex">
                 {ctaLabel}
               </FsaButton>
             )}

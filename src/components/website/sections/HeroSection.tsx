@@ -1,5 +1,6 @@
 import { Hero } from "../Hero";
 import { lf } from "./localeField";
+import { localeHref } from "../localeHref";
 
 export function HeroSection({ content, locale }: { content: Record<string, any>; locale: string }) {
   const heading = lf(content, "heading", locale);
@@ -19,7 +20,7 @@ export function HeroSection({ content, locale }: { content: Record<string, any>;
       align={content.align}
       verticalPosition={content.verticalPosition}
       minHeight={content.minHeight}
-      primaryCta={content.ctaUrl ? { label: lf(content, "ctaLabel", locale) || "Learn more", href: content.ctaUrl } : undefined}
+      primaryCta={content.ctaUrl ? { label: lf(content, "ctaLabel", locale) || "Learn more", href: localeHref(content.ctaUrl, locale) } : undefined}
       secondaryCta={content.secondaryCtaUrl ? { label: lf(content, "secondaryCtaLabel", locale) || "Learn more", href: content.secondaryCtaUrl, variant: "outline" } : undefined}
     />
   );
