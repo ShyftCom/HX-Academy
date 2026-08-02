@@ -11,11 +11,13 @@ import { toast } from "sonner";
 import { Copy, Link2, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const APP_URL = typeof window !== "undefined" ? window.location.origin : "";
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
 export default function AffiliatesPage() {
+  const { t } = useTranslation("affiliates");
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
@@ -40,46 +42,46 @@ export default function AffiliatesPage() {
     onSuccess: (d) => {
       if (d.error) { toast.error(d.error); return; }
       qc.invalidateQueries({ queryKey: ["affiliates"] });
-      toast.success("Affiliate created");
+      toast.success(t("created"));
       setOpen(false); setUserId(""); setRate("0");
     },
-    onError: () => toast.error("Failed to create affiliate"),
+    onError: () => toast.error(t("create_failed")),
   });
 
   const copyLink = (code: string) => {
     navigator.clipboard.writeText(`${APP_URL}/register?ref=${code}`);
-    toast.success("Link copied to clipboard");
+    toast.success(t("link_copied_clip"));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Affiliate System</h1>
-          <p className="text-sm text-gray-500">Manage affiliate links and commissions</p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{t("subtitle")}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="me-2 h-4 w-4" />New Affiliate</Button>
+            <Button><Plus className="me-2 h-4 w-4" />{t("new")}</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Create Affiliate Account</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{t("create_title")}</DialogTitle></DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-1">
-                <Label>Staff Member</Label>
+                <Label>{t("staff_member")}</Label>
                 <select
                   className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                 >
-                  <option value="">Select user...</option>
+                  <option value="">{t("select_user")}</option>
                   {users.map((u: any) => (
                     <option key={u.id} value={u.id}>{u.name} — {u.email}</option>
                   ))}
                 </select>
               </div>
               <div className="space-y-1">
-                <Label>Commission Rate (%)</Label>
+                <Label>{t("commission_rate")}</Label>
                 <Input type="number" min="0" max="100" step="0.5" value={rate} onChange={(e) => setRate(e.target.value)} />
               </div>
               <Button className="w-full" disabled={!userId || createMut.isPending} onClick={() => createMut.mutate({ userId, commissionRate: Number(rate) })}>
@@ -91,26 +93,26 @@ export default function AffiliatesPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Total Affiliates</p><p className="text-2xl font-bold">{affiliates.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Total Referrals</p><p className="text-2xl font-bold">{totalReferrals}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Paid</p><p className="text-2xl font-bold text-green-600">{totalPaid}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">Commissions Owed</p><p className="text-2xl font-bold text-amber-600">{formatDA(totalBalance)}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("total_affiliates")}</p><p className="text-2xl font-bold">{affiliates.length}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("total_referrals")}</p><p className="text-2xl font-bold">{totalReferrals}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("common:ui.paid")}</p><p className="text-2xl font-bold text-green-600">{totalPaid}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-gray-500">{t("commissions_owed")}</p><p className="text-2xl font-bold text-amber-600">{formatDA(totalBalance)}</p></CardContent></Card>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2"><Link2 className="h-5 w-5" />Affiliates</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Link2 className="h-5 w-5" />{t("affiliates")}</CardTitle></CardHeader>
         <CardContent>
-          {isLoading ? <p className="text-center text-sm text-gray-400 py-6">Loading...</p> : (
+          {isLoading ? <p className="text-center text-sm text-gray-400 py-6">{t("common:ui.loading")}</p> : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead><tr className="border-b text-gray-500">
-                  <th className="text-start py-2 pe-4">Name</th>
-                  <th className="text-start py-2 pe-4">Code</th>
-                  <th className="text-end py-2 pe-4">Referrals</th>
-                  <th className="text-end py-2 pe-4">Paid/Unpaid</th>
-                  <th className="text-end py-2 pe-4">Balance</th>
-                  <th className="text-end py-2 pe-4">Rate</th>
-                  <th className="text-end py-2">Actions</th>
+                  <th className="text-start py-2 pe-4">{t("common:ui.name")}</th>
+                  <th className="text-start py-2 pe-4">{t("code")}</th>
+                  <th className="text-end py-2 pe-4">{t("referrals")}</th>
+                  <th className="text-end py-2 pe-4">{t("paid_unpaid")}</th>
+                  <th className="text-end py-2 pe-4">{t("balance")}</th>
+                  <th className="text-end py-2 pe-4">{t("rate")}</th>
+                  <th className="text-end py-2">{t("common:ui.actions")}</th>
                 </tr></thead>
                 <tbody>
                   {affiliates.map((a: any) => (
@@ -135,14 +137,14 @@ export default function AffiliatesPage() {
                       <td className="py-3 pe-4 text-end">{Number(a.commissionRate).toFixed(1)}%</td>
                       <td className="py-3 text-end">
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/dashboard/affiliates/${a.id}`}>View</Link>
+                          <Link href={`/dashboard/affiliates/${a.id}`}>{t("common:ui.view")}</Link>
                         </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {affiliates.length === 0 && <p className="py-8 text-center text-sm text-gray-400">No affiliates yet.</p>}
+              {affiliates.length === 0 && <p className="py-8 text-center text-sm text-gray-400">{t("empty")}</p>}
             </div>
           )}
         </CardContent>

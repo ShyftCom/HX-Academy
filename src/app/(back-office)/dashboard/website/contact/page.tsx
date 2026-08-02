@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface LeadStatus { id: string; name: string }
 interface ContactLead {
@@ -18,6 +19,7 @@ function parseExtra(raw: string | null): Record<string, unknown> {
 }
 
 export default function ContactSubmissionsPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -37,12 +39,12 @@ export default function ContactSubmissionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Contact Submissions" description="Messages submitted from the public Contact Us page." />
+      <PageHeader title={t("contact.title")} description={t("contact.subtitle")} />
 
       {isLoading ? (
         <div className="py-12 text-center text-gray-500"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>
       ) : leads.length === 0 ? (
-        <EmptyState icon={Mail} title="No messages yet" description="Messages submitted from the public Contact page will appear here." />
+        <EmptyState icon={Mail} title={t("contact.empty")} description={t("contact.empty_body")} />
       ) : (
         <div className="space-y-2">
           {leads.map((lead) => {
@@ -67,9 +69,9 @@ export default function ContactSubmissionsPage() {
                 </button>
                 {expanded && (
                   <div className="space-y-2 border-t border-gray-100 px-4 py-4 text-sm dark:border-gray-800">
-                    <div><span className="text-gray-400">Phone:</span> {lead.phone ?? "—"}</div>
-                    <div><span className="text-gray-400">Enquiry type:</span> {lead.categoryInterest ?? "—"}</div>
-                    <div><span className="text-gray-400">Message:</span> {lead.notes}</div>
+                    <div><span className="text-gray-400">{t("contact.phone")}</span> {lead.phone ?? "—"}</div>
+                    <div><span className="text-gray-400">{t("contact.enquiry")}</span> {lead.categoryInterest ?? "—"}</div>
+                    <div><span className="text-gray-400">{t("contact.message")}</span> {lead.notes}</div>
                     <div className="text-xs text-gray-400">Marketing consent: {extra.marketingConsent ? "Yes" : "No"}</div>
                   </div>
                 )}

@@ -17,10 +17,12 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDate } from "@/lib/utils";
 import { Plus, Edit, Trash2, FileText, ChevronDown, ChevronUp, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const QTYPES = ["text", "number", "select", "radio", "checkbox", "textarea"];
 
 export default function SurveysPage() {
+  const { t } = useTranslation("surveys");
   const qc = useQueryClient();
   const [surveyModal, setSurveyModal] = useState(false);
   const [editSurvey, setEditSurvey] = useState<any>(null);
@@ -42,14 +44,14 @@ export default function SurveysPage() {
       const res = await fetch(url, { method: editSurvey ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(surveyForm) });
       if (!res.ok) throw new Error("Failed"); return res.json();
     },
-    onSuccess: () => { toast.success("Survey saved"); qc.invalidateQueries({ queryKey: ["surveys"] }); setSurveyModal(false); setEditSurvey(null); },
-    onError: () => toast.error("Save failed"),
+    onSuccess: () => { toast.success(t("saved")); qc.invalidateQueries({ queryKey: ["surveys"] }); setSurveyModal(false); setEditSurvey(null); },
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteSurveyMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/surveys/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["surveys"] }); setDeleteSurveyId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["surveys"] }); setDeleteSurveyId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const saveQMutation = useMutation({
@@ -62,14 +64,14 @@ export default function SurveysPage() {
       const res = await fetch(`/api/surveys/${selectedSurvey.id}/questions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error("Failed"); return res.json();
     },
-    onSuccess: () => { toast.success("Question saved"); qc.invalidateQueries({ queryKey: ["survey", selectedSurvey?.id] }); setQModal(false); setEditQ(null); setQForm({ question: "", questionType: "text", isRequired: false, options: [] }); },
-    onError: () => toast.error("Save failed"),
+    onSuccess: () => { toast.success(t("question_saved")); qc.invalidateQueries({ queryKey: ["survey", selectedSurvey?.id] }); setQModal(false); setEditQ(null); setQForm({ question: "", questionType: "text", isRequired: false, options: [] }); },
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteQMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/surveys/questions/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Question deleted"); qc.invalidateQueries({ queryKey: ["survey", selectedSurvey?.id] }); setDeleteQId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("question_deleted")); qc.invalidateQueries({ queryKey: ["survey", selectedSurvey?.id] }); setDeleteQId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const openAddSurvey = () => { setEditSurvey(null); setSurveyForm({ title: "", description: "", isActive: true }); setSurveyModal(true); };
@@ -81,12 +83,12 @@ export default function SurveysPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Survey Builder" description="Build surveys for lead registration">
-        <Button onClick={openAddSurvey}><Plus className="me-2 h-4 w-4" />New Survey</Button>
+      <PageHeader title={t("title")} description={t("subtitle")}>
+        <Button onClick={openAddSurvey}><Plus className="me-2 h-4 w-4" />{t("new")}</Button>
       </PageHeader>
 
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
-        : surveys?.length === 0 ? <EmptyState icon={FileText} title="No surveys" description="Create a survey for your registration form" action={{ label: "New Survey", onClick: openAddSurvey }} />
+        : surveys?.length === 0 ? <EmptyState icon={FileText} title={t("empty")} description={t("empty_body")} action={{ label: t("new"), onClick: openAddSurvey }} />
         : (
           <div className="space-y-3">
             {surveys?.map((s: any) => (
@@ -112,7 +114,7 @@ export default function SurveysPage() {
                     <div className="mt-4 border-t pt-4 dark:border-gray-700">
                       <div className="flex justify-between mb-3">
                         <p className="text-sm font-medium">Questions ({surveyDetail?.questions?.length ?? 0})</p>
-                        <Button size="sm" onClick={openAddQ}><Plus className="me-1.5 h-3.5 w-3.5" />Add Question</Button>
+                        <Button size="sm" onClick={openAddQ}><Plus className="me-1.5 h-3.5 w-3.5" />{t("add_question")}</Button>
                       </div>
                       <div className="space-y-2">
                         {surveyDetail?.questions?.map((q: any, i: number) => (
@@ -121,7 +123,7 @@ export default function SurveysPage() {
                               <p className="text-sm font-medium">{i + 1}. {q.question}</p>
                               <div className="flex gap-2 mt-1">
                                 <Badge variant="outline" className="text-[10px]">{q.questionType}</Badge>
-                                {q.isRequired && <Badge variant="destructive" className="text-[10px]">Required</Badge>}
+                                {q.isRequired && <Badge variant="destructive" className="text-[10px]">{t("required")}</Badge>}
                               </div>
                             </div>
                             <div className="flex gap-1">
@@ -145,12 +147,12 @@ export default function SurveysPage() {
         <DialogContent size="sm">
           <DialogHeader><DialogTitle>{editSurvey ? "Edit Survey" : "New Survey"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Title *" value={surveyForm.title} onChange={(e) => setSurveyForm({ ...surveyForm, title: e.target.value })} placeholder="e.g. Registration Survey" />
-            <Textarea label="Description" value={surveyForm.description} onChange={(e) => setSurveyForm({ ...surveyForm, description: e.target.value })} placeholder="Optional description" rows={2} />
-            <div className="flex items-center gap-3"><Switch checked={surveyForm.isActive} onCheckedChange={(v) => setSurveyForm({ ...surveyForm, isActive: v })} /><span className="text-sm">Active</span></div>
+            <Input label={t("title_req")} value={surveyForm.title} onChange={(e) => setSurveyForm({ ...surveyForm, title: e.target.value })} placeholder={t("title_ph")} />
+            <Textarea label={t("common:ui.description")} value={surveyForm.description} onChange={(e) => setSurveyForm({ ...surveyForm, description: e.target.value })} placeholder={t("description_ph")} rows={2} />
+            <div className="flex items-center gap-3"><Switch checked={surveyForm.isActive} onCheckedChange={(v) => setSurveyForm({ ...surveyForm, isActive: v })} /><span className="text-sm">{t("common:ui.active")}</span></div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSurveyModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setSurveyModal(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveSurveyMutation.mutate()} loading={saveSurveyMutation.isPending} disabled={!surveyForm.title}>{editSurvey ? "Save" : "Create"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -161,9 +163,9 @@ export default function SurveysPage() {
         <DialogContent size="md">
           <DialogHeader><DialogTitle>{editQ ? "Edit Question" : "Add Question"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Question *" value={qForm.question} onChange={(e) => setQForm({ ...qForm, question: e.target.value })} placeholder="Enter your question" />
+            <Input label={t("question_req")} value={qForm.question} onChange={(e) => setQForm({ ...qForm, question: e.target.value })} placeholder={t("question_ph")} />
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("type")}</label>
               <Select value={qForm.questionType} onValueChange={(v) => setQForm({ ...qForm, questionType: v, options: [] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{QTYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
@@ -171,7 +173,7 @@ export default function SurveysPage() {
             </div>
             {needsOptions && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Options</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("options")}</label>
                 {qForm.options.map((opt, i) => (
                   <div key={i} className="flex items-center gap-2 mb-1">
                     <span className="flex-1 rounded border border-gray-200 px-2 py-1 text-sm dark:border-gray-700">{opt}</span>
@@ -179,22 +181,22 @@ export default function SurveysPage() {
                   </div>
                 ))}
                 <div className="flex gap-2 mt-1">
-                  <Input value={newOption} onChange={(e) => setNewOption(e.target.value)} placeholder="Add option" />
-                  <Button type="button" variant="outline" size="sm" onClick={() => { if (newOption.trim()) { setQForm({ ...qForm, options: [...qForm.options, newOption.trim()] }); setNewOption(""); } }}>Add</Button>
+                  <Input value={newOption} onChange={(e) => setNewOption(e.target.value)} placeholder={t("add_option")} />
+                  <Button type="button" variant="outline" size="sm" onClick={() => { if (newOption.trim()) { setQForm({ ...qForm, options: [...qForm.options, newOption.trim()] }); setNewOption(""); } }}>{t("common:ui.add")}</Button>
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-3"><Checkbox checked={qForm.isRequired} onCheckedChange={(v) => setQForm({ ...qForm, isRequired: !!v })} /><span className="text-sm">Required</span></div>
+            <div className="flex items-center gap-3"><Checkbox checked={qForm.isRequired} onCheckedChange={(v) => setQForm({ ...qForm, isRequired: !!v })} /><span className="text-sm">{t("required")}</span></div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setQModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setQModal(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveQMutation.mutate()} loading={saveQMutation.isPending} disabled={!qForm.question}>{editQ ? "Save" : "Add"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteSurveyId} onOpenChange={(o) => !o && setDeleteSurveyId(null)} title="Delete Survey" description="All questions and answers will be deleted." confirmLabel="Delete" onConfirm={() => deleteSurveyId && deleteSurveyMutation.mutate(deleteSurveyId)} loading={deleteSurveyMutation.isPending} />
-      <ConfirmDialog open={!!deleteQId} onOpenChange={(o) => !o && setDeleteQId(null)} title="Delete Question" description="This question and all its answers will be deleted." confirmLabel="Delete" onConfirm={() => deleteQId && deleteQMutation.mutate(deleteQId)} loading={deleteQMutation.isPending} />
+      <ConfirmDialog open={!!deleteSurveyId} onOpenChange={(o) => !o && setDeleteSurveyId(null)} title={t("delete_survey")} description={t("delete_survey_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteSurveyId && deleteSurveyMutation.mutate(deleteSurveyId)} loading={deleteSurveyMutation.isPending} />
+      <ConfirmDialog open={!!deleteQId} onOpenChange={(o) => !o && setDeleteQId(null)} title={t("delete_question")} description={t("delete_question_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteQId && deleteQMutation.mutate(deleteQId)} loading={deleteQMutation.isPending} />
     </div>
   );
 }

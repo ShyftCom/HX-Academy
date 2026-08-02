@@ -1,0 +1,50 @@
+{
+  "title": "Tickets",
+  "subtitle": "Tickets d'assistance internes et suivi des tâches entre collaborateurs.",
+  "create": "Nouveau ticket",
+  "search": "Rechercher des tickets…",
+  "empty": "Aucun ticket",
+  "empty_body": "Créez un ticket pour suivre une tâche ou demander de l'aide.",
+  "form": {
+    "title": "Titre *",
+    "title_ph": "Brève description du problème ou de la tâche",
+    "description": "Description *",
+    "description_ph": "Donnez tous les détails…",
+    "priority": "Priorité",
+    "assign": "Assigner à",
+    "assign_ph": "Choisir une personne…"
+  },
+  "unassigned": "Non assigné",
+  "filters": {
+    "all_priority": "Toutes les priorités"
+  },
+  "status": {
+    "open": "Ouvert",
+    "in_progress": "En cours",
+    "resolved": "Résolu",
+    "closed": "Fermé"
+  },
+  "priority": {
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "urgent": "Urgente"
+  },
+  "toast": {
+    "created": "Ticket créé",
+    "create_failed": "Échec de la création du ticket"
+  },
+  "detail": {
+    "not_found": "Ticket introuvable",
+    "back": "Retour aux tickets",
+    "created_by": "Créé par",
+    "assigned_to": "Assigné à",
+    "manage": "Gérer le ticket",
+    "no_comments": "Aucun commentaire. Soyez le premier à répondre.",
+    "submit_hint": "Ctrl+Entrée pour envoyer",
+    "comment_ph": "Écrire un commentaire…",
+    "delete": "Supprimer le ticket",
+    "delete_body": "Le ticket et tous ses commentaires seront définitivement supprimés.",
+    "deleted": "Ticket supprimé"
+  }
+}

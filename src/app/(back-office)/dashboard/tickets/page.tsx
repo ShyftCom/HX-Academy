@@ -17,6 +17,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
@@ -41,6 +42,7 @@ interface Ticket {
 }
 
 export default function TicketsPage() {
+  const { t } = useTranslation("tickets");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -69,12 +71,12 @@ export default function TicketsPage() {
       fetch("/api/tickets", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json()),
     onSuccess: (d) => {
       if (d.error) { toast.error(d.error); return; }
-      toast.success("Ticket created");
+      toast.success(t("toast.created"));
       qc.invalidateQueries({ queryKey: ["tickets"] });
       setNewOpen(false);
       setForm({ title: "", description: "", priority: "medium", assignedToId: "" });
     },
-    onError: () => toast.error("Failed to create ticket"),
+    onError: () => toast.error(t("toast.create_failed")),
   });
 
   const tickets: Ticket[] = data?.data ?? [];
@@ -85,38 +87,38 @@ export default function TicketsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Tickets" description="Internal support tickets and task tracking between team members.">
-        <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Ticket</Button>
+      <PageHeader title={t("title")} description={t("subtitle")}>
+        <Button onClick={() => setNewOpen(true)}><Plus className="w-4 h-4 mr-1" /> {t("create")}</Button>
       </PageHeader>
 
       <div className="flex gap-3 flex-wrap">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search tickets..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("search")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("common:ui.status")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="all">{t("common:ui.all_status")}</SelectItem>
+            <SelectItem value="open">{t("status.open")}</SelectItem>
+            <SelectItem value="in_progress">{t("status.in_progress")}</SelectItem>
+            <SelectItem value="resolved">{t("status.resolved")}</SelectItem>
+            <SelectItem value="closed">{t("status.closed")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={(v) => { setPriorityFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("form.priority")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
+            <SelectItem value="all">{t("filters.all_priority")}</SelectItem>
+            <SelectItem value="low">{t("priority.low")}</SelectItem>
+            <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+            <SelectItem value="high">{t("priority.high")}</SelectItem>
+            <SelectItem value="urgent">{t("priority.urgent")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : filteredTickets.length === 0 ? (
-        <EmptyState icon={TicketIcon} title="No tickets" description="Create a ticket to track a task or request help." action={{ label: "New Ticket", onClick: () => setNewOpen(true) }} />
+        <EmptyState icon={TicketIcon} title={t("empty")} description={t("empty_body")} action={{ label: t("create"), onClick: () => setNewOpen(true) }} />
       ) : (
         <>
           <div className="space-y-2">
@@ -150,35 +152,35 @@ export default function TicketsPage() {
 
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>New Ticket</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("create")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div>
-              <Label>Title *</Label>
-              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="Brief description of the issue or task" className="mt-1" />
+              <Label>{t("form.title")}</Label>
+              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder={t("form.title_ph")} className="mt-1" />
             </div>
             <div>
-              <Label>Description *</Label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Provide full details..." rows={4} className="mt-1" />
+              <Label>{t("form.description")}</Label>
+              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder={t("form.description_ph")} rows={4} className="mt-1" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Priority</Label>
+                <Label>{t("form.priority")}</Label>
                 <Select value={form.priority} onValueChange={(v) => setForm((f) => ({ ...f, priority: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="low">{t("priority.low")}</SelectItem>
+                    <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+                    <SelectItem value="high">{t("priority.high")}</SelectItem>
+                    <SelectItem value="urgent">{t("priority.urgent")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Assign To</Label>
+                <Label>{t("form.assign")}</Label>
                 <Select value={form.assignedToId || "unassigned"} onValueChange={(v) => setForm((f) => ({ ...f, assignedToId: v === "unassigned" ? "" : v }))}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select person..." /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder={t("form.assign_ph")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    <SelectItem value="unassigned">{t("unassigned")}</SelectItem>
                     {(Array.isArray(staff) ? staff : []).map((u: { id: string; name: string | null; email: string }) => (
                       <SelectItem key={u.id} value={u.id}>{u.name ?? u.email}</SelectItem>
                     ))}
@@ -188,7 +190,7 @@ export default function TicketsPage() {
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNewOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setNewOpen(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => createTicket(form)} disabled={creating}>{creating ? "Creating..." : "Create Ticket"}</Button>
           </DialogFooter>
         </DialogContent>

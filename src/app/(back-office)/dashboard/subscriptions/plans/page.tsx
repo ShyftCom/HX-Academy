@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, Edit, Trash2, CreditCard } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const COLORS = ["#3B82F6","#10B981","#8B5CF6","#F59E0B","#EF4444","#EC4899","#14B8A6","#F97316"];
 const schema = z.object({
@@ -33,6 +34,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function PlansPage() {
+  const { t } = useTranslation("subscriptions");
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<any>(null);
@@ -57,13 +59,13 @@ export default function PlansPage() {
       return res.json();
     },
     onSuccess: () => { toast.success(editPlan ? "Plan updated" : "Plan created"); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setModalOpen(false); reset(); setEditPlan(null); },
-    onError: () => toast.error("Save failed"),
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/subscriptions/plans/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Plan deleted"); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("plans.deleted")); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const openAdd = () => {
@@ -82,12 +84,12 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Subscription Plans" description="Manage academy membership plans">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Plan</Button>
+      <PageHeader title={t("plans.title")} description={t("plans.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("plans.add")}</Button>
       </PageHeader>
 
       {plans?.length === 0 ? (
-        <EmptyState icon={CreditCard} title="No plans yet" description="Create your first subscription plan to get started" action={{ label: "Add Plan", onClick: openAdd }} />
+        <EmptyState icon={CreditCard} title={t("plans.empty")} description={t("plans.empty_body")} action={{ label: t("plans.add"), onClick: openAdd }} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plans?.map((plan: any) => (
@@ -106,7 +108,7 @@ export default function PlansPage() {
                   <p className="text-sm text-gray-500">{plan.duration} {plan.durationType}{plan.duration > 1 ? "s" : ""}</p>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="me-1.5 h-3.5 w-3.5" />Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>
                   <Button variant="outline" size="sm" onClick={() => setDeleteId(plan.id)} className="text-red-600 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </CardContent>
@@ -120,21 +122,21 @@ export default function PlansPage() {
           <DialogHeader><DialogTitle>{editPlan ? "Edit Plan" : "New Subscription Plan"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="space-y-4">
-              <Input {...register("name")} label="Plan Name *" placeholder="e.g. Monthly Plan" error={errors.name?.message} />
-              <Textarea {...register("description")} label="Description" placeholder="What's included..." rows={2} />
+              <Input {...register("name")} label={t("plans.name")} placeholder={t("plans.name_ph")} error={errors.name?.message} />
+              <Textarea {...register("description")} label={t("common:ui.description")} placeholder={t("plans.description_ph")} rows={2} />
               <div className="grid grid-cols-2 gap-3">
-                <Input {...register("duration")} label="Duration *" type="number" min="1" placeholder="1" error={errors.duration?.message} />
+                <Input {...register("duration")} label={t("plans.duration")} type="number" min="1" placeholder="1" error={errors.duration?.message} />
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Unit</label>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("plans.unit")}</label>
                   <Select onValueChange={(v) => setValue("durationType", v)} defaultValue={editPlan?.durationType ?? "month"}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="month">Month(s)</SelectItem><SelectItem value="year">Year(s)</SelectItem></SelectContent>
+                    <SelectContent><SelectItem value="month">{t("plans.months")}</SelectItem><SelectItem value="year">{t("plans.years")}</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
-              <Input {...register("price")} label="Price (DA) *" type="number" min="0" placeholder="5000" error={errors.price?.message} />
+              <Input {...register("price")} label={t("plans.price")} type="number" min="0" placeholder="5000" error={errors.price?.message} />
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Color</label>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("plans.color")}</label>
                 <div className="flex gap-2">
                   {COLORS.map((c) => (
                     <button key={c} type="button" onClick={() => setSelectedColor(c)} className="h-7 w-7 rounded-full ring-offset-2 transition-all" style={{ backgroundColor: c, outline: selectedColor === c ? `3px solid ${c}` : "none", outlineOffset: "2px" }} />
@@ -143,18 +145,18 @@ export default function PlansPage() {
               </div>
               <div className="flex items-center gap-3">
                 <Switch checked={watch("isActive")} onCheckedChange={(v) => setValue("isActive", v)} />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{t("common:ui.active")}</span>
               </div>
             </DialogBody>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
               <Button type="submit" loading={saveMutation.isPending}>{editPlan ? "Save Changes" : "Create Plan"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Plan" description="Are you sure you want to delete this plan? Existing subscriptions will not be affected." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("plans.delete_title")} description={t("plans.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

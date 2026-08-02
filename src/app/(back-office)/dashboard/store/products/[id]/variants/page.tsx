@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, Zap, Save, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Attribute = { id: string; groupId: string; value: string; colorHex?: string | null };
 type AttributeGroup = { id: string; name: string; attributes: Attribute[] };
@@ -33,6 +34,7 @@ function cartesian(arrays: string[][]): string[][] {
 }
 
 export default function VariantsPage() {
+  const { t } = useTranslation("store");
   const { id: productId } = useParams<{ id: string }>();
   const qc = useQueryClient();
 
@@ -60,23 +62,23 @@ export default function VariantsPage() {
         body: JSON.stringify({ name }),
       }).then((r) => r.json()),
     onSuccess: () => {
-      toast.success("Group created");
+      toast.success(t("variants.group_created"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });
       setNewGroupName("");
       setAddingGroup(false);
     },
-    onError: () => toast.error("Failed to create group"),
+    onError: () => toast.error(t("variants.group_create_failed")),
   });
 
   const deleteGroupMutation = useMutation({
     mutationFn: (groupId: string) =>
       fetch(`/api/attribute-groups/${groupId}`, { method: "DELETE" }),
     onSuccess: () => {
-      toast.success("Group deleted");
+      toast.success(t("variants.group_deleted"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });
       setGenerated(false);
     },
-    onError: () => toast.error("Failed to delete group"),
+    onError: () => toast.error(t("variants.group_delete_failed")),
   });
 
   const addAttributeMutation = useMutation({
@@ -87,23 +89,23 @@ export default function VariantsPage() {
         body: JSON.stringify({ value }),
       }).then((r) => r.json()),
     onSuccess: (_, { groupId }) => {
-      toast.success("Value added");
+      toast.success(t("variants.value_added"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });
       setNewValues((prev) => ({ ...prev, [groupId]: "" }));
       setGenerated(false);
     },
-    onError: () => toast.error("Failed to add value"),
+    onError: () => toast.error(t("variants.value_add_failed")),
   });
 
   const deleteAttributeMutation = useMutation({
     mutationFn: (attrId: string) =>
       fetch(`/api/attributes/${attrId}`, { method: "DELETE" }),
     onSuccess: () => {
-      toast.success("Value deleted");
+      toast.success(t("variants.value_deleted"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });
       setGenerated(false);
     },
-    onError: () => toast.error("Failed to delete value"),
+    onError: () => toast.error(t("variants.value_delete_failed")),
   });
 
   const saveVariantsMutation = useMutation({
@@ -122,16 +124,16 @@ export default function VariantsPage() {
         }),
       }).then((r) => r.json()),
     onSuccess: () => {
-      toast.success("Variants saved");
+      toast.success(t("variants.saved"));
       qc.invalidateQueries({ queryKey: ["variants", productId] });
     },
-    onError: () => toast.error("Failed to save variants"),
+    onError: () => toast.error(t("variants.save_failed")),
   });
 
   const generateVariants = useCallback(() => {
     const groupsWithAttrs = groups.filter((g) => g.attributes.length > 0);
     if (groupsWithAttrs.length === 0) {
-      toast.error("Add at least one attribute group with values");
+      toast.error(t("variants.need_group"));
       return;
     }
 
@@ -163,13 +165,13 @@ export default function VariantsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Manage Variants"
-        description="Define attribute groups, then generate and configure product variants"
+        title={t("variants.title")}
+        description={t("variants.subtitle")}
       />
 
       <Card className="p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Attribute Groups</h2>
+          <h2 className="text-base font-semibold">{t("variants.groups")}</h2>
           {!addingGroup && (
             <Button size="sm" variant="outline" onClick={() => setAddingGroup(true)}>
               <Plus className="me-1.5 h-4 w-4" />
@@ -183,7 +185,7 @@ export default function VariantsPage() {
             <Input
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="e.g. Size, Color"
+              placeholder={t("variants.group_ph")}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && newGroupName.trim()) {
                   createGroupMutation.mutate(newGroupName.trim());
@@ -195,18 +197,18 @@ export default function VariantsPage() {
               onClick={() => newGroupName.trim() && createGroupMutation.mutate(newGroupName.trim())}
               loading={createGroupMutation.isPending}
             >
-              Save
+              {t("common:actions.save")}
             </Button>
             <Button variant="outline" onClick={() => { setAddingGroup(false); setNewGroupName(""); }}>
-              Cancel
+              {t("common:ui.cancel")}
             </Button>
           </div>
         )}
 
-        {groupsLoading && <p className="text-sm text-gray-400">Loading...</p>}
+        {groupsLoading && <p className="text-sm text-gray-400">{t("common:ui.loading")}</p>}
 
         {groups.length === 0 && !groupsLoading && (
-          <p className="text-sm text-gray-400">No attribute groups yet. Add one above.</p>
+          <p className="text-sm text-gray-400">{t("variants.no_groups")}</p>
         )}
 
         <div className="space-y-4">
@@ -246,7 +248,7 @@ export default function VariantsPage() {
                 <Input
                   value={newValues[group.id] ?? ""}
                   onChange={(e) => setNewValues((prev) => ({ ...prev, [group.id]: e.target.value }))}
-                  placeholder="Add value..."
+                  placeholder={t("variants.add_value")}
                   className="max-w-xs text-sm"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && (newValues[group.id] ?? "").trim()) {
@@ -283,7 +285,7 @@ export default function VariantsPage() {
 
       {generated && variantRows.length > 0 && (
         <Card className="p-5 space-y-4">
-          <h2 className="text-base font-semibold">Variant Combinations</h2>
+          <h2 className="text-base font-semibold">{t("variants.combinations")}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -291,10 +293,10 @@ export default function VariantsPage() {
                   {groupCols.map((g) => (
                     <th key={g.id} className="pb-2 pe-4 font-medium text-gray-500">{g.name}</th>
                   ))}
-                  <th className="pb-2 pe-4 font-medium text-gray-500">SKU</th>
-                  <th className="pb-2 pe-4 font-medium text-gray-500">Price (DA)</th>
-                  <th className="pb-2 pe-4 font-medium text-gray-500">Stock</th>
-                  <th className="pb-2 font-medium text-gray-500">Active</th>
+                  <th className="pb-2 pe-4 font-medium text-gray-500">{t("common:ui.sku")}</th>
+                  <th className="pb-2 pe-4 font-medium text-gray-500">{t("variants.price_da")}</th>
+                  <th className="pb-2 pe-4 font-medium text-gray-500">{t("variants.stock")}</th>
+                  <th className="pb-2 font-medium text-gray-500">{t("common:ui.active")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -309,7 +311,7 @@ export default function VariantsPage() {
                       <Input
                         value={row.sku}
                         onChange={(e) => updateRow(i, "sku", e.target.value)}
-                        placeholder="SKU"
+                        placeholder={t("common:ui.sku")}
                         className="w-28"
                       />
                     </td>

@@ -18,7 +18,12 @@
   "actions": {
     "add_player": "Ajouter un joueur",
     "edit_player": "Modifier le joueur",
-    "view_profile": "Voir le profil"
+    "view_profile": "Voir le profil",
+    "add": "Ajouter un joueur",
+    "view_details": "Voir les détails",
+    "suspend": "Suspendre",
+    "activate": "Activer",
+    "reset_password": "Réinitialiser le mot de passe"
   },
   "form": {
     "full_name": "Nom complet",
@@ -34,7 +39,22 @@
     "position": "Poste",
     "emergency_contact": "Contact d'urgence",
     "medical_notes": "Notes médicales",
-    "notes": "Notes"
+    "notes": "Notes",
+    "full_name_req": "Nom complet *",
+    "full_name_ph": "Nom et prénom",
+    "email_req": "Email *",
+    "email_ph": "joueur@exemple.com",
+    "select_gender": "Choisir le genre",
+    "select_category": "Choisir la catégorie",
+    "select_position": "Choisir le poste",
+    "team_ph": "Équipe A",
+    "parent_name_ph": "Nom complet du parent",
+    "address_ph": "Ville, région",
+    "emergency_ph": "Nom et téléphone",
+    "medical_ph": "Conditions médicales éventuelles…",
+    "notes_ph": "Notes complémentaires…",
+    "male": "Masculin",
+    "female": "Féminin"
   },
   "profile": {
     "title": "Profil du joueur",
@@ -52,5 +72,37 @@
   "empty": {
     "no_players": "Aucun joueur",
     "no_players_subtitle": "Convertissez des leads pour ajouter des joueurs"
+  },
+  "page": {
+    "title": "Joueurs",
+    "subtitle": "Gérer tous les joueurs de l'académie",
+    "search": "Rechercher des joueurs…",
+    "empty": "Aucun joueur trouvé"
+  },
+  "tabs": {
+    "profile": "Profil",
+    "subscriptions": "Abonnements",
+    "payments": "Paiements",
+    "orders": "Commandes",
+    "no_subscriptions": "Aucun abonnement",
+    "no_payments": "Aucun paiement",
+    "no_orders": "Aucune commande"
+  },
+  "no_plan": "Aucune formule",
+  "delete": {
+    "title": "Supprimer le joueur",
+    "body": "Le joueur et son compte seront définitivement supprimés. Cette action est irréversible."
+  },
+  "password": {
+    "new": "Nouveau mot de passe",
+    "min": "6 caractères minimum",
+    "confirm": "Confirmer le mot de passe",
+    "repeat": "Répétez le nouveau mot de passe"
+  },
+  "toast": {
+    "status_updated": "Statut du joueur mis à jour",
+    "deleted": "Joueur supprimé",
+    "password_updated": "Mot de passe mis à jour",
+    "update_failed": "Échec de la mise à jour"
   }
 }

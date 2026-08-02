@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
+import { useTranslation } from "react-i18next";
 
 type DropdownItem = { label: string; labelFr: string; labelAr: string; url: string; icon: string; description: string; descriptionFr: string; descriptionAr: string; position: number; isActive: boolean };
 type NavItem = { label: string; labelFr: string; labelAr: string; url: string; hasDropdown: boolean; position: number; isActive: boolean; dropdownItems: DropdownItem[] };
@@ -30,6 +31,7 @@ const blankDropdownItem = (): DropdownItem => ({ label: "", labelFr: "", labelAr
 const blankNavItem = (): NavItem => ({ label: "", labelFr: "", labelAr: "", url: "/", hasDropdown: false, position: 0, isActive: true, dropdownItems: [] });
 
 export default function HeaderEditorPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [lang, setLang] = useState("en");
   const [expandedNavItem, setExpandedNavItem] = useState<number | null>(null);
@@ -70,8 +72,8 @@ export default function HeaderEditorPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ branding, navItems, cta, options }),
       }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Header saved!"); qc.invalidateQueries({ queryKey: ["header-config"] }); },
-    onError: () => toast.error("Failed to save"),
+    onSuccess: () => { toast.success(t("header.saved")); qc.invalidateQueries({ queryKey: ["header-config"] }); },
+    onError: () => toast.error(t("common:toast.save_failed_alt")),
   });
 
   const updateNavItem = useCallback((idx: number, patch: Partial<NavItem>) => {
@@ -85,17 +87,17 @@ export default function HeaderEditorPage() {
     }));
   }, []);
 
-  if (isLoading) return <div className="p-8 text-gray-500">Loading...</div>;
+  if (isLoading) return <div className="p-8 text-gray-500">{t("common:ui.loading")}</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      <PageHeader title="Header Editor" description="Customize your website navigation header." />
+      <PageHeader title={t("header.title")} description={t("header.subtitle")} />
 
       {/* Branding */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Branding</h2>
+        <h2 className="text-lg font-semibold">{t("header.branding")}</h2>
         <div>
-          <label className="text-sm font-medium block mb-1">Logo URL</label>
+          <label className="text-sm font-medium block mb-1">{t("header.logo_url")}</label>
           <Input value={branding.logoUrl} onChange={(e) => setBranding((p) => ({ ...p, logoUrl: e.target.value }))} placeholder="https://..." />
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -119,18 +121,18 @@ export default function HeaderEditorPage() {
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={branding.sticky} onCheckedChange={(v) => setBranding((p) => ({ ...p, sticky: v }))} />
-          <span className="text-sm">Sticky Header</span>
+          <span className="text-sm">{t("header.sticky")}</span>
         </div>
       </section>
 
       {/* Navigation Items */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Navigation Items</h2>
+          <h2 className="text-lg font-semibold">{t("header.nav_items")}</h2>
           <div className="flex items-center gap-2">
             <LangTabs lang={lang} setLang={setLang} />
             <Button size="sm" variant="outline" onClick={() => setNavItems((p) => [...p, blankNavItem()])}>
-              <Plus className="w-4 h-4 mr-1" /> Add Item
+              <Plus className="w-4 h-4 mr-1" /> {t("header.add_item")}
             </Button>
           </div>
         </div>
@@ -140,17 +142,17 @@ export default function HeaderEditorPage() {
               <button onClick={() => setExpandedNavItem(expandedNavItem === idx ? null : idx)} className="text-gray-500 hover:text-gray-700">
                 {expandedNavItem === idx ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
-              {lang === "en" && <Input value={item.label} onChange={(e) => updateNavItem(idx, { label: e.target.value })} placeholder="Label" className="flex-1 h-8 text-sm" />}
+              {lang === "en" && <Input value={item.label} onChange={(e) => updateNavItem(idx, { label: e.target.value })} placeholder={t("common:ui.label")} className="flex-1 h-8 text-sm" />}
               {lang === "fr" && <Input value={item.labelFr} onChange={(e) => updateNavItem(idx, { labelFr: e.target.value })} placeholder="Libellé" className="flex-1 h-8 text-sm" />}
               {lang === "ar" && <Input value={item.labelAr} onChange={(e) => updateNavItem(idx, { labelAr: e.target.value })} placeholder="التسمية" className="flex-1 h-8 text-sm" dir="rtl" />}
               <Input value={item.url ?? ""} onChange={(e) => updateNavItem(idx, { url: e.target.value })} placeholder="/url" className="w-36 h-8 text-sm" />
               <div className="flex items-center gap-1">
                 <Switch checked={item.isActive} onCheckedChange={(v) => updateNavItem(idx, { isActive: v })} />
-                <span className="text-xs text-gray-500">Active</span>
+                <span className="text-xs text-gray-500">{t("common:ui.active")}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Switch checked={item.hasDropdown} onCheckedChange={(v) => updateNavItem(idx, { hasDropdown: v })} />
-                <span className="text-xs text-gray-500">Dropdown</span>
+                <span className="text-xs text-gray-500">{t("header.dropdown")}</span>
               </div>
               <Button size="sm" variant="ghost" className="text-red-400 p-1" onClick={() => setNavItems((p) => p.filter((_, i) => i !== idx))}>
                 <Trash2 className="w-3 h-3" />
@@ -158,10 +160,10 @@ export default function HeaderEditorPage() {
             </div>
             {expandedNavItem === idx && item.hasDropdown && (
               <div className="p-4 space-y-2 border-t border-gray-100 dark:border-gray-600">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Dropdown Items</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("header.dropdown_items")}</p>
                 {item.dropdownItems.map((d, dIdx) => (
                   <div key={dIdx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center border border-gray-100 dark:border-gray-600 rounded p-2">
-                    {lang === "en" && <Input value={d.label} onChange={(e) => updateDropdownItem(idx, dIdx, { label: e.target.value })} placeholder="Label" className="h-8 text-sm" />}
+                    {lang === "en" && <Input value={d.label} onChange={(e) => updateDropdownItem(idx, dIdx, { label: e.target.value })} placeholder={t("common:ui.label")} className="h-8 text-sm" />}
                     {lang === "fr" && <Input value={d.labelFr} onChange={(e) => updateDropdownItem(idx, dIdx, { labelFr: e.target.value })} placeholder="Libellé" className="h-8 text-sm" />}
                     {lang === "ar" && <Input value={d.labelAr} onChange={(e) => updateDropdownItem(idx, dIdx, { labelAr: e.target.value })} placeholder="التسمية" className="h-8 text-sm" dir="rtl" />}
                     <Input value={d.url} onChange={(e) => updateDropdownItem(idx, dIdx, { url: e.target.value })} placeholder="/url" className="h-8 text-sm" />
@@ -169,13 +171,13 @@ export default function HeaderEditorPage() {
                     <Button size="sm" variant="ghost" className="text-red-400 p-1" onClick={() => updateNavItem(idx, { dropdownItems: item.dropdownItems.filter((_, j) => j !== dIdx) })}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
-                    {lang === "en" && <Input value={d.description} onChange={(e) => updateDropdownItem(idx, dIdx, { description: e.target.value })} placeholder="Description (optional)" className="col-span-4 h-8 text-sm" />}
+                    {lang === "en" && <Input value={d.description} onChange={(e) => updateDropdownItem(idx, dIdx, { description: e.target.value })} placeholder={t("common:ui.description_optional")} className="col-span-4 h-8 text-sm" />}
                     {lang === "fr" && <Input value={d.descriptionFr} onChange={(e) => updateDropdownItem(idx, dIdx, { descriptionFr: e.target.value })} placeholder="Description FR" className="col-span-4 h-8 text-sm" />}
                     {lang === "ar" && <Input value={d.descriptionAr} onChange={(e) => updateDropdownItem(idx, dIdx, { descriptionAr: e.target.value })} placeholder="الوصف" className="col-span-4 h-8 text-sm" dir="rtl" />}
                   </div>
                 ))}
                 <Button size="sm" variant="ghost" className="text-blue-500 text-xs" onClick={() => updateNavItem(idx, { dropdownItems: [...item.dropdownItems, blankDropdownItem()] })}>
-                  <Plus className="w-3 h-3 mr-1" /> Add Dropdown Item
+                  <Plus className="w-3 h-3 mr-1" /> {t("header.add_dropdown")}
                 </Button>
               </div>
             )}
@@ -185,28 +187,28 @@ export default function HeaderEditorPage() {
 
       {/* CTA Button */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-        <h2 className="text-lg font-semibold">CTA Button</h2>
+        <h2 className="text-lg font-semibold">{t("header.cta")}</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium block mb-1">Label</label>
+            <label className="text-sm font-medium block mb-1">{t("common:ui.label")}</label>
             <LangTabs lang={lang} setLang={setLang} />
             {lang === "en" && <Input value={cta.label} onChange={(e) => setCta((p) => ({ ...p, label: e.target.value }))} placeholder="Join now" />}
             {lang === "fr" && <Input value={cta.labelFr} onChange={(e) => setCta((p) => ({ ...p, labelFr: e.target.value }))} placeholder="Rejoindre" />}
             {lang === "ar" && <Input value={cta.labelAr} onChange={(e) => setCta((p) => ({ ...p, labelAr: e.target.value }))} placeholder="انضم الآن" dir="rtl" />}
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">URL</label>
+            <label className="text-sm font-medium block mb-1">{t("common:ui.url")}</label>
             <Input value={cta.url} onChange={(e) => setCta((p) => ({ ...p, url: e.target.value }))} placeholder="/register" />
           </div>
         </div>
         <div>
-          <label className="text-sm font-medium block mb-1">Style</label>
+          <label className="text-sm font-medium block mb-1">{t("header.style")}</label>
           <Select value={cta.style} onValueChange={(v) => setCta((p) => ({ ...p, style: v }))}>
             <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="filled">Filled</SelectItem>
-              <SelectItem value="outlined">Outlined</SelectItem>
-              <SelectItem value="text">Text Only</SelectItem>
+              <SelectItem value="filled">{t("header.filled")}</SelectItem>
+              <SelectItem value="outlined">{t("header.outlined")}</SelectItem>
+              <SelectItem value="text">{t("header.text_only")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -214,10 +216,10 @@ export default function HeaderEditorPage() {
 
       {/* Options */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-3">
-        <h2 className="text-lg font-semibold">Options</h2>
+        <h2 className="text-lg font-semibold">{t("common:ui.options")}</h2>
         <div className="flex items-center gap-3">
           <Switch checked={options.showLanguageSwitcher} onCheckedChange={(v) => setOptions((p) => ({ ...p, showLanguageSwitcher: v }))} />
-          <span className="text-sm">Show Language Switcher</span>
+          <span className="text-sm">{t("header.show_lang")}</span>
         </div>
       </section>
 

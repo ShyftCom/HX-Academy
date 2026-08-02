@@ -11,11 +11,13 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { timeAgo } from "@/lib/utils";
 import { Bell, CheckCheck, Info, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const TYPE_ICONS: Record<string, any> = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle };
 const TYPE_COLORS: Record<string, string> = { info: "text-blue-500", success: "text-green-500", warning: "text-amber-500", error: "text-red-500" };
 
 export default function NotificationsPage() {
+  const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"all" | "unread">("all");
@@ -32,7 +34,7 @@ export default function NotificationsPage() {
 
   const readAllMutation = useMutation({
     mutationFn: () => fetch("/api/notifications/read-all", { method: "POST" }),
-    onSuccess: () => { toast.success("All marked as read"); qc.invalidateQueries({ queryKey: ["notifications"] }); },
+    onSuccess: () => { toast.success(t("notifications.all_read")); qc.invalidateQueries({ queryKey: ["notifications"] }); },
   });
 
   const notifications = data?.data ?? [];
@@ -40,9 +42,9 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Notifications" description="Stay up to date with academy activity">
+      <PageHeader title={t("notifications.title")} description={t("notifications.subtitle")}>
         <Button variant="outline" onClick={() => readAllMutation.mutate()} loading={readAllMutation.isPending} disabled={!notifications.some((n: any) => !n.isRead)}>
-          <CheckCheck className="me-2 h-4 w-4" />Mark All Read
+          <CheckCheck className="me-2 h-4 w-4" />{t("notifications.mark_all")}
         </Button>
       </PageHeader>
 
@@ -55,7 +57,7 @@ export default function NotificationsPage() {
       {isLoading ? (
         <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />)}</div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Bell} title="No notifications" description="You're all caught up!" />
+        <EmptyState icon={Bell} title={t("notifications.empty")} description={t("notifications.caught_up")} />
       ) : (
         <div className="space-y-2">
           {filtered.map((n: any) => {

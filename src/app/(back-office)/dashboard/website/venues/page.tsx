@@ -6,12 +6,14 @@ import { Eye, EyeOff, ExternalLink, Settings2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface StationRow {
   id: string; name: string; wilaya: string; slug: string | null; isPubliclyListed: boolean; displayOrder: number;
 }
 
 export default function WebsiteVenuesPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const { data: stations = [] } = useQuery<StationRow[]>({ queryKey: ["admin-stations-venues"], queryFn: () => fetch("/api/stations").then((r) => r.json()) });
   const [rows, setRows] = useState<StationRow[] | null>(null);
@@ -34,10 +36,10 @@ export default function WebsiteVenuesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Venues" description="Control which stations appear on the public Venues page and their order. Edit each venue's description, images and facilities from Stations." />
+      <PageHeader title={t("venues.title")} description={t("venues.subtitle")} />
 
       {list.length === 0 ? (
-        <div className="py-12 text-center text-gray-500">No stations found. Add one under Stations first.</div>
+        <div className="py-12 text-center text-gray-500">{t("venues.empty")}</div>
       ) : (
         <SortableList
           items={list}
@@ -56,7 +58,7 @@ export default function WebsiteVenuesPage() {
                 {s.isPubliclyListed ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                 {s.isPubliclyListed ? "Public" : "Hidden"}
               </button>
-              <Link href={`/dashboard/stations/${s.id}`} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800" title="Edit venue content">
+              <Link href={`/dashboard/stations/${s.id}`} className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800" title={t("venues.edit")}>
                 <Settings2 className="h-4 w-4" />
               </Link>
               {s.slug && (

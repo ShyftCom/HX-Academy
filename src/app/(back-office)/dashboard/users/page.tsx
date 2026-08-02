@@ -18,8 +18,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDate, timeAgo, getInitials } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function UsersPage() {
+  const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -55,14 +57,14 @@ export default function UsersPage() {
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       fetch(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["users"] }); },
-    onError: () => toast.error("Update failed"),
+    onSuccess: () => { toast.success(t("common:toast.status_updated")); qc.invalidateQueries({ queryKey: ["users"] }); },
+    onError: () => toast.error(t("common:toast.update_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/users/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("User deleted"); qc.invalidateQueries({ queryKey: ["users"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("users.deleted")); qc.invalidateQueries({ queryKey: ["users"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const openAdd = () => { setEditUser(null); setForm({ name: "", email: "", password: "", roleId: "", isActive: true }); setModalOpen(true); };
@@ -75,7 +77,7 @@ export default function UsersPage() {
         <div><p className="font-medium text-sm">{r.name ?? "—"}</p><p className="text-xs text-gray-400">{r.email}</p></div>
       </div>
     )},
-    { key: "role", header: "Role", cell: (r: any) => r.role ? <Badge variant="default">{r.role.name}</Badge> : <Badge variant="secondary">No Role</Badge> },
+    { key: "role", header: "Role", cell: (r: any) => r.role ? <Badge variant="default">{r.role.name}</Badge> : <Badge variant="secondary">{t("users.no_role")}</Badge> },
     { key: "isActive", header: "Active", cell: (r: any) => <Switch checked={r.isActive} onCheckedChange={(v) => toggleMutation.mutate({ id: r.id, isActive: v })} /> },
     { key: "lastLogin", header: "Last Login", cell: (r: any) => r.lastLogin ? timeAgo(r.lastLogin) : "Never" },
     { key: "createdAt", header: "Created", cell: (r: any) => formatDate(r.createdAt) },
@@ -83,8 +85,8 @@ export default function UsersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -92,42 +94,42 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Users & Accounts" description="Manage admin and staff accounts">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add User</Button>
+      <PageHeader title={t("users.title")} description={t("users.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("users.add")}</Button>
       </PageHeader>
 
-      <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search users..." className="w-64" />
+      <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("users.search")} className="w-64" />
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No users found" emptyIcon={<Users className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("users.empty")} emptyIcon={<Users className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="md">
           <DialogHeader><DialogTitle>{editUser ? "Edit User" : "Add User"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Full Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="John Doe" />
-            {!editUser && <Input label="Email *" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@hxacademy.com" />}
+            <Input label={t("users.full_name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="John Doe" />
+            {!editUser && <Input label={t("users.email")} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@hxacademy.com" />}
             <Input label={editUser ? "New Password (leave blank to keep)" : "Password *"} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("users.role")}</label>
               <Select value={form.roleId} onValueChange={(v) => setForm({ ...form, roleId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("users.select_role")} /></SelectTrigger>
                 <SelectContent>{roles?.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Active account</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t("users.active_account")}</span>
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name || (!editUser && (!form.email || !form.password))}>{editUser ? "Save Changes" : "Create User"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete User" description="This will permanently delete the user account." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("users.delete")} description={t("users.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

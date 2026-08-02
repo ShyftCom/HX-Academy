@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFoo
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface Sponsor {
   id: string; name: string; logoUrl: string; websiteUrl: string | null; position: number; isActive: boolean;
@@ -19,6 +20,7 @@ interface Sponsor {
 const EMPTY_FORM = { name: "", logoUrl: "", websiteUrl: "" };
 
 function LogoUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const { t } = useTranslation("website");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,9 +33,9 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (data.url) onChange(data.url);
-      else toast.error("Upload failed");
+      else toast.error(t("common:toast.upload_failed"));
     } catch {
-      toast.error("Upload failed");
+      toast.error(t("common:toast.upload_failed"));
     } finally {
       setUploading(false);
     }
@@ -43,7 +45,7 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
     <div className="flex items-center gap-3">
       {value ? (
         <div className="relative group w-24 h-16 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white flex items-center justify-center p-2">
-          <img src={value} alt="Logo" className="max-w-full max-h-full object-contain" />
+          <img src={value} alt={t("sponsors.logo")} className="max-w-full max-h-full object-contain" />
           <button
             onClick={() => onChange("")}
             className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -79,6 +81,7 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
 }
 
 export default function SponsorsPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [modal, setModal] = useState<"new" | Sponsor | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -92,15 +95,15 @@ export default function SponsorsPage() {
   const { mutate: createSponsor, isPending: creating } = useMutation({
     mutationFn: (data: typeof EMPTY_FORM) =>
       fetch("/api/website/sponsors", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Sponsor added"); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("sponsors.added")); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: updateSponsor, isPending: updating } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & typeof EMPTY_FORM) =>
       fetch(`/api/website/sponsors/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.saved")); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: toggleActive } = useMutation({
@@ -111,16 +114,16 @@ export default function SponsorsPage() {
 
   const { mutate: deleteSponsor, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/website/sponsors/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setDeleteId(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const openNew = () => { setForm(EMPTY_FORM); setModal("new"); };
   const openEdit = (s: Sponsor) => { setForm({ name: s.name, logoUrl: s.logoUrl, websiteUrl: s.websiteUrl ?? "" }); setModal(s); };
 
   const save = () => {
-    if (!form.name) { toast.error("Name is required"); return; }
-    if (!form.logoUrl) { toast.error("Please upload a logo"); return; }
+    if (!form.name) { toast.error(t("sponsors.name_required")); return; }
+    if (!form.logoUrl) { toast.error(t("sponsors.need_logo")); return; }
     if (modal === "new") createSponsor(form);
     else if (modal) updateSponsor({ id: (modal as Sponsor).id, ...form });
   };
@@ -129,14 +132,14 @@ export default function SponsorsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Sponsors" description="Manage sponsor logos displayed on the public website. New sponsors appear automatically.">
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Sponsor</Button>
+      <PageHeader title={t("sponsors.title")} description={t("sponsors.subtitle")}>
+        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> {t("sponsors.add")}</Button>
       </PageHeader>
 
       {/* Live preview strip */}
       {allSponsors.filter((s) => s.isActive).length > 0 && (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium mb-3">Live Preview</p>
+          <p className="text-xs text-gray-500 uppercase font-medium mb-3">{t("sponsors.preview")}</p>
           <div className="flex items-center gap-8 overflow-x-auto pb-2">
             {allSponsors.filter((s) => s.isActive).map((s) => (
               <img key={s.id} src={s.logoUrl} alt={s.name} className="h-10 object-contain opacity-70 hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -146,9 +149,9 @@ export default function SponsorsPage() {
       )}
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : allSponsors.length === 0 ? (
-        <EmptyState icon={Upload} title="No sponsors yet" description="Add your first sponsor logo to display it on the website." action={{ label: "Add Sponsor", onClick: openNew }} />
+        <EmptyState icon={Upload} title={t("sponsors.empty")} description={t("sponsors.empty_body")} action={{ label: t("sponsors.add"), onClick: openNew }} />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {allSponsors.map((sponsor) => (
@@ -163,7 +166,7 @@ export default function SponsorsPage() {
                 </a>
               )}
               <div className="flex gap-1 w-full">
-                <Button size="sm" variant="outline" className="flex-1 text-xs h-6 px-1" onClick={() => openEdit(sponsor)}>Edit</Button>
+                <Button size="sm" variant="outline" className="flex-1 text-xs h-6 px-1" onClick={() => openEdit(sponsor)}>{t("common:ui.edit")}</Button>
                 <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => toggleActive({ id: sponsor.id, isActive: !sponsor.isActive })}>
                   {sponsor.isActive ? <EyeOff className="w-3 h-3 text-gray-400" /> : <Eye className="w-3 h-3 text-green-500" />}
                 </Button>
@@ -184,22 +187,22 @@ export default function SponsorsPage() {
             </DialogHeader>
             <DialogBody className="space-y-4">
               <div>
-                <Label>Logo *</Label>
+                <Label>{t("sponsors.logo_req")}</Label>
                 <div className="mt-1">
                   <LogoUploader value={form.logoUrl} onChange={(url) => setForm((f) => ({ ...f, logoUrl: url }))} />
                 </div>
               </div>
               <div>
-                <Label>Sponsor Name *</Label>
-                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Nike, Adidas..." className="mt-1" />
+                <Label>{t("sponsors.name_req")}</Label>
+                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("sponsors.name_ph")} className="mt-1" />
               </div>
               <div>
-                <Label>Website URL (optional)</Label>
+                <Label>{t("sponsors.url")}</Label>
                 <Input value={form.websiteUrl} onChange={(e) => setForm((f) => ({ ...f, websiteUrl: e.target.value }))} placeholder="https://sponsor.com" className="mt-1" />
               </div>
             </DialogBody>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>
                 {creating || updating ? "Saving..." : "Save Sponsor"}
               </Button>
@@ -211,8 +214,8 @@ export default function SponsorsPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Remove Sponsor"
-        description="This will permanently remove the sponsor."
+        title={t("sponsors.remove")}
+        description={t("sponsors.remove_body")}
         onConfirm={() => deleteId && deleteSponsor(deleteId)}
         loading={deleting}
         variant="destructive"

@@ -1,0 +1,34 @@
+{
+  "title": "Commandes",
+  "subtitle": "Gérer les commandes de la boutique",
+  "search": "Rechercher des commandes…",
+  "empty": "Aucune commande pour le moment",
+  "change_status": "Changer le statut",
+  "customer_info": "Informations client",
+  "items": "Articles",
+  "total": "Total",
+  "unknown": "Inconnu",
+  "delete": {
+    "title": "Supprimer la commande",
+    "body": "Cette commande sera définitivement supprimée."
+  },
+  "toast": {
+    "deleted": "Commande supprimée",
+    "status_updated": "Statut mis à jour",
+    "update_failed": "Échec de la mise à jour"
+  },
+  "store": {
+    "title": "Commandes boutique",
+    "subtitle": "Gérez toutes les commandes passées via la boutique du site.",
+    "empty_body": "Les commandes passées via la boutique apparaîtront ici.",
+    "all_statuses": "Tous les statuts",
+    "customer": "Client",
+    "delivery": "Livraison",
+    "product": "Produit",
+    "qty": "Qté",
+    "price": "Prix",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "update_failed": "Échec de la mise à jour"
+  }
+}

@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
+import { useTranslation } from "react-i18next";
 
 interface Category { id: string; name: string }
 interface ArticleDetail {
@@ -20,6 +21,7 @@ interface ArticleDetail {
 }
 
 export default function NewsEditPage() {
+  const { t } = useTranslation("website");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const qc = useQueryClient();
@@ -33,11 +35,11 @@ export default function NewsEditPage() {
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: () => fetch(`/api/news/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["admin-news-article", id] }); },
-    onError: () => toast.error("Save failed"),
+    onSuccess: () => { toast.success(t("common:toast.saved")); qc.invalidateQueries({ queryKey: ["admin-news-article", id] }); },
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
-  if (isLoading || !article) return <div className="py-12 text-center text-gray-500">Loading…</div>;
+  if (isLoading || !article) return <div className="py-12 text-center text-gray-500">{t("common:ui.loading_alt")}</div>;
 
   return (
     <div className="space-y-6 pb-16">
@@ -52,7 +54,7 @@ export default function NewsEditPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <a href={`/fr/news/${article.slug}`} target="_blank" rel="noopener noreferrer"><Button variant="outline" size="sm"><ExternalLink className="h-3.5 w-3.5" /> View</Button></a>
+          <a href={`/fr/news/${article.slug}`} target="_blank" rel="noopener noreferrer"><Button variant="outline" size="sm"><ExternalLink className="h-3.5 w-3.5" /> {t("common:ui.view")}</Button></a>
           <Button size="sm" onClick={() => save()} disabled={saving}><Save className="h-3.5 w-3.5" /> {saving ? "Saving…" : "Save"}</Button>
         </div>
       </div>
@@ -60,41 +62,41 @@ export default function NewsEditPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <LocaleTextInput baseKey="title" values={form} onChange={set} label="Title" />
+            <LocaleTextInput baseKey="title" values={form} onChange={set} label={t("common:ui.title_field")} />
           </div>
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <LocaleTextInput baseKey="excerpt" values={form} onChange={set} label="Excerpt (used on cards)" multiline />
+            <LocaleTextInput baseKey="excerpt" values={form} onChange={set} label={t("news.excerpt")} multiline />
           </div>
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <LocaleTextInput baseKey="body" values={form} onChange={set} label="Body (HTML)" multiline />
+            <LocaleTextInput baseKey="body" values={form} onChange={set} label={t("news.body_html")} multiline />
           </div>
           <div className="space-y-4 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <p className="text-sm font-semibold">SEO</p>
-            <div><Label>SEO title</Label><Input value={(form.metaTitle as string) ?? ""} onChange={(e) => set({ metaTitle: e.target.value })} /></div>
-            <div><Label>SEO description</Label><Textarea value={(form.metaDescription as string) ?? ""} onChange={(e) => set({ metaDescription: e.target.value })} /></div>
+            <p className="text-sm font-semibold">{t("news.seo")}</p>
+            <div><Label>{t("news.seo_title")}</Label><Input value={(form.metaTitle as string) ?? ""} onChange={(e) => set({ metaTitle: e.target.value })} /></div>
+            <div><Label>{t("news.seo_description")}</Label><Textarea value={(form.metaDescription as string) ?? ""} onChange={(e) => set({ metaDescription: e.target.value })} /></div>
           </div>
         </div>
 
         <div className="space-y-5">
           <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <ImageUrlInput label="Cover image" value={(form.coverImageUrl as string) ?? ""} onChange={(url) => set({ coverImageUrl: url })} />
+            <ImageUrlInput label={t("news.cover")} value={(form.coverImageUrl as string) ?? ""} onChange={(url) => set({ coverImageUrl: url })} />
           </div>
           <div className="space-y-4 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
             <div>
-              <Label>Category</Label>
+              <Label>{t("common:ui.category")}</Label>
               <Select value={(form.categoryId as string) ?? "none"} onValueChange={(v) => set({ categoryId: v === "none" ? null : v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No category</SelectItem>
+                  <SelectItem value="none">{t("news.no_category")}</SelectItem>
                   {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>Author</Label><Input value={(form.authorName as string) ?? ""} onChange={(e) => set({ authorName: e.target.value })} /></div>
+            <div><Label>{t("news.author")}</Label><Input value={(form.authorName as string) ?? ""} onChange={(e) => set({ authorName: e.target.value })} /></div>
           </div>
           <div className="space-y-3 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-            <div className="flex items-center justify-between"><Label>Published</Label><Switch checked={!!form.isPublished} onCheckedChange={(v) => set({ isPublished: v })} /></div>
-            <div className="flex items-center justify-between"><Label>Featured</Label><Switch checked={!!form.isFeatured} onCheckedChange={(v) => set({ isFeatured: v })} /></div>
+            <div className="flex items-center justify-between"><Label>{t("news.published")}</Label><Switch checked={!!form.isPublished} onCheckedChange={(v) => set({ isPublished: v })} /></div>
+            <div className="flex items-center justify-between"><Label>{t("common:ui.featured")}</Label><Switch checked={!!form.isFeatured} onCheckedChange={(v) => set({ isFeatured: v })} /></div>
           </div>
         </div>
       </div>

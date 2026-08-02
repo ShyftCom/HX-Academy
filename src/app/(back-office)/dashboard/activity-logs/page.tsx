@@ -11,12 +11,14 @@ import { SearchInput } from "@/components/shared/search-input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { timeAgo, getInitials } from "@/lib/utils";
 import { Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const MODULES = ["leads", "players", "subscriptions", "payments", "store", "orders", "settings", "users"];
 const ACTIONS = ["create", "update", "delete", "approve", "reject", "convert", "status_change"];
 const ACTION_COLORS: Record<string, string> = { create: "success", update: "default", delete: "destructive", approve: "success", reject: "destructive", convert: "default", status_change: "warning" };
 
 export default function ActivityLogsPage() {
+  const { t } = useTranslation("admin");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [module, setModule] = useState("");
@@ -48,27 +50,27 @@ export default function ActivityLogsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Activity Logs" description="Track all actions in the system" />
+      <PageHeader title={t("logs.title")} description={t("logs.subtitle")} />
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search logs..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("logs.search")} className="w-64" />
         <Select value={module} onValueChange={(v) => { setModule(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Modules" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("logs.all_modules")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Modules</SelectItem>
+            <SelectItem value="all">{t("logs.all_modules")}</SelectItem>
             {MODULES.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={action} onValueChange={(v) => { setAction(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Actions" /></SelectTrigger>
+          <SelectTrigger className="w-36"><SelectValue placeholder={t("logs.all_actions")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Actions</SelectItem>
+            <SelectItem value="all">{t("logs.all_actions")}</SelectItem>
             {ACTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No activity logs" emptyIcon={<Activity className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("logs.empty")} emptyIcon={<Activity className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={30} onPageChange={setPage} />}
     </div>
   );

@@ -1,10 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getSettings } from "@/lib/settings";
 
-const inter = Inter({ subsets: ["latin"] });
+// OBSIDIAN FLUX typography. Geist carries the whole interface — its tabular
+// lining figures are what keep dashboard columns aligned without per-cell
+// classes. JetBrains Mono is the label face: statuses, IDs, codes, timestamps.
+// Both are self-hosted and subset by next/font, so there is no runtime request
+// to fonts.googleapis.com and no layout shift on first paint.
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 // Read from the Setting table rather than hardcoding, so renaming the academy
 // in Super Admin propagates to the document title. Falls back to the canonical
@@ -25,40 +41,54 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Admin-editable branding still overrides the palette, but it now feeds the
+  // Obsidian token names rather than the retired --primary-red / --card pair.
+  // Defaults are the Obsidian Flux values, so an academy that never opened
+  // Branding gets the designed look rather than an accidental legacy red.
   let brandCss = "";
   try {
     const s = await getSettings(["primary_color", "secondary_color", "dark_bg_color", "card_dark_color"]);
-    const primary   = s.primary_color   || "#A02020";
-    const secondary = s.secondary_color || "#903030";
-    const darkBg    = s.dark_bg_color   || "#101010";
-    const cardDark  = s.card_dark_color || "#202020";
+    const primary   = s.primary_color   || "#0070f3";
+    const secondary = s.secondary_color || "#0059c5";
+    const darkBg    = s.dark_bg_color   || "#131313";
+    const cardDark  = s.card_dark_color || "#1c1b1b";
 
-    brandCss = `
-      :root {
-        --primary-red: ${primary};
-        --secondary-red: ${secondary};
-        --accent: ${primary};
-        --accent-hover: ${secondary};
-        --ring: ${primary};
-      }
-      .dark {
-        --background: ${darkBg};
-        --card: ${cardDark};
-      }
-    `;
+    // The brand colour is theme-agnostic. The two surface settings are not —
+    // Branding labels them "Dark Mode Background" and "Dark Mode Card Surface"
+    // — so they are scoped to :not(.light). Emitting them on plain `:root`
+    // pinned the whole app to charcoal: this <style> is injected after
+    // globals.css, and `:root` and `.light` have identical specificity, so
+    // source order let it beat the light theme and the toggle did nothing
+    // below the top bar.
+    brandCss =
+      `:root{--ob-primary:${primary};--ob-primary-hover:${secondary};` +
+      `--ob-primary-active:${secondary};` +
+      `--accent:${primary};--accent-hover:${secondary};--ring:${primary};}` +
+      `:root:not(.light){--ob-surface-base:${darkBg};--ob-surface-low:${cardDark};}`;
   } catch {
-    // DB unavailable at build/dev time — fall back to globals.css defaults
+    // DB unavailable at build/dev time — fall back to globals.css defaults.
   }
 
   return (
-    <html lang="fr" suppressHydrationWarning>
+    // The font variable classes go on <html>, not <body>. globals.css declares
+    // `--ob-font-sans: var(--font-geist), …` inside `:root`, and a var() is
+    // resolved in the scope of the element that *declares* it — so with the
+    // classes on <body>, --font-geist was undefined at :root, the whole
+    // declaration was invalid, and the UI silently fell back to system-ui.
+    <html
+      lang="fr"
+      className={`${geist.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Cairo covers the Arabic locale, which Geist has no glyphs for.
+            It stays a <link> because next/font cannot subset per-locale here. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet" />
         {brandCss && <style dangerouslySetInnerHTML={{ __html: brandCss }} />}
       </head>
-      <body className={`${inter.className} h-full antialiased`}>
+      <body className="h-full antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

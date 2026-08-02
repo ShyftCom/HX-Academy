@@ -1,0 +1,70 @@
+{
+  "title": "HR Management",
+  "subtitle": "Staff, attendance, leave, and payroll",
+  "staff": {
+    "title": "Staff",
+    "subtitle": "Manage your team",
+    "add": "Add Staff",
+    "add_title": "Add Staff Member",
+    "user_account": "User Account",
+    "select_user": "Select user...",
+    "full_name": "Full Name",
+    "role": "Role",
+    "role_ph": "Coach, Manager...",
+    "hire_date": "Hire Date",
+    "base_salary_da": "Base Salary (DA)",
+    "list": "Staff List",
+    "base_salary": "Base Salary",
+    "station": "Station",
+    "empty": "No staff members yet.",
+    "added": "Staff member added"
+  },
+  "attendance": {
+    "title": "Attendance",
+    "subtitle": "Monthly attendance grid",
+    "empty": "No staff members found."
+  },
+  "leave": {
+    "title": "Leave Requests",
+    "subtitle": "Manage staff leave",
+    "add": "Add Leave",
+    "create_title": "Create Leave Request",
+    "staff_member": "Staff Member",
+    "select_staff": "Select staff...",
+    "type": "Leave Type",
+    "start": "Start Date",
+    "end": "End Date",
+    "reason": "Reason",
+    "empty": "No leave requests found.",
+    "updated": "Leave request updated",
+    "created": "Leave request created"
+  },
+  "payroll": {
+    "title": "Payroll",
+    "subtitle": "Monthly salary management",
+    "bonuses": "Bonuses",
+    "deductions": "Deductions",
+    "absences": "Absences",
+    "net": "Net Salary",
+    "pay": "Pay",
+    "empty": "No payroll generated yet. Click \"Generate Payroll\" to start.",
+    "generated": "Payroll generated",
+    "generate_failed": "Failed to generate payroll",
+    "updated": "Payroll updated",
+    "paid": "Payroll marked as paid & charge created"
+  },
+  "detail": {
+    "not_found": "Staff member not found.",
+    "national_id": "National ID",
+    "attendance_history": "Attendance History",
+    "no_attendance": "No attendance records",
+    "no_leave": "No leave requests",
+    "payroll_history": "Payroll History",
+    "no_payroll": "No payroll records",
+    "period": "Period",
+    "base": "Base",
+    "net": "Net",
+    "leave_updated": "Leave request updated",
+    "leave_failed": "Failed to update leave request"
+  }
+}

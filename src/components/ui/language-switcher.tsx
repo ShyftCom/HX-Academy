@@ -119,16 +119,16 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
   const isAdmin = variant === "admin";
 
   const btnClass = isAdmin
-    ? "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium transition-colors"
-    : "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors border border-white/20";
+    ? "flex h-9 items-center gap-1.5 rounded-[var(--ob-radius-control)] px-2.5 text-[13px] font-medium text-[var(--ob-text-secondary)] transition-colors hover:bg-[var(--ob-surface-high)] hover:text-[var(--ob-text)]"
+    : "flex items-center gap-1.5 rounded-[var(--ob-radius-control)] border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/20";
 
   const dropdownClass = isAdmin
-    ? "absolute end-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-1 overflow-hidden"
-    : "absolute end-0 mt-1 w-36 bg-gray-900 border border-white/10 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
+    ? "ob-glass absolute end-0 z-50 mt-1 w-40 overflow-hidden rounded-[var(--ob-radius-container)] py-1 shadow-[0_12px_32px_rgba(0,0,0,0.45)]"
+    : "absolute end-0 z-50 mt-1 w-40 overflow-hidden rounded-[var(--ob-radius-container)] border border-white/10 bg-[#131313] py-1 shadow-lg";
 
   const itemClass = (code: string) => isAdmin
-    ? `flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${code === current ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-medium" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`
-    : `flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${code === current ? "bg-green-700 text-white font-medium" : "text-gray-200 hover:bg-gray-700"}`;
+    ? `flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors ${code === current ? "bg-[var(--ob-primary-soft)] font-medium text-[var(--ob-primary-light)]" : "text-[var(--ob-text-secondary)] hover:bg-[var(--ob-surface-high)] hover:text-[var(--ob-text)]"}`
+    : `flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors ${code === current ? "bg-[var(--ob-primary)] font-medium text-white" : "text-gray-200 hover:bg-white/10"}`;
 
   return (
     <div className="relative" ref={ref}>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/shared/page-header";
+import { useTranslation } from "react-i18next";
 
 function LangTabs({ lang, setLang }: { lang: string; setLang: (l: string) => void }) {
   return (
@@ -23,6 +24,7 @@ function LangTabs({ lang, setLang }: { lang: string; setLang: (l: string) => voi
 }
 
 export default function StoreSettingsPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [lang, setLang] = useState("en");
   const [form, setForm] = useState({
@@ -55,15 +57,15 @@ export default function StoreSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Store settings saved!"); qc.invalidateQueries({ queryKey: ["store-settings"] }); },
-    onError: () => toast.error("Failed to save"),
+    onSuccess: () => { toast.success(t("store.saved")); qc.invalidateQueries({ queryKey: ["store-settings"] }); },
+    onError: () => toast.error(t("common:toast.save_failed_alt")),
   });
 
-  if (isLoading) return <div className="p-8 text-gray-500">Loading...</div>;
+  if (isLoading) return <div className="p-8 text-gray-500">{t("common:ui.loading")}</div>;
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-16">
-      <PageHeader title="Store Settings" description="Configure your public store." />
+      <PageHeader title={t("store.title")} description={t("store.subtitle")} />
 
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
         <div className="flex items-center gap-3">
@@ -72,13 +74,13 @@ export default function StoreSettingsPage() {
             onCheckedChange={(v) => setForm((p) => ({ ...p, store_enabled: v ? "true" : "false" }))}
           />
           <div>
-            <p className="text-sm font-medium">Enable Store</p>
-            <p className="text-xs text-gray-500">When disabled, the /store page returns 404.</p>
+            <p className="text-sm font-medium">{t("store.enable")}</p>
+            <p className="text-xs text-gray-500">{t("store.enable_hint")}</p>
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium block mb-1">Store Page Title</label>
+          <label className="text-sm font-medium block mb-1">{t("store.page_title")}</label>
           <LangTabs lang={lang} setLang={setLang} />
           {lang === "en" && <Input value={form.store_title} onChange={(e) => setForm((p) => ({ ...p, store_title: e.target.value }))} />}
           {lang === "fr" && <Input value={form.store_title_fr} onChange={(e) => setForm((p) => ({ ...p, store_title_fr: e.target.value }))} />}
@@ -86,7 +88,7 @@ export default function StoreSettingsPage() {
         </div>
 
         <div>
-          <label className="text-sm font-medium block mb-1">Store Description</label>
+          <label className="text-sm font-medium block mb-1">{t("store.page_description")}</label>
           <LangTabs lang={lang} setLang={setLang} />
           {lang === "en" && <Textarea value={form.store_description} onChange={(e) => setForm((p) => ({ ...p, store_description: e.target.value }))} rows={2} />}
           {lang === "fr" && <Textarea value={form.store_description_fr} onChange={(e) => setForm((p) => ({ ...p, store_description_fr: e.target.value }))} rows={2} />}
@@ -95,22 +97,22 @@ export default function StoreSettingsPage() {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="text-sm font-medium block mb-1">Shipping Fee (DA)</label>
+            <label className="text-sm font-medium block mb-1">{t("store.shipping_fee")}</label>
             <Input type="number" value={form.store_shipping_fee} onChange={(e) => setForm((p) => ({ ...p, store_shipping_fee: e.target.value }))} />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Free Shipping Above (DA)</label>
-            <p className="text-xs text-gray-400 mb-1">Set 0 to always charge</p>
+            <label className="text-sm font-medium block mb-1">{t("store.free_above")}</label>
+            <p className="text-xs text-gray-400 mb-1">{t("store.free_hint")}</p>
             <Input type="number" value={form.store_free_shipping_threshold} onChange={(e) => setForm((p) => ({ ...p, store_free_shipping_threshold: e.target.value }))} />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Low Stock Threshold</label>
+            <label className="text-sm font-medium block mb-1">{t("store.low_stock")}</label>
             <Input type="number" value={form.store_low_stock_threshold} onChange={(e) => setForm((p) => ({ ...p, store_low_stock_threshold: e.target.value }))} />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium block mb-1">Order Confirmation Email Template</label>
+          <label className="text-sm font-medium block mb-1">{t("store.email_template")}</label>
           <p className="text-xs text-gray-400 mb-2">Use {"{order_number}"}, {"{customer_name}"}, {"{total}"} as placeholders.</p>
           <Textarea value={form.store_order_email_template} onChange={(e) => setForm((p) => ({ ...p, store_order_email_template: e.target.value }))} rows={4} />
         </div>

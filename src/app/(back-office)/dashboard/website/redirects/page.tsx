@@ -12,10 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFoo
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface Redirect { id: string; fromPath: string; toPath: string; statusCode: number; isActive: boolean }
 
 export default function RedirectsAdminPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [fromPath, setFromPath] = useState("");
@@ -28,7 +30,7 @@ export default function RedirectsAdminPage() {
     mutationFn: () => fetch("/api/redirects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromPath, toPath }) }).then(async (r) => {
       const d = await r.json(); if (!r.ok) throw new Error(d.error ?? "Failed"); return d;
     }),
-    onSuccess: () => { toast.success("Redirect created"); qc.invalidateQueries({ queryKey: ["admin-redirects"] }); setCreating(false); setFromPath(""); setToPath(""); },
+    onSuccess: () => { toast.success(t("redirects.created")); qc.invalidateQueries({ queryKey: ["admin-redirects"] }); setCreating(false); setFromPath(""); setToPath(""); },
     onError: (e: Error) => toast.error(e.message),
   });
   const { mutate: toggle } = useMutation({
@@ -37,13 +39,13 @@ export default function RedirectsAdminPage() {
   });
   const { mutate: remove, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/redirects/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-redirects"] }); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-redirects"] }); setDeleteId(null); },
   });
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Redirects" description="Record legacy URLs that should redirect to a new page.">
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4" /> New Redirect</Button>
+      <PageHeader title={t("redirects.title")} description={t("redirects.subtitle")}>
+        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4" /> {t("redirects.new")}</Button>
       </PageHeader>
 
       <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
@@ -52,9 +54,9 @@ export default function RedirectsAdminPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-gray-500">Loading…</div>
+        <div className="py-12 text-center text-gray-500">{t("common:ui.loading_alt")}</div>
       ) : redirects.length === 0 ? (
-        <EmptyState icon={ArrowRightLeft} title="No redirects yet" description="Add a redirect for any URL you need to change." action={{ label: "New Redirect", onClick: () => setCreating(true) }} />
+        <EmptyState icon={ArrowRightLeft} title={t("redirects.empty")} description={t("redirects.empty_body")} action={{ label: t("redirects.new"), onClick: () => setCreating(true) }} />
       ) : (
         <div className="space-y-2">
           {redirects.map((r) => (
@@ -74,19 +76,19 @@ export default function RedirectsAdminPage() {
 
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Redirect</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("redirects.new")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-3">
-            <div><Label>From path</Label><Input value={fromPath} onChange={(e) => setFromPath(e.target.value)} placeholder="/old-page" /></div>
-            <div><Label>To path</Label><Input value={toPath} onChange={(e) => setToPath(e.target.value)} placeholder="/programmes/football-school" /></div>
+            <div><Label>{t("redirects.from")}</Label><Input value={fromPath} onChange={(e) => setFromPath(e.target.value)} placeholder="/old-page" /></div>
+            <div><Label>{t("redirects.to")}</Label><Input value={toPath} onChange={(e) => setToPath(e.target.value)} placeholder="/programmes/football-school" /></div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreating(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => create()} disabled={isPending || !fromPath || !toPath}>{isPending ? "Creating…" : "Create"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete redirect" description="This permanently removes the redirect record." onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("redirects.delete")} description={t("redirects.delete_body")} onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

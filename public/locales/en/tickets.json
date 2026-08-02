@@ -1,0 +1,50 @@
+{
+  "title": "Tickets",
+  "subtitle": "Internal support tickets and task tracking between team members.",
+  "create": "New Ticket",
+  "search": "Search tickets...",
+  "empty": "No tickets",
+  "empty_body": "Create a ticket to track a task or request help.",
+  "form": {
+    "title": "Title *",
+    "title_ph": "Brief description of the issue or task",
+    "description": "Description *",
+    "description_ph": "Provide full details...",
+    "priority": "Priority",
+    "assign": "Assign To",
+    "assign_ph": "Select person..."
+  },
+  "unassigned": "Unassigned",
+  "filters": {
+    "all_priority": "All Priority"
+  },
+  "status": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "toast": {
+    "created": "Ticket created",
+    "create_failed": "Failed to create ticket"
+  },
+  "detail": {
+    "not_found": "Ticket not found",
+    "back": "Back to Tickets",
+    "created_by": "Created by",
+    "assigned_to": "Assigned to",
+    "manage": "Manage Ticket",
+    "no_comments": "No comments yet. Be the first to reply.",
+    "submit_hint": "Ctrl+Enter to submit",
+    "comment_ph": "Write a comment...",
+    "delete": "Delete Ticket",
+    "delete_body": "This will permanently delete the ticket and all its comments.",
+    "deleted": "Ticket deleted"
+  }
+}

@@ -18,7 +18,12 @@
   "actions": {
     "add_player": "إضافة لاعب",
     "edit_player": "تعديل اللاعب",
-    "view_profile": "عرض الملف الشخصي"
+    "view_profile": "عرض الملف الشخصي",
+    "add": "إضافة لاعب",
+    "view_details": "عرض التفاصيل",
+    "suspend": "تعليق",
+    "activate": "تفعيل",
+    "reset_password": "إعادة تعيين كلمة المرور"
   },
   "form": {
     "full_name": "الاسم الكامل",
@@ -34,7 +39,22 @@
     "position": "المركز",
     "emergency_contact": "جهة الاتصال للطوارئ",
     "medical_notes": "ملاحظات طبية",
-    "notes": "ملاحظات"
+    "notes": "ملاحظات",
+    "full_name_req": "الاسم الكامل *",
+    "full_name_ph": "الاسم واللقب",
+    "email_req": "البريد الإلكتروني *",
+    "email_ph": "player@example.com",
+    "select_gender": "اختر الجنس",
+    "select_category": "اختر الفئة",
+    "select_position": "اختر المركز",
+    "team_ph": "الفريق أ",
+    "parent_name_ph": "الاسم الكامل لولي الأمر",
+    "address_ph": "المدينة، المنطقة",
+    "emergency_ph": "الاسم والهاتف",
+    "medical_ph": "أي حالات طبية…",
+    "notes_ph": "ملاحظات إضافية…",
+    "male": "ذكر",
+    "female": "أنثى"
   },
   "profile": {
     "title": "ملف اللاعب",
@@ -52,5 +72,37 @@
   "empty": {
     "no_players": "لا يوجد لاعبون",
     "no_players_subtitle": "حوّل العملاء لإضافة لاعبين"
+  },
+  "page": {
+    "title": "اللاعبون",
+    "subtitle": "إدارة جميع لاعبي الأكاديمية",
+    "search": "ابحث عن لاعبين…",
+    "empty": "لم يتم العثور على لاعبين"
+  },
+  "tabs": {
+    "profile": "الملف الشخصي",
+    "subscriptions": "الاشتراكات",
+    "payments": "المدفوعات",
+    "orders": "الطلبات",
+    "no_subscriptions": "لا توجد اشتراكات",
+    "no_payments": "لا توجد مدفوعات",
+    "no_orders": "لا توجد طلبات"
+  },
+  "no_plan": "لا توجد باقة",
+  "delete": {
+    "title": "حذف اللاعب",
+    "body": "سيتم حذف اللاعب وحسابه نهائياً. لا يمكن التراجع عن هذا الإجراء."
+  },
+  "password": {
+    "new": "كلمة المرور الجديدة",
+    "min": "6 أحرف على الأقل",
+    "confirm": "تأكيد كلمة المرور",
+    "repeat": "أعد إدخال كلمة المرور الجديدة"
+  },
+  "toast": {
+    "status_updated": "تم تحديث حالة اللاعب",
+    "deleted": "تم حذف اللاعب",
+    "password_updated": "تم تحديث كلمة المرور",
+    "update_failed": "فشل التحديث"
   }
 }

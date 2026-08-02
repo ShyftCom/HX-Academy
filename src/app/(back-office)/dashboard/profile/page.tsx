@@ -12,20 +12,22 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { getInitials } from "@/lib/utils";
 import { Lock, Save } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
+  const { t } = useTranslation("admin");
   const { data: session } = useSession();
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
   const pwMutation = useMutation({
     mutationFn: () => fetch("/api/auth/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }) }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; }),
-    onSuccess: () => { toast.success("Password changed successfully"); setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); },
+    onSuccess: () => { toast.success(t("profile.changed")); setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); },
     onError: (e: any) => toast.error(e.message ?? "Failed to change password"),
   });
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <PageHeader title="My Profile" description="Manage your account settings" />
+      <PageHeader title={t("profile.title")} description={t("profile.subtitle")} />
 
       <Card>
         <CardContent className="p-6">
@@ -41,17 +43,17 @@ export default function ProfilePage() {
           </div>
           <Separator />
           <div className="mt-6">
-            <h3 className="flex items-center gap-2 text-base font-semibold mb-4"><Lock className="h-4 w-4" />Change Password</h3>
+            <h3 className="flex items-center gap-2 text-base font-semibold mb-4"><Lock className="h-4 w-4" />{t("profile.change_password")}</h3>
             <div className="space-y-4">
-              <Input label="Current Password" type="password" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} placeholder="••••••••" />
-              <Input label="New Password" type="password" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder="Min 8 characters" />
-              <Input label="Confirm New Password" type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} placeholder="Repeat new password" />
+              <Input label={t("profile.current")} type="password" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} placeholder="••••••••" />
+              <Input label={t("profile.new")} type="password" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder={t("profile.min8")} />
+              <Input label={t("profile.confirm")} type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} placeholder={t("profile.repeat")} />
               <Button onClick={() => {
-                if (!pwForm.currentPassword || !pwForm.newPassword) { toast.error("All fields required"); return; }
-                if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error("Passwords don't match"); return; }
-                if (pwForm.newPassword.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+                if (!pwForm.currentPassword || !pwForm.newPassword) { toast.error(t("profile.all_required")); return; }
+                if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error(t("profile.mismatch")); return; }
+                if (pwForm.newPassword.length < 8) { toast.error(t("profile.too_short")); return; }
                 pwMutation.mutate();
-              }} loading={pwMutation.isPending}><Save className="me-2 h-4 w-4" />Change Password</Button>
+              }} loading={pwMutation.isPending}><Save className="me-2 h-4 w-4" />{t("profile.change_password")}</Button>
             </div>
           </div>
         </CardContent>

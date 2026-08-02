@@ -1,0 +1,34 @@
+{
+  "title": "Orders",
+  "subtitle": "Manage store orders",
+  "search": "Search orders...",
+  "empty": "No orders yet",
+  "change_status": "Change Status",
+  "customer_info": "Customer Info",
+  "items": "Items",
+  "total": "Total",
+  "unknown": "Unknown",
+  "delete": {
+    "title": "Delete Order",
+    "body": "This will permanently delete the order."
+  },
+  "toast": {
+    "deleted": "Order deleted",
+    "status_updated": "Status updated",
+    "update_failed": "Update failed"
+  },
+  "store": {
+    "title": "Store Orders",
+    "subtitle": "Manage all orders placed through the website store.",
+    "empty_body": "Orders placed through the website store will appear here.",
+    "all_statuses": "All Statuses",
+    "customer": "Customer",
+    "delivery": "Delivery",
+    "product": "Product",
+    "qty": "Qty",
+    "price": "Price",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "update_failed": "Failed to update"
+  }
+}

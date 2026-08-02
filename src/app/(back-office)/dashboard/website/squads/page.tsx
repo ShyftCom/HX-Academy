@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users2, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface LeadStatus { id: string; name: string; color: string }
 interface SquadLead {
@@ -18,6 +19,7 @@ function parseExtra(raw: string | null): Record<string, unknown> {
 }
 
 export default function SquadsSubmissionsPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -37,12 +39,12 @@ export default function SquadsSubmissionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Development Squad Registrations" description="Interest registrations submitted from the public Development Squads page." />
+      <PageHeader title={t("squads.title")} description={t("squads.subtitle")} />
 
       {isLoading ? (
         <div className="py-12 text-center text-gray-500"><Loader2 className="mx-auto h-5 w-5 animate-spin" /></div>
       ) : leads.length === 0 ? (
-        <EmptyState icon={Users2} title="No registrations yet" description="Registrations submitted from the public Squads page will appear here." />
+        <EmptyState icon={Users2} title={t("squads.empty")} description={t("squads.empty_body")} />
       ) : (
         <div className="space-y-2">
           {leads.map((lead) => {
@@ -67,14 +69,14 @@ export default function SquadsSubmissionsPage() {
                 </button>
                 {expanded && (
                   <div className="grid grid-cols-1 gap-3 border-t border-gray-100 px-4 py-4 text-sm sm:grid-cols-2 dark:border-gray-800">
-                    <div><span className="text-gray-400">Phone:</span> {lead.phone}</div>
-                    <div><span className="text-gray-400">Email:</span> {lead.email}</div>
-                    <div><span className="text-gray-400">Age group:</span> {lead.categoryInterest ?? "—"}</div>
-                    <div><span className="text-gray-400">Gender:</span> {(extra.gender as string) ?? "—"}</div>
-                    <div><span className="text-gray-400">Current level:</span> {(extra.currentPlayingLevel as string) ?? "—"}</div>
-                    <div><span className="text-gray-400">Current club:</span> {(extra.currentClub as string) ?? "—"}</div>
-                    {!!extra.medicalNotes && <div className="sm:col-span-2"><span className="text-gray-400">Medical notes:</span> {extra.medicalNotes as string}</div>}
-                    {lead.notes && <div className="sm:col-span-2"><span className="text-gray-400">Message:</span> {lead.notes}</div>}
+                    <div><span className="text-gray-400">{t("contact.phone")}</span> {lead.phone}</div>
+                    <div><span className="text-gray-400">{t("squads.email")}</span> {lead.email}</div>
+                    <div><span className="text-gray-400">{t("squads.age_group")}</span> {lead.categoryInterest ?? "—"}</div>
+                    <div><span className="text-gray-400">{t("squads.gender")}</span> {(extra.gender as string) ?? "—"}</div>
+                    <div><span className="text-gray-400">{t("squads.level")}</span> {(extra.currentPlayingLevel as string) ?? "—"}</div>
+                    <div><span className="text-gray-400">{t("squads.club")}</span> {(extra.currentClub as string) ?? "—"}</div>
+                    {!!extra.medicalNotes && <div className="sm:col-span-2"><span className="text-gray-400">{t("squads.medical")}</span> {extra.medicalNotes as string}</div>}
+                    {lead.notes && <div className="sm:col-span-2"><span className="text-gray-400">{t("contact.message")}</span> {lead.notes}</div>}
                     <div className="sm:col-span-2 text-xs text-gray-400">Marketing consent: {extra.marketingConsent ? "Yes" : "No"}</div>
                   </div>
                 )}

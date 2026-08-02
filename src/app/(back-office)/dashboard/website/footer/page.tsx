@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/shared/page-header";
+import { useTranslation } from "react-i18next";
 
 const PLATFORMS = [
   { id: "facebook", label: "Facebook" },
@@ -37,6 +38,7 @@ function LangTabs({ lang, setLang }: { lang: string; setLang: (l: string) => voi
 }
 
 export default function FooterEditorPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [lang, setLang] = useState("en");
   const [appearance, setAppearance] = useState({
@@ -101,8 +103,8 @@ export default function FooterEditorPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ appearance, socialLinks: socialLinks.filter((s) => s.url), linkColumns, bottomLinks }),
       }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Footer saved!"); qc.invalidateQueries({ queryKey: ["footer-config"] }); },
-    onError: () => toast.error("Failed to save"),
+    onSuccess: () => { toast.success(t("footer.saved")); qc.invalidateQueries({ queryKey: ["footer-config"] }); },
+    onError: () => toast.error(t("common:toast.save_failed_alt")),
   });
 
   const addColumn = useCallback(() => {
@@ -125,32 +127,32 @@ export default function FooterEditorPage() {
     ));
   }, []);
 
-  if (isLoading) return <div className="p-8 text-gray-500">Loading...</div>;
+  if (isLoading) return <div className="p-8 text-gray-500">{t("common:ui.loading")}</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      <PageHeader title="Footer Editor" description="Customize your website footer — appearance, links, and social icons." />
+      <PageHeader title={t("footer.title")} description={t("footer.subtitle")} />
 
       {/* Appearance */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Appearance</h2>
+        <h2 className="text-lg font-semibold">{t("footer.appearance")}</h2>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="text-sm font-medium block mb-1">Background Color</label>
+            <label className="text-sm font-medium block mb-1">{t("footer.bg_color")}</label>
             <div className="flex gap-2 items-center">
               <input type="color" value={appearance.backgroundColor} onChange={(e) => setAppearance((p) => ({ ...p, backgroundColor: e.target.value }))} className="w-10 h-10 rounded cursor-pointer border" />
               <Input value={appearance.backgroundColor} onChange={(e) => setAppearance((p) => ({ ...p, backgroundColor: e.target.value }))} className="font-mono text-sm" />
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Text Color</label>
+            <label className="text-sm font-medium block mb-1">{t("footer.text_color")}</label>
             <div className="flex gap-2 items-center">
               <input type="color" value={appearance.textColor} onChange={(e) => setAppearance((p) => ({ ...p, textColor: e.target.value }))} className="w-10 h-10 rounded cursor-pointer border" />
               <Input value={appearance.textColor} onChange={(e) => setAppearance((p) => ({ ...p, textColor: e.target.value }))} className="font-mono text-sm" />
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Accent Color</label>
+            <label className="text-sm font-medium block mb-1">{t("footer.accent_color")}</label>
             <div className="flex gap-2 items-center">
               <input type="color" value={appearance.accentColor} onChange={(e) => setAppearance((p) => ({ ...p, accentColor: e.target.value }))} className="w-10 h-10 rounded cursor-pointer border" />
               <Input value={appearance.accentColor} onChange={(e) => setAppearance((p) => ({ ...p, accentColor: e.target.value }))} className="font-mono text-sm" />
@@ -158,23 +160,23 @@ export default function FooterEditorPage() {
           </div>
         </div>
         <div>
-          <label className="text-sm font-medium block mb-1">Logo URL</label>
+          <label className="text-sm font-medium block mb-1">{t("header.logo_url")}</label>
           <Input value={appearance.logoUrl} onChange={(e) => setAppearance((p) => ({ ...p, logoUrl: e.target.value }))} placeholder="https://..." />
         </div>
         <div>
-          <label className="text-sm font-medium block mb-1">Tagline</label>
+          <label className="text-sm font-medium block mb-1">{t("footer.tagline")}</label>
           <LangTabs lang={lang} setLang={setLang} />
-          {lang === "en" && <Input value={appearance.tagline} onChange={(e) => setAppearance((p) => ({ ...p, tagline: e.target.value }))} placeholder="Your academy tagline..." />}
+          {lang === "en" && <Input value={appearance.tagline} onChange={(e) => setAppearance((p) => ({ ...p, tagline: e.target.value }))} placeholder={t("footer.tagline_ph")} />}
           {lang === "fr" && <Input value={appearance.taglineFr} onChange={(e) => setAppearance((p) => ({ ...p, taglineFr: e.target.value }))} placeholder="Slogan en français..." />}
           {lang === "ar" && <Input value={appearance.taglineAr} onChange={(e) => setAppearance((p) => ({ ...p, taglineAr: e.target.value }))} placeholder="الشعار بالعربية..." dir="rtl" />}
         </div>
         <div>
-          <label className="text-sm font-medium block mb-1">Copyright Text</label>
+          <label className="text-sm font-medium block mb-1">{t("footer.copyright")}</label>
           <Input value={appearance.copyrightText} onChange={(e) => setAppearance((p) => ({ ...p, copyrightText: e.target.value }))} />
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={appearance.showTrustpilot} onCheckedChange={(v) => setAppearance((p) => ({ ...p, showTrustpilot: v }))} />
-          <span className="text-sm">Show Trustpilot Badge</span>
+          <span className="text-sm">{t("footer.trustpilot")}</span>
           {appearance.showTrustpilot && (
             <Input value={appearance.trustpilotUrl} onChange={(e) => setAppearance((p) => ({ ...p, trustpilotUrl: e.target.value }))} placeholder="https://www.trustpilot.com/..." className="flex-1" />
           )}
@@ -183,8 +185,8 @@ export default function FooterEditorPage() {
 
       {/* Social Links */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-3">
-        <h2 className="text-lg font-semibold">Social Media Links</h2>
-        <p className="text-sm text-gray-500">Leave blank to hide that platform's icon.</p>
+        <h2 className="text-lg font-semibold">{t("footer.social")}</h2>
+        <p className="text-sm text-gray-500">{t("footer.social_hint")}</p>
         {PLATFORMS.map((platform, idx) => (
           <div key={platform.id} className="flex gap-3 items-center">
             <div className="w-32 text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">{platform.label}</div>
@@ -205,9 +207,9 @@ export default function FooterEditorPage() {
       {/* Link Columns */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Link Columns</h2>
+          <h2 className="text-lg font-semibold">{t("footer.columns")}</h2>
           <Button size="sm" variant="outline" onClick={addColumn} disabled={linkColumns.length >= 5}>
-            <Plus className="w-4 h-4 mr-1" /> Add Column
+            <Plus className="w-4 h-4 mr-1" /> {t("footer.add_column")}
           </Button>
         </div>
         {linkColumns.map((col, colIdx) => (
@@ -215,7 +217,7 @@ export default function FooterEditorPage() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <LangTabs lang={lang} setLang={setLang} />
-                {lang === "en" && <Input value={col.title} onChange={(e) => setLinkColumns((prev) => prev.map((c, i) => i === colIdx ? { ...c, title: e.target.value } : c))} placeholder="Column title..." />}
+                {lang === "en" && <Input value={col.title} onChange={(e) => setLinkColumns((prev) => prev.map((c, i) => i === colIdx ? { ...c, title: e.target.value } : c))} placeholder={t("footer.column_ph")} />}
                 {lang === "fr" && <Input value={col.titleFr} onChange={(e) => setLinkColumns((prev) => prev.map((c, i) => i === colIdx ? { ...c, titleFr: e.target.value } : c))} placeholder="Titre en français..." />}
                 {lang === "ar" && <Input value={col.titleAr} onChange={(e) => setLinkColumns((prev) => prev.map((c, i) => i === colIdx ? { ...c, titleAr: e.target.value } : c))} placeholder="العنوان بالعربية..." dir="rtl" />}
               </div>
@@ -226,7 +228,7 @@ export default function FooterEditorPage() {
             <div className="space-y-2 pl-2 border-l-2 border-gray-100 dark:border-gray-700">
               {col.links.map((link, linkIdx) => (
                 <div key={linkIdx} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center">
-                  {lang === "en" && <Input value={link.label} onChange={(e) => setLinkColumns((prev) => prev.map((c, ci) => ci === colIdx ? { ...c, links: c.links.map((l, li) => li === linkIdx ? { ...l, label: e.target.value } : l) } : c))} placeholder="Label" />}
+                  {lang === "en" && <Input value={link.label} onChange={(e) => setLinkColumns((prev) => prev.map((c, ci) => ci === colIdx ? { ...c, links: c.links.map((l, li) => li === linkIdx ? { ...l, label: e.target.value } : l) } : c))} placeholder={t("common:ui.label")} />}
                   {lang === "fr" && <Input value={link.labelFr} onChange={(e) => setLinkColumns((prev) => prev.map((c, ci) => ci === colIdx ? { ...c, links: c.links.map((l, li) => li === linkIdx ? { ...l, labelFr: e.target.value } : l) } : c))} placeholder="Libellé FR" />}
                   {lang === "ar" && <Input value={link.labelAr} onChange={(e) => setLinkColumns((prev) => prev.map((c, ci) => ci === colIdx ? { ...c, links: c.links.map((l, li) => li === linkIdx ? { ...l, labelAr: e.target.value } : l) } : c))} placeholder="التسمية AR" dir="rtl" />}
                   <Input value={link.url} onChange={(e) => setLinkColumns((prev) => prev.map((c, ci) => ci === colIdx ? { ...c, links: c.links.map((l, li) => li === linkIdx ? { ...l, url: e.target.value } : l) } : c))} placeholder="/page-url" />
@@ -243,7 +245,7 @@ export default function FooterEditorPage() {
                 </div>
               ))}
               <Button size="sm" variant="ghost" className="text-blue-500" onClick={() => addLink(colIdx)}>
-                <Plus className="w-3 h-3 mr-1" /> Add Link
+                <Plus className="w-3 h-3 mr-1" /> {t("footer.add_link")}
               </Button>
             </div>
           </div>
@@ -253,14 +255,14 @@ export default function FooterEditorPage() {
       {/* Bottom Links */}
       <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Bottom Bar Links</h2>
+          <h2 className="text-lg font-semibold">{t("footer.bottom_links")}</h2>
           <Button size="sm" variant="outline" onClick={() => setBottomLinks((prev) => [...prev, { label: "Link", labelFr: "", labelAr: "", url: "/", position: prev.length }])}>
-            <Plus className="w-4 h-4 mr-1" /> Add Link
+            <Plus className="w-4 h-4 mr-1" /> {t("footer.add_link")}
           </Button>
         </div>
         {bottomLinks.map((link, idx) => (
           <div key={idx} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
-            {lang === "en" && <Input value={link.label} onChange={(e) => setBottomLinks((prev) => prev.map((l, i) => i === idx ? { ...l, label: e.target.value } : l))} placeholder="Label" />}
+            {lang === "en" && <Input value={link.label} onChange={(e) => setBottomLinks((prev) => prev.map((l, i) => i === idx ? { ...l, label: e.target.value } : l))} placeholder={t("common:ui.label")} />}
             {lang === "fr" && <Input value={link.labelFr} onChange={(e) => setBottomLinks((prev) => prev.map((l, i) => i === idx ? { ...l, labelFr: e.target.value } : l))} placeholder="Libellé FR" />}
             {lang === "ar" && <Input value={link.labelAr} onChange={(e) => setBottomLinks((prev) => prev.map((l, i) => i === idx ? { ...l, labelAr: e.target.value } : l))} placeholder="AR" dir="rtl" />}
             <Input value={link.url} onChange={(e) => setBottomLinks((prev) => prev.map((l, i) => i === idx ? { ...l, url: e.target.value } : l))} placeholder="/terms" />
@@ -269,7 +271,7 @@ export default function FooterEditorPage() {
             </Button>
           </div>
         ))}
-        {!bottomLinks.length && <p className="text-sm text-gray-400">No bottom links added yet.</p>}
+        {!bottomLinks.length && <p className="text-sm text-gray-400">{t("footer.bottom_empty")}</p>}
       </section>
 
       {/* Save */}

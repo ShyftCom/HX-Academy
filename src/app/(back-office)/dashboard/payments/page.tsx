@@ -16,10 +16,12 @@ import { SearchInput } from "@/components/shared/search-input";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText } from "lucide-react";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 type Status = "all" | "pending" | "approved" | "rejected";
 
 function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
+  const { t } = useTranslation("payments");
   const isPdf = url.toLowerCase().includes(".pdf") || url.includes("application/pdf");
   const filename = url.split("/").pop() ?? "proof";
 
@@ -42,18 +44,18 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
         </DialogHeader>
         <DialogBody className="p-0 overflow-hidden">
           {isPdf ? (
-            <iframe src={url} className="w-full h-[70vh] rounded-b-xl" title="Payment proof PDF" />
+            <iframe src={url} className="w-full h-[70vh] rounded-b-xl" title={t("proof.pdf")} />
           ) : (
             <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 min-h-64 p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="Payment proof" className="max-w-full max-h-[65vh] object-contain rounded-lg shadow-md" />
+              <img src={url} alt={t("proof.image")} className="max-w-full max-h-[65vh] object-contain rounded-lg shadow-md" />
             </div>
           )}
         </DialogBody>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>{t("common:ui.close")}</Button>
           <Button onClick={handleDownload}>
-            <Download className="me-1.5 h-4 w-4" /> Download
+            <Download className="me-1.5 h-4 w-4" /> {t("common:ui.download")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -62,6 +64,7 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
 }
 
 export default function PaymentsPage() {
+  const { t } = useTranslation("payments");
   const qc = useQueryClient();
   const { activeStationId } = useStation();
   const proofInputRef = useRef<HTMLInputElement>(null);
@@ -95,20 +98,20 @@ export default function PaymentsPage() {
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/payments/${id}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminNotes: approveNote }) }).then(async (r) => { if (!r.ok) throw await r.json(); }),
-    onSuccess: () => { toast.success("Payment approved & subscription activated"); qc.invalidateQueries({ queryKey: ["payments"] }); setApproveId(null); setApproveNote(""); },
+    onSuccess: () => { toast.success(t("toast.approved")); qc.invalidateQueries({ queryKey: ["payments"] }); setApproveId(null); setApproveNote(""); },
     onError: (e: any) => toast.error(e.error ?? "Approval failed"),
   });
 
   const rejectMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/payments/${id}/reject`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: rejectReason }) }).then(async (r) => { if (!r.ok) throw await r.json(); }),
-    onSuccess: () => { toast.success("Payment rejected"); qc.invalidateQueries({ queryKey: ["payments"] }); setRejectId(null); setRejectReason(""); },
-    onError: () => toast.error("Rejection failed"),
+    onSuccess: () => { toast.success(t("toast.rejected")); qc.invalidateQueries({ queryKey: ["payments"] }); setRejectId(null); setRejectReason(""); },
+    onError: () => toast.error(t("toast.reject_failed")),
   });
 
   const addMutation = useMutation({
     mutationFn: () => fetch("/api/payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...addForm, amount: parseFloat(addForm.amount), proof: proofUrl }) }).then(async (r) => { if (!r.ok) throw await r.json(); }),
-    onSuccess: () => { toast.success("Payment created"); qc.invalidateQueries({ queryKey: ["payments"] }); setAddOpen(false); setProofUrl(null); setAddForm({ playerId: "", planId: "", amount: "", paymentMethodId: "", proof: "" }); },
-    onError: () => toast.error("Create failed"),
+    onSuccess: () => { toast.success(t("toast.created")); qc.invalidateQueries({ queryKey: ["payments"] }); setAddOpen(false); setProofUrl(null); setAddForm({ playerId: "", planId: "", amount: "", paymentMethodId: "", proof: "" }); },
+    onError: () => toast.error(t("toast.create_failed")),
   });
 
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +123,7 @@ export default function PaymentsPage() {
     fd.append("folder", "payments");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const d = await res.json();
-    if (res.ok) { setProofUrl(d.url); toast.success("Proof uploaded"); }
+    if (res.ok) { setProofUrl(d.url); toast.success(t("toast.proof_uploaded")); }
     else toast.error(d.error ?? "Upload failed");
     setUploadingAdd(false);
   };
@@ -140,7 +143,7 @@ export default function PaymentsPage() {
             onClick={() => setPreviewUrl(r.proof)}
             className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 transition-colors"
           >
-            <Eye className="h-3 w-3" /> Preview
+            <Eye className="h-3 w-3" /> {t("proof.preview")}
           </button>
           <a
             href={r.proof}
@@ -149,18 +152,18 @@ export default function PaymentsPage() {
             rel="noopener noreferrer"
             className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 transition-colors"
           >
-            <Download className="h-3 w-3" /> Download
+            <Download className="h-3 w-3" /> {t("common:ui.download")}
           </a>
         </div>
-      ) : <span className="text-xs text-gray-400">No proof</span>
+      ) : <span className="text-xs text-gray-400">{t("proof.none")}</span>
     },
     { key: "date", header: "Date", cell: (r: any) => formatDate(r.createdAt) },
     {
       key: "actions", header: "", cell: (r: any) => (
         <div className="flex gap-1">
           {r.status === "pending" && <>
-            <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title="Approve"><Check className="h-3.5 w-3.5" /></Button>
-            <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title="Reject"><X className="h-3.5 w-3.5" /></Button>
+            <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("common:ui.approve")}><Check className="h-3.5 w-3.5" /></Button>
+            <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>
           </>}
         </div>
       )
@@ -169,18 +172,18 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Payments" description="Manage payment verification">
-        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />Create Payment</Button>
+      <PageHeader title={t("title")} description={t("subtitle")}>
+        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("create")}</Button>
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search by player..." className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("search")} className="w-64" />
         {(["all", "pending", "approved", "rejected"] as Status[]).map((s) => (
           <Button key={s} variant={status === s ? "default" : "outline"} size="sm" onClick={() => { setStatus(s); setPage(1); }} className="capitalize">{s}</Button>
         ))}
       </div>
 
-      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage="No payments found" emptyIcon={<CreditCard className="h-8 w-8" />} />
+      <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<CreditCard className="h-8 w-8" />} />
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={20} onPageChange={setPage} />}
 
       {/* Proof Preview Dialog */}
@@ -189,14 +192,14 @@ export default function PaymentsPage() {
       {/* Approve Dialog */}
       <Dialog open={!!approveId} onOpenChange={(o) => !o && setApproveId(null)}>
         <DialogContent size="sm">
-          <DialogHeader><DialogTitle>Approve Payment</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("approve.title")}</DialogTitle></DialogHeader>
           <DialogBody>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">The payment will be approved and the subscription will be activated.</p>
-            <Textarea label="Admin Note (optional)" value={approveNote} onChange={(e) => setApproveNote(e.target.value)} placeholder="Optional note..." rows={2} />
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{t("approve.body")}</p>
+            <Textarea label={t("approve.note")} value={approveNote} onChange={(e) => setApproveNote(e.target.value)} placeholder={t("approve.note_ph")} rows={2} />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setApproveId(null)}>Cancel</Button>
-            <Button variant="success" onClick={() => approveId && approveMutation.mutate(approveId)} loading={approveMutation.isPending}><Check className="me-1.5 h-4 w-4" />Approve</Button>
+            <Button variant="outline" onClick={() => setApproveId(null)}>{t("common:ui.cancel")}</Button>
+            <Button variant="success" onClick={() => approveId && approveMutation.mutate(approveId)} loading={approveMutation.isPending}><Check className="me-1.5 h-4 w-4" />{t("common:ui.approve")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -204,13 +207,13 @@ export default function PaymentsPage() {
       {/* Reject Dialog */}
       <Dialog open={!!rejectId} onOpenChange={(o) => !o && setRejectId(null)}>
         <DialogContent size="sm">
-          <DialogHeader><DialogTitle>Reject Payment</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("reject.title")}</DialogTitle></DialogHeader>
           <DialogBody>
-            <Textarea label="Rejection Reason *" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Explain why the payment is rejected..." rows={3} />
+            <Textarea label={t("reject.reason")} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder={t("reject.reason_ph")} rows={3} />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => rejectId && rejectMutation.mutate(rejectId)} loading={rejectMutation.isPending} disabled={!rejectReason.trim()}><X className="me-1.5 h-4 w-4" />Reject</Button>
+            <Button variant="outline" onClick={() => setRejectId(null)}>{t("common:ui.cancel")}</Button>
+            <Button variant="destructive" onClick={() => rejectId && rejectMutation.mutate(rejectId)} loading={rejectMutation.isPending} disabled={!rejectReason.trim()}><X className="me-1.5 h-4 w-4" />{t("common:ui.reject")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -218,32 +221,32 @@ export default function PaymentsPage() {
       {/* Create Payment Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>Create Payment</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("create")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Player *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.player")}</label>
               <Select value={addForm.playerId} onValueChange={(v) => setAddForm({ ...addForm, playerId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select player" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("form.select_player")} /></SelectTrigger>
                 <SelectContent>{players?.data?.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.fullName}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Plan *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.plan")}</label>
               <Select value={addForm.planId} onValueChange={(v) => { const plan = plans?.find((p: any) => p.id === v); setAddForm({ ...addForm, planId: v, amount: plan ? String(plan.price) : "" }); }}>
-                <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("form.select_plan")} /></SelectTrigger>
                 <SelectContent>{plans?.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.name} — {p.price} DA</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Input label="Amount (DA) *" type="number" value={addForm.amount} onChange={(e) => setAddForm({ ...addForm, amount: e.target.value })} placeholder="5000" />
+            <Input label={t("form.amount")} type="number" value={addForm.amount} onChange={(e) => setAddForm({ ...addForm, amount: e.target.value })} placeholder="5000" />
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.method")}</label>
               <Select value={addForm.paymentMethodId} onValueChange={(v) => setAddForm({ ...addForm, paymentMethodId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select method" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("form.select_method")} /></SelectTrigger>
                 <SelectContent>{methods?.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Proof</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("proof.label")}</label>
               <div className="flex items-center gap-2">
                 <input ref={proofInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={handleProofUpload} />
                 <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()} loading={uploadingAdd}>
@@ -251,16 +254,16 @@ export default function PaymentsPage() {
                 </Button>
                 {proofUrl && (
                   <button onClick={() => setPreviewUrl(proofUrl)} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
-                    <Eye className="h-3 w-3" /> Preview
+                    <Eye className="h-3 w-3" /> {t("proof.preview")}
                   </button>
                 )}
               </div>
-              {proofUrl && <p className="mt-1 text-xs text-green-600">✓ Proof uploaded successfully</p>}
+              {proofUrl && <p className="mt-1 text-xs text-green-600">{t("proof.uploaded")}</p>}
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={() => addMutation.mutate()} loading={addMutation.isPending} disabled={!addForm.playerId || !addForm.planId || !addForm.amount}>Create Payment</Button>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>{t("common:ui.cancel")}</Button>
+            <Button onClick={() => addMutation.mutate()} loading={addMutation.isPending} disabled={!addForm.playerId || !addForm.planId || !addForm.amount}>{t("create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

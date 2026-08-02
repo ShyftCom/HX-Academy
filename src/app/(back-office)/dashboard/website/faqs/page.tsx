@@ -12,10 +12,12 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SortableList } from "@/components/website/admin/SortableList";
+import { useTranslation } from "react-i18next";
 
 interface Faq { id: string; question: string; answer: string; category: string | null; isPublished: boolean }
 
 export default function FaqsAdminPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: faqs = [] } = useQuery<Faq[]>({ queryKey: ["admin-faqs"], queryFn: () => fetch("/api/faqs").then((r) => r.json()) });
@@ -24,8 +26,8 @@ export default function FaqsAdminPage() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-faqs"] });
   const { mutate: create } = useMutation({
-    mutationFn: (category: string | null) => fetch("/api/faqs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: "New question", answer: "<p>Answer</p>", category }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("FAQ added"); invalidate(); },
+    mutationFn: (category: string | null) => fetch("/api/faqs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: t("faqs.new_question"), answer: "<p></p>", category }) }).then((r) => r.json()),
+    onSuccess: () => { toast.success(t("faqs.added")); invalidate(); },
   });
   const { mutate: update } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Faq>) => fetch(`/api/faqs/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -33,7 +35,7 @@ export default function FaqsAdminPage() {
   });
   const { mutate: remove, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/faqs/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); invalidate(); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
   });
 
   const groups = list.reduce<Record<string, Faq[]>>((acc, f) => {
@@ -50,12 +52,12 @@ export default function FaqsAdminPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="FAQs" description="Grouped by category — used on programme pages, venue pages, Squads, Contact and Pathway.">
-        <Button onClick={() => create(null)}><Plus className="h-4 w-4" /> Add FAQ</Button>
+      <PageHeader title={t("faqs.title")} description={t("faqs.subtitle")}>
+        <Button onClick={() => create(null)}><Plus className="h-4 w-4" /> {t("faqs.add")}</Button>
       </PageHeader>
 
       {list.length === 0 ? (
-        <EmptyState icon={HelpCircle} title="No FAQs yet" description="Add your first FAQ." action={{ label: "Add FAQ", onClick: () => create(null) }} />
+        <EmptyState icon={HelpCircle} title={t("faqs.empty")} description={t("faqs.empty_body")} action={{ label: t("faqs.add"), onClick: () => create(null) }} />
       ) : (
         Object.entries(groups).map(([category, items]) => (
           <div key={category}>
@@ -67,9 +69,9 @@ export default function FaqsAdminPage() {
                 <div className="mb-3 flex gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
                   {dragHandle}
                   <div className="flex-1 space-y-2">
-                    <Input defaultValue={f.question} onBlur={(e) => update({ id: f.id, question: e.target.value })} placeholder="Question" />
-                    <Textarea defaultValue={f.answer} onBlur={(e) => update({ id: f.id, answer: e.target.value })} placeholder="Answer (HTML)" rows={2} />
-                    <Input defaultValue={f.category ?? ""} onBlur={(e) => update({ id: f.id, category: e.target.value || null })} placeholder="Category" className="w-48" />
+                    <Input defaultValue={f.question} onBlur={(e) => update({ id: f.id, question: e.target.value })} placeholder={t("faqs.question")} />
+                    <Textarea defaultValue={f.answer} onBlur={(e) => update({ id: f.id, answer: e.target.value })} placeholder={t("faqs.answer_html")} rows={2} />
+                    <Input defaultValue={f.category ?? ""} onBlur={(e) => update({ id: f.id, category: e.target.value || null })} placeholder={t("common:ui.category")} className="w-48" />
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <Switch checked={f.isPublished} onCheckedChange={(v) => update({ id: f.id, isPublished: v })} />
@@ -84,7 +86,7 @@ export default function FaqsAdminPage() {
         ))
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete FAQ" description="This permanently removes this FAQ." onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("faqs.delete")} description={t("faqs.delete_body")} onConfirm={() => deleteId && remove(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

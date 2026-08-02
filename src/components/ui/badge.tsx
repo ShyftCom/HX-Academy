@@ -2,19 +2,30 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Chips and tags. Low-saturation tinted fill, full-intensity text — so a badge
+ * reads as a label rather than as a button. Squared off (2px) to match the
+ * rectangular structure; pills would fight the rest of the system.
+ */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors",
+  cn(
+    "inline-flex items-center gap-1.5 rounded-[2px] border px-2 py-0.5",
+    "font-mono text-[11px] font-medium uppercase leading-[1.4] tracking-[0.04em]",
+    "transition-colors"
+  ),
   {
     variants: {
       variant: {
-        default:     "bg-[#FEE2E2] text-[#701C1C] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
-        secondary:   "bg-[#F0F0F0] text-[#374151] dark:bg-[#2a2a2a] dark:text-[#D0D0D0]",
-        destructive: "bg-[#FEE2E2] text-[#701C1C] dark:bg-[#A02020]/30 dark:text-[#ffaaaa]",
-        success:     "bg-[#FEF2F2] text-[#A02020] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
-        warning:     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        outline:     "border border-[#D0D0D0] text-[#374151] dark:border-[#2a2a2a] dark:text-[#D0D0D0]",
-        orange:      "bg-[#FEF2F2] text-[#903030] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
-        purple:      "bg-[#FEF2F2] text-[#701C1C] dark:bg-[#A02020]/20 dark:text-[#ffaaaa]",
+        default: "border-[rgba(0,112,243,0.3)] bg-[var(--ob-primary-soft)] text-[var(--ob-primary-light)]",
+        secondary: "border-[var(--ob-line-strong)] bg-[var(--ob-neutral-soft)] text-[var(--ob-text-secondary)]",
+        success: "border-[rgba(60,215,255,0.3)] bg-[var(--ob-success-soft)] text-[var(--ob-success)]",
+        warning: "border-[rgba(245,181,68,0.3)] bg-[var(--ob-warning-soft)] text-[var(--ob-warning)]",
+        destructive: "border-[rgba(255,180,171,0.3)] bg-[var(--ob-error-soft)] text-[var(--ob-error)]",
+        outline: "border-[var(--ob-line-strong)] bg-transparent text-[var(--ob-text-secondary)]",
+        // Retained so existing call sites keep compiling; both fold into the
+        // primary family rather than reintroducing off-palette hues.
+        orange: "border-[rgba(245,181,68,0.3)] bg-[var(--ob-warning-soft)] text-[var(--ob-warning)]",
+        purple: "border-[rgba(0,112,243,0.3)] bg-[var(--ob-primary-soft)] text-[var(--ob-primary-light)]",
       },
     },
     defaultVariants: { variant: "default" },

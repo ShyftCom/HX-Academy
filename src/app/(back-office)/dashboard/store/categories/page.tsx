@@ -13,8 +13,10 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Plus, Edit, Trash2, Folder } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function CategoriesPage() {
+  const { t } = useTranslation("store");
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCat, setEditCat] = useState<any>(null);
@@ -34,13 +36,13 @@ export default function CategoriesPage() {
       return res.json();
     },
     onSuccess: () => { toast.success(editCat ? "Category updated" : "Category created"); qc.invalidateQueries({ queryKey: ["product-categories"] }); setModalOpen(false); setForm({ name: "", description: "" }); setEditCat(null); },
-    onError: () => toast.error("Save failed"),
+    onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/products/categories/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["product-categories"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["product-categories"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const openAdd = () => { setEditCat(null); setForm({ name: "", description: "" }); setModalOpen(true); };
@@ -52,7 +54,7 @@ export default function CategoriesPage() {
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.isActive ? "success" : "secondary"}>{r.isActive ? "Active" : "Inactive"}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />Edit</Button>
+        <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />{t("common:ui.edit")}</Button>
         <Button variant="outline" size="sm" onClick={() => setDeleteId(r.id)} className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     )},
@@ -60,31 +62,31 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Product Categories" description="Organize products by category">
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />Add Category</Button>
+      <PageHeader title={t("categories.title")} description={t("categories.subtitle")}>
+        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("categories.add")}</Button>
       </PageHeader>
 
       {!isLoading && categories?.length === 0 ? (
-        <EmptyState icon={Folder} title="No categories" description="Create your first product category" action={{ label: "Add Category", onClick: openAdd }} />
+        <EmptyState icon={Folder} title={t("categories.empty")} description={t("categories.empty_body")} action={{ label: t("categories.add"), onClick: openAdd }} />
       ) : (
-        <DataTable columns={columns} data={categories ?? []} loading={isLoading} emptyMessage="No categories" />
+        <DataTable columns={columns} data={categories ?? []} loading={isLoading} emptyMessage={t("categories.empty")} />
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="sm">
           <DialogHeader><DialogTitle>{editCat ? "Edit Category" : "Add Category"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label="Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Jerseys" />
-            <Textarea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional description" rows={2} />
+            <Input label={t("categories.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("categories.name_ph")} />
+            <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("categories.description_ph")} rows={2} />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editCat ? "Save" : "Create"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete Category" description="Products in this category won't be deleted, but will have no category." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("categories.delete_title")} description={t("categories.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

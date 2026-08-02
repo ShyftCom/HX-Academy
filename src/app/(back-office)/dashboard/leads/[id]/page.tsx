@@ -101,6 +101,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 export default function LeadDetailPage() {
+  const { t } = useTranslation("leads");
   const { t: tl } = useTranslation("leads");
   const { t: tc } = useTranslation("common");
   const { id } = useParams<{ id: string }>();
@@ -207,8 +208,8 @@ export default function LeadDetailPage() {
     return (
       <div className="text-center py-20">
         <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
-        <p className="font-medium" style={{ color: "var(--text-primary)" }}>Lead not found</p>
-        <Link href="/dashboard/leads" className="text-sm mt-2 block" style={{ color: "#A02020" }}>Back to Leads</Link>
+        <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("detail.not_found")}</p>
+        <Link href="/dashboard/leads" className="text-sm mt-2 block" style={{ color: "#A02020" }}>{t("detail.back")}</Link>
       </div>
     );
   }
@@ -247,7 +248,7 @@ export default function LeadDetailPage() {
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{lead.fullName}</h1>
               {lead.isConverted && (
-                <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "#D1FAE5", color: "#065F46" }}>Converted</span>
+                <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "#D1FAE5", color: "#065F46" }}>{t("page.converted")}</span>
               )}
             </div>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
@@ -324,7 +325,7 @@ export default function LeadDetailPage() {
             </div>
             {lead.notes && (
               <div className="rounded-2xl p-5" style={{ background: "var(--card)", border: "1px solid var(--card-border)" }}>
-                <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--text-muted)" }}>Notes</h2>
+                <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--text-muted)" }}>{t("common:ui.notes")}</h2>
                 <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--text-primary)" }}>{lead.notes}</p>
               </div>
             )}
@@ -362,7 +363,7 @@ export default function LeadDetailPage() {
               </div>
               {lead.isConverted && lead.convertedAt && (
                 <div>
-                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Converted</p>
+                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{t("page.converted")}</p>
                   <p className="text-sm" style={{ color: "#10B981" }}>{formatDate(lead.convertedAt)}</p>
                 </div>
               )}

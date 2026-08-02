@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Banknote, RefreshCw } from "lucide-react";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
 export default function PayrollPage() {
+  const { t } = useTranslation("hrm");
   const { activeStationId } = useStation();
   const qc = useQueryClient();
   const now = new Date();
@@ -30,14 +32,14 @@ export default function PayrollPage() {
 
   const generateMut = useMutation({
     mutationFn: () => fetch("/api/hrm/payroll", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId: activeStationId, month, year }) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll"] }); toast.success("Payroll generated"); },
-    onError: () => toast.error("Failed to generate payroll"),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll"] }); toast.success(t("payroll.generated")); },
+    onError: () => toast.error(t("payroll.generate_failed")),
   });
 
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       fetch(`/api/hrm/payroll/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll"] }); setEditingId(null); toast.success("Payroll updated"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll"] }); setEditingId(null); toast.success(t("payroll.updated")); },
   });
 
   const payMut = useMutation({
@@ -45,7 +47,7 @@ export default function PayrollPage() {
     onSuccess: (d) => {
       if (d.error) { toast.error(d.error); return; }
       qc.invalidateQueries({ queryKey: ["payroll"] });
-      toast.success("Payroll marked as paid & charge created");
+      toast.success(t("payroll.paid"));
     },
   });
 
@@ -54,7 +56,7 @@ export default function PayrollPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold">Payroll</h1><p className="text-sm text-gray-500">Monthly salary management</p></div>
+        <div><h1 className="text-2xl font-bold">{t("payroll.title")}</h1><p className="text-sm text-gray-500">{t("payroll.subtitle")}</p></div>
         <div className="flex items-center gap-2">
           <select className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => <option key={m} value={m}>{new Date(2000, m - 1).toLocaleString("en", { month: "long" })}</option>)}
@@ -77,14 +79,14 @@ export default function PayrollPage() {
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b text-gray-500">
-              <th className="text-start py-2 pe-4">Staff</th>
-              <th className="text-end py-2 pe-4">Base Salary</th>
-              <th className="text-end py-2 pe-4">Bonuses</th>
-              <th className="text-end py-2 pe-4">Deductions</th>
-              <th className="text-end py-2 pe-4">Absences</th>
-              <th className="text-end py-2 pe-4">Net Salary</th>
-              <th className="text-center py-2 pe-4">Status</th>
-              <th className="text-end py-2">Actions</th>
+              <th className="text-start py-2 pe-4">{t("staff.title")}</th>
+              <th className="text-end py-2 pe-4">{t("staff.base_salary")}</th>
+              <th className="text-end py-2 pe-4">{t("payroll.bonuses")}</th>
+              <th className="text-end py-2 pe-4">{t("payroll.deductions")}</th>
+              <th className="text-end py-2 pe-4">{t("payroll.absences")}</th>
+              <th className="text-end py-2 pe-4">{t("payroll.net")}</th>
+              <th className="text-center py-2 pe-4">{t("common:ui.status")}</th>
+              <th className="text-end py-2">{t("common:ui.actions")}</th>
             </tr></thead>
             <tbody>
               {payrolls.map((p: any) => (
@@ -108,13 +110,13 @@ export default function PayrollPage() {
                     <div className="flex justify-end gap-1">
                       {editingId === p.id ? (
                         <>
-                          <Button size="sm" onClick={() => updateMut.mutate({ id: p.id, data: { bonuses: Number(bonuses[p.id] ?? p.bonuses), deductions: Number(deductions[p.id] ?? p.deductions) } })}>Save</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                          <Button size="sm" onClick={() => updateMut.mutate({ id: p.id, data: { bonuses: Number(bonuses[p.id] ?? p.bonuses), deductions: Number(deductions[p.id] ?? p.deductions) } })}>{t("common:actions.save")}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>{t("common:ui.cancel")}</Button>
                         </>
                       ) : (
                         <>
-                          {p.status !== "paid" && <Button size="sm" variant="outline" onClick={() => setEditingId(p.id)}>Edit</Button>}
-                          {p.status !== "paid" && <Button size="sm" onClick={() => { if (confirm(`Mark ${p.staff?.fullName}'s salary as paid?`)) payMut.mutate(p.id); }}>Pay</Button>}
+                          {p.status !== "paid" && <Button size="sm" variant="outline" onClick={() => setEditingId(p.id)}>{t("common:ui.edit")}</Button>}
+                          {p.status !== "paid" && <Button size="sm" onClick={() => { if (confirm(`Mark ${p.staff?.fullName}'s salary as paid?`)) payMut.mutate(p.id); }}>{t("payroll.pay")}</Button>}
                         </>
                       )}
                     </div>
@@ -123,8 +125,8 @@ export default function PayrollPage() {
               ))}
             </tbody>
           </table>
-          {isLoading && <p className="py-8 text-center text-sm text-gray-400">Loading...</p>}
-          {!isLoading && !payrolls.length && <p className="py-8 text-center text-sm text-gray-400">No payroll generated yet. Click "Generate Payroll" to start.</p>}
+          {isLoading && <p className="py-8 text-center text-sm text-gray-400">{t("common:ui.loading")}</p>}
+          {!isLoading && !payrolls.length && <p className="py-8 text-center text-sm text-gray-400">{t("payroll.empty")}</p>}
         </CardContent>
       </Card>
     </div>

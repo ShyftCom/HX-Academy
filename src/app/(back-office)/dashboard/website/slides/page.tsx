@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "react-i18next";
 
 interface Slide {
   id: string; imageUrl: string; title: string | null; titleFr: string | null; titleAr: string | null;
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
 };
 
 function ImageUploader({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const { t } = useTranslation("website");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,9 +39,9 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (data.url) onChange(data.url);
-      else toast.error("Upload failed");
+      else toast.error(t("common:toast.upload_failed"));
     } catch {
-      toast.error("Upload failed");
+      toast.error(t("common:toast.upload_failed"));
     } finally {
       setUploading(false);
     }
@@ -49,7 +51,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
     <div className="space-y-2">
       {value ? (
         <div className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-          <img src={value} alt="Slide" className="w-full h-48 object-cover" />
+          <img src={value} alt={t("slides.one")} className="w-full h-48 object-cover" />
           <button
             onClick={() => onChange("")}
             className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -66,7 +68,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
         >
           <Upload className="w-6 h-6" />
           <span className="text-sm">{uploading ? "Uploading..." : "Click to upload image"}</span>
-          <span className="text-xs text-gray-400">JPG, PNG, WEBP • max 10MB</span>
+          <span className="text-xs text-gray-400">{t("slides.hint")}</span>
         </button>
       )}
       <input
@@ -86,6 +88,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
 }
 
 export default function SlidesPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [modal, setModal] = useState<"new" | Slide | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -100,15 +103,15 @@ export default function SlidesPage() {
   const { mutate: createSlide, isPending: creating } = useMutation({
     mutationFn: (data: typeof EMPTY_FORM) =>
       fetch("/api/website/slides", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Slide added"); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("slides.added")); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: updateSlide, isPending: updating } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & typeof EMPTY_FORM) =>
       fetch(`/api/website/slides/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.saved")); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: toggleActive } = useMutation({
@@ -119,8 +122,8 @@ export default function SlidesPage() {
 
   const { mutate: deleteSlide, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/website/slides/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setDeleteId(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const openNew = () => { setForm(EMPTY_FORM); setTab("en"); setModal("new"); };
@@ -131,7 +134,7 @@ export default function SlidesPage() {
   };
 
   const save = () => {
-    if (!form.imageUrl) { toast.error("Please upload an image"); return; }
+    if (!form.imageUrl) { toast.error(t("slides.need_image")); return; }
     if (modal === "new") createSlide(form);
     else if (modal) updateSlide({ id: (modal as Slide).id, ...form });
   };
@@ -141,14 +144,14 @@ export default function SlidesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Image Slider" description="Manage the image carousel shown on the public website.">
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Slide</Button>
+      <PageHeader title={t("slides.title")} description={t("slides.subtitle")}>
+        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> {t("slides.add")}</Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : allSlides.length === 0 ? (
-        <EmptyState icon={Upload} title="No slides yet" description="Add your first slide to display on the public website homepage." action={{ label: "Add Slide", onClick: openNew }} />
+        <EmptyState icon={Upload} title={t("slides.empty")} description={t("slides.empty_body")} action={{ label: t("slides.add"), onClick: openNew }} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {allSlides.map((slide) => (
@@ -157,7 +160,7 @@ export default function SlidesPage() {
                 <img src={slide.imageUrl} alt={slide.title ?? "Slide"} className="w-full h-full object-cover" />
                 {!slide.isActive && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <span className="text-white text-xs font-semibold bg-black/60 px-2 py-1 rounded">Hidden</span>
+                    <span className="text-white text-xs font-semibold bg-black/60 px-2 py-1 rounded">{t("reviews.hidden")}</span>
                   </div>
                 )}
               </div>
@@ -165,7 +168,7 @@ export default function SlidesPage() {
                 {slide.title && <p className="font-medium text-sm truncate">{slide.title}</p>}
                 {slide.subtitle && <p className="text-xs text-gray-500 truncate">{slide.subtitle}</p>}
                 <div className="flex items-center gap-1 mt-3">
-                  <Button size="sm" variant="outline" className="flex-1 text-xs h-7" onClick={() => openEdit(slide)}>Edit</Button>
+                  <Button size="sm" variant="outline" className="flex-1 text-xs h-7" onClick={() => openEdit(slide)}>{t("common:ui.edit")}</Button>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => toggleActive({ id: slide.id, isActive: !slide.isActive })}>
                     {slide.isActive ? <EyeOff className="w-3.5 h-3.5 text-gray-500" /> : <Eye className="w-3.5 h-3.5 text-green-500" />}
                   </Button>
@@ -198,30 +201,30 @@ export default function SlidesPage() {
 
               {tab === "en" && (
                 <div className="space-y-3">
-                  <div><Label>Title (EN)</Label><Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Train with the best" /></div>
-                  <div><Label>Subtitle (EN)</Label><Input value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} placeholder="Short description" /></div>
+                  <div><Label>{t("slides.title_en")}</Label><Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder={t("slides.heading_ph")} /></div>
+                  <div><Label>{t("slides.sub_en")}</Label><Input value={form.subtitle} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} placeholder={t("slides.sub_ph")} /></div>
                 </div>
               )}
               {tab === "fr" && (
                 <div className="space-y-3">
-                  <div><Label>Title (FR)</Label><Input value={form.titleFr} onChange={(e) => setForm((f) => ({ ...f, titleFr: e.target.value }))} /></div>
-                  <div><Label>Subtitle (FR)</Label><Input value={form.subtitleFr} onChange={(e) => setForm((f) => ({ ...f, subtitleFr: e.target.value }))} /></div>
+                  <div><Label>{t("slides.title_fr")}</Label><Input value={form.titleFr} onChange={(e) => setForm((f) => ({ ...f, titleFr: e.target.value }))} /></div>
+                  <div><Label>{t("slides.sub_fr")}</Label><Input value={form.subtitleFr} onChange={(e) => setForm((f) => ({ ...f, subtitleFr: e.target.value }))} /></div>
                 </div>
               )}
               {tab === "ar" && (
                 <div className="space-y-3" dir="rtl">
-                  <div><Label>Title (AR)</Label><Input value={form.titleAr} onChange={(e) => setForm((f) => ({ ...f, titleAr: e.target.value }))} /></div>
-                  <div><Label>Subtitle (AR)</Label><Input value={form.subtitleAr} onChange={(e) => setForm((f) => ({ ...f, subtitleAr: e.target.value }))} /></div>
+                  <div><Label>{t("slides.title_ar")}</Label><Input value={form.titleAr} onChange={(e) => setForm((f) => ({ ...f, titleAr: e.target.value }))} /></div>
+                  <div><Label>{t("slides.sub_ar")}</Label><Input value={form.subtitleAr} onChange={(e) => setForm((f) => ({ ...f, subtitleAr: e.target.value }))} /></div>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>CTA Button Label</Label><Input value={form.ctaLabel} onChange={(e) => setForm((f) => ({ ...f, ctaLabel: e.target.value }))} placeholder="Join Now" /></div>
-                <div><Label>CTA URL</Label><Input value={form.ctaUrl} onChange={(e) => setForm((f) => ({ ...f, ctaUrl: e.target.value }))} placeholder="/apply" /></div>
+                <div><Label>{t("sc.cta_label")}</Label><Input value={form.ctaLabel} onChange={(e) => setForm((f) => ({ ...f, ctaLabel: e.target.value }))} placeholder="Join Now" /></div>
+                <div><Label>{t("slides.cta_url")}</Label><Input value={form.ctaUrl} onChange={(e) => setForm((f) => ({ ...f, ctaUrl: e.target.value }))} placeholder="/apply" /></div>
               </div>
             </DialogBody>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>
                 {creating || updating ? "Saving..." : "Save Slide"}
               </Button>
@@ -233,8 +236,8 @@ export default function SlidesPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Slide"
-        description="This will permanently remove the slide."
+        title={t("slides.delete")}
+        description={t("slides.delete_body")}
         onConfirm={() => deleteId && deleteSlide(deleteId)}
         loading={deleting}
         variant="destructive"

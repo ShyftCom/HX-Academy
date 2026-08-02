@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFoo
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface ProgrammeRow {
   id: string; slug: string; name: string; isPubliclyListed: boolean; isFeatured: boolean;
@@ -19,6 +20,7 @@ interface ProgrammeRow {
 }
 
 export default function ProgrammesListPage() {
+  const { t } = useTranslation("website");
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -35,7 +37,7 @@ export default function ProgrammesListPage() {
       if (!r.ok) throw new Error(d.error ?? "Failed");
       return d;
     }),
-    onSuccess: () => { toast.success("Programme created"); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setCreating(false); setName(""); },
+    onSuccess: () => { toast.success(t("programmes.created")); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setCreating(false); setName(""); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -47,32 +49,32 @@ export default function ProgrammesListPage() {
 
   const { mutate: deleteProgramme, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/programmes/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Programme deleted"); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setDeleteId(null); },
+    onSuccess: () => { toast.success(t("programmes.deleted")); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setDeleteId(null); },
   });
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Programmes" description="Manage every football programme shown on the public site, including schedules, coaches and pricing.">
+      <PageHeader title={t("programmes.title")} description={t("programmes.subtitle")}>
         <div className="flex gap-2">
-          <Button variant="outline" asChild><Link href="/dashboard/website/programmes/categories"><Settings2 className="h-4 w-4" /> Categories</Link></Button>
-          <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4" /> New Programme</Button>
+          <Button variant="outline" asChild><Link href="/dashboard/website/programmes/categories"><Settings2 className="h-4 w-4" /> {t("programmes.categories")}</Link></Button>
+          <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4" /> {t("programmes.new")}</Button>
         </div>
       </PageHeader>
 
       {isLoading ? (
-        <div className="py-12 text-center text-gray-500">Loading…</div>
+        <div className="py-12 text-center text-gray-500">{t("common:ui.loading_alt")}</div>
       ) : programmes.length === 0 ? (
-        <EmptyState icon={Trophy} title="No programmes yet" description="Create your first programme to show it on the public site." action={{ label: "New Programme", onClick: () => setCreating(true) }} />
+        <EmptyState icon={Trophy} title={t("programmes.empty")} description={t("programmes.empty_body")} action={{ label: t("programmes.new"), onClick: () => setCreating(true) }} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800/50">
               <tr>
-                <th className="px-4 py-3 text-start font-medium">Name</th>
-                <th className="px-4 py-3 text-start font-medium">Category</th>
-                <th className="px-4 py-3 text-start font-medium">Schedule rows</th>
-                <th className="px-4 py-3 text-start font-medium">Leads</th>
-                <th className="px-4 py-3 text-start font-medium">Status</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.name")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.category")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("programmes.schedule_rows")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.leads")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("common:ui.status")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -81,7 +83,7 @@ export default function ProgrammesListPage() {
                 <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
                   <td className="px-4 py-3">
                     <Link href={`/dashboard/website/programmes/${p.id}`} className="font-medium text-blue-600 hover:underline">{p.name}</Link>
-                    {p.isFeatured && <span className="ms-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">FEATURED</span>}
+                    {p.isFeatured && <span className="ms-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">{t("common:ui.featured_caps")}</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500">{p.category?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-500">{p._count.schedules}</td>
@@ -114,13 +116,13 @@ export default function ProgrammesListPage() {
 
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Programme</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("programmes.new")}</DialogTitle></DialogHeader>
           <DialogBody>
-            <Label>Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Football School" />
+            <Label>{t("common:ui.name")}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("programmes.name_ph")} />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreating(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
             <Button onClick={() => createProgramme()} disabled={isPending || !name}>{isPending ? "Creating…" : "Create"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -129,8 +131,8 @@ export default function ProgrammesListPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
-        title="Delete Programme"
-        description="This permanently removes the programme, its schedule and its FAQs."
+        title={t("programmes.delete")}
+        description={t("programmes.delete_body")}
         onConfirm={() => deleteId && deleteProgramme(deleteId)}
         loading={deleting}
         variant="destructive"

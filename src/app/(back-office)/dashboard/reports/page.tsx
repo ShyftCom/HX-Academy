@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Legend } from "recharts";
 import { DollarSign, Users, CreditCard, ShoppingBag, TrendingUp, UserPlus, Calendar } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const PERIODS = [
   { label: "Today", value: "today" },
@@ -24,6 +25,7 @@ const PERIODS = [
 const PIE_COLORS = ["#3B82F6", "#10B981", "#EF4444", "#F59E0B"];
 
 export default function ReportsPage() {
+  const { t } = useTranslation("admin");
   const [period, setPeriod] = useState("month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -61,7 +63,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Reports & Analytics" description="Track academy performance">
+      <PageHeader title={t("reports.title")} description={t("reports.subtitle")}>
         <div className="flex items-center gap-2">
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
@@ -78,27 +80,27 @@ export default function ReportsPage() {
 
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="products">Top Products</TabsTrigger>
+          <TabsTrigger value="overview">{t("reports.overview")}</TabsTrigger>
+          <TabsTrigger value="revenue">{t("reports.revenue")}</TabsTrigger>
+          <TabsTrigger value="subscriptions">{t("common:nav.subscriptions")}</TabsTrigger>
+          <TabsTrigger value="leads">{t("common:ui.leads")}</TabsTrigger>
+          <TabsTrigger value="products">{t("reports.top_products")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-5">
           {ovLoading ? <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div> : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard title="Total Revenue" value={formatCurrency(overview?.totalRevenue ?? 0)} icon={DollarSign} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />
-                <StatCard title="Period Revenue" value={formatCurrency(overview?.periodRevenue ?? 0)} icon={TrendingUp} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />
-                <StatCard title="Total Players" value={overview?.totalPlayers ?? 0} icon={Users} iconColor="text-purple-600" iconBg="bg-purple-50 dark:bg-purple-900/20" />
-                <StatCard title="Active Subscriptions" value={overview?.activeSubscriptions ?? 0} icon={CreditCard} iconColor="text-indigo-600" iconBg="bg-indigo-50 dark:bg-indigo-900/20" />
+                <StatCard title={t("reports.total_revenue")} value={formatCurrency(overview?.totalRevenue ?? 0)} icon={DollarSign} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />
+                <StatCard title={t("reports.period_revenue")} value={formatCurrency(overview?.periodRevenue ?? 0)} icon={TrendingUp} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />
+                <StatCard title={t("reports.total_players")} value={overview?.totalPlayers ?? 0} icon={Users} iconColor="text-purple-600" iconBg="bg-purple-50 dark:bg-purple-900/20" />
+                <StatCard title={t("reports.active_subs")} value={overview?.activeSubscriptions ?? 0} icon={CreditCard} iconColor="text-indigo-600" iconBg="bg-indigo-50 dark:bg-indigo-900/20" />
               </div>
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard title="Total Leads" value={overview?.totalLeads ?? 0} icon={UserPlus} iconColor="text-amber-600" iconBg="bg-amber-50 dark:bg-amber-900/20" />
-                <StatCard title="Converted Leads" value={overview?.convertedLeads ?? 0} subtitle={`${overview?.conversionRate ?? 0}% rate`} icon={Users} iconColor="text-emerald-600" iconBg="bg-emerald-50 dark:bg-emerald-900/20" />
-                <StatCard title="Total Orders" value={overview?.totalOrders ?? 0} icon={ShoppingBag} iconColor="text-rose-600" iconBg="bg-rose-50 dark:bg-rose-900/20" />
-                <StatCard title="Pending Payments" value={overview?.pendingPayments ?? 0} icon={Calendar} iconColor="text-orange-600" iconBg="bg-orange-50 dark:bg-orange-900/20" />
+                <StatCard title={t("reports.total_leads")} value={overview?.totalLeads ?? 0} icon={UserPlus} iconColor="text-amber-600" iconBg="bg-amber-50 dark:bg-amber-900/20" />
+                <StatCard title={t("reports.converted_leads")} value={overview?.convertedLeads ?? 0} subtitle={`${overview?.conversionRate ?? 0}% rate`} icon={Users} iconColor="text-emerald-600" iconBg="bg-emerald-50 dark:bg-emerald-900/20" />
+                <StatCard title={t("reports.total_orders")} value={overview?.totalOrders ?? 0} icon={ShoppingBag} iconColor="text-rose-600" iconBg="bg-rose-50 dark:bg-rose-900/20" />
+                <StatCard title={t("reports.pending_payments")} value={overview?.pendingPayments ?? 0} icon={Calendar} iconColor="text-orange-600" iconBg="bg-orange-50 dark:bg-orange-900/20" />
               </div>
             </div>
           )}
@@ -106,7 +108,7 @@ export default function ReportsPage() {
 
         <TabsContent value="revenue" className="mt-5">
           <Card>
-            <CardHeader><CardTitle>Monthly Revenue (Last 12 Months)</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("reports.monthly_revenue")}</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={revenue?.data ?? []}>
@@ -123,7 +125,7 @@ export default function ReportsPage() {
 
         <TabsContent value="subscriptions" className="mt-5">
           <Card>
-            <CardHeader><CardTitle>Subscriptions by Status</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("reports.subs_by_status")}</CardTitle></CardHeader>
             <CardContent className="flex justify-center">
               {subscriptions?.data?.length ? (
                 <PieChart width={400} height={300}>
@@ -133,23 +135,23 @@ export default function ReportsPage() {
                   <Tooltip />
                   <Legend />
                 </PieChart>
-              ) : <p className="py-16 text-sm text-gray-400">No subscription data</p>}
+              ) : <p className="py-16 text-sm text-gray-400">{t("reports.no_sub_data")}</p>}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="leads" className="mt-5">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatCard title="Total Leads" value={leads?.total ?? 0} icon={UserPlus} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />
-            <StatCard title="Converted" value={leads?.converted ?? 0} icon={Users} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />
-            <StatCard title="Conversion Rate" value={`${leads?.conversionRate ?? 0}%`} icon={TrendingUp} iconColor="text-purple-600" iconBg="bg-purple-50 dark:bg-purple-900/20" />
-            <StatCard title="Period Leads" value={leads?.thisMonth ?? 0} icon={Calendar} iconColor="text-amber-600" iconBg="bg-amber-50 dark:bg-amber-900/20" />
+            <StatCard title={t("reports.total_leads")} value={leads?.total ?? 0} icon={UserPlus} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />
+            <StatCard title={t("reports.converted")} value={leads?.converted ?? 0} icon={Users} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />
+            <StatCard title={t("reports.conversion_rate")} value={`${leads?.conversionRate ?? 0}%`} icon={TrendingUp} iconColor="text-purple-600" iconBg="bg-purple-50 dark:bg-purple-900/20" />
+            <StatCard title={t("reports.period_leads")} value={leads?.thisMonth ?? 0} icon={Calendar} iconColor="text-amber-600" iconBg="bg-amber-50 dark:bg-amber-900/20" />
           </div>
         </TabsContent>
 
         <TabsContent value="products" className="mt-5">
           <Card>
-            <CardHeader><CardTitle>Top Products by Sales</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("reports.top_by_sales")}</CardTitle></CardHeader>
             <CardContent>
               {products?.data?.length ? (
                 <ResponsiveContainer width="100%" height={350}>
@@ -161,7 +163,7 @@ export default function ReportsPage() {
                     <Bar dataKey="sales" fill="#10B981" radius={[0, 4, 4, 0]} name="Units Sold" />
                   </BarChart>
                 </ResponsiveContainer>
-              ) : <p className="py-16 text-center text-sm text-gray-400">No product sales data</p>}
+              ) : <p className="py-16 text-center text-sm text-gray-400">{t("reports.no_product_data")}</p>}
             </CardContent>
           </Card>
         </TabsContent>

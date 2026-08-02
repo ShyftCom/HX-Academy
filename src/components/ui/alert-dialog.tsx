@@ -14,7 +14,7 @@ const AlertDialogOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
-    className={cn("fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className)}
+    className={cn("fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className)}
     {...props}
     ref={ref}
   />
@@ -30,7 +30,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "ob-glass fixed start-[50%] top-[50%] z-50 w-[calc(100%-2rem)] max-w-md translate-x-[-50%] translate-y-[-50%] rtl:translate-x-[50%] rounded-[var(--ob-radius-feature)] p-6 shadow-[0_16px_48px_rgba(0,0,0,0.5)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ const AlertDialogTitle = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Title ref={ref} className={cn("text-lg font-semibold text-gray-900 dark:text-gray-100", className)} {...props} />
+  <AlertDialogPrimitive.Title ref={ref} className={cn("text-base font-semibold tracking-[-0.01em] text-[var(--ob-text)]", className)} {...props} />
 ));
 AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName;
 
@@ -59,7 +59,7 @@ const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPrimitive.Description ref={ref} className={cn("text-sm text-gray-500 dark:text-gray-400", className)} {...props} />
+  <AlertDialogPrimitive.Description ref={ref} className={cn("text-[13px] leading-relaxed text-[var(--ob-text-secondary)]", className)} {...props} />
 ));
 AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 

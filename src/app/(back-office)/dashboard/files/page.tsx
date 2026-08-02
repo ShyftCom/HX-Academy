@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatDate } from "@/lib/utils";
 import { Upload, Trash2, Folder, FileText, Image } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const FOLDERS = ["general", "products", "payments", "players", "videos", "documents"];
 
@@ -21,6 +22,7 @@ function formatSize(bytes: number) {
 }
 
 export default function FilesPage() {
+  const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [page, setPage] = useState(1);
@@ -39,8 +41,8 @@ export default function FilesPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/files?id=${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success("File deleted"); qc.invalidateQueries({ queryKey: ["files"] }); setDeleteId(null); },
-    onError: () => toast.error("Delete failed"),
+    onSuccess: () => { toast.success(t("files.deleted")); qc.invalidateQueries({ queryKey: ["files"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +51,7 @@ export default function FilesPage() {
     const fd = new FormData(); fd.append("file", file); fd.append("folder", folder || "general");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const d = await res.json();
-    if (res.ok) { toast.success("File uploaded"); qc.invalidateQueries({ queryKey: ["files"] }); }
+    if (res.ok) { toast.success(t("files.uploaded")); qc.invalidateQueries({ queryKey: ["files"] }); }
     else toast.error(d.error ?? "Upload failed");
     setUploading(false);
     e.target.value = "";
@@ -59,7 +61,7 @@ export default function FilesPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="File Manager" description="Manage uploaded files and media">
+      <PageHeader title={t("files.title")} description={t("files.subtitle")}>
         <input
           ref={fileInputRef}
           type="file"
@@ -68,15 +70,15 @@ export default function FilesPage() {
           accept="image/*,.pdf,.mp4,.webm"
         />
         <Button loading={uploading} onClick={() => fileInputRef.current?.click()}>
-          <Upload className="me-2 h-4 w-4" />Upload File
+          <Upload className="me-2 h-4 w-4" />{t("files.upload")}
         </Button>
       </PageHeader>
 
       <div className="flex gap-3">
         <Select value={folder} onValueChange={(v) => { setFolder(v); setPage(1); }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Folders" /></SelectTrigger>
+          <SelectTrigger className="w-40"><SelectValue placeholder={t("files.all_folders")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Folders</SelectItem>
+            <SelectItem value="all">{t("files.all_folders")}</SelectItem>
             {FOLDERS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -87,7 +89,7 @@ export default function FilesPage() {
           {Array.from({ length: 12 }).map((_, i) => <div key={i} className="h-32 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />)}
         </div>
       ) : data?.data?.length === 0 ? (
-        <EmptyState icon={Folder} title="No files" description="Upload files to manage them here" action={{ label: "Upload File", onClick: () => document.querySelector<HTMLInputElement>("input[type=file]")?.click() }} />
+        <EmptyState icon={Folder} title={t("files.empty")} description={t("files.empty_body")} action={{ label: t("files.upload"), onClick: () => document.querySelector<HTMLInputElement>("input[type=file]")?.click() }} />
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {data?.data?.map((file: any) => (
@@ -114,7 +116,7 @@ export default function FilesPage() {
       )}
 
       {data?.totalPages > 1 && <Pagination page={page} totalPages={data.totalPages} total={data.total} perPage={30} onPageChange={setPage} />}
-      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title="Delete File" description="This file will be permanently deleted." confirmLabel="Delete" onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} title={t("files.delete")} description={t("files.delete_body")} confirmLabel={t("common:ui.delete")} onConfirm={() => deleteId && deleteMutation.mutate(deleteId)} loading={deleteMutation.isPending} />
     </div>
   );
 }

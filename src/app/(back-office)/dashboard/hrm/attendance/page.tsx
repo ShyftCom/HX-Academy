@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStation } from "@/context/StationContext";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<string, string> = {
   present: "bg-green-500",
@@ -18,6 +19,7 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_OPTIONS = ["present", "absent", "late", "half-day", "day-off", "holiday"];
 
 export default function AttendancePage() {
+  const { t } = useTranslation("hrm");
   const { activeStationId } = useStation();
   const qc = useQueryClient();
   const now = new Date();
@@ -42,7 +44,7 @@ export default function AttendancePage() {
   const markMut = useMutation({
     mutationFn: (data: any) => fetch("/api/hrm/attendance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["attendance"] }); setEditing(null); },
-    onError: () => toast.error("Failed to save"),
+    onError: () => toast.error(t("common:toast.save_failed_alt")),
   });
 
   const getRecord = (staffId: string, day: number) => {
@@ -53,7 +55,7 @@ export default function AttendancePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold">Attendance</h1><p className="text-sm text-gray-500">Monthly attendance grid</p></div>
+        <div><h1 className="text-2xl font-bold">{t("attendance.title")}</h1><p className="text-sm text-gray-500">{t("attendance.subtitle")}</p></div>
         <div className="flex items-center gap-2">
           <select className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => <option key={m} value={m}>{new Date(2000, m - 1).toLocaleString("en", { month: "long" })}</option>)}
@@ -77,7 +79,7 @@ export default function AttendancePage() {
           <table className="text-xs border-collapse">
             <thead>
               <tr>
-                <th className="text-start py-2 pe-4 font-medium min-w-[140px]">Staff</th>
+                <th className="text-start py-2 pe-4 font-medium min-w-[140px]">{t("staff.title")}</th>
                 {days.map((d) => (
                   <th key={d} className="w-8 text-center py-2 font-normal text-gray-400">{d}</th>
                 ))}
@@ -116,7 +118,7 @@ export default function AttendancePage() {
               ))}
             </tbody>
           </table>
-          {!staff.length && <p className="py-8 text-center text-sm text-gray-400">No staff members found.</p>}
+          {!staff.length && <p className="py-8 text-center text-sm text-gray-400">{t("attendance.empty")}</p>}
         </CardContent>
       </Card>
     </div>

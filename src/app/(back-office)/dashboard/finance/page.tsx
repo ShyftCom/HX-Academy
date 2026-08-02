@@ -12,10 +12,12 @@ import {
   PieChart, Pie, Cell,
 } from "recharts";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
 export default function FinancePage() {
+  const { t } = useTranslation("finance");
   const { activeStationId } = useStation();
   const now = new Date();
   const [dateFrom, setDateFrom] = useState(new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0]);
@@ -38,14 +40,14 @@ export default function FinancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Finance Overview</h1>
-          <p className="text-sm text-gray-500">Profit and expense analysis</p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Input type="date" className="w-36 h-9" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
           <span className="text-gray-400">—</span>
           <Input type="date" className="w-36 h-9" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
-          <Button variant="outline" size="sm" asChild><Link href="/dashboard/finance/charges">Manage Charges</Link></Button>
+          <Button variant="outline" size="sm" asChild><Link href="/dashboard/finance/charges">{t("manage_charges")}</Link></Button>
         </div>
       </div>
 
@@ -67,7 +69,7 @@ export default function FinancePage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Daily Profit Trend</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("daily_profit")}</CardTitle></CardHeader>
           <CardContent>
             {profit?.dailyTrend?.length ? (
               <ResponsiveContainer width="100%" height={260}>
@@ -91,7 +93,7 @@ export default function FinancePage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Charges by Category</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("by_category")}</CardTitle></CardHeader>
           <CardContent>
             {profit?.byCategory?.length ? (
               <ResponsiveContainer width="100%" height={260}>
@@ -105,7 +107,7 @@ export default function FinancePage() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-64 items-center justify-center text-sm text-gray-400">No charges in this period</div>
+              <div className="flex h-64 items-center justify-center text-sm text-gray-400">{t("no_charges_period")}</div>
             )}
           </CardContent>
         </Card>

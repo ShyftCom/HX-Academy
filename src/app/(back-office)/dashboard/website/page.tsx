@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun, Trophy, MapPin, Users2, UserCheck, TrendingUp, HelpCircle, Newspaper, Mail, ArrowRightLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function WebsiteHubPage() {
+  const { t } = useTranslation("website");
   const [stats, setStats] = useState({ total: 0, pending: 0, converted: 0 });
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function WebsiteHubPage() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Website &amp; Applications</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your public website and incoming applications from one place.</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">{t("hub.subtitle")}</p>
       </div>
 
       {/* Stats */}
@@ -83,12 +85,12 @@ export default function WebsiteHubPage() {
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           <div>
-            <p className="font-semibold text-green-800 dark:text-green-300 text-sm">Your landing page is live</p>
-            <p className="text-green-600 dark:text-green-400 text-xs">Visit your website to see how it looks to visitors.</p>
+            <p className="font-semibold text-green-800 dark:text-green-300 text-sm">{t("hub.live")}</p>
+            <p className="text-green-600 dark:text-green-400 text-xs">{t("hub.live_body")}</p>
           </div>
         </div>
         <a href="/" target="_blank" className="text-xs font-semibold text-green-700 dark:text-green-300 bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 px-3 py-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1">
-          <Globe className="w-3 h-3" /> View Site
+          <Globe className="w-3 h-3" /> {t("hub.view_site")}
         </a>
       </div>
     </div>

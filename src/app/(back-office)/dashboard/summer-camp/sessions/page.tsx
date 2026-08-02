@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
 import { useStation } from "@/context/StationContext";
+import { useTranslation } from "react-i18next";
 
 interface CampSession {
   id: string; name: string; startDate: string; endDate: string; capacity: number | null;
@@ -25,6 +26,7 @@ interface CampSession {
 const EMPTY = { name: "", startDate: "", endDate: "", capacity: "", price: "", description: "" };
 
 export default function SummerCampSessionsPage() {
+  const { t } = useTranslation("summercamp");
   const qc = useQueryClient();
   const { activeStationId } = useStation();
   const [modal, setModal] = useState<"new" | CampSession | null>(null);
@@ -43,21 +45,21 @@ export default function SummerCampSessionsPage() {
   const { mutate: createSession, isPending: creating } = useMutation({
     mutationFn: (data: typeof EMPTY) =>
       fetch("/api/summer-camp/sessions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...data, stationId: activeStationId ?? undefined }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Session created"); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("sessions.created")); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: updateSession, isPending: updating } = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & typeof EMPTY) =>
       fetch(`/api/summer-camp/sessions/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setModal(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.saved")); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setModal(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const { mutate: deleteSession, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/summer-camp/sessions/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setDeleteId(null); },
-    onError: () => toast.error("Failed"),
+    onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setDeleteId(null); },
+    onError: () => toast.error(t("common:toast.failed")),
   });
 
   const openNew = () => { setForm(EMPTY); setModal("new"); };
@@ -74,7 +76,7 @@ export default function SummerCampSessionsPage() {
   };
 
   const save = () => {
-    if (!form.name || !form.startDate || !form.endDate) { toast.error("Name, start and end dates are required"); return; }
+    if (!form.name || !form.startDate || !form.endDate) { toast.error(t("sessions.required")); return; }
     if (modal === "new") createSession(form);
     else if (modal) updateSession({ id: (modal as CampSession).id, ...form });
   };
@@ -83,14 +85,14 @@ export default function SummerCampSessionsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Camp Sessions" description="Define the available summer camp sessions participants can enroll in.">
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New Session</Button>
+      <PageHeader title={t("sessions.title")} description={t("sessions.subtitle")}>
+        <Button onClick={openNew}><Plus className="w-4 h-4 mr-1" /> {t("sessions.new")}</Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-500">{t("common:ui.loading")}</div>
       ) : allSessions.length === 0 ? (
-        <EmptyState icon={Sun} title="No sessions yet" description="Create your first summer camp session." action={{ label: "New Session", onClick: openNew }} />
+        <EmptyState icon={Sun} title={t("sessions.empty")} description={t("sessions.empty_body")} action={{ label: t("sessions.new"), onClick: openNew }} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {allSessions.map((s) => (
@@ -124,26 +126,26 @@ export default function SummerCampSessionsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{modal === "new" ? "New Session" : "Edit Session"}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
-              <div><Label>Session Name *</Label><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Summer Camp 2026 – July" className="mt-1" /></div>
+              <div><Label>{t("sessions.name")}</Label><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("sessions.name_ph")} className="mt-1" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Start Date *</Label><Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className="mt-1" /></div>
-                <div><Label>End Date *</Label><Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className="mt-1" /></div>
+                <div><Label>{t("sessions.start")}</Label><Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className="mt-1" /></div>
+                <div><Label>{t("sessions.end")}</Label><Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className="mt-1" /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Capacity (optional)</Label><Input type="number" value={form.capacity} onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} placeholder="Max participants" className="mt-1" /></div>
-                <div><Label>Price (DA)</Label><Input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="0" className="mt-1" /></div>
+                <div><Label>{t("sessions.capacity")}</Label><Input type="number" value={form.capacity} onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} placeholder={t("sessions.capacity_ph")} className="mt-1" /></div>
+                <div><Label>{t("common:ui.price_da")}</Label><Input type="number" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="0" className="mt-1" /></div>
               </div>
-              <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Session description..." rows={2} className="mt-1" /></div>
+              <div><Label>{t("common:ui.description")}</Label><Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder={t("sessions.desc_ph")} rows={2} className="mt-1" /></div>
             </DialogBody>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setModal(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>{creating || updating ? "Saving..." : "Save"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
 
-      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete Session" description="This will delete the session and unlink all enrolled participants." onConfirm={() => deleteId && deleteSession(deleteId)} loading={deleting} variant="destructive" />
+      <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title={t("sessions.delete")} description={t("sessions.delete_body")} onConfirm={() => deleteId && deleteSession(deleteId)} loading={deleting} variant="destructive" />
     </div>
   );
 }

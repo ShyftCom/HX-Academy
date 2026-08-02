@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, CheckCircle, User, ExternalLink, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Application {
   id: string; fullName: string; phone?: string; email?: string; dateOfBirth?: string; parentName?: string; parentPhone?: string; address?: string; categoryInterest?: string; adminNotes?: string; isConverted: boolean; createdAt: string;
@@ -17,6 +18,7 @@ interface Application {
 interface LeadStatus { id: string; name: string; color?: string; }
 
 export default function ApplicationDetailPage() {
+  const { t } = useTranslation("website");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [app, setApp] = useState<Application | null>(null);
@@ -38,16 +40,16 @@ export default function ApplicationDetailPage() {
       setNotes(appData.adminNotes ?? "");
       setSelectedStatus(appData.status?.id ?? "");
       setStatuses(statusData.statuses ?? statusData ?? []);
-    }).catch(() => toast.error("Failed to load")).finally(() => setLoading(false));
+    }).catch(() => toast.error(t("common:errors.failed_to_load"))).finally(() => setLoading(false));
   }, [id]);
 
   async function saveNotes() {
     setSaving(true);
     try {
       const r = await fetch(`/api/applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminNotes: notes, statusId: selectedStatus || undefined }) });
-      if (r.ok) { toast.success("Saved"); const d = await r.json(); setApp(d); }
-      else toast.error("Failed to save");
-    } catch { toast.error("Failed to save"); }
+      if (r.ok) { toast.success(t("common:toast.saved")); const d = await r.json(); setApp(d); }
+      else toast.error(t("common:toast.save_failed_alt"));
+    } catch { toast.error(t("common:toast.save_failed_alt")); }
     setSaving(false);
   }
 
@@ -56,14 +58,14 @@ export default function ApplicationDetailPage() {
     try {
       const r = await fetch(`/api/applications/${id}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(approveForm) });
       const d = await r.json();
-      if (r.ok) { toast.success("Application approved!"); setShowApproveDialog(false); setApp((p) => p ? { ...p, isConverted: true } : p); }
+      if (r.ok) { toast.success(t("applications.approved_toast")); setShowApproveDialog(false); setApp((p) => p ? { ...p, isConverted: true } : p); }
       else toast.error(d.error ?? "Approval failed");
-    } catch { toast.error("Approval failed"); }
+    } catch { toast.error(t("applications.approval_failed")); }
     setApproving(false);
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
-  if (!app) return <div className="text-center text-gray-500 dark:text-gray-400 py-20">Application not found.</div>;
+  if (!app) return <div className="text-center text-gray-500 dark:text-gray-400 py-20">{t("applications.not_found")}</div>;
 
   const inputClass = "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500";
 
@@ -85,10 +87,10 @@ export default function ApplicationDetailPage() {
         </div>
         {!app.isConverted && (
           <button onClick={() => setShowApproveDialog(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-colors">
-            <CheckCircle className="w-4 h-4" /> Approve
+            <CheckCircle className="w-4 h-4" /> {t("common:ui.approve")}
           </button>
         )}
-        {app.isConverted && <span className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-1.5 rounded-full font-medium"><CheckCircle className="w-4 h-4" /> Approved</span>}
+        {app.isConverted && <span className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-3 py-1.5 rounded-full font-medium"><CheckCircle className="w-4 h-4" /> {t("applications.approved")}</span>}
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -96,7 +98,7 @@ export default function ApplicationDetailPage() {
         <div className="col-span-2 space-y-4">
           {/* Personal Info */}
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><User className="w-4 h-4 text-gray-400" /> Personal Information</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><User className="w-4 h-4 text-gray-400" /> {t("applications.personal_info")}</h2>
             <div className="divide-y divide-gray-50 dark:divide-gray-700">
               {detailRow("Full Name", app.fullName)}
               {detailRow("Phone", app.phone)}
@@ -112,7 +114,7 @@ export default function ApplicationDetailPage() {
           {/* Selected Plan */}
           {app.selectedPlan && (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-              <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Selected Plan</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-white mb-2">{t("applications.selected_plan")}</h2>
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-800 dark:text-gray-200">{app.selectedPlan.name}</span>
                 <span className="text-green-700 dark:text-green-400 font-semibold">{app.selectedPlan.price.toLocaleString()} / {app.selectedPlan.duration} {app.selectedPlan.durationType}</span>
@@ -123,7 +125,7 @@ export default function ApplicationDetailPage() {
           {/* Survey Answers */}
           {app.surveyAnswers && app.surveyAnswers.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-              <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Survey Answers</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-white mb-3">{t("applications.survey_answers")}</h2>
               <div className="space-y-4">
                 {app.surveyAnswers.map((a) => (
                   <div key={a.id}>
@@ -138,7 +140,7 @@ export default function ApplicationDetailPage() {
           {/* Documents */}
           {app.applicationFiles && app.applicationFiles.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-              <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Uploaded Documents</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-white mb-3">{t("applications.documents")}</h2>
               <div className="space-y-2">
                 {app.applicationFiles.map((f) => (
                   <a key={f.id} href={f.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all group">
@@ -160,10 +162,10 @@ export default function ApplicationDetailPage() {
         {/* Right column */}
         <div className="space-y-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{t("common:ui.status")}</h3>
             <div className="relative">
               <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className={`appearance-none pe-8 ${inputClass}`}>
-                <option value="">No status</option>
+                <option value="">{t("applications.no_status")}</option>
                 {statuses.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -171,8 +173,8 @@ export default function ApplicationDetailPage() {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Admin Notes</h3>
-            <textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${inputClass} resize-none`} placeholder="Add internal notes..." />
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{t("applications.admin_notes")}</h3>
+            <textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${inputClass} resize-none`} placeholder={t("applications.notes_ph")} />
             <button onClick={saveNotes} disabled={saving} className="mt-2 w-full flex items-center justify-center gap-2 bg-gray-900 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Save Notes
             </button>
@@ -184,34 +186,34 @@ export default function ApplicationDetailPage() {
       {showApproveDialog && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-5">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Approve Application</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">This will convert the lead into a player. Optionally create a user account.</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("applications.approve")}</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{t("applications.approve_body")}</p>
             <label className="flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={approveForm.createAccount} onChange={(e) => setApproveForm((p) => ({ ...p, createAccount: e.target.checked }))} className="rounded text-green-600" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Create player account</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("applications.create_account")}</span>
             </label>
             {approveForm.createAccount && (
               app.email ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Initial Password</label>
-                  <input type="text" value={approveForm.password} onChange={(e) => setApproveForm((p) => ({ ...p, password: e.target.value }))} className={inputClass} placeholder="Leave blank for auto-generated" />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("applications.initial_password")}</label>
+                  <input type="text" value={approveForm.password} onChange={(e) => setApproveForm((p) => ({ ...p, password: e.target.value }))} className={inputClass} placeholder={t("applications.password_hint")} />
                 </div>
               ) : (
-                <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">No email address — account cannot be created without an email.</p>
+                <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">{t("applications.no_email")}</p>
               )
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subscription Start</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("applications.sub_start")}</label>
                 <input type="date" value={approveForm.subscriptionStart} onChange={(e) => setApproveForm((p) => ({ ...p, subscriptionStart: e.target.value }))} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subscription End</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("applications.sub_end")}</label>
                 <input type="date" value={approveForm.subscriptionEnd} onChange={(e) => setApproveForm((p) => ({ ...p, subscriptionEnd: e.target.value }))} className={inputClass} />
               </div>
             </div>
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowApproveDialog(false)} className="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+              <button onClick={() => setShowApproveDialog(false)} className="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{t("common:ui.cancel")}</button>
               <button onClick={handleApprove} disabled={approving} className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                 {approving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Confirm Approval
               </button>
