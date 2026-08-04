@@ -346,6 +346,33 @@ async function main() {
       : "⏭️  No venue slugs needed backfilling"
   );
 
+  // ==================== ONE-TIME REPAIRS ====================
+  // An earlier version of this seed created footer links to /privacy and
+  // /terms, neither of which has a page behind it, so live footers carry two
+  // links that 404. Removing them from the seed above only helps a fresh
+  // install; existing databases need the rows deleted.
+  //
+  // Guarded by a marker rather than running unconditionally: this seed executes
+  // on every deploy, so an unguarded deleteMany would silently remove those
+  // links again every time — including after someone publishes real Privacy and
+  // Terms pages and adds the links back through the admin. A repair should
+  // apply once per database and then stay out of the way.
+  const REPAIR_KEY = "repair_dead_footer_links_v1";
+  const alreadyRepaired = await db.setting.findUnique({ where: { key: REPAIR_KEY } });
+  if (alreadyRepaired) {
+    console.log("⏭️  Dead footer link repair already applied");
+  } else {
+    const removed = await db.footerBottomLink.deleteMany({
+      where: { url: { in: ["/privacy", "/terms"] } },
+    });
+    await db.setting.create({ data: { key: REPAIR_KEY, value: new Date().toISOString() } });
+    console.log(
+      removed.count > 0
+        ? `✅ Removed ${removed.count} dead footer link(s) (/privacy, /terms)`
+        : "⏭️  No dead footer links present"
+    );
+  }
+
   // ==================== SHOWCASE WEBSITE DEMO CONTENT ====================
   // Gated behind SEED_DEMO_CONTENT because package.json's build script runs
   // `prisma db push && npm run seed` on EVERY deploy. Without this gate, demo
@@ -858,11 +885,13 @@ async function main() {
           ] },
         },
       });
+      // Privacy Policy and Terms are deliberately not seeded: they pointed at
+      // /privacy and /terms, which have no pages behind them, so the footer
+      // shipped two links that 404. Both are legal documents specific to the
+      // academy — add the pages first, then the links, in Website → Footer.
       await db.footerBottomLink.createMany({
         data: [
-          { footerId: footer.id, label: "Privacy Policy", labelFr: "Confidentialité", url: "/privacy", position: 0 },
-          { footerId: footer.id, label: "Terms", labelFr: "Conditions", url: "/terms", position: 1 },
-          { footerId: footer.id, label: "Safeguarding", labelFr: "Protection", url: "/contact#safeguarding", position: 2 },
+          { footerId: footer.id, label: "Safeguarding", labelFr: "Protection", url: "/contact#safeguarding", position: 0 },
         ],
       });
       console.log("✅ Footer config created");
