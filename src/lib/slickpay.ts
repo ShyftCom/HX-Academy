@@ -89,6 +89,45 @@ export class SlickPayError extends Error {
   }
 }
 
+/** Longest error text kept from a non-JSON body — enough to diagnose, not a whole HTML page. */
+const MAX_BODY_MESSAGE = 200;
+
+/**
+ * The best human-readable reason available from an error response.
+ *
+ * Written as a function returning `string` rather than inline, because the
+ * `&&`/`||` chain this replaces could not be typed: narrowing `unknown`
+ * through `&&` leaves `{}` in the union, so the result was `{} | string` and
+ * SlickPayError wants `string`.
+ *
+ * Two behaviours differ from that chain, both deliberate:
+ *
+ *  - A JSON body carrying `message: null` used to produce the literal text
+ *    "null", because String(null) is truthy and so the `||` fallback never
+ *    ran. Same for undefined ("undefined") and objects ("[object Object]").
+ *    Only a non-empty *string* message is trusted now.
+ *
+ *  - A non-JSON body was discarded entirely. request() falls back to
+ *    `body = text` when JSON.parse throws, but the chain then failed its
+ *    `typeof body === "object"` test and reported only the status code —
+ *    throwing away an HTML or plain-text error page that may be the sole
+ *    diagnostic. SATIM sits in front of this gateway, so a 502 with an HTML
+ *    body is entirely plausible.
+ *
+ * The status is not lost when body text is used: SlickPayError carries it as
+ * its own property.
+ */
+function errorMessageFrom(body: unknown, fallback: string): string {
+  if (body && typeof body === "object") {
+    const message = (body as Record<string, unknown>).message;
+    if (typeof message === "string" && message.trim()) return message.trim();
+  }
+  if (typeof body === "string" && body.trim()) {
+    return body.trim().slice(0, MAX_BODY_MESSAGE);
+  }
+  return fallback;
+}
+
 async function request<T>(
   config: SlickPayConfig,
   path: string,
@@ -128,10 +167,11 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const message =
-      (body && typeof body === "object" && "message" in body && String((body as Record<string, unknown>).message)) ||
-      `SlickPay returned ${res.status}`;
-    throw new SlickPayError(message, res.status, body);
+    throw new SlickPayError(
+      errorMessageFrom(body, `SlickPay returned ${res.status}`),
+      res.status,
+      body,
+    );
   }
 
   return body as T;
