@@ -354,9 +354,23 @@ model Payment {
   rejectionReason String?
   stationId       String?
   station         Station?          @relation(fields: [stationId], references: [id])
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
 
+  // ---- Online payment gateway (SlickPay / SATIM) ----
+  // `provider` is null for the manual flow that predates the gateway: the
+  // player uploads a transfer receipt into `proof` and an admin approves it by
+  // hand. When it is "slickpay" the money was taken by the gateway, `proof` is
+  // meaningless, and approval is automatic — see src/lib/payment-activation.ts.
+  provider        String? // "slickpay" | null (manual/offline)
+  providerRef     String? @unique // SlickPay invoice id — the reconciliation key
+  providerUrl     String? // SATIM hosted payment page the player was sent to
+  providerStatus  String? // last payment_status read back from SlickPay ("paid" | "unpaid")
+  providerPayload String? // JSON of the last verified invoice, kept for audit
+  paidAt          DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, status])
   @@map("payments")
 }
 
