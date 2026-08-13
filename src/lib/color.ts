@@ -93,3 +93,63 @@ export function deriveInteractionStates(primary: string): { hover: string; activ
     ? { hover: darken(primary, 0.12), active: darken(primary, 0.24) }
     : { hover: lighten(primary, 0.14), active: darken(primary, 0.16) };
 }
+
+/** WCAG 2.x contrast ratio between two opaque colours. */
+export function contrastRatio(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/** `#rrggbb` + alpha as `#rrggbbaa`. Alpha is clamped to 0–1. */
+export function withAlpha(color: string, alpha: number): string {
+  const c = parseHex(color);
+  if (!c) return color;
+  const a = Math.max(0, Math.min(1, alpha));
+  return `#${toHex(c.r)}${toHex(c.g)}${toHex(c.b)}${toHex(a * 255)}`;
+}
+
+/**
+ * A tint of the brand colour light enough to use as *text* on a dark surface.
+ *
+ * `--ob-primary-light` is not a decorative lightening — it is what the active
+ * sidebar item, inline links and default badges are coloured with, all sitting
+ * on --ob-surface-low. A fixed lighten() amount cannot guarantee that is
+ * readable, because how far a hue has to travel to clear 4.5:1 depends on the
+ * hue: #0070f3 needs much more lightening than #f5d90a does.
+ *
+ * So this walks toward white until it clears the target ratio, and gives up at
+ * white rather than looping. The design system's own pairing is the reference
+ * point: #0070f3 -> #aec6ff, which is ~7.5:1 on #1c1b1b.
+ */
+export function readableTint(color: string, background: string, minRatio = 7): string {
+  if (!parseHex(color) || !parseHex(background)) return color;
+  // Start at the design system's own step so a blue brand lands close to the
+  // hand-picked #aec6ff rather than stopping the moment it scrapes past.
+  let candidate = lighten(color, 0.6);
+  for (let i = 0; i < 20 && contrastRatio(candidate, background) < minRatio; i++) {
+    candidate = lighten(candidate, 0.08);
+  }
+  return candidate;
+}
+
+/**
+ * The full set of primary-derived tokens.
+ *
+ * Deriving only hover/active left --ob-primary-light, --ob-primary-soft and
+ * --ob-primary-glow at their hardcoded blues, so a red-branded install showed
+ * a blue active nav item, blue soft fills and a blue focus glow. Every token
+ * that is a *function of* the brand colour has to be derived, or none of them
+ * should be.
+ */
+export function derivePrimaryTokens(primary: string, surface = "#1c1b1b") {
+  const { hover, active } = deriveInteractionStates(primary);
+  return {
+    hover,
+    active,
+    light: readableTint(primary, surface),
+    soft: withAlpha(primary, 0.12),
+    glow: withAlpha(primary, 0.28),
+  };
+}

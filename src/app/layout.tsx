@@ -3,7 +3,7 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getSettings } from "@/lib/settings";
-import { deriveInteractionStates } from "@/lib/color";
+import { derivePrimaryTokens } from "@/lib/color";
 
 // OBSIDIAN FLUX typography. Geist carries the whole interface — its tabular
 // lining figures are what keep dashboard columns aligned without per-cell
@@ -66,7 +66,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // Deriving guarantees the states are relatives of whatever brand colour an
     // academy picks. `secondary_color` still drives --accent-hover, which is
     // what the legacy (non-Obsidian) call sites read.
-    const { hover, active } = deriveInteractionStates(primary);
+    //
+    // *Every* primary-derived token is covered, not just hover/active. An
+    // earlier pass derived only those two and left --ob-primary-light,
+    // --ob-primary-soft and --ob-primary-glow at their hardcoded blues, so the
+    // red-branded production install rendered a blue active sidebar item, blue
+    // soft fills and a blue focus glow. The tint is contrast-checked against
+    // the card surface it actually sits on, since it is used as text.
+    const { hover, active, light, soft, glow } = derivePrimaryTokens(primary, cardDark);
 
     // The brand colour is theme-agnostic. The two surface settings are not —
     // Branding labels them "Dark Mode Background" and "Dark Mode Card Surface"
@@ -77,7 +84,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // below the top bar.
     brandCss =
       `:root{--ob-primary:${primary};--ob-primary-hover:${hover};` +
-      `--ob-primary-active:${active};` +
+      `--ob-primary-active:${active};--ob-primary-light:${light};` +
+      `--ob-primary-soft:${soft};--ob-primary-glow:${glow};` +
       `--accent:${primary};--accent-hover:${secondary};--ring:${primary};}` +
       `:root:not(.light){--ob-surface-base:${darkBg};--ob-surface-low:${cardDark};}`;
   } catch {
