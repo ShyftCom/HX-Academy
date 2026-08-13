@@ -33,17 +33,22 @@ const db = new PrismaClient({
 const RETIRED: Record<string, [string, string]> = {
   primary_color: ["#1e40af", "#0070f3"],
   secondary_color: ["#0f172a", "#0059c5"],
-  // The legacy red palette, in case an older install is still on it.
-  // (Both retired defaults are checked below.)
+  // The dark surfaces the pre-Obsidian palette wrote. These feed
+  // --ob-surface-base / --ob-surface-low, so an install still carrying them
+  // renders on #101010/#202020 instead of the designed #131313/#1c1b1b.
+  dark_bg_color: ["#101010", "#131313"],
+  card_dark_color: ["#202020", "#1c1b1b"],
 };
 
-/** Additional retired values for primary/secondary from the red-brand era. */
+/** Further superseded values for the same keys, from earlier palettes. */
 const ALSO_RETIRED: Record<string, string[]> = {
   primary_color: ["#a02020"],
   secondary_color: ["#903030"],
+  dark_bg_color: ["#0a0a0a"],
+  card_dark_color: ["#1a1a1a"],
 };
 
-/** Surface tokens that simply did not exist before; seed them if absent. */
+/** Keys that should exist at the Obsidian default when absent entirely. */
 const NEW_DEFAULTS: [string, string][] = [
   ["dark_bg_color", "#131313"],
   ["card_dark_color", "#1c1b1b"],

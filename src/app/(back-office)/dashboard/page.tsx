@@ -21,7 +21,7 @@ import { useStation } from "@/context/StationContext";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
 import * as fmt from "@/lib/format";
-import { brand } from "@/lib/design-tokens";
+import { useBrandPrimary } from "@/hooks/use-brand-color";
 import { cn } from "@/lib/utils";
 
 interface DashboardStats {
@@ -52,6 +52,9 @@ export default function DashboardPage() {
   const { t } = useTranslation("common");
   const { activeStationId } = useStation();
   const { can } = usePermissions();
+  // Recharts emits stroke/stopColor as SVG attributes, where var() does not
+  // resolve — so the chart has to read the brand colour rather than inherit it.
+  const brandPrimary = useBrandPrimary();
 
   const statsQuery = useQuery<DashboardStats>({
     queryKey: ["dashboard-stats", activeStationId],
@@ -185,8 +188,8 @@ export default function DashboardPage() {
               <AreaChart data={revenueSeries} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="obRevenueFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={brand.primary} stopOpacity={0.28} />
-                    <stop offset="100%" stopColor={brand.primary} stopOpacity={0} />
+                    <stop offset="0%" stopColor={brandPrimary} stopOpacity={0.28} />
+                    <stop offset="100%" stopColor={brandPrimary} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid {...gridProps} />
@@ -205,7 +208,7 @@ export default function DashboardPage() {
                   type="monotone"
                   dataKey="revenue"
                   name={t("dashboard.monthly_revenue")}
-                  stroke={brand.primary}
+                  stroke={brandPrimary}
                   strokeWidth={2}
                   fill="url(#obRevenueFill)"
                 />
