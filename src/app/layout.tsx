@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getSettings } from "@/lib/settings";
+import { deriveInteractionStates } from "@/lib/color";
 
 // OBSIDIAN FLUX typography. Geist carries the whole interface — its tabular
 // lining figures are what keep dashboard columns aligned without per-cell
@@ -53,6 +54,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const darkBg    = s.dark_bg_color   || "#131313";
     const cardDark  = s.card_dark_color || "#1c1b1b";
 
+    // Hover and pressed are derived from the primary rather than read from
+    // `secondary_color`.
+    //
+    // Branding presents those as two independent colour pickers, so nothing
+    // keeps them related: production ran primary=#ae1e1e (red) with
+    // secondary=#0f172a (near-black slate), and every primary button turned
+    // almost black on hover. One setting was also feeding *both* the hover and
+    // the pressed state, so they were indistinguishable regardless.
+    //
+    // Deriving guarantees the states are relatives of whatever brand colour an
+    // academy picks. `secondary_color` still drives --accent-hover, which is
+    // what the legacy (non-Obsidian) call sites read.
+    const { hover, active } = deriveInteractionStates(primary);
+
     // The brand colour is theme-agnostic. The two surface settings are not —
     // Branding labels them "Dark Mode Background" and "Dark Mode Card Surface"
     // — so they are scoped to :not(.light). Emitting them on plain `:root`
@@ -61,8 +76,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // source order let it beat the light theme and the toggle did nothing
     // below the top bar.
     brandCss =
-      `:root{--ob-primary:${primary};--ob-primary-hover:${secondary};` +
-      `--ob-primary-active:${secondary};` +
+      `:root{--ob-primary:${primary};--ob-primary-hover:${hover};` +
+      `--ob-primary-active:${active};` +
       `--accent:${primary};--accent-hover:${secondary};--ring:${primary};}` +
       `:root:not(.light){--ob-surface-base:${darkBg};--ob-surface-low:${cardDark};}`;
   } catch {
