@@ -373,6 +373,50 @@ async function main() {
     );
   }
 
+  // ---- Retire the pre-Obsidian dark surface colours -------------------------
+  // dark_bg_color / card_dark_color feed --ob-surface-base and --ob-surface-low
+  // (see src/app/layout.tsx). Databases predating the Obsidian Flux redesign
+  // carry the old palette's values, so the app renders on #101010/#202020
+  // rather than the designed #131313/#1c1b1b. Production is in exactly that
+  // state.
+  //
+  // Only a value that still *equals a superseded default* is rewritten. Such a
+  // value carries no information about what anyone chose — it is what the old
+  // seed happened to write — whereas any other value is a deliberate pick in
+  // Branding and is left alone. This is the same rule as
+  // scripts/migrate-brand-colors.ts, which is the manual path for the same fix.
+  //
+  // Marker-guarded like the repair above: the seed runs on every deploy, so
+  // without it an admin who deliberately set #101010 after this shipped would
+  // have it overwritten again on the next deploy.
+  const SURFACE_REPAIR_KEY = "repair_legacy_surface_colors_v1";
+  const surfaceRepaired = await db.setting.findUnique({ where: { key: SURFACE_REPAIR_KEY } });
+  if (surfaceRepaired) {
+    console.log("⏭️  Legacy surface colour repair already applied");
+  } else {
+    /** key -> [superseded defaults, Obsidian Flux replacement] */
+    const RETIRED_SURFACES: Record<string, [string[], string]> = {
+      dark_bg_color: [["#101010", "#0a0a0a"], "#131313"],
+      card_dark_color: [["#202020", "#1a1a1a"], "#1c1b1b"],
+    };
+
+    const changed: string[] = [];
+    for (const [key, [retired, replacement]] of Object.entries(RETIRED_SURFACES)) {
+      const row = await db.setting.findUnique({ where: { key } });
+      if (!row) continue;
+      if (!retired.includes(row.value.trim().toLowerCase())) continue;
+      await db.setting.update({ where: { key }, data: { value: replacement } });
+      changed.push(`${key} ${row.value} -> ${replacement}`);
+    }
+
+    await db.setting.create({ data: { key: SURFACE_REPAIR_KEY, value: new Date().toISOString() } });
+    console.log(
+      changed.length > 0
+        ? `✅ Retired legacy surface colours: ${changed.join(", ")}`
+        : "⏭️  No legacy surface colours to retire (customised or already current)"
+    );
+  }
+
   // ==================== SHOWCASE WEBSITE DEMO CONTENT ====================
   // Gated behind SEED_DEMO_CONTENT because package.json's build script runs
   // `prisma db push && npm run seed` on EVERY deploy. Without this gate, demo
