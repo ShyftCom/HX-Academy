@@ -13,11 +13,16 @@
  * Flow (see src/app/api/payments/slickpay/*):
  *   createInvoice() -> redirect player to `url` -> SATIM takes the card
  *   -> player returns to our `url`, and/or SlickPay calls our `webhook_url`
- *   -> we call getInvoice() and only trust `payment_status === "paid"`.
+ *   -> we call getInvoice() and trust only what it reports.
  *
  * The docs are explicit that the return page must re-verify server-side, and
  * the webhook payload has no documented shape or signing scheme, so neither is
  * treated as proof of payment on its own. getInvoice() is the only authority.
+ *
+ * Be warned that the published docs are unreliable in places — the status
+ * field they tell you to read does not exist, and two pages disagree about the
+ * shape of the create response. Both are handled below, with the evidence
+ * recorded at each point. Verify against the sandbox before changing them.
  */
 import { getSettings } from "@/lib/settings";
 
@@ -262,10 +267,61 @@ export async function createInvoice(
 export interface InvoiceStatus {
   /** True only when SlickPay reports the invoice as actually paid. */
   paid: boolean;
-  /** Raw `payment_status` string, kept verbatim for the audit trail. */
-  paymentStatus: string;
+  /** Terminal failure: the invoice was cancelled/refused and will never be paid. */
+  cancelled: boolean;
+  /** SlickPay's own status label, verbatim, for the audit trail ("Accomplie", "Initié", …). */
+  status: string;
+  /** SlickPay's numeric flag: 1 = paid. */
+  payStatus: number | null;
   completed: boolean;
+  /** Invoice total as SlickPay has it, parsed from its "5,000.00" formatting. */
+  amount: number | null;
   raw: unknown;
+}
+
+/**
+ * Status vocabulary, established empirically rather than from the docs.
+ *
+ * The docs' Quick Integration page tells you to read
+ * `result['data']['payment_status']` and compare it to "paid". That field does
+ * not exist. A sample of 10,584 invoices from the sandbox returned exactly
+ * four states, and no `payment_status` on any of them:
+ *
+ *   status        pay_status  completed  transaction
+ *   "Accomplie"        1          1        present     <- paid
+ *   "Initié"           0          0        null        <- awaiting payment
+ *   "En attente"       0          0        null        <- awaiting payment
+ *   "Annulé"           0          0        null        <- cancelled
+ *
+ * Note what this rules out: `completed` is 1 *only* when paid, so "completed
+ * but unpaid" is not the failure signal it looks like — a cancelled invoice
+ * stays at completed 0. Cancellation has to be read from the label.
+ *
+ * `rejection_reason` is not a failure signal either: a freshly created,
+ * perfectly healthy invoice already carries "Paiement de transfert en attente".
+ *
+ * English and unaccented spellings are included so a future API-language
+ * change, or a locale-dependent response, does not silently stop confirming
+ * payments.
+ */
+const PAID_LABELS = new Set(["accomplie", "accompli", "paid", "paye", "payee", "completed", "terminee", "termine", "success"]);
+const CANCELLED_LABELS = new Set(["annule", "annulee", "cancelled", "canceled", "expire", "expiree", "rejected", "refuse", "refusee", "echoue", "echouee", "failed"]);
+
+/** Lowercase and strip accents, so "Annulé" and "annule" compare equal. */
+function normalizeLabel(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+/** "5,000.00" -> 5000. Returns null for anything unparseable. */
+function parseAmount(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string") return null;
+  const n = Number(value.replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : null;
 }
 
 /**
@@ -285,13 +341,38 @@ export async function getInvoice(
 
   const root = (body ?? {}) as Record<string, unknown>;
   const data = (root.data ?? {}) as Record<string, unknown>;
-  const paymentStatus = String(data.payment_status ?? root.payment_status ?? "unknown");
-  const completed = root.completed === 1 || root.completed === true;
+
+  const label = String(data.status ?? root.status ?? "");
+  const normalized = normalizeLabel(label);
+  const payStatus =
+    typeof data.pay_status === "number"
+      ? data.pay_status
+      : typeof root.pay_status === "number"
+        ? (root.pay_status as number)
+        : null;
+  const completed = data.completed === 1 || data.completed === true || root.completed === 1 || root.completed === true;
+
+  // `payment_status` is checked purely as forward compatibility — it is what
+  // the docs promise, so if SlickPay ever ships it, we already read it.
+  const documentedStatus = normalizeLabel(String(data.payment_status ?? root.payment_status ?? ""));
+
+  const cancelled = CANCELLED_LABELS.has(normalized);
+
+  // Any one positive signal is enough — across the sample all three move
+  // together, so requiring all three would break the moment SlickPay changed
+  // one. But cancellation vetoes: never activate a subscription off a stray
+  // `completed` flag on an invoice whose own label says it was cancelled.
+  const paid =
+    !cancelled &&
+    (payStatus === 1 || completed || PAID_LABELS.has(normalized) || documentedStatus === "paid");
 
   return {
-    paid: paymentStatus.toLowerCase() === "paid",
-    paymentStatus,
+    paid,
+    cancelled,
+    status: label || "unknown",
+    payStatus,
     completed,
+    amount: parseAmount(data.amount ?? root.amount),
     raw: body,
   };
 }
@@ -299,17 +380,24 @@ export async function getInvoice(
 /**
  * Cheap credentials check for the "Test connection" button in Settings.
  *
- * Listing invoices is a harmless GET that still exercises the bearer token, so
- * an admin can confirm a key before any player is sent to a payment page.
+ * Asks for an invoice id that cannot exist. A working key gets 404 ("Facture
+ * introuvable"), a bad key gets 401 ("Unauthenticated") — which is exactly the
+ * distinction the button needs, in ~150ms.
+ *
+ * Listing invoices was the obvious choice and is the wrong one: on the shared
+ * sandbox account that endpoint returned 19 MB over 68 seconds, so it timed
+ * out and reported a good key as broken.
  */
 export async function testConnection(
   config: SlickPayConfig,
 ): Promise<{ ok: true } | { ok: false; error: string; status: number }> {
   try {
-    await request<unknown>(config, "/users/invoices", { method: "GET" });
+    await request<unknown>(config, "/users/invoices/0", { method: "GET" });
+    // A 2xx for invoice "0" would be odd, but it still proves the key works.
     return { ok: true };
   } catch (error) {
     if (error instanceof SlickPayError) {
+      if (error.status === 404) return { ok: true };
       return { ok: false, error: error.message, status: error.status };
     }
     return { ok: false, error: (error as Error).message, status: 0 };

@@ -39,5 +39,17 @@
     "created": "تم إنشاء الدفعة",
     "create_failed": "فشل الإنشاء",
     "proof_uploaded": "تم رفع الإثبات"
+  },
+  "method_online": "SlickPay (بطاقة)",
+  "method_manual": "يدوي",
+  "gateway": {
+    "ref": "فاتورة {{ref}}",
+    "verify": "إعادة التحقق",
+    "verify_title": "إعادة التحقق من هذا الدفع لدى SlickPay",
+    "verified_paid": "تم تأكيد الدفع — تم تفعيل الاشتراك",
+    "verified_already": "مؤكد مسبقًا — الاشتراك نشط",
+    "verified_pending": "لا يزال SlickPay يعتبر هذا الدفع غير مدفوع",
+    "verified_failed": "يفيد SlickPay بأن هذا الدفع قد فشل",
+    "verify_error": "تعذّر الاتصال بـ SlickPay"
   }
 }

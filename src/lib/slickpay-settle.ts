@@ -25,6 +25,13 @@ import {
   type ActivationSource,
 } from "@/lib/payment-activation";
 
+/**
+ * How long a payment is given before a "not found" from SlickPay is read as
+ * abandonment. Comfortably longer than a SATIM checkout session, so a player
+ * still entering their card details is never declared failed underneath them.
+ */
+const ABANDON_GRACE_MS = 30 * 60 * 1000;
+
 export type SettleOutcome =
   | { result: "paid"; alreadyActive: boolean; paymentId: string }
   | { result: "pending"; paymentId: string; paymentStatus: string }
@@ -61,6 +68,31 @@ export async function settleSlickPayPayment(
   try {
     invoice = await getInvoice(config, payment.providerRef);
   } catch (error) {
+    // A 404 is not a transport failure — it is an answer.
+    //
+    // SlickPay's detail endpoint resolves the SATIM transaction behind the
+    // invoice. A live invoice returns 200 whether or not it has been paid
+    // yet, but one that was abandoned or cancelled loses its transaction and
+    // starts answering 404 "Transaction introuvable" (confirmed against the
+    // sandbox: every "Annulé" and "En attente" invoice 404s, while "Initié"
+    // and "Accomplie" ones resolve at any age).
+    //
+    // Treating that as an error left the payment pending forever and made the
+    // webhook reply 503, so SlickPay retried a call that could never succeed.
+    // The id came from SlickPay itself, so "not found" means "not paid".
+    if (error instanceof SlickPayError && error.status === 404) {
+      const ageMs = Date.now() - payment.createdAt.getTime();
+      if (ageMs < ABANDON_GRACE_MS) {
+        // Too soon to call it. Guards against declaring a checkout dead while
+        // the player is still on SATIM's page and some transient lookup blip
+        // answers 404.
+        return { result: "pending", paymentId, paymentStatus: "not_found_yet" };
+      }
+      const reason = "The payment was not completed (the SlickPay invoice expired or was cancelled)";
+      await markPaymentFailed({ paymentId, reason, providerStatus: "not_found" });
+      return { result: "failed", paymentId, reason };
+    }
+
     const reason =
       error instanceof SlickPayError
         ? `Could not verify with SlickPay: ${error.message}`
@@ -73,42 +105,51 @@ export async function settleSlickPayPayment(
   }
 
   if (invoice.paid) {
+    // Integrity check, not a gate. The invoice was created by us for this
+    // payment, so a mismatch means something is wrong with the mapping or the
+    // plan price changed mid-checkout — worth an operator's attention, but the
+    // player has been charged either way and must get what they paid for.
+    if (invoice.amount !== null && Math.abs(invoice.amount - payment.amount) > 1) {
+      console.warn(
+        `SlickPay amount mismatch on payment ${paymentId}: invoice ${invoice.amount} vs expected ${payment.amount}`,
+      );
+    }
+
     const activation = await activatePayment({
       paymentId,
       source,
       actorUserId: opts.actorUserId ?? null,
-      providerStatus: invoice.paymentStatus,
+      providerStatus: invoice.status,
       providerPayload: invoice.raw,
     });
     return { result: "paid", alreadyActive: activation.alreadyActive, paymentId };
   }
 
   // Record what the gateway said, but keep the payment open: an invoice reads
-  // "unpaid" both while the player is still typing their card details and
-  // after they abandoned the page, and we cannot tell those apart.
+  // unpaid both while the player is still typing their card details and after
+  // they abandoned the page, and we cannot tell those apart.
   await db.payment.update({
     where: { id: paymentId },
     data: {
-      providerStatus: invoice.paymentStatus,
+      providerStatus: invoice.status,
       providerPayload: JSON.stringify(invoice.raw),
     },
   });
 
-  // `completed` means SlickPay considers the invoice closed. Unpaid *and*
-  // closed is a real failure, so stop showing it to the player as in-progress.
-  if (invoice.completed) {
+  // Only an explicitly cancelled invoice is a terminal failure. Note this is
+  // *not* keyed off `completed`: SlickPay sets completed to 1 only on paid
+  // invoices, so "completed but unpaid" never occurs and would have closed
+  // nothing. See the status table in src/lib/slickpay.ts.
+  if (invoice.cancelled) {
+    const reason = `SlickPay reported the payment as "${invoice.status}"`;
     await markPaymentFailed({
       paymentId,
-      reason: `SlickPay reported the payment as ${invoice.paymentStatus}`,
-      providerStatus: invoice.paymentStatus,
+      reason,
+      providerStatus: invoice.status,
       providerPayload: invoice.raw,
     });
-    return {
-      result: "failed",
-      paymentId,
-      reason: `SlickPay reported the payment as ${invoice.paymentStatus}`,
-    };
+    return { result: "failed", paymentId, reason };
   }
 
-  return { result: "pending", paymentId, paymentStatus: invoice.paymentStatus };
+  return { result: "pending", paymentId, paymentStatus: invoice.status };
 }

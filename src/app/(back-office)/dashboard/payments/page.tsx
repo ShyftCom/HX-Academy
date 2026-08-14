@@ -14,7 +14,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText } from "lucide-react";
+import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText, RefreshCw } from "lucide-react";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 
@@ -80,6 +80,7 @@ export default function PaymentsPage() {
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadingAdd, setUploadingAdd] = useState(false);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["payments", page, search, status, activeStationId],
@@ -108,6 +109,25 @@ export default function PaymentsPage() {
     onError: () => toast.error(t("toast.reject_failed")),
   });
 
+  // Ask SlickPay again about one payment and settle on whatever it says.
+  const verifyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      setVerifyingId(id);
+      const res = await fetch(`/api/payments/slickpay/${id}/verify`, { method: "POST" });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Verification failed");
+      return d as { result: string; alreadyActive?: boolean };
+    },
+    onSuccess: (d) => {
+      if (d.result === "paid") toast.success(d.alreadyActive ? t("gateway.verified_already") : t("gateway.verified_paid"));
+      else if (d.result === "failed") toast.error(t("gateway.verified_failed"));
+      else toast.info(t("gateway.verified_pending"));
+      qc.invalidateQueries({ queryKey: ["payments"] });
+    },
+    onError: () => toast.error(t("gateway.verify_error")),
+    onSettled: () => setVerifyingId(null),
+  });
+
   const addMutation = useMutation({
     mutationFn: () => fetch("/api/payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...addForm, amount: parseFloat(addForm.amount), proof: proofUrl }) }).then(async (r) => { if (!r.ok) throw await r.json(); }),
     onSuccess: () => { toast.success(t("toast.created")); qc.invalidateQueries({ queryKey: ["payments"] }); setAddOpen(false); setProofUrl(null); setAddForm({ playerId: "", planId: "", amount: "", paymentMethodId: "", proof: "" }); },
@@ -134,7 +154,16 @@ export default function PaymentsPage() {
     { key: "player", header: "Player", cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone}</p></div> },
     { key: "plan", header: "Plan", cell: (r: any) => <span className="text-sm">{r.plan?.name ?? "—"}</span> },
     { key: "amount", header: "Amount", cell: (r: any) => <span className="font-medium">{formatCurrency(r.amount)}</span> },
-    { key: "method", header: "Method", cell: (r: any) => r.paymentMethod?.name ?? "—" },
+    {
+      key: "method", header: "Method", cell: (r: any) => r.provider === "slickpay" ? (
+        <div>
+          <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+            <CreditCard className="h-3 w-3" />{t("method_online")}
+          </span>
+          {r.providerRef && <p className="mt-0.5 font-mono text-[10px] text-gray-400">{t("gateway.ref", { ref: r.providerRef })}</p>}
+        </div>
+      ) : (r.paymentMethod?.name ?? "—")
+    },
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={STATUS_VARIANT[r.status] as any}>{r.status}</Badge> },
     {
       key: "proof", header: "Proof", cell: (r: any) => r.proof ? (
@@ -161,7 +190,17 @@ export default function PaymentsPage() {
     {
       key: "actions", header: "", cell: (r: any) => (
         <div className="flex gap-1">
-          {r.status === "pending" && <>
+          {/* A gateway payment is settled by SlickPay, not by an admin. The only
+              action offered is to re-ask SlickPay — useful when the webhook was
+              missed and the player insists they paid. Manual approve/reject stay
+              hidden so nobody hand-approves an unpaid card. */}
+          {r.provider === "slickpay" ? (
+            r.status === "pending" && (
+              <Button size="sm" variant="outline" onClick={() => verifyMutation.mutate(r.id)} loading={verifyingId === r.id} title={t("gateway.verify_title")}>
+                <RefreshCw className="me-1.5 h-3.5 w-3.5" />{t("gateway.verify")}
+              </Button>
+            )
+          ) : r.status === "pending" && <>
             <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("common:ui.approve")}><Check className="h-3.5 w-3.5" /></Button>
             <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>
           </>}

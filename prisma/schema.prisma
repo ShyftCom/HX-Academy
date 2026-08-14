@@ -361,7 +361,14 @@ model Payment {
   // hand. When it is "slickpay" the money was taken by the gateway, `proof` is
   // meaningless, and approval is automatic — see src/lib/payment-activation.ts.
   provider        String? // "slickpay" | null (manual/offline)
-  providerRef     String? @unique // SlickPay invoice id — the reconciliation key
+  // SlickPay invoice id — the reconciliation key. Indexed but not @unique:
+  // `npm run build` runs a bare `prisma db push`, which refuses to add a
+  // unique constraint to an existing table without --accept-data-loss and
+  // would fail every deploy. Nothing reads this through a uniqueness
+  // guarantee — the webhook looks it up with findFirst — and one invoice is
+  // only ever created for one payment row, so the index carries its weight
+  // without holding the build hostage.
+  providerRef     String?
   providerUrl     String? // SATIM hosted payment page the player was sent to
   providerStatus  String? // last payment_status read back from SlickPay ("paid" | "unpaid")
   providerPayload String? // JSON of the last verified invoice, kept for audit
@@ -371,6 +378,7 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   @@index([provider, status])
+  @@index([providerRef])
   @@map("payments")
 }
 

@@ -145,7 +145,10 @@ export async function POST(req: NextRequest) {
       await db.payment.update({
         where: { id: payment.id },
         data: {
-          status: "failed",
+          // "rejected", not a new "failed" status: the admin table filters and
+          // badge map only know pending/approved/rejected, and a payment that
+          // never reached a card is closed either way.
+          status: "rejected",
           rejectionReason:
             error instanceof SlickPayError
               ? `SlickPay refused the invoice: ${error.message}`

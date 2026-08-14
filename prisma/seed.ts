@@ -199,6 +199,13 @@ async function main() {
     { key: "footer_text", value: "© 2024 Football Skills Academy. All rights reserved." },
     { key: "currency", value: "DZD" },
     { key: "currency_symbol", value: "DA" },
+    // SlickPay stays off until a Super Admin pastes an API key into
+    // Settings → SlickPay. The key and webhook secret are deliberately not
+    // seeded: they are credentials, not defaults, and live only in the rows an
+    // admin creates (see SECRET_SETTING_KEYS in src/lib/settings.ts).
+    { key: "slickpay_enabled", value: "false" },
+    { key: "slickpay_mode", value: "sandbox" },
+    { key: "slickpay_account_uuid", value: "" },
   ];
 
   for (const s of defaultSettings) {
