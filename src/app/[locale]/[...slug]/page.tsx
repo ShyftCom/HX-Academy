@@ -4,7 +4,7 @@ import { routing } from "@/i18n/routing";
 
 // Applies the redirects managed in Dashboard → Website → Redirects.
 //
-// This lives in a catch-all rather than in middleware on purpose. Middleware
+// This lives in a catch-all rather than in the proxy on purpose. The proxy
 // runs on every single request, so honouring redirects there would mean a
 // database round-trip per page view for a table that is almost always empty.
 // Next.js resolves static segments before a catch-all, so this component is

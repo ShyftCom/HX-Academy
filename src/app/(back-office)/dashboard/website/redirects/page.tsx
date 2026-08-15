@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowRightLeft, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, ArrowRightLeft, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,9 +48,9 @@ export default function RedirectsAdminPage() {
         <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4" /> {t("redirects.new")}</Button>
       </PageHeader>
 
-      <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-        <p>Redirects are recorded here but are not yet automatically applied at runtime — this requires a small, carefully-tested addition to the site&apos;s routing middleware. See the delivery notes for details.</p>
+      <div className="flex items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-800 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300">
+        <Info className="mt-0.5 h-4 w-4 shrink-0" />
+        <p>Redirects apply as soon as you save them. They are checked only for addresses that would otherwise show a &quot;page not found&quot;, so an active page is never redirected away.</p>
       </div>
 
       {isLoading ? (
