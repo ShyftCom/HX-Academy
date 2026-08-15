@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Same gap the approve route had: auth() alone let any signed-in user reject
+  // any payment by id, including another player's — an IDOR that could cancel
+  // a legitimate subscription request out from under its owner.
+  const denied = await requirePermissionResponse(PERMISSIONS.PAYMENTS_REJECT);
+  if (denied) return denied;
+
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
 
   try {
@@ -35,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     await logActivity({
-      userId: session.user.id,
+      userId: session?.user?.id ?? null,
       action: "reject",
       module: "payments",
       description: `Rejected payment for ${payment.player.fullName} - Reason: ${body.reason ?? "No reason given"}`,

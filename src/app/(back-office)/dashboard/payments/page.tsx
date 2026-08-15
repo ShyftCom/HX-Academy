@@ -17,6 +17,8 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText, RefreshCw } from "lucide-react";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 type Status = "all" | "pending" | "approved" | "rejected";
 
@@ -81,6 +83,14 @@ export default function PaymentsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadingAdd, setUploadingAdd] = useState(false);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
+
+  // The approve, reject and create routes enforce these server-side. Reading
+  // them here as well keeps Staff — who hold payments:view but none of the
+  // three — from being shown buttons that can only answer 403.
+  const { can } = usePermissions();
+  const canApprove = can(PERMISSIONS.PAYMENTS_APPROVE);
+  const canReject = can(PERMISSIONS.PAYMENTS_REJECT);
+  const canCreate = can(PERMISSIONS.PAYMENTS_CREATE);
 
   const { data, isLoading } = useQuery({
     queryKey: ["payments", page, search, status, activeStationId],
@@ -201,8 +211,8 @@ export default function PaymentsPage() {
               </Button>
             )
           ) : r.status === "pending" && <>
-            <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("common:ui.approve")}><Check className="h-3.5 w-3.5" /></Button>
-            <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>
+            {canApprove && <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("common:ui.approve")}><Check className="h-3.5 w-3.5" /></Button>}
+            {canReject && <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>}
           </>}
         </div>
       )
@@ -212,7 +222,7 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("title")} description={t("subtitle")}>
-        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("create")}</Button>
+        {canCreate && <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("create")}</Button>}
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
