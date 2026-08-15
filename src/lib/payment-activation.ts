@@ -61,26 +61,77 @@ export async function activatePayment({
   if (!payment) throw new Error(`Payment ${paymentId} not found`);
 
   const now = new Date();
+  const startDate = now;
+  const endDate = computeEndDate(startDate, payment.plan?.duration, payment.plan?.durationType);
 
-  // Claim the payment. `status: { not: "approved" }` is the guard: two
-  // concurrent callers both read "pending" above, but only one UPDATE matches.
-  const claim = await db.payment.updateMany({
-    where: { id: paymentId, status: { not: "approved" } },
-    data: {
-      status: "approved",
-      approvalDate: now,
-      paidAt: payment.paidAt ?? now,
-      ...(adminNotes !== null ? { adminNotes } : {}),
-      ...(providerStatus !== undefined ? { providerStatus } : {}),
-      ...(providerPayload !== undefined
-        ? { providerPayload: JSON.stringify(providerPayload) }
-        : {}),
-      // A payment that goes through can no longer be a rejected one.
-      rejectionReason: null,
-    },
+  // Claim and activate in one transaction.
+  //
+  // The claim below is what makes this idempotent, but on its own it also made
+  // failure unrecoverable: it committed immediately, so a crash before the
+  // subscription write left a payment marked approved with nothing activated —
+  // and because the claim only matches rows that are *not* approved, no retry,
+  // webhook redelivery or admin re-check could ever repair it. The player had
+  // paid, the row said approved, and they had no subscription.
+  //
+  // Wrapping both means either the payment is approved *and* the subscription
+  // exists, or neither happened and the next delivery tries again.
+  const outcome = await db.$transaction(async (tx) => {
+    // `status: { not: "approved" }` is the guard: two concurrent callers both
+    // read "pending" above, but only one UPDATE matches.
+    const claim = await tx.payment.updateMany({
+      where: { id: paymentId, status: { not: "approved" } },
+      data: {
+        status: "approved",
+        approvalDate: now,
+        paidAt: payment.paidAt ?? now,
+        ...(adminNotes !== null ? { adminNotes } : {}),
+        ...(providerStatus !== undefined ? { providerStatus } : {}),
+        ...(providerPayload !== undefined
+          ? { providerPayload: JSON.stringify(providerPayload) }
+          : {}),
+        // A payment that goes through can no longer be a rejected one.
+        rejectionReason: null,
+      },
+    });
+
+    // `claimed` is reported separately from `subscriptionId`, because a
+    // successful claim can legitimately produce no subscription (a payment
+    // filed against no plan at all). Collapsing both into a null return would
+    // make that indistinguishable from losing the race, and would report a
+    // fresh activation as "already active".
+    if (claim.count === 0) return { claimed: false, subscriptionId: null };
+
+    if (payment.subscriptionId) {
+      await tx.subscription.update({
+        where: { id: payment.subscriptionId },
+        data: { status: "active", startDate, endDate },
+      });
+      return { claimed: true, subscriptionId: payment.subscriptionId };
+    }
+
+    if (payment.planId) {
+      const created = await tx.subscription.create({
+        data: {
+          playerId: payment.playerId,
+          planId: payment.planId,
+          startDate,
+          endDate,
+          status: "active",
+        },
+      });
+      // Point the payment at the subscription it paid for, so the admin table
+      // and the player's history can link the two.
+      await tx.payment.update({
+        where: { id: paymentId },
+        data: { subscriptionId: created.id },
+      });
+      return { claimed: true, subscriptionId: created.id };
+    }
+
+    return { claimed: true, subscriptionId: null };
   });
 
-  if (claim.count === 0) {
+  if (!outcome.claimed) {
     return {
       activated: false,
       alreadyActive: true,
@@ -88,35 +139,10 @@ export async function activatePayment({
     };
   }
 
-  // ---- Subscription ----
-  const startDate = now;
-  const endDate = computeEndDate(startDate, payment.plan?.duration, payment.plan?.durationType);
+  const subscriptionId = outcome.subscriptionId;
 
-  let subscriptionId = payment.subscriptionId ?? null;
-
-  if (payment.subscriptionId) {
-    await db.subscription.update({
-      where: { id: payment.subscriptionId },
-      data: { status: "active", startDate, endDate },
-    });
-  } else if (payment.planId) {
-    const created = await db.subscription.create({
-      data: {
-        playerId: payment.playerId,
-        planId: payment.planId,
-        startDate,
-        endDate,
-        status: "active",
-      },
-    });
-    subscriptionId = created.id;
-    // Point the payment at the subscription it paid for, so the admin table
-    // and the player's history can link the two.
-    await db.payment.update({
-      where: { id: paymentId },
-      data: { subscriptionId: created.id },
-    });
-  }
+  // Everything below is best-effort follow-up and deliberately outside the
+  // transaction: a failed notification must not roll back a real payment.
 
   // ---- Player notification ----
   await createNotification({

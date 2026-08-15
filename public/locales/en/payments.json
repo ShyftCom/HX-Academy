@@ -50,6 +50,9 @@
     "verified_already": "Already confirmed — subscription is active",
     "verified_pending": "SlickPay still reports this payment as unpaid",
     "verified_failed": "SlickPay reports this payment as failed",
-    "verify_error": "Could not reach SlickPay"
+    "verify_error": "Could not reach SlickPay",
+    "verified_mismatch": "SlickPay reports a different amount — held for review",
+    "needs_review": "Needs review",
+    "approve_mismatch": "Approve despite the amount difference"
   }
 }

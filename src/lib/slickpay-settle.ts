@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import {
   getSlickPayConfig,
   getInvoice,
+  sanitizeProviderPayload,
   SlickPayError,
   type SlickPayConfig,
 } from "@/lib/slickpay";
@@ -24,6 +25,7 @@ import {
   markPaymentFailed,
   type ActivationSource,
 } from "@/lib/payment-activation";
+import { createNotification } from "@/lib/activity";
 
 /**
  * How long a payment is given before a "not found" from SlickPay is read as
@@ -32,11 +34,50 @@ import {
  */
 const ABANDON_GRACE_MS = 30 * 60 * 1000;
 
+/**
+ * How far the invoice total may drift from the payment before settlement
+ * refuses to act on it. One dinar absorbs rounding; anything larger is a real
+ * discrepancy, not a formatting artefact.
+ */
+const AMOUNT_TOLERANCE_DZD = 1;
+
 export type SettleOutcome =
   | { result: "paid"; alreadyActive: boolean; paymentId: string }
   | { result: "pending"; paymentId: string; paymentStatus: string }
   | { result: "failed"; paymentId: string; reason: string }
+  /** Gateway says paid, but not for the amount we expected. Needs a human. */
+  | { result: "mismatch"; paymentId: string; reason: string }
   | { result: "error"; paymentId: string | null; reason: string };
+
+/**
+ * Tell the back office something needs a person, at most once per payment.
+ *
+ * Settlement is retried by the webhook, the return redirect and every admin
+ * re-check, so an unguarded notify here would bury the dashboard under copies
+ * of the same alert. `previousProviderStatus` is the value *before* this pass
+ * wrote its flag: once it reads "amount_mismatch", the alert has already gone
+ * out for this payment.
+ */
+async function notifyAdminsOnce(
+  previousProviderStatus: string | null,
+  title: string,
+  message: string,
+): Promise<void> {
+  if (previousProviderStatus === "amount_mismatch") return;
+  const admins = await db.user.findMany({
+    where: { role: { name: { in: ["Admin", "Super Admin"] } } },
+    select: { id: true },
+  });
+  for (const admin of admins) {
+    await createNotification({
+      userId: admin.id,
+      title,
+      message,
+      type: "warning",
+      link: "/dashboard/payments",
+    });
+  }
+}
 
 export async function settleSlickPayPayment(
   paymentId: string,
@@ -59,10 +100,22 @@ export async function settleSlickPayPayment(
     return { result: "error", paymentId, reason: "Payment has no SlickPay invoice reference" };
   }
 
-  const config = opts.config ?? (await getSlickPayConfig());
-  if (!config.publicKey) {
+  const stored = opts.config ?? (await getSlickPayConfig());
+  if (!stored.publicKey) {
     return { result: "error", paymentId, reason: "SlickPay is not configured" };
   }
+
+  // Read the invoice back from the environment that issued it, not from
+  // whatever the settings say now. Sandbox and production have independent
+  // invoice namespaces, so an admin flipping the mode while a checkout was in
+  // flight would otherwise look up a live id on the wrong host, get a 404, and
+  // have settlement record that as a definitive "not paid" on a card that had
+  // genuinely been charged. Rows created before providerMode existed fall back
+  // to the current mode, which is the old behaviour.
+  const config: SlickPayConfig =
+    payment.providerMode === "sandbox" || payment.providerMode === "production"
+      ? { ...stored, mode: payment.providerMode }
+      : stored;
 
   let invoice;
   try {
@@ -105,14 +158,54 @@ export async function settleSlickPayPayment(
   }
 
   if (invoice.paid) {
-    // Integrity check, not a gate. The invoice was created by us for this
-    // payment, so a mismatch means something is wrong with the mapping or the
-    // plan price changed mid-checkout — worth an operator's attention, but the
-    // player has been charged either way and must get what they paid for.
-    if (invoice.amount !== null && Math.abs(invoice.amount - payment.amount) > 1) {
-      console.warn(
-        `SlickPay amount mismatch on payment ${paymentId}: invoice ${invoice.amount} vs expected ${payment.amount}`,
-      );
+    // The invoice was created by us, for this payment, at this price — so the
+    // totals agreeing is not a nicety, it is the check that the id we are
+    // holding really is the invoice we issued. A warning was not enough: a
+    // mismatch means either the mapping is wrong (we are about to grant a
+    // subscription off someone else's payment) or the amount charged is not
+    // the amount owed. Neither should activate on its own.
+    const shortfall =
+      invoice.amount === null ? 0 : payment.amount - invoice.amount;
+
+    if (shortfall > AMOUNT_TOLERANCE_DZD) {
+      // Underpaid. Holding is the only safe move: granting a full plan for
+      // part of its price is a real loss, and the difference has to be chased
+      // or refunded by a person either way.
+      const reason =
+        `SlickPay reports this invoice as paid for ${invoice.amount} DA, but ` +
+        `${payment.amount} DA was owed. Activation is on hold pending review.`;
+
+      // Pending, not failed: the card was charged, so closing this would
+      // strand someone who has genuinely paid something. `providerStatus`
+      // carries the flag, which is what lets an admin approve it by hand once
+      // they have resolved it — see the approve route, which otherwise refuses
+      // to touch a gateway payment.
+      await db.payment.update({
+        where: { id: paymentId },
+        data: {
+          providerStatus: "amount_mismatch",
+          providerPayload: JSON.stringify(sanitizeProviderPayload(invoice.raw)),
+          adminNotes: reason,
+        },
+      });
+
+      console.error(`SlickPay amount mismatch on payment ${paymentId}: ${reason}`);
+      await notifyAdminsOnce(payment.providerStatus, "Payment needs review", reason);
+
+      return { result: "mismatch", paymentId, reason };
+    }
+
+    if (shortfall < -AMOUNT_TOLERANCE_DZD) {
+      // Overpaid — most likely the plan got cheaper between checkout and
+      // settlement. The player has covered what they owe, so withholding the
+      // subscription would punish them for our own timing. Activate, and put
+      // the difference in front of an admin to refund.
+      const reason =
+        `SlickPay reports this invoice as paid for ${invoice.amount} DA, which is ` +
+        `more than the ${payment.amount} DA owed. The subscription was activated; ` +
+        `the difference may need refunding.`;
+      console.warn(`SlickPay overpayment on payment ${paymentId}: ${reason}`);
+      await notifyAdminsOnce(payment.providerStatus, "Payment overpaid", reason);
     }
 
     const activation = await activatePayment({
@@ -120,7 +213,7 @@ export async function settleSlickPayPayment(
       source,
       actorUserId: opts.actorUserId ?? null,
       providerStatus: invoice.status,
-      providerPayload: invoice.raw,
+      providerPayload: sanitizeProviderPayload(invoice.raw),
     });
     return { result: "paid", alreadyActive: activation.alreadyActive, paymentId };
   }
@@ -132,7 +225,7 @@ export async function settleSlickPayPayment(
     where: { id: paymentId },
     data: {
       providerStatus: invoice.status,
-      providerPayload: JSON.stringify(invoice.raw),
+      providerPayload: JSON.stringify(sanitizeProviderPayload(invoice.raw)),
     },
   });
 
@@ -146,7 +239,7 @@ export async function settleSlickPayPayment(
       paymentId,
       reason,
       providerStatus: invoice.status,
-      providerPayload: invoice.raw,
+      providerPayload: sanitizeProviderPayload(invoice.raw),
     });
     return { result: "failed", paymentId, reason };
   }

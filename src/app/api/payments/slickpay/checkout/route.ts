@@ -14,22 +14,72 @@ import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
 import { appUrl } from "@/lib/app-url";
+import { getSetting } from "@/lib/settings";
 import {
   getSlickPayConfig,
   isSlickPayUsable,
   createInvoice,
+  sanitizeProviderPayload,
   SlickPayError,
 } from "@/lib/slickpay";
 
 /** SlickPay rejects invoices at or below 100 DZD. */
 const MIN_AMOUNT_DZD = 100;
 
-/** SlickPay wants firstname/lastname; the platform stores one `fullName`. */
-function splitName(fullName: string): { firstname: string; lastname: string } {
+/**
+ * How long an unpaid checkout stays reusable. Long enough that a double tap or
+ * a back-button return lands on the same invoice rather than opening a second
+ * one, short enough that a player returning much later gets a fresh SATIM page
+ * instead of an expired one.
+ */
+const CHECKOUT_REUSE_MS = 20 * 60 * 1000;
+
+/**
+ * SlickPay wants firstname/lastname; the platform stores one `fullName`.
+ *
+ * Both parts must be at least 2 characters or the API rejects the invoice with
+ * 422 "Le texte firstname doit contenir au moins 2 caractères". The old
+ * one-character "-" placeholder for a single-word name tripped exactly that,
+ * so a player recorded as "Yacine" could never have checked out. A single-word
+ * name repeats into both fields rather than inventing a surname.
+ */
+function splitName(fullName: string): { firstname: string; lastname: string } | null {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return { firstname: "Player", lastname: "-" };
-  if (parts.length === 1) return { firstname: parts[0], lastname: "-" };
-  return { firstname: parts[0], lastname: parts.slice(1).join(" ") };
+  if (parts.length === 0) return null;
+
+  const firstname = parts[0];
+  const lastname = parts.length > 1 ? parts.slice(1).join(" ") : firstname;
+  if (firstname.length < 2 || lastname.length < 2) return null;
+
+  return { firstname, lastname };
+}
+
+/**
+ * Contact details SlickPay insists on, despite documenting them as optional.
+ *
+ * The Create Invoice page marks phone, email and address "Required: No", and
+ * the API returns 422 without them ("Le champ téléphone est obligatoire", and
+ * the same for email and adresse). Every one of these is nullable on Player,
+ * so this is not a rare case — it is any player whose profile was never
+ * completed. Checking here turns an opaque "Payment provider error" 502 into a
+ * message that says which field to fill in.
+ */
+function missingContactFields(player: {
+  fullName: string;
+  phone: string | null;
+  email: string | null;
+}): string[] {
+  const missing: string[] = [];
+  if (!player.phone?.trim()) missing.push("phone number");
+  if (!player.email?.trim()) missing.push("email address");
+  if (!splitName(player.fullName)) missing.push("full name (first and last)");
+  return missing;
+}
+
+/** ["a", "b", "c"] -> "a, b and c" — three missing fields should not read as "a and b and c". */
+function formatList(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -76,6 +126,19 @@ export async function POST(req: NextRequest) {
     const player = await db.player.findUnique({ where: { id: playerId } });
     if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
+    // Fail here, with something the player can act on, rather than letting
+    // SlickPay reject the invoice and surfacing a bare 502.
+    const missing = missingContactFields(player);
+    if (missing.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Please add your ${formatList(missing)} to your profile before paying by card.`,
+          missingFields: missing,
+        },
+        { status: 400 },
+      );
+    }
+
     // ---- What it costs ----
     // Price is read from the plan row. A client-supplied amount is ignored
     // outright: accepting one would let a player charge themselves 100 DA for
@@ -94,14 +157,49 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If renewing a specific subscription, make sure it belongs to this player.
+    // If renewing a specific subscription it must belong to this player *and*
+    // be for this plan. Ownership alone was not enough: activation extends the
+    // named subscription without touching its planId, so paying for the
+    // cheapest plan while naming an annual subscription bought a year of the
+    // expensive one for the price of a month.
     let subscriptionId: string | null = null;
     if (body.subscriptionId) {
       const sub = await db.subscription.findUnique({ where: { id: body.subscriptionId } });
       if (!sub || sub.playerId !== playerId) {
         return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
       }
+      if (sub.planId !== plan.id) {
+        return NextResponse.json(
+          { error: "That subscription is for a different plan" },
+          { status: 400 },
+        );
+      }
       subscriptionId = sub.id;
+    }
+
+    // Idempotency. A double-submitted form, an impatient second tap, or a
+    // back-button return would otherwise open a second invoice for the same
+    // plan — and if the player paid both, they would hold two overlapping
+    // subscriptions with no refund path. Reuse a checkout that is still live
+    // instead: same plan, same player, still pending, still inside the window
+    // where its SATIM page works.
+    const reusable = await db.payment.findFirst({
+      where: {
+        playerId,
+        planId: plan.id,
+        provider: "slickpay",
+        status: "pending",
+        providerUrl: { not: null },
+        providerMode: config.mode,
+        createdAt: { gt: new Date(Date.now() - CHECKOUT_REUSE_MS) },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (reusable?.providerUrl) {
+      return NextResponse.json(
+        { url: reusable.providerUrl, paymentId: reusable.id, reused: true },
+        { status: 200 },
+      );
     }
 
     // ---- Our record first ----
@@ -114,16 +212,34 @@ export async function POST(req: NextRequest) {
         playerId,
         planId: plan.id,
         subscriptionId,
-        amount: plan.price,
+        // The rounded figure, not plan.price — this is what SlickPay is asked
+        // to charge, so recording the unrounded price instead would leave a
+        // permanent few-centimes gap between what the player paid and what the
+        // books say, and would trip settlement's own amount check.
+        amount,
         status: "pending",
         provider: "slickpay",
         providerStatus: "unpaid",
+        // Pin the environment, so settlement reads the invoice back from the
+        // host that issued it even if the mode is switched meanwhile.
+        providerMode: config.mode,
         stationId: player.stationId ?? null,
       },
     });
 
     const base = appUrl();
-    const { firstname, lastname } = splitName(player.fullName);
+    // Non-null by construction: missingContactFields() above rejects any name
+    // splitName() cannot handle.
+    const { firstname, lastname } = splitName(player.fullName)!;
+
+    // SlickPay requires an address too, but blocking a payment over a field
+    // the academy never asks players to fill in would be needlessly hostile —
+    // it is a billing formality here, not a delivery address. Fall back to the
+    // academy's own address, then to the city, so the invoice is always valid.
+    const address =
+      player.address?.trim() ||
+      (await getSetting("academy_address", "")).trim() ||
+      "Algeria";
 
     let invoice;
     try {
@@ -137,7 +253,7 @@ export async function POST(req: NextRequest) {
         lastname,
         phone: player.phone ?? undefined,
         email: player.email ?? undefined,
-        address: player.address ?? undefined,
+        address,
         note: `Subscription: ${plan.name}`,
         items: [{ name: plan.name, price: amount, quantity: 1 }],
       });
@@ -163,7 +279,10 @@ export async function POST(req: NextRequest) {
       data: {
         providerRef: invoice.id,
         providerUrl: invoice.url,
-        providerPayload: JSON.stringify(invoice.raw),
+        // Sanitised: the create response echoes back the `webhook_signature`
+        // we just sent, so storing it verbatim would write our shared webhook
+        // secret into every payment row at the moment of checkout.
+        providerPayload: JSON.stringify(sanitizeProviderPayload(invoice.raw)),
       },
     });
 

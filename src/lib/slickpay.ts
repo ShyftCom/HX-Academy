@@ -378,6 +378,35 @@ export async function getInvoice(
 }
 
 /**
+ * Strip our own webhook secret out of a gateway payload before it is stored.
+ *
+ * SlickPay echoes the `webhook_signature` we send on create straight back in
+ * the invoice body, under `meta_data.signature` — confirmed against the
+ * sandbox, whose create response contained the exact secret the request had
+ * set. `providerPayload` is kept verbatim for reconciliation and is read by
+ * anyone with database access or a payments export, so persisting it there
+ * would turn one shared secret into a credential sitting in every paid row.
+ *
+ * Deep-clones through a replacer rather than mutating: the caller's object is
+ * also the value returned to the HTTP layer.
+ */
+export function sanitizeProviderPayload(payload: unknown): unknown {
+  const SECRET_FIELDS = new Set(["signature", "webhook_signature"]);
+  const walk = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(walk);
+    if (value && typeof value === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        out[k] = SECRET_FIELDS.has(k) ? "[redacted]" : walk(v);
+      }
+      return out;
+    }
+    return value;
+  };
+  return walk(payload);
+}
+
+/**
  * Cheap credentials check for the "Test connection" button in Settings.
  *
  * Asks for an invoice id that cannot exist. A working key gets 404 ("Facture

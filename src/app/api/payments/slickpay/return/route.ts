@@ -24,19 +24,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(destination);
   }
 
-  const outcome = await settleSlickPayPayment(paymentId, "slickpay-return");
+  // Whatever happens, this has to end in a redirect. The person hitting it has
+  // just handed over a card, and an unhandled throw here would answer that
+  // with a raw Next.js 500 on an API URL — no way back into the portal, and
+  // every reason to assume the money vanished. The payment itself is safe
+  // either way: the webhook settles it independently, and nothing about the
+  // outcome depends on this request succeeding.
+  let status: string;
+  try {
+    const outcome = await settleSlickPayPayment(paymentId, "slickpay-return");
 
-  // "pending" is normal here: SATIM occasionally reports the invoice a beat
-  // after redirecting. The webhook will settle it, and the portal shows the
-  // payment as pending in the meantime.
-  const status =
-    outcome.result === "paid"
-      ? "success"
-      : outcome.result === "failed"
-        ? "failed"
-        : outcome.result === "pending"
-          ? "pending"
-          : "error";
+    // "pending" is normal here: SATIM occasionally reports the invoice a beat
+    // after redirecting. The webhook will settle it, and the portal shows the
+    // payment as pending in the meantime.
+    status =
+      outcome.result === "paid"
+        ? "success"
+        : outcome.result === "failed"
+          ? "failed"
+          : outcome.result === "pending"
+            ? "pending"
+            : outcome.result === "mismatch"
+              ? "review"
+              : "error";
+  } catch (error) {
+    console.error("SlickPay return handler failed", paymentId, error);
+    status = "pending";
+  }
 
   destination.searchParams.set("payment", status);
   return NextResponse.redirect(destination);

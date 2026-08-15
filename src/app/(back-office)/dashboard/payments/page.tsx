@@ -14,7 +14,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText, RefreshCw } from "lucide-react";
+import { Plus, Check, X, Eye, Upload, CreditCard, Download, ZoomIn, FileText, RefreshCw, AlertTriangle } from "lucide-react";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -131,6 +131,7 @@ export default function PaymentsPage() {
     onSuccess: (d) => {
       if (d.result === "paid") toast.success(d.alreadyActive ? t("gateway.verified_already") : t("gateway.verified_paid"));
       else if (d.result === "failed") toast.error(t("gateway.verified_failed"));
+      else if (d.result === "mismatch") toast.warning(t("gateway.verified_mismatch"));
       else toast.info(t("gateway.verified_pending"));
       qc.invalidateQueries({ queryKey: ["payments"] });
     },
@@ -174,7 +175,20 @@ export default function PaymentsPage() {
         </div>
       ) : (r.paymentMethod?.name ?? "—")
     },
-    { key: "status", header: "Status", cell: (r: any) => <Badge variant={STATUS_VARIANT[r.status] as any}>{r.status}</Badge> },
+    {
+      key: "status", header: "Status", cell: (r: any) => (
+        <div className="space-y-1">
+          <Badge variant={STATUS_VARIANT[r.status] as any}>{r.status}</Badge>
+          {/* A held underpayment is still "pending", which on its own reads as
+              "waiting for the player". It is not — it is waiting for an admin. */}
+          {r.providerStatus === "amount_mismatch" && (
+            <p className="flex items-center gap-1 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="h-3 w-3" />{t("gateway.needs_review")}
+            </p>
+          )}
+        </div>
+      )
+    },
     {
       key: "proof", header: "Proof", cell: (r: any) => r.proof ? (
         <div className="flex items-center gap-1.5">
@@ -203,13 +217,24 @@ export default function PaymentsPage() {
           {/* A gateway payment is settled by SlickPay, not by an admin. The only
               action offered is to re-ask SlickPay — useful when the webhook was
               missed and the player insists they paid. Manual approve/reject stay
-              hidden so nobody hand-approves an unpaid card. */}
+              hidden so nobody hand-approves an unpaid card.
+
+              The exception is a payment settlement has flagged as underpaid:
+              re-checking it will only ever return the same numbers, so an admin
+              has to decide whether the shortfall was chased, waived or
+              refunded. The approve route allows exactly this case. */}
           {r.provider === "slickpay" ? (
-            r.status === "pending" && (
+            r.status === "pending" && <>
               <Button size="sm" variant="outline" onClick={() => verifyMutation.mutate(r.id)} loading={verifyingId === r.id} title={t("gateway.verify_title")}>
                 <RefreshCw className="me-1.5 h-3.5 w-3.5" />{t("gateway.verify")}
               </Button>
-            )
+              {r.providerStatus === "amount_mismatch" && canApprove && (
+                <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("gateway.approve_mismatch")}><Check className="h-3.5 w-3.5" /></Button>
+              )}
+              {r.providerStatus === "amount_mismatch" && canReject && (
+                <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>
+              )}
+            </>
           ) : r.status === "pending" && <>
             {canApprove && <Button size="icon-sm" variant="success" onClick={() => setApproveId(r.id)} title={t("common:ui.approve")}><Check className="h-3.5 w-3.5" /></Button>}
             {canReject && <Button size="icon-sm" variant="destructive" onClick={() => setRejectId(r.id)} title={t("common:ui.reject")}><X className="h-3.5 w-3.5" /></Button>}

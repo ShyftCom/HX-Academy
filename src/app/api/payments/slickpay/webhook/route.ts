@@ -103,5 +103,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, error: outcome.reason }, { status: 503 });
   }
 
+  // A held mismatch answers 200 on purpose. It is a real, final reading of the
+  // invoice that needs a person, not a delivery failure — retrying would only
+  // re-read the same numbers and re-alert the same admins.
+  if (outcome.result === "mismatch") {
+    return NextResponse.json({ received: true, result: "mismatch", needsReview: true });
+  }
+
   return NextResponse.json({ received: true, result: outcome.result });
 }

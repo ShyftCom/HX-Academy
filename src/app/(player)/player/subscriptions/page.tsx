@@ -53,6 +53,7 @@ export default function PlayerSubscriptionsPage() {
     if (!result) return;
 
     if (result === "success") toast.success("Payment confirmed — your subscription is now active.");
+    else if (result === "review") toast.warning("Your payment came through for a different amount than expected, so we've put it in front of our team. They'll be in touch shortly.");
     else if (result === "pending") toast.info("Payment received. We're confirming it with SlickPay — this page will update shortly.");
     else if (result === "failed") toast.error("The payment did not go through. Nothing was charged twice — you can try again.");
     else toast.error("We couldn't confirm that payment. Please check your payment history below.");

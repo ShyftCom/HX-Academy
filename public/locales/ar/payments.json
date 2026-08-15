@@ -50,6 +50,9 @@
     "verified_already": "مؤكد مسبقًا — الاشتراك نشط",
     "verified_pending": "لا يزال SlickPay يعتبر هذا الدفع غير مدفوع",
     "verified_failed": "يفيد SlickPay بأن هذا الدفع قد فشل",
-    "verify_error": "تعذّر الاتصال بـ SlickPay"
+    "verify_error": "تعذّر الاتصال بـ SlickPay",
+    "verified_mismatch": "يفيد SlickPay بمبلغ مختلف — تم تعليقه للمراجعة",
+    "needs_review": "يحتاج مراجعة",
+    "approve_mismatch": "الموافقة رغم اختلاف المبلغ"
   }
 }

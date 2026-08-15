@@ -35,10 +35,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // through /api/payments/slickpay/[id]/verify, which asks the gateway.
     const existing = await db.payment.findUnique({
       where: { id },
-      select: { provider: true },
+      select: { provider: true, providerStatus: true },
     });
     if (!existing) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
-    if (existing.provider === "slickpay") {
+
+    // The one exception: settlement holds a gateway payment when SlickPay
+    // reports it paid for less than was owed, and flags it "amount_mismatch".
+    // Someone has to decide whether that shortfall was chased, waived or
+    // refunded, and without this the payment would be stuck forever — the
+    // gateway will keep reporting the same number no matter how often it is
+    // re-checked. Approving here is a deliberate, permission-gated human call
+    // and is written to the activity log like any other approval.
+    if (existing.provider === "slickpay" && existing.providerStatus !== "amount_mismatch") {
       return NextResponse.json(
         { error: "Card payments are confirmed by SlickPay. Use \"Re-check\" to verify this payment." },
         { status: 400 },

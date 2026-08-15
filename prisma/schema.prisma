@@ -369,6 +369,12 @@ model Payment {
   // only ever created for one payment row, so the index carries its weight
   // without holding the build hostage.
   providerRef     String?
+  // Which SlickPay environment issued the invoice. Settlement reads the
+  // invoice back from *this* host, not from whatever the settings say today:
+  // sandbox and production have separate invoice namespaces, so flipping the
+  // mode while a checkout was in flight made a live invoice 404 on the other
+  // host, which settlement then recorded as a definitive "not paid".
+  providerMode    String?
   providerUrl     String? // SATIM hosted payment page the player was sent to
   providerStatus  String? // last payment_status read back from SlickPay ("paid" | "unpaid")
   providerPayload String? // JSON of the last verified invoice, kept for audit

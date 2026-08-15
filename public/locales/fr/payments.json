@@ -50,6 +50,9 @@
     "verified_already": "Déjà confirmé — l'abonnement est actif",
     "verified_pending": "SlickPay indique toujours ce paiement comme impayé",
     "verified_failed": "SlickPay indique que ce paiement a échoué",
-    "verify_error": "Impossible de joindre SlickPay"
+    "verify_error": "Impossible de joindre SlickPay",
+    "verified_mismatch": "SlickPay indique un montant différent — mis en attente de vérification",
+    "needs_review": "À vérifier",
+    "approve_mismatch": "Approuver malgré l’écart de montant"
   }
 }

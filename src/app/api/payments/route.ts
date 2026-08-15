@@ -118,11 +118,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
+    // `subscriptionId` was copied straight from the body, unchecked. On
+    // approval, activatePayment() extends whatever subscription is named
+    // without altering its plan — so naming someone else's subscription
+    // renewed *their* membership off this payment, and naming one's own annual
+    // subscription while paying for the monthly plan bought a year for the
+    // price of a month. It must belong to the payer and match the plan.
+    let subscriptionId: string | null = null;
+    if (body.subscriptionId) {
+      const sub = await db.subscription.findUnique({
+        where: { id: body.subscriptionId },
+        select: { id: true, playerId: true, planId: true },
+      });
+      if (!sub || sub.playerId !== playerId) {
+        return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
+      }
+      if (sub.planId !== body.planId) {
+        return NextResponse.json(
+          { error: "That subscription is for a different plan" },
+          { status: 400 },
+        );
+      }
+      subscriptionId = sub.id;
+    }
+
     const payment = await db.payment.create({
       data: {
         playerId,
         planId: body.planId,
-        subscriptionId: body.subscriptionId ?? null,
+        subscriptionId,
         paymentMethodId: body.paymentMethodId ?? null,
         amount,
         proof: body.proof ?? null,
