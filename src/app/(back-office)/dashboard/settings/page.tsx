@@ -16,6 +16,8 @@ import { DataTable } from "@/components/shared/data-table";
 import { Save, Plus, Edit, Trash2 } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 export default function SettingsPage() {
   const { t } = useTranslation("admin");
@@ -27,6 +29,11 @@ export default function SettingsPage() {
   const [methodForm, setMethodForm] = useState({ name: "", instructions: "", accountDetails: "", isActive: true });
 
   const { data, isLoading } = useQuery({ queryKey: ["settings"], queryFn: () => fetch("/api/settings").then((r) => r.json()) });
+  // Payment methods are configuration: creating or editing one rewrites the
+  // account players are told to pay into, so the routes require settings:edit.
+  const { can } = usePermissions();
+  const canEditSettings = can(PERMISSIONS.SETTINGS_EDIT);
+
   const { data: methods, isLoading: methodsLoading } = useQuery({ queryKey: ["payment-methods"], queryFn: () => fetch("/api/payments/methods").then((r) => r.json()) });
 
   useEffect(() => { if (data) setSettings(data); }, [data]);
@@ -64,11 +71,11 @@ export default function SettingsPage() {
   const methodColumns = [
     { key: "name", header: "Method", cell: (r: any) => <p className="font-medium text-sm">{r.name}</p> },
     { key: "instructions", header: "Instructions", cell: (r: any) => <p className="text-xs text-gray-500 truncate max-w-xs">{r.instructions ?? "—"}</p> },
-    { key: "status", header: "Active", cell: (r: any) => <Switch checked={r.isActive} onCheckedChange={(v) => fetch(`/api/payments/methods/${r.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...r, isActive: v }) }).then(() => qc.invalidateQueries({ queryKey: ["payment-methods"] }))} /> },
+    { key: "status", header: "Active", cell: (r: any) => <Switch disabled={!canEditSettings} checked={r.isActive} onCheckedChange={(v) => fetch(`/api/payments/methods/${r.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...r, isActive: v }) }).then(() => qc.invalidateQueries({ queryKey: ["payment-methods"] }))} /> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => openEditMethod(r)}><Edit className="h-3.5 w-3.5" /></Button>
-        <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteMethodId(r.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+        {canEditSettings && <Button variant="outline" size="sm" onClick={() => openEditMethod(r)}><Edit className="h-3.5 w-3.5" /></Button>}
+        {canEditSettings && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteMethodId(r.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
       </div>
     )},
   ];
@@ -128,7 +135,7 @@ export default function SettingsPage() {
         <TabsContent value="payments">
           <div className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={openAddMethod}><Plus className="me-2 h-4 w-4" />{t("settings.add_method")}</Button>
+              {canEditSettings && <Button onClick={openAddMethod}><Plus className="me-2 h-4 w-4" />{t("settings.add_method")}</Button>}
             </div>
             <DataTable columns={methodColumns} data={methods ?? []} loading={methodsLoading} emptyMessage={t("settings.no_methods")} />
           </div>

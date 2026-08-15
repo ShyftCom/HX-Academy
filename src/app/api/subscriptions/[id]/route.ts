@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { addMonths, addYears } from "date-fns";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Any subscription by id, with no ownership check — back-office read.
+  const denied = await requirePermissionResponse(PERMISSIONS.SUBS_VIEW);
+  if (denied) return denied;
   const { id } = await params;
   const sub = await db.subscription.findUnique({ where: { id }, include: { player: true, plan: true, payments: true } });
   if (!sub) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -13,8 +14,10 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Changes a subscription's status or dates — i.e. whether a player currently
+  // has access, and until when.
+  const denied = await requirePermissionResponse(PERMISSIONS.SUBS_EDIT);
+  if (denied) return denied;
   const { id } = await params;
   try {
     const body = await req.json();
@@ -40,8 +43,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SUBS_DELETE);
+  if (denied) return denied;
   const { id } = await params;
   try {
     await db.subscription.delete({ where: { id } });
