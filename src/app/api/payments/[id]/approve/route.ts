@@ -3,8 +3,16 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
 import { addMonths, addYears } from "date-fns";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // This route gated on auth() alone: any signed-in user, players included,
+  // could approve any payment by id — and approving is what creates the active
+  // subscription below. Nothing about the caller was checked against the
+  // payment they were approving.
+  const denied = await requirePermissionResponse(PERMISSIONS.PAYMENTS_APPROVE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
