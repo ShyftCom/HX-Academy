@@ -29,6 +29,40 @@ export async function getAllSettings(): Promise<Record<string, string>> {
   return result;
 }
 
+/**
+ * Settings that are credentials, not configuration.
+ *
+ * Everything else in this table is public-ish (colours, phone numbers, social
+ * URLs) and GET /api/settings hands the whole table to any signed-in user —
+ * which includes every player. A payment-gateway API key cannot travel that
+ * route: anyone holding it can create invoices against the academy's SlickPay
+ * account. These keys are therefore stripped from the generic settings
+ * endpoint and are only ever written through /api/settings/slickpay, which
+ * requires settings:edit. They are never sent back to a browser at all — the
+ * UI shows a "configured / not configured" flag and a masked hint instead.
+ */
+export const SECRET_SETTING_KEYS = new Set<string>([
+  "slickpay_public_key",
+  "slickpay_webhook_secret",
+]);
+
+/** A copy of `settings` with every credential removed. */
+export function redactSecretSettings(settings: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(settings)) {
+    if (!SECRET_SETTING_KEYS.has(k)) out[k] = v;
+  }
+  return out;
+}
+
+/** Last 4 characters of a secret, for "…which key is this?" confirmation. */
+export function maskSecret(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (trimmed.length <= 4) return "••••";
+  return `••••${trimmed.slice(-4)}`;
+}
+
 export const DEFAULT_SETTINGS = {
   academy_name: "Football Skills Academy",
   academy_email: "contact@footballskillsacademy.com",
@@ -57,6 +91,14 @@ export const DEFAULT_SETTINGS = {
   privacy_url: "",
   currency: "DZD",
   currency_symbol: "DA",
+
+  // ---- SlickPay (SATIM card gateway) ----
+  // slickpay_public_key and slickpay_webhook_secret are deliberately absent:
+  // they are credentials, live only in the Setting table once an admin enters
+  // them, and are listed in SECRET_SETTING_KEYS so they never reach a client.
+  slickpay_enabled: "false",
+  slickpay_mode: "sandbox",
+  slickpay_account_uuid: "",
 
   // ---- Showcase Website theme (public site only — independent of the admin
   // primary_color/secondary_color above; see ThemeVars.tsx) ----

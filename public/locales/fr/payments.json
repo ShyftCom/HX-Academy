@@ -39,5 +39,20 @@
     "created": "Paiement créé",
     "create_failed": "Échec de la création",
     "proof_uploaded": "Justificatif téléversé"
+  },
+  "method_online": "SlickPay (carte)",
+  "method_manual": "Manuel",
+  "gateway": {
+    "ref": "Facture {{ref}}",
+    "verify": "Revérifier",
+    "verify_title": "Revérifier ce paiement auprès de SlickPay",
+    "verified_paid": "Paiement confirmé — abonnement activé",
+    "verified_already": "Déjà confirmé — l'abonnement est actif",
+    "verified_pending": "SlickPay indique toujours ce paiement comme impayé",
+    "verified_failed": "SlickPay indique que ce paiement a échoué",
+    "verify_error": "Impossible de joindre SlickPay",
+    "verified_mismatch": "SlickPay indique un montant différent — mis en attente de vérification",
+    "needs_review": "À vérifier",
+    "approve_mismatch": "Approuver malgré l’écart de montant"
   }
 }

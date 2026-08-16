@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { DataTable } from "@/components/shared/data-table";
 import { Save, Plus, Edit, Trash2 } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
+import { SlickPaySettings } from "@/components/settings/slickpay-settings";
 import { useTranslation } from "react-i18next";
 
 export default function SettingsPage() {
@@ -82,6 +83,7 @@ export default function SettingsPage() {
           <TabsTrigger value="general">{t("settings.general")}</TabsTrigger>
           <TabsTrigger value="branding">{t("settings.branding")}</TabsTrigger>
           <TabsTrigger value="payments">{t("settings.payment_methods")}</TabsTrigger>
+          <TabsTrigger value="slickpay">{t("settings.slickpay.tab")}</TabsTrigger>
           <TabsTrigger value="social">{t("settings.social")}</TabsTrigger>
           <TabsTrigger value="legal">{t("settings.legal")}</TabsTrigger>
         </TabsList>
@@ -132,6 +134,10 @@ export default function SettingsPage() {
             </div>
             <DataTable columns={methodColumns} data={methods ?? []} loading={methodsLoading} emptyMessage={t("settings.no_methods")} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="slickpay">
+          <SlickPaySettings />
         </TabsContent>
 
         <TabsContent value="social">
