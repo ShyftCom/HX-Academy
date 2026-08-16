@@ -25,6 +25,8 @@ import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRo
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward", "Winger"];
@@ -59,6 +61,14 @@ export default function PlayersPage() {
   const [editPlayer, setEditPlayer] = useState<any>(null);
   const [viewPlayer, setViewPlayer] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Mirrors the gates the player routes now enforce. Staff reach this page on
+  // players:view alone, so without this every action below is a 403 — the
+  // password reset most of all, which is now permission-only server-side.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.PLAYERS_CREATE);
+  const canEdit = can(PERMISSIONS.PLAYERS_EDIT);
+  const canDelete = can(PERMISSIONS.PLAYERS_DELETE);
   const [resetPwdPlayer, setResetPwdPlayer] = useState<any>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -151,15 +161,15 @@ export default function PlayersPage() {
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setViewPlayer(r)}><Eye className="me-2 h-4 w-4" />{t("actions.view_details")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {r.status === "active"
+          {canEdit && <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>}
+          {canEdit && <DropdownMenuSeparator />}
+          {canEdit && (r.status === "active"
             ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="me-2 h-4 w-4" />{t("actions.suspend")}</DropdownMenuItem>
             : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />{t("actions.activate")}</DropdownMenuItem>
-          }
-          <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
+          )}
+          {canEdit && <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>}
+          {canDelete && <DropdownMenuSeparator />}
+          {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -168,7 +178,7 @@ export default function PlayersPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("page.title")} description={t("page.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("actions.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("actions.add")}</Button>}
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
