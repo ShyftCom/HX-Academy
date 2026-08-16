@@ -3,10 +3,14 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateOrderNumber } from "@/lib/utils";
 import { logActivity as log, createNotification } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Lists every order in the academy, including each buyer's COD delivery
+  // details — name, phone, address. The player portal does not read this; it
+  // gets its own orders nested in /api/players/[id].
+  const denied = await requirePermissionResponse(PERMISSIONS.ORDERS_VIEW);
+  if (denied) return denied;
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") ?? "1");
@@ -38,9 +42,32 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ data, total, page, totalPages: Math.ceil(total / perPage) });
 }
 
+/**
+ * Places an order. This is the store checkout, and the only caller is the
+ * player portal — the back office reads, re-statuses and deletes orders, but
+ * never creates one. So it stays reachable by any signed-in user rather than
+ * taking a permission: gating it would close the shop.
+ *
+ * What it stops taking on trust is who the order belongs to. `playerId` came
+ * straight from the request body, so a player could attribute their order —
+ * and its cash-on-delivery obligation — to somebody else's account. It is now
+ * resolved from the session.
+ *
+ * The money was already safe here and stays that way: the total is summed from
+ * each product's own price server-side, so a client-sent amount has never been
+ * believed. Only the attribution was open.
+ */
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Whoever is signed in owns the order. A back-office user has no player
+  // record, which yields null — exactly what the column held for them before.
+  const own = await db.player.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  const playerId = own?.id ?? null;
 
   try {
     const body = await req.json();
@@ -65,7 +92,7 @@ export async function POST(req: NextRequest) {
     const order = await db.order.create({
       data: {
         orderNumber: generateOrderNumber(),
-        playerId: body.playerId ?? null,
+        playerId,
         statusId: body.statusId ?? defaultStatus?.id ?? null,
         totalAmount,
         codData: JSON.stringify(body.codData ?? {}),

@@ -17,6 +17,8 @@ import { Eye, Trash2, ClipboardList, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 export default function OrdersPage() {
   const { t } = useTranslation("orders");
@@ -26,6 +28,12 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [viewOrder, setViewOrder] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Mirrors the gates the order routes now enforce. Staff reach this page on
+  // orders:view alone and hold neither orders:edit nor orders:delete.
+  const { can } = usePermissions();
+  const canEdit = can(PERMISSIONS.ORDERS_EDIT);
+  const canDelete = can(PERMISSIONS.ORDERS_DELETE);
 
   const { data, isLoading } = useQuery({
     queryKey: ["orders", page, search, statusFilter],
@@ -71,7 +79,7 @@ export default function OrdersPage() {
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setViewOrder(r)}><Eye className="me-2 h-4 w-4" />{t("common:ui.view")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
+          {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -113,7 +121,7 @@ export default function OrdersPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-gray-400">{t("change_status")}</label>
-                  <Select value={viewOrder.statusId ?? ""} onValueChange={(v) => statusMutation.mutate({ id: viewOrder.id, statusId: v })}>
+                  <Select disabled={!canEdit} value={viewOrder.statusId ?? ""} onValueChange={(v) => statusMutation.mutate({ id: viewOrder.id, statusId: v })}>
                     <SelectTrigger className="h-8 text-xs w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>{statuses?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                   </Select>

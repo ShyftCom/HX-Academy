@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Any order by id, with the buyer's delivery details attached.
+  const denied = await requirePermissionResponse(PERMISSIONS.ORDERS_VIEW);
+  if (denied) return denied;
+
   const { id } = await params;
   const order = await db.order.findUnique({
     where: { id },
@@ -16,6 +19,12 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Moves an order through the fulfilment workflow and notifies the buyer,
+  // so on auth() alone any signed-in user could mark a stranger's order
+  // delivered — or cancelled.
+  const denied = await requirePermissionResponse(PERMISSIONS.ORDERS_EDIT);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
@@ -44,8 +53,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.ORDERS_DELETE);
+  if (denied) return denied;
+
   const { id } = await params;
   try {
     await db.order.delete({ where: { id } });
