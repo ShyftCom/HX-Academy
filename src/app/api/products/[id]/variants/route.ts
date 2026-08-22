@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Variants are managed from the back office and are not part of the player
+  // checkout, which orders by productId alone.
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_VIEW);
+  if (denied) return denied;
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -32,6 +37,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_CREATE);
+  if (denied) return denied;
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
+  // Back-office only; the player store receives each product's category
+  // nested inside the /api/products payload.
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_VIEW);
+  if (denied) return denied;
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const categories = await db.productCategory.findMany({ orderBy: { order: "asc" } });
@@ -10,6 +15,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_CREATE);
+  if (denied) return denied;
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {

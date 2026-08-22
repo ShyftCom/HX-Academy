@@ -17,6 +17,8 @@ import { formatDate } from "@/lib/utils";
 import { differenceInDays, parseISO } from "date-fns";
 import { Plus, MoreHorizontal, Trash2, CreditCard, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "success", pending: "warning", expired: "destructive", suspended: "orange",
@@ -31,6 +33,12 @@ export default function SubscriptionsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ playerId: "", planId: "", status: "pending", notes: "" });
+
+  // Mirrors the gates the subscription routes now enforce server-side.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.SUBS_CREATE);
+  const canEdit = can(PERMISSIONS.SUBS_EDIT);
+  const canDelete = can(PERMISSIONS.SUBS_DELETE);
 
   const { data, isLoading } = useQuery({
     queryKey: ["subscriptions", page, statusFilter],
@@ -87,22 +95,26 @@ export default function SubscriptionsPage() {
     { key: "remaining", header: "Remaining", cell: (r: any) => getDaysRemaining(r) },
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={STATUS_COLORS[r.status] as any}>{r.status}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
+      // Staff reach this page on subscriptions:view alone but hold neither
+      // edit nor delete, so the whole menu would be dead for them.
+      canEdit || canDelete ? (
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="me-2 h-3.5 w-3.5" />{t("actions.activate")}</DropdownMenuItem>}
-          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}>{t("actions.suspend")}</DropdownMenuItem>}
-          {r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "expired" })}>{t("actions.mark_expired")}</DropdownMenuItem>}
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-3.5 w-3.5" />{t("common:ui.delete")}</DropdownMenuItem>
+          {canEdit && r.status !== "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><RefreshCw className="me-2 h-3.5 w-3.5" />{t("actions.activate")}</DropdownMenuItem>}
+          {canEdit && r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}>{t("actions.suspend")}</DropdownMenuItem>}
+          {canEdit && r.status === "active" && <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "expired" })}>{t("actions.mark_expired")}</DropdownMenuItem>}
+          {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-3.5 w-3.5" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
+      ) : null
     )},
   ];
 
   return (
     <div className="space-y-5">
       <PageHeader title={t("title")} description={t("subtitle")}>
-        <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("add")}</Button>
+        {canCreate && <Button onClick={() => setAddOpen(true)}><Plus className="me-2 h-4 w-4" />{t("add")}</Button>}
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">

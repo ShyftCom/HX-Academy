@@ -14,11 +14,22 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, GripVertical, Trash2, Edit, ChevronUp, ChevronDown, ClipboardList, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const FIELD_TYPES = ["text", "number", "phone", "email", "select", "checkbox", "radio", "textarea", "file"];
 
 export default function FormBuilderPage() {
   const { t } = useTranslation("store");
+
+  // Mirrors the gates the store routes now enforce. The store nav needs
+  // store:view, so a role granted only that would otherwise be shown controls
+  // that can answer nothing but 403.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.STORE_CREATE);
+  const canEdit = can(PERMISSIONS.STORE_EDIT);
+  const canDelete = can(PERMISSIONS.STORE_DELETE);
+
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editField, setEditField] = useState<any>(null);
@@ -80,7 +91,7 @@ export default function FormBuilderPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("form.title")} description={t("form.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("form.add_field")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("form.add_field")}</Button>}
       </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -109,8 +120,8 @@ export default function FormBuilderPage() {
                 <div className="flex items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon-sm" onClick={() => moveField(idx, "up")} disabled={idx === 0}><ChevronUp className="h-3.5 w-3.5" /></Button>
                   <Button variant="ghost" size="icon-sm" onClick={() => moveField(idx, "down")} disabled={idx === (fields?.length ?? 0) - 1}><ChevronDown className="h-3.5 w-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm" onClick={() => openEdit(field)}><Edit className="h-3.5 w-3.5" /></Button>
-                  {!field.isDefault && <Button variant="ghost" size="icon-sm" className="text-red-500" onClick={() => setDeleteId(field.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                  {canEdit && <Button variant="ghost" size="icon-sm" onClick={() => openEdit(field)}><Edit className="h-3.5 w-3.5" /></Button>}
+                  {canDelete && !field.isDefault && <Button variant="ghost" size="icon-sm" className="text-red-500" onClick={() => setDeleteId(field.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                 </div>
               </div>
             ))

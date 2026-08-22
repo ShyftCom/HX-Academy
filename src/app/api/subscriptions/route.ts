@@ -3,10 +3,14 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
 import { addMonths, addYears } from "date-fns";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Lists every subscription in the academy. The player portal does not read
+  // this — it gets its own subscriptions nested in /api/players/[id] — so
+  // requiring subscriptions:view costs it nothing.
+  const denied = await requirePermissionResponse(PERMISSIONS.SUBS_VIEW);
+  if (denied) return denied;
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") ?? "1");
@@ -33,6 +37,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Creating a subscription is granting access without a payment having been
+  // approved, so it is back-office only.
+  const denied = await requirePermissionResponse(PERMISSIONS.SUBS_CREATE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

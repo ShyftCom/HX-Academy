@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // The academy's whole roster — every player's name, phone and email — with
+  // no per-caller filter. The player portal never calls this; it reads its own
+  // record from /api/players/[id].
+  const denied = await requirePermissionResponse(PERMISSIONS.PLAYERS_VIEW);
+  if (denied) return denied;
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") ?? "1");
@@ -45,6 +49,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // This does not just create a player row: it creates the linked *user
+  // account*, with a password defaulted from the phone number. On auth() alone
+  // any signed-in user could mint accounts on the academy's login.
+  const denied = await requirePermissionResponse(PERMISSIONS.PLAYERS_CREATE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
