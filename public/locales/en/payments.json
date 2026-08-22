@@ -39,5 +39,20 @@
     "created": "Payment created",
     "create_failed": "Create failed",
     "proof_uploaded": "Proof uploaded"
+  },
+  "method_online": "SlickPay (card)",
+  "method_manual": "Manual",
+  "gateway": {
+    "ref": "Invoice {{ref}}",
+    "verify": "Re-check",
+    "verify_title": "Re-check this payment with SlickPay",
+    "verified_paid": "Confirmed paid — subscription activated",
+    "verified_already": "Already confirmed — subscription is active",
+    "verified_pending": "SlickPay still reports this payment as unpaid",
+    "verified_failed": "SlickPay reports this payment as failed",
+    "verify_error": "Could not reach SlickPay",
+    "verified_mismatch": "SlickPay reports a different amount — held for review",
+    "needs_review": "Needs review",
+    "approve_mismatch": "Approve despite the amount difference"
   }
 }

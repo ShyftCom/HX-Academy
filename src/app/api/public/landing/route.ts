@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { SECRET_SETTING_KEYS } from "@/lib/settings";
 
 export async function GET(req: NextRequest) {
   try {
     const locale = req.nextUrl.searchParams.get("locale") ?? "fr";
     const allSettings = await db.setting.findMany();
     const raw: Record<string, string> = {};
-    for (const s of allSettings) raw[s.key] = s.value;
+    // Credentials are dropped before anything else looks at this map. This
+    // route is unauthenticated, and the `locale` suffix logic below turns any
+    // caller-supplied string into a key filter: `?locale=key` matches every
+    // setting ending in "_key", which is exactly slickpay_public_key, and
+    // published it as "slickpay_public". Filtering at the source closes that
+    // for every present and future secret rather than for the one spelling.
+    for (const s of allSettings) {
+      if (!SECRET_SETTING_KEYS.has(s.key)) raw[s.key] = s.value;
+    }
 
     const settings: Record<string, string> = {};
     for (const [key, value] of Object.entries(raw)) {

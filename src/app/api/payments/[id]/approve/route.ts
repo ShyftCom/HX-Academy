@@ -1,109 +1,74 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { logActivity, createNotification } from "@/lib/activity";
-import { addMonths, addYears } from "date-fns";
+import { activatePayment } from "@/lib/payment-activation";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
+/**
+ * Manual approval of an offline payment (bank transfer receipt, cash, etc.).
+ *
+ * The activation itself — approve the payment, start or extend the
+ * subscription, notify the player, fire the purchase pixel — lives in
+ * src/lib/payment-activation.ts, shared with the SlickPay callbacks so an
+ * online payment produces exactly the same result as an approved receipt.
+ */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  // This route gated on auth() alone: any signed-in user, players included,
-  // could approve any payment by id — and approving is what creates the active
-  // subscription below. Nothing about the caller was checked against the
-  // payment they were approving.
+  // Until now this route gated on auth() alone: *any* signed-in user, players
+  // included, could approve *any* payment by id. That was survivable only
+  // because a player had no way to create an approvable payment. The SlickPay
+  // checkout removes that accident — it mints a pending payment and hands the
+  // caller its id — so the same request sequence would buy a free
+  // subscription: checkout, never visit SATIM, approve yourself.
   const denied = await requirePermissionResponse(PERMISSIONS.PAYMENTS_APPROVE);
   if (denied) return denied;
 
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
 
   try {
-    const body = await req.json();
-    const payment = await db.payment.findUnique({
+    const body = await req.json().catch(() => ({}));
+
+    // Gateway payments are settled by SlickPay, never by hand. Allowing a
+    // manual override here would reintroduce, for staff, exactly the bypass
+    // the permission check above closes for players: an unpaid card checkout
+    // approved without a single dinar having moved. Reconciliation goes
+    // through /api/payments/slickpay/[id]/verify, which asks the gateway.
+    const existing = await db.payment.findUnique({
       where: { id },
-      include: { player: true, plan: true, subscription: true },
+      select: { provider: true, providerStatus: true },
     });
-    if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
-    if (payment.status === "approved") return NextResponse.json({ error: "Payment already approved" }, { status: 400 });
+    if (!existing) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
 
-    const startDate = new Date();
-    let endDate: Date;
-
-    if (payment.plan) {
-      endDate = payment.plan.durationType === "year"
-        ? addYears(startDate, payment.plan.duration)
-        : addMonths(startDate, payment.plan.duration);
-    } else {
-      endDate = addMonths(startDate, 1);
+    // The one exception: settlement holds a gateway payment when SlickPay
+    // reports it paid for less than was owed, and flags it "amount_mismatch".
+    // Someone has to decide whether that shortfall was chased, waived or
+    // refunded, and without this the payment would be stuck forever — the
+    // gateway will keep reporting the same number no matter how often it is
+    // re-checked. Approving here is a deliberate, permission-gated human call
+    // and is written to the activity log like any other approval.
+    if (existing.provider === "slickpay" && existing.providerStatus !== "amount_mismatch") {
+      return NextResponse.json(
+        { error: "Card payments are confirmed by SlickPay. Use \"Re-check\" to verify this payment." },
+        { status: 400 },
+      );
     }
 
-    // Approve payment
-    await db.payment.update({
-      where: { id },
-      data: {
-        status: "approved",
-        approvalDate: new Date(),
-        adminNotes: body.adminNotes ?? null,
-      },
+    const result = await activatePayment({
+      paymentId: id,
+      source: "admin",
+      actorUserId: session?.user?.id ?? null,
+      adminNotes: body.adminNotes ?? null,
     });
 
-    // Activate or create subscription
-    if (payment.subscriptionId) {
-      await db.subscription.update({
-        where: { id: payment.subscriptionId },
-        data: { status: "active", startDate, endDate },
-      });
-    } else if (payment.planId) {
-      await db.subscription.create({
-        data: {
-          playerId: payment.playerId,
-          planId: payment.planId,
-          startDate,
-          endDate,
-          status: "active",
-        },
-      });
-    }
-
-    // Notify player
-    await createNotification({
-      userId: payment.player.userId,
-      playerId: payment.playerId,
-      title: "Payment Approved",
-      message: `Your payment of ${payment.amount} DA has been approved. Your subscription is now active.`,
-      type: "success",
-      link: "/player/subscriptions",
-    });
-
-    await logActivity({
-      userId: session.user.id,
-      action: "approve",
-      module: "payments",
-      description: `Approved payment for ${payment.player.fullName} - ${payment.amount} DA`,
-    });
-
-    if (payment.stationId) {
-      fetch(`${process.env.NEXTAUTH_URL ?? ""}/api/pixels/event`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventName: "Purchase",
-          stationId: payment.stationId,
-          userData: {
-            phone: payment.player.phone ?? undefined,
-            email: payment.player.email ?? undefined,
-            firstName: payment.player.fullName,
-          },
-          eventData: {
-            value: payment.amount,
-            currency: "DZD",
-          },
-        }),
-      }).catch(() => {});
+    if (result.alreadyActive) {
+      return NextResponse.json({ error: "Payment already approved" }, { status: 400 });
     }
 
     return NextResponse.json({ message: "Payment approved and subscription activated" });
   } catch (error) {
+    if (error instanceof Error && error.message.includes("not found")) {
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+    }
     console.error(error);
     return NextResponse.json({ error: "Approval failed" }, { status: 500 });
   }

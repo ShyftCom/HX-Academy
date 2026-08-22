@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { setSetting } from "@/lib/settings";
+import { setSetting, redactSecretSettings } from "@/lib/settings";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
@@ -10,7 +10,9 @@ export async function GET() {
   const all = await db.setting.findMany();
   const result: Record<string, string> = {};
   for (const s of all) result[s.key] = s.value;
-  return NextResponse.json(result);
+  // website:view is a content-editor permission, not a finance one — it should
+  // not carry the payment-gateway API key along with the footer text.
+  return NextResponse.json(redactSecretSettings(result));
 }
 
 export async function PUT(req: NextRequest) {
