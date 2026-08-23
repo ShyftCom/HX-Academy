@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { getSetting } from "@/lib/settings";
-import { pageMetadata, adminOrTranslated } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { SplitContentSection } from "@/components/website/sections/SplitContentSection";
@@ -40,8 +40,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: `/programmes/${slug}`,
     // metaTitle/metaDescription are single-column in the schema; fall back to
     // the localised name/description rather than to the English base value.
-    title: adminOrTranslated(programme.metaTitle, lf(record, "name", locale), locale),
-    description: adminOrTranslated(programme.metaDescription, lf(record, "shortDescription", locale), locale) || undefined,
+    title: programme.metaTitle || lf(record, "name", locale),
+    description: programme.metaDescription || lf(record, "shortDescription", locale) || undefined,
     images: programme.ogImage ? [programme.ogImage] : undefined,
   });
 }

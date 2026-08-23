@@ -284,16 +284,20 @@ model Player {
 // ==================== SUBSCRIPTIONS ====================
 
 model SubscriptionPlan {
-  id           String   @id @default(cuid())
-  name         String
-  description  String?
-  duration     Int
-  durationType String   @default("month")
-  price        Float
-  color        String   @default("#3B82F6")
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  nameFr        String?
+  nameAr        String?
+  description   String?
+  descriptionFr String?
+  descriptionAr String?
+  duration      Int
+  durationType  String   @default("month")
+  price         Float
+  color         String   @default("#3B82F6")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   subscriptions Subscription[]
   payments      Payment[]
@@ -408,8 +412,12 @@ model ProductCategory {
 model Product {
   id            String           @id @default(cuid())
   name          String
+  nameFr        String?
+  nameAr        String?
   slug          String?          @unique
   description   String?
+  descriptionFr String?
+  descriptionAr String?
   images        String           @default("[]")
   price         Float
   discountPrice Float?
@@ -434,18 +442,22 @@ model Product {
 // ==================== COD FORM ====================
 
 model FormField {
-  id          String   @id @default(cuid())
-  label       String
-  fieldName   String
-  fieldType   String   @default("text")
-  placeholder String?
-  options     String?
-  isRequired  Boolean  @default(false)
-  isDefault   Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  label         String
+  labelFr       String?
+  labelAr       String?
+  fieldName     String
+  fieldType     String   @default("text")
+  placeholder   String?
+  placeholderFr String?
+  placeholderAr String?
+  options       String?
+  isRequired    Boolean  @default(false)
+  isDefault     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("form_fields")
 }
@@ -506,16 +518,22 @@ model LandingPage {
   isPublished Boolean @default(false)
 
   // ---- Showcase Website: generalized multi-page section builder ----
-  slug            String? @unique // e.g. "home", "programmes", "who-we-are" — nullable for safe additive migration, always set by application code
-  title           String?
-  template        String? @default("default")
-  metaTitle       String?
-  metaDescription String?
-  ogImage         String?
-  canonicalUrl    String?
-  noindex         Boolean @default(false)
-  nofollow        Boolean @default(false)
-  breadcrumbLabel String?
+  slug              String? @unique // e.g. "home", "programmes", "who-we-are" — nullable for safe additive migration, always set by application code
+  title             String?
+  template          String? @default("default")
+  metaTitle         String?
+  metaTitleFr       String?
+  metaTitleAr       String?
+  metaDescription   String?
+  metaDescriptionFr String?
+  metaDescriptionAr String?
+  ogImage           String?
+  canonicalUrl      String?
+  noindex           Boolean @default(false)
+  nofollow          Boolean @default(false)
+  breadcrumbLabel   String?
+  breadcrumbLabelFr String?
+  breadcrumbLabelAr String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -698,18 +716,22 @@ model MediaFile {
 // ==================== WEBSITE / APPLICATIONS ====================
 
 model FileRequirement {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  isRequired   Boolean  @default(true)
-  allowedTypes String   @default("image/*,.pdf,.docx,.xlsx")
-  maxSizeMb    Int      @default(10)
-  isActive     Boolean  @default(true)
-  order        Int      @default(0)
+  id            String   @id @default(cuid())
+  title         String
+  titleFr       String?
+  titleAr       String?
+  description   String?
+  descriptionFr String?
+  descriptionAr String?
+  isRequired    Boolean  @default(true)
+  allowedTypes  String   @default("image/*,.pdf,.docx,.xlsx")
+  maxSizeMb     Int      @default(10)
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
   // "academy" | "summer_camp" | "both"
-  appliesTo    String   @default("academy")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  appliesTo     String   @default("academy")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   applicationFiles    ApplicationFile[]
   summerCampDocuments SummerCampDocument[]
@@ -1100,6 +1122,8 @@ model WebsiteFooterConfig {
   taglineFr       String?
   taglineAr       String?
   copyrightText   String   @default("© 2026 Football Skills Academy. All rights reserved.")
+  copyrightTextFr String?
+  copyrightTextAr String?
   showTrustpilot  Boolean  @default(false)
   trustpilotUrl   String?
   updatedAt       DateTime @updatedAt
@@ -1334,18 +1358,22 @@ model WebsiteSponsor {
 // ==================== SUMMER CAMP ====================
 
 model SummerCampSession {
-  id          String   @id @default(cuid())
-  stationId   String?
-  station     Station? @relation(fields: [stationId], references: [id])
-  name        String
-  startDate   DateTime
-  endDate     DateTime
-  capacity    Int?
-  price       Decimal? @db.Decimal(10, 2)
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  stationId     String?
+  station       Station? @relation(fields: [stationId], references: [id])
+  name          String
+  nameFr        String?
+  nameAr        String?
+  startDate     DateTime
+  endDate       DateTime
+  capacity      Int?
+  price         Decimal? @db.Decimal(10, 2)
+  description   String?
+  descriptionFr String?
+  descriptionAr String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   enrollments SummerCampPlayer[]
 
@@ -1406,17 +1434,21 @@ model SummerCampDocument {
 // ==================== SUMMER CAMP PLANS ====================
 
 model SummerCampPlan {
-  id           String   @id @default(cuid())
-  name         String
-  programTrack String?
-  price        Float    @default(0)
-  description  String?
-  isActive     Boolean  @default(true)
-  order        Int      @default(0)
-  stationId    String?
-  station      Station? @relation(fields: [stationId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  nameFr        String?
+  nameAr        String?
+  programTrack  String?
+  price         Float    @default(0)
+  description   String?
+  descriptionFr String?
+  descriptionAr String?
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  stationId     String?
+  station       Station? @relation(fields: [stationId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("summer_camp_plans")
 }

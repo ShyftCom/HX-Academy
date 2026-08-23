@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
-import { pageMetadata, adminOrTranslated } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
+import { lf } from "@/components/website/sections/localeField";
 import { SectionRenderer } from "@/components/website/sections/SectionRenderer";
 import { Hero } from "@/components/website/Hero";
 
@@ -13,8 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const meta = pageMetadata({
       locale,
       path: "",
-      title: adminOrTranslated(page?.metaTitle, t("title"), locale),
-      description: adminOrTranslated(page?.metaDescription, t("description"), locale),
+      title: lf(page as never, "metaTitle", locale) || t("title"),
+      description: lf(page as never, "metaDescription", locale) || t("description"),
       noindex: page?.noindex ?? false,
       nofollow: page?.nofollow ?? false,
     });

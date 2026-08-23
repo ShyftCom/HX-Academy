@@ -38,7 +38,7 @@ export async function PricingCardsSection({ content, locale }: { content: Record
                   {t("popular")}
                 </span>
               )}
-              <h3 className="font-fsa-display text-xl font-bold text-fsa-navy-900">{plan.name}</h3>
+              <h3 className="font-fsa-display text-xl font-bold text-fsa-navy-900" dir="auto">{lf(plan as never, "name", locale)}</h3>
               <div className="mt-3 mb-1">
                 <span className="font-fsa-display text-3xl font-extrabold text-fsa-navy-900">
                   {currencySymbol} {formatNumber(plan.price, locale)}
@@ -47,7 +47,7 @@ export async function PricingCardsSection({ content, locale }: { content: Record
                   / {plan.duration} {plan.durationType}
                 </span>
               </div>
-              {plan.description && <p className="mt-2 text-sm text-fsa-text-muted">{plan.description}</p>}
+              {plan.description && <p className="mt-2 text-sm text-fsa-text-muted" dir="auto">{lf(plan as never, "description", locale)}</p>}
               <Link
                 href={localeHref("/apply", locale)}
                 className={`mt-auto block rounded-fsa-pill py-3 text-center font-semibold transition-colors ${

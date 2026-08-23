@@ -29,29 +29,6 @@ export function localeAlternates(locale: string, path = "") {
   };
 }
 
-/**
- * Choose between an admin-authored value and a translated one.
- *
- * metaTitle / metaDescription / breadcrumbLabel are single-column in the
- * schema — there is no metaTitleFr / metaTitleAr — so one stored value has to
- * serve both locales. Whoever types it in the admin is writing it against the
- * site's default locale (French); for any other locale that value is, by
- * construction, the wrong language. So the admin keeps full SEO control over
- * French, and Arabic falls to the translated string rather than rendering
- * French (or, as the seeded rows do, English) in the browser tab.
- *
- * This is a workaround for a schema gap, not a design: see the migration notes
- * for the list of fields that want a per-locale column.
- */
-export function adminOrTranslated(
-  adminValue: string | null | undefined,
-  translated: string,
-  locale: string
-): string {
-  if (locale === routing.defaultLocale && adminValue) return adminValue;
-  return translated || adminValue || "";
-}
-
 /** OpenGraph locale tags. `og:locale` for the current page, `og:locale:alternate` for the rest. */
 export function openGraphLocale(locale: string) {
   const OG: Record<string, string> = { fr: "fr_DZ", ar: "ar_DZ" };

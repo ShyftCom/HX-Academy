@@ -14,7 +14,8 @@ interface BottomLink { id: string; label: string; labelFr: string | null; labelA
 interface FooterConfig {
   backgroundColor: string; textColor: string; accentColor: string;
   logoUrl: string | null; tagline: string | null; taglineFr: string | null; taglineAr: string | null;
-  copyrightText: string; showTrustpilot: boolean; trustpilotUrl: string | null;
+  copyrightText: string; copyrightTextFr: string | null; copyrightTextAr: string | null;
+  showTrustpilot: boolean; trustpilotUrl: string | null;
   linkColumns: FooterColumn[]; socialLinks: SocialLink[]; bottomLinks: BottomLink[];
 }
 
@@ -40,6 +41,12 @@ function getTitle(col: FooterColumn, locale: string): string {
   if (locale === "fr" && col.titleFr) return col.titleFr;
   if (locale === "ar" && col.titleFr) return col.titleFr;
   return col.title;
+}
+function getCopyright(config: FooterConfig, locale: string): string {
+  if (locale === "ar" && config.copyrightTextAr) return config.copyrightTextAr;
+  if (locale === "fr" && config.copyrightTextFr) return config.copyrightTextFr;
+  if (locale === "ar" && config.copyrightTextFr) return config.copyrightTextFr;
+  return config.copyrightText;
 }
 function getTagline(config: FooterConfig, locale: string): string | null {
   if (locale === "ar" && config.taglineAr) return config.taglineAr;
@@ -217,7 +224,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
             ))}
           </div>
           <div className="flex items-center gap-4">
-            <p style={{ color: text, opacity: 0.5 }} className="text-xs">{config.copyrightText}</p>
+            <p style={{ color: text, opacity: 0.5 }} className="text-xs" dir="auto">{getCopyright(config, locale)}</p>
             <a
               href="#top"
               style={{ color: text, opacity: 0.6 }}

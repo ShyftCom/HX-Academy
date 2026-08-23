@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getPublishedPage } from "@/lib/slugPage";
 import { SlugPageBody } from "@/components/website/SlugPageBody";
-import { pageMetadata, adminOrTranslated } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
+import { lf } from "@/components/website/sections/localeField";
 
 const SLUG = "who-we-are";
 
@@ -17,8 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/${SLUG}`,
-    title: adminOrTranslated(page?.metaTitle, t("title"), locale),
-    description: adminOrTranslated(page?.metaDescription, t("description"), locale) || undefined,
+    title: lf(page as never, "metaTitle", locale) || t("title"),
+    description: lf(page as never, "metaDescription", locale) || t("description"),
   });
 }
 
@@ -28,5 +29,5 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
   const page = await getPublishedPage(SLUG);
   if (!page) notFound();
 
-  return <SlugPageBody sections={page.sections} locale={locale} breadcrumbLabel={adminOrTranslated(page.breadcrumbLabel, t("title"), locale)} />;
+  return <SlugPageBody sections={page.sections} locale={locale} breadcrumbLabel={lf(page as never, "breadcrumbLabel", locale) || t("title")} />;
 }

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CalendarDays, User } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
-import { pageMetadata, adminOrTranslated } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/public-format";
 import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: `/news/${slug}`,
     // metaTitle/metaDescription have no per-locale column yet (see the audit
     // note on NewsArticle) — the localised title is the better default.
-    title: adminOrTranslated(article.metaTitle, lf(record, "title", locale), locale),
-    description: adminOrTranslated(article.metaDescription, lf(record, "excerpt", locale), locale) || undefined,
+    title: article.metaTitle || lf(record, "title", locale),
+    description: article.metaDescription || lf(record, "excerpt", locale) || undefined,
     images: image ? [image] : undefined,
   });
 }

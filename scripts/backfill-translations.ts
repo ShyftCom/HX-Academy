@@ -427,6 +427,81 @@ const T: Record<string, Pair> = {
     fr: "Prêt à commencer l'aventure ?",
     ar: "هل أنت مستعد لبدء الرحلة؟",
   },
+
+  // ---------------- Per-locale columns added 2026-08-23 ----------------
+  // These eight tables were single-language until the locale columns landed.
+  // LandingPage metadata is keyed on its French value, not English: the base
+  // column was rewritten to French earlier (it is the default locale, and the
+  // column had to hold something a French visitor could read).
+  "Football Skills Academy — Entraîne-toi, rivalise, progresse": {
+    fr: "Football Skills Academy — Entraîne-toi, rivalise, progresse",
+    ar: "Football Skills Academy — تدرّب، نافس، تطوّر",
+  },
+  "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.": {
+    fr: "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.",
+    ar: "تقدّم أكاديمية Football Skills Academy برامج على مدار السنة وتربّصات للعطل وفرق تطوير للاعبين من 6 إلى 16 سنة، بإشراف مدربين مؤهَّلين في جميع مواقعنا.",
+  },
+  "Qui sommes-nous | Football Skills Academy": {
+    fr: "Qui sommes-nous | Football Skills Academy",
+    ar: "من نحن | Football Skills Academy",
+  },
+  "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.": {
+    fr: "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.",
+    ar: "تقوم أكاديمية Football Skills Academy على تطوير اللاعب على المدى الطويل، وتأطير مؤهَّل، وبيئة آمنة وشاملة للجميع.",
+  },
+  "Méthodologie | Football Skills Academy": {
+    fr: "Méthodologie | Football Skills Academy",
+    ar: "منهجيتنا | Football Skills Academy",
+  },
+  "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.": {
+    fr: "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.",
+    ar: "تطوّر منهجيتنا المهارات التقنية والتكتيكية والبدنية والنفسية والاجتماعية عبر حصص تناسب كل فئة عمرية وتُبنى على وضعيات اللعب.",
+  },
+  "Parcours du joueur | Football Skills Academy": {
+    fr: "Parcours du joueur | Football Skills Academy",
+    ar: "مسار اللاعب | Football Skills Academy",
+  },
+  "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.": {
+    fr: "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.",
+    ar: "من التكوين الأولي إلى فرق التطوير — مسار واضح يناسب كل مرحلة عمرية لكل لاعب في أكاديمية Football Skills Academy.",
+  },
+
+  // Subscription plans — rendered in the public pricing cards.
+  Monthly: { fr: "Mensuel", ar: "شهري" },
+  "Monthly membership plan": { fr: "Abonnement mensuel", ar: "اشتراك شهري" },
+  "Half Yearly": { fr: "Semestriel", ar: "نصف سنوي" },
+  "6 months membership — 10% discount": {
+    fr: "Abonnement de 6 mois — 10 % de réduction",
+    ar: "اشتراك لستة أشهر — خصم 10٪",
+  },
+  Annual: { fr: "Annuel", ar: "سنوي" },
+  "Full year membership — best value!": {
+    fr: "Abonnement d'un an — la meilleure offre !",
+    ar: "اشتراك لسنة كاملة — أفضل قيمة!",
+  },
+
+  // Admin-built form fields.
+  "Full Name": { fr: "Nom complet", ar: "الاسم الكامل" },
+  "Your full name": { fr: "Votre nom complet", ar: "اسمك الكامل" },
+  Phone: { fr: "Téléphone", ar: "الهاتف" },
+  "+213 ...": { fr: "+213 ...", ar: "+213 ..." },
+  Address: { fr: "Adresse", ar: "العنوان" },
+  "Street, neighborhood": { fr: "Rue, quartier", ar: "الشارع، الحي" },
+  City: { fr: "Ville", ar: "المدينة" },
+  "Your city": { fr: "Votre ville", ar: "مدينتك" },
+  "Region/Wilaya": { fr: "Wilaya", ar: "الولاية" },
+  Wilaya: { fr: "Wilaya", ar: "الولاية" },
+  Notes: { fr: "Notes", ar: "ملاحظات" },
+  "Any special instructions...": {
+    fr: "Instructions particulières…",
+    ar: "أي تعليمات خاصة…",
+  },
+
+  // Footer copyright line.
+  "© 2026 Football Skills Academy. All rights reserved.": {
+    fr: "© 2026 Football Skills Academy. Tous droits réservés.",
+    ar: "© 2026 Football Skills Academy. جميع الحقوق محفوظة.",
+  },
 };
 
 /** Fields that carry translatable copy inside a LandingSection content blob. */
@@ -531,6 +606,36 @@ async function main() {
   );
   await run("WebsiteSlide", await db.websiteSlide.findMany(), ["title", "subtitle"], (id, data) =>
     db.websiteSlide.update({ where: { id }, data })
+  );
+
+  // Tables that gained per-locale columns in
+  // prisma/migrations/20260823000002_public_content_locale_columns.
+  await run(
+    "LandingPage",
+    await db.landingPage.findMany(),
+    ["metaTitle", "metaDescription", "breadcrumbLabel"],
+    (id, data) => db.landingPage.update({ where: { id }, data })
+  );
+  await run("SubscriptionPlan", await db.subscriptionPlan.findMany(), ["name", "description"], (id, data) =>
+    db.subscriptionPlan.update({ where: { id }, data })
+  );
+  await run("Product", await db.product.findMany(), ["name", "description"], (id, data) =>
+    db.product.update({ where: { id }, data })
+  );
+  await run("FormField", await db.formField.findMany(), ["label", "placeholder"], (id, data) =>
+    db.formField.update({ where: { id }, data })
+  );
+  await run("FileRequirement", await db.fileRequirement.findMany(), ["title", "description"], (id, data) =>
+    db.fileRequirement.update({ where: { id }, data })
+  );
+  await run("SummerCampPlan", await db.summerCampPlan.findMany(), ["name", "description"], (id, data) =>
+    db.summerCampPlan.update({ where: { id }, data })
+  );
+  await run("SummerCampSession", await db.summerCampSession.findMany(), ["name", "description"], (id, data) =>
+    db.summerCampSession.update({ where: { id }, data })
+  );
+  await run("WebsiteFooterConfig", await db.websiteFooterConfig.findMany(), ["copyrightText"], (id, data) =>
+    db.websiteFooterConfig.update({ where: { id }, data })
   );
 
   // LandingSection.content is a JSON blob using the same convention, including

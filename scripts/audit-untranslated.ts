@@ -78,11 +78,41 @@ async function main() {
     }
   }
 
-  // Fields with no per-locale column at all — these need a schema change.
-  const noColumn: string[] = [];
-  for (const p of await db.subscriptionPlan.findMany()) noColumn.push(`SubscriptionPlan.name/description — "${p.name}"`);
-  for (const p of await db.product.findMany({ take: 5 })) noColumn.push(`Product.name/description — "${p.name}"`);
-  for (const p of await db.landingPage.findMany()) noColumn.push(`LandingPage.metaTitle/metaDescription — "${p.slug}"`);
+  // These gained per-locale columns in the
+  // 20260823000002_public_content_locale_columns migration, so they are checked
+  // like everything else now rather than listed as a known schema gap.
+  for (const r of await db.landingPage.findMany()) {
+    check("LandingPage", r.slug ?? r.id, r.metaTitle ?? "", "metaTitle", r.metaTitleFr, r.metaTitleAr);
+    check("LandingPage", r.slug ?? r.id, r.metaDescription ?? "", "metaDescription", r.metaDescriptionFr, r.metaDescriptionAr);
+    check("LandingPage", r.slug ?? r.id, r.breadcrumbLabel ?? "", "breadcrumbLabel", r.breadcrumbLabelFr, r.breadcrumbLabelAr);
+  }
+  for (const r of await db.subscriptionPlan.findMany()) {
+    check("SubscriptionPlan", r.name, r.name, "name", r.nameFr, r.nameAr);
+    check("SubscriptionPlan", r.name, r.description ?? "", "description", r.descriptionFr, r.descriptionAr);
+  }
+  for (const r of await db.product.findMany()) {
+    check("Product", r.slug ?? r.id, r.name, "name", r.nameFr, r.nameAr);
+    check("Product", r.slug ?? r.id, r.description ?? "", "description", r.descriptionFr, r.descriptionAr);
+  }
+  for (const r of await db.formField.findMany()) {
+    check("FormField", r.fieldName, r.label, "label", r.labelFr, r.labelAr);
+    check("FormField", r.fieldName, r.placeholder ?? "", "placeholder", r.placeholderFr, r.placeholderAr);
+  }
+  for (const r of await db.fileRequirement.findMany()) {
+    check("FileRequirement", r.id.slice(0, 6), r.title, "title", r.titleFr, r.titleAr);
+    check("FileRequirement", r.id.slice(0, 6), r.description ?? "", "description", r.descriptionFr, r.descriptionAr);
+  }
+  for (const r of await db.summerCampPlan.findMany()) {
+    check("SummerCampPlan", r.name, r.name, "name", r.nameFr, r.nameAr);
+    check("SummerCampPlan", r.name, r.description ?? "", "description", r.descriptionFr, r.descriptionAr);
+  }
+  for (const r of await db.summerCampSession.findMany()) {
+    check("SummerCampSession", r.name, r.name, "name", r.nameFr, r.nameAr);
+    check("SummerCampSession", r.name, r.description ?? "", "description", r.descriptionFr, r.descriptionAr);
+  }
+  for (const r of await db.websiteFooterConfig.findMany()) {
+    check("WebsiteFooterConfig", r.id.slice(0, 6), r.copyrightText, "copyrightText", r.copyrightTextFr, r.copyrightTextAr);
+  }
 
   const byTable = new Map<string, Row[]>();
   for (const r of rows) {
@@ -97,8 +127,11 @@ async function main() {
     if (list.length > 12) console.log(`   … and ${list.length - 12} more`);
   }
 
-  console.log(`\n=== No per-locale column exists (schema change needed) ===`);
-  for (const n of [...new Set(noColumn)]) console.log("  -", n);
+  console.log(
+    rows.length === 0
+      ? "\nEvery public-facing field has both translations."
+      : "\nFill these in Super Admin, or extend scripts/backfill-translations.ts."
+  );
 
   await db.$disconnect();
 }
