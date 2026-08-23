@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CalendarDays, ArrowRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { lf } from "../sections/localeField";
+import { formatDate } from "@/lib/public-format";
 
 export interface NewsCardData {
   slug: string;
@@ -16,7 +18,8 @@ export interface NewsCardData {
   category?: { name: string; nameFr?: string | null; nameAr?: string | null } | null;
 }
 
-export function NewsCard({ article, locale }: { article: NewsCardData; locale: string }) {
+export async function NewsCard({ article, locale }: { article: NewsCardData; locale: string }) {
+  const t = await getTranslations({ locale, namespace: "news" });
   const title = lf(article as unknown as Record<string, unknown>, "title", locale);
   const excerpt = lf(article as unknown as Record<string, unknown>, "excerpt", locale);
   const date = article.publishedAt ? new Date(article.publishedAt) : null;
@@ -32,11 +35,11 @@ export function NewsCard({ article, locale }: { article: NewsCardData; locale: s
         )}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        {date && <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-fsa-text-muted"><CalendarDays className="h-3.5 w-3.5" /> {date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>}
-        <h3 className="font-fsa-display text-lg font-bold text-fsa-navy-900">{title}</h3>
-        {excerpt && <p className="mt-2 line-clamp-2 flex-1 text-sm text-fsa-text-muted">{excerpt}</p>}
+        {date && <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-fsa-text-muted"><CalendarDays className="h-3.5 w-3.5" /> {formatDate(date, locale)}</p>}
+        <h3 className="font-fsa-display text-lg font-bold text-fsa-navy-900" dir="auto">{title}</h3>
+        {excerpt && <p className="mt-2 line-clamp-2 flex-1 text-sm text-fsa-text-muted" dir="auto">{excerpt}</p>}
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-fsa-navy-900">
-          Read more <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          {t("readMore")} <ArrowRight className="ob-flip-rtl h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
     </Link>

@@ -125,17 +125,15 @@ export function Hero({
         style={{ maxWidth: "var(--fsa-container-max)" }}
       >
         {eyebrow && (
-          <span className="mb-4 inline-flex items-center gap-2 rounded-fsa-pill bg-white/15 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
-            {eyebrow}
+          <span className="mb-4 inline-flex items-center gap-2 rounded-fsa-pill bg-white/15 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm" dir="auto">{eyebrow}
           </span>
         )}
         <h1
           className="max-w-4xl font-fsa-display font-extrabold uppercase leading-[0.95] tracking-tight text-white"
           style={{ fontSize: "clamp(2.75rem, 3rem + 4vw, 6.5rem)" }}
-        >
-          {title}
+         dir="auto">{title}
         </h1>
-        {subtitle && <p className="mt-5 max-w-xl text-lg text-white/85 sm:text-xl">{subtitle}</p>}
+        {subtitle && <p className="mt-5 max-w-xl text-lg text-white/85 sm:text-xl" dir="auto">{subtitle}</p>}
         {(primaryCta || secondaryCta) && (
           <div className={`mt-8 flex flex-wrap gap-3 ${align === "center" ? "justify-center" : align === "right" ? "justify-end" : "justify-start"}`}>
             {primaryCta && (

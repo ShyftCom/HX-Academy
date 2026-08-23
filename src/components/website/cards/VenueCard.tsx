@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, ArrowRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { lf } from "../sections/localeField";
 
 export interface VenueCardData {
@@ -13,7 +14,8 @@ export interface VenueCardData {
   shortDescriptionAr?: string | null;
 }
 
-export function VenueCard({ venue, locale }: { venue: VenueCardData; locale: string }) {
+export async function VenueCard({ venue, locale }: { venue: VenueCardData; locale: string }) {
+  const t = await getTranslations({ locale, namespace: "venues" });
   const desc = lf(venue as unknown as Record<string, unknown>, "shortDescription", locale);
   const content = (
     <>
@@ -27,7 +29,7 @@ export function VenueCard({ venue, locale }: { venue: VenueCardData; locale: str
       </div>
       {desc && (
         <div className="flex items-center justify-between p-5">
-          <p className="line-clamp-2 text-sm text-fsa-text-muted">{desc}</p>
+          <p className="line-clamp-2 text-sm text-fsa-text-muted" dir="auto">{desc}</p>
         </div>
       )}
     </>
@@ -42,7 +44,7 @@ export function VenueCard({ venue, locale }: { venue: VenueCardData; locale: str
       {content}
       <div className="flex items-center justify-end px-5 pb-5">
         <span className="inline-flex items-center gap-1 text-sm font-semibold text-fsa-navy-900">
-          View venue <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          {t("viewVenue")} <ArrowRight className="ob-flip-rtl h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
     </Link>

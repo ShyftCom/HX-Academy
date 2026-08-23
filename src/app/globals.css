@@ -509,6 +509,12 @@ body {
 /* Directional glyphs (chevrons, arrows) must mirror with the layout. */
 [dir="rtl"] .ob-flip-rtl { transform: scaleX(-1); }
 
+/* Mixed-direction copy: see the `dir="auto"` attributes in
+   src/components/website/*. It is done in the markup rather than here because
+   Lightning CSS (Tailwind v4's transformer) drops `unicode-bidi: plaintext`
+   for this project's browser targets — the declaration never reaches the
+   compiled stylesheet, which is why the CSS approach was abandoned. */
+
 /* ============================================================
    SCROLLBAR
    ============================================================ */

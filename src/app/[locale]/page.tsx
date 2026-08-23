@@ -1,25 +1,35 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
+import { pageMetadata, adminOrTranslated } from "@/lib/seo";
 import { SectionRenderer } from "@/components/website/sections/SectionRenderer";
 import { Hero } from "@/components/website/Hero";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.home" });
   try {
     const page = await db.landingPage.findUnique({ where: { slug: "home" } });
-    return {
-      title: page?.metaTitle || "Football Skills Academy",
-      description: page?.metaDescription || "Train, compete and grow with Football Skills Academy.",
-      alternates: { canonical: page?.canonicalUrl || `/${locale}` },
-      robots: page?.noindex ? { index: false, follow: !page?.nofollow } : undefined,
-    };
+    const meta = pageMetadata({
+      locale,
+      path: "",
+      title: adminOrTranslated(page?.metaTitle, t("title"), locale),
+      description: adminOrTranslated(page?.metaDescription, t("description"), locale),
+      noindex: page?.noindex ?? false,
+      nofollow: page?.nofollow ?? false,
+    });
+    // An admin-set canonical wins, but the hreflang alternates are kept either
+    // way — otherwise /fr and /ar stop being declared as translations.
+    if (page?.canonicalUrl) meta.alternates.canonical = page.canonicalUrl;
+    return meta;
   } catch {
-    return { title: "Football Skills Academy" };
+    return pageMetadata({ locale, path: "", title: t("title"), description: t("description") });
   }
 }
 
 export default async function LocaleHomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
 
   let sections: { id: string; type: string; content: string; isEnabled: boolean }[] = [];
   try {
@@ -37,9 +47,9 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
     // unavailable — a minimal, on-brand placeholder instead of a blank page.
     return (
       <Hero
-        desktopImageUrl="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=80"
-        title="Football Skills Academy"
-        subtitle="Homepage content has not been published yet. Add sections from Super Admin → Showcase Website → Pages."
+        desktopImageUrl="/media/home/hero-team-talk.jpg"
+        title={t("emptyTitle")}
+        subtitle={t("emptyBody")}
         align="center"
         verticalPosition="center"
       />

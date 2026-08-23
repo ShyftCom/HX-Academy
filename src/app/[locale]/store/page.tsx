@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { formatPrice } from "@/lib/public-format";
 import { ShoppingCart, Star, Filter, X, SlidersHorizontal, ChevronDown, Search } from "lucide-react";
 
 interface Product {
@@ -34,25 +35,31 @@ function parseImages(images: string): string[] {
   try { const arr = JSON.parse(images); return Array.isArray(arr) ? arr : []; } catch { return []; }
 }
 
-function getVariantPriceRange(product: Product): string | null {
+function getVariantPriceRange(product: Product, locale: string, currency: string): string | null {
   if (!product.variants?.length) return null;
   const prices = product.variants.filter((v) => v.stock > 0 && v.price).map((v) => Number(v.price));
   if (!prices.length) return null;
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  if (min === max) return `${min.toLocaleString("fr-DZ")} DA`;
-  return `${min.toLocaleString("fr-DZ")} DA – ${max.toLocaleString("fr-DZ")} DA`;
+  if (min === max) return formatPrice(min, locale, currency);
+  return `${formatPrice(min, locale, currency)} – ${formatPrice(max, locale, currency)}`;
 }
 
+/** These three read from the store namespace now. They were hardcoded French
+ *  literals sitting next to t() calls for the very same concepts, so the badge
+ *  stayed French on the Arabic page. */
 function StockBadge({ stock, threshold = 5 }: { stock: number; threshold?: number }) {
-  if (stock === 0) return <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-medium">Rupture</span>;
-  if (stock <= threshold) return <span className="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700 font-medium">Stock limité</span>;
-  return <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">En stock</span>;
+  const t = useTranslations("store");
+  if (stock === 0) return <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-medium">{t("outOfStockBadge")}</span>;
+  if (stock <= threshold) return <span className="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700 font-medium">{t("lowStockBadge")}</span>;
+  return <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">{t("inStockBadge")}</span>;
 }
 
 export default function StorePage() {
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("store");
+  const tc = useTranslations("common");
+  const currency = tc("currency");
   const { addItem } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,12 +120,12 @@ export default function StorePage() {
 
             <div>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && fetchProducts()}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent"
+                  className="w-full ps-9 pe-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent"
                   placeholder={t("allProducts")}
                 />
               </div>
@@ -199,7 +206,7 @@ export default function StorePage() {
               {products.map((product) => {
                 const imgs = parseImages(product.images);
                 const displayPrice = product.discountPrice ?? product.price;
-                const variantRange = getVariantPriceRange(product);
+                const variantRange = getVariantPriceRange(product, locale, currency);
                 const slug = product.slug ?? product.id;
                 const hasVariants = product.variants?.length > 0;
                 const totalStock = hasVariants
@@ -227,9 +234,9 @@ export default function StorePage() {
                         <h3 className="font-medium text-sm line-clamp-2 hover:text-blue-600 transition-colors mb-1">{product.name}</h3>
                       </Link>
                       <p className="font-bold text-sm text-gray-900 dark:text-white mb-1">
-                        {variantRange ?? `${Number(displayPrice).toLocaleString("fr-DZ")} DA`}
+                        {variantRange ?? formatPrice(Number(displayPrice), locale, currency)}
                         {product.discountPrice && !variantRange && (
-                          <span className="text-xs line-through text-gray-400 ml-1">{Number(product.price).toLocaleString("fr-DZ")} DA</span>
+                          <span className="text-xs line-through text-gray-400 ms-1">{formatPrice(Number(product.price), locale, currency)}</span>
                         )}
                       </p>
                       <div className="flex items-center justify-between">

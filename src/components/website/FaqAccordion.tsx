@@ -57,7 +57,7 @@ export function FaqAccordion({ items, locale, heading, multiOpen = false }: FaqA
       <FaqJsonLd items={items} locale={locale} />
       <div className="mx-auto max-w-3xl px-[var(--fsa-container-pad)]">
         {heading && (
-          <h2 className="mb-10 text-center font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-heading-blue sm:text-5xl">{heading}</h2>
+          <h2 className="mb-10 text-center font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-heading-blue sm:text-5xl" dir="auto">{heading}</h2>
         )}
         <div className="divide-y divide-fsa-border rounded-fsa-md border border-fsa-border">
           {items.map((f) => {
@@ -74,7 +74,7 @@ export function FaqAccordion({ items, locale, heading, multiOpen = false }: FaqA
                   onClick={() => toggle(f.id)}
                   className="flex w-full items-center justify-between gap-4 px-6 py-5 text-start transition-colors hover:bg-fsa-pale-bg"
                 >
-                  <span className="font-semibold text-fsa-navy-900">{question}</span>
+                  <span className="font-semibold text-fsa-navy-900" dir="auto">{question}</span>
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-fsa-border text-fsa-navy-900">
                     {isOpen ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                   </span>
@@ -86,7 +86,7 @@ export function FaqAccordion({ items, locale, heading, multiOpen = false }: FaqA
                   style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
                 >
                   <div className="min-h-0">
-                    <div className="fsa-richtext px-6 pb-5 text-sm text-fsa-text-muted" dangerouslySetInnerHTML={{ __html: answer }} />
+                    <div className="fsa-richtext px-6 pb-5 text-sm text-fsa-text-muted" dir="auto" dangerouslySetInnerHTML={{ __html: answer }} />
                   </div>
                 </div>
               </div>

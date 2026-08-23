@@ -6,10 +6,15 @@ import { routing } from "@/i18n/routing";
  * page, only /fr/programmes is.
  *
  * Keep in step with the directories under src/app/[locale]/. Everything not
- * listed here is either a genuine top-level route (/apply, /login, /dashboard)
- * or external, and must be left exactly as authored.
+ * listed here is either a genuine top-level route (/login, /dashboard) or
+ * external, and must be left exactly as authored.
+ *
+ * "apply" joined this set when the application form moved under [locale]. The
+ * bare /apply still resolves — it redirects — but prefixing here means the CTA
+ * keeps the visitor in their locale without an extra hop.
  */
 const LOCALISED_SECTIONS = new Set([
+  "apply",
   "programmes",
   "venues",
   "squads",

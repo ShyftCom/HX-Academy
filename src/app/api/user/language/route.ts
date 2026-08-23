@@ -7,7 +7,11 @@ export async function PATCH(req: NextRequest) {
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { language } = await req.json();
-  if (!["fr", "eng", "ar"].includes(language)) {
+  // "eng" was the public site's URL segment for English and is retired with it.
+  // "en" is the back-office i18next code — which the switcher has always sent
+  // and this route has always rejected with a 400, silently dropping the
+  // preference. Accepting it fixes that; the public site sends fr/ar.
+  if (!["fr", "en", "ar"].includes(language)) {
     return NextResponse.json({ error: "Invalid language" }, { status: 400 });
   }
 

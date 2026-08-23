@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { getSetting } from "@/lib/settings";
+import { pageMetadata, adminOrTranslated } from "@/lib/seo";
 import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { SplitContentSection } from "@/components/website/sections/SplitContentSection";
@@ -12,6 +14,7 @@ import { FaqAccordion } from "@/components/website/FaqAccordion";
 import { ProgrammeCard } from "@/components/website/cards/ProgrammeCard";
 import { CtaBannerSection } from "@/components/website/sections/CtaBannerSection";
 import { lf } from "@/components/website/sections/localeField";
+import { localeHref } from "@/components/website/localeHref";
 
 async function getProgramme(slug: string) {
   const programme = await db.programme.findUnique({
@@ -27,21 +30,29 @@ async function getProgramme(slug: string) {
   return programme;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+  const { locale, slug } = await params;
   const programme = await getProgramme(slug);
   if (!programme) return {};
-  return {
-    title: programme.metaTitle || `${programme.name} | Football Skills Academy`,
-    description: programme.metaDescription || programme.shortDescription || undefined,
-    openGraph: programme.ogImage ? { images: [programme.ogImage] } : undefined,
-  };
+  const record = programme as unknown as Record<string, unknown>;
+  return pageMetadata({
+    locale,
+    path: `/programmes/${slug}`,
+    // metaTitle/metaDescription are single-column in the schema; fall back to
+    // the localised name/description rather than to the English base value.
+    title: adminOrTranslated(programme.metaTitle, lf(record, "name", locale), locale),
+    description: adminOrTranslated(programme.metaDescription, lf(record, "shortDescription", locale), locale) || undefined,
+    images: programme.ogImage ? [programme.ogImage] : undefined,
+  });
 }
 
 export default async function ProgrammeDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
   const programme = await getProgramme(slug);
   if (!programme) notFound();
+
+  const t = await getTranslations({ locale, namespace: "programmes" });
+  const tFaq = await getTranslations({ locale, namespace: "faq" });
 
   const [related, defaultBookingUrl] = await Promise.all([
     db.programme.findMany({
@@ -54,7 +65,9 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
   ]);
 
   const name = lf(programme as unknown as Record<string, unknown>, "name", locale);
-  const bookingUrl = programme.bookingUrl || defaultBookingUrl;
+  // Resolve against the active locale: the stored value is typically the
+  // bare "/apply", which would otherwise drop the visitor through a redirect.
+  const bookingUrl = localeHref(programme.bookingUrl || defaultBookingUrl, locale);
   const ageRange = lf(programme as unknown as Record<string, unknown>, "ageRangeLabel", locale);
 
   return (
@@ -63,13 +76,13 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
         desktopImageUrl={programme.heroImageUrl || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=1600&q=80"}
         title={name}
         subtitle={ageRange || undefined}
-        primaryCta={{ label: "Book Now", href: bookingUrl }}
+        primaryCta={{ label: t("bookNow"), href: bookingUrl }}
         minHeight="60vh"
       />
       <Breadcrumb
         locale={locale}
         items={[
-          { label: "Programmes", href: `/${locale}/programmes` },
+          { label: t("breadcrumb"), href: `/${locale}/programmes` },
           ...(programme.category ? [{ label: lf(programme.category as unknown as Record<string, unknown>, "name", locale), href: `/${locale}/programmes?category=${programme.category.slug}` }] : []),
           { label: name },
         ]}
@@ -85,7 +98,7 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
           bodyFr: programme.fullDescriptionFr || programme.shortDescriptionFr,
           bodyAr: programme.fullDescriptionAr || programme.shortDescriptionAr,
           imageUrl: programme.cardImageUrl || programme.heroImageUrl,
-          ctaLabel: "Book Now", ctaUrl: bookingUrl,
+          ctaLabel: t("bookNow"), ctaUrl: bookingUrl,
         }}
       />
 
@@ -96,7 +109,7 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
           content={{
             heading: programme.promoBannerText, headingFr: programme.promoBannerTextFr, headingAr: programme.promoBannerTextAr,
             body: programme.priceLabel, bodyFr: programme.priceLabelFr, bodyAr: programme.priceLabelAr,
-            ctaLabel: "Book Now", ctaUrl: programme.promoBannerUrl || bookingUrl,
+            ctaLabel: t("bookNow"), ctaUrl: programme.promoBannerUrl || bookingUrl,
             bgColor: "sky",
           }}
         />
@@ -107,7 +120,7 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
         <FeatureCardsSection
           locale={locale}
           content={{
-            heading: "Meet the Coaches",
+            heading: t("meetCoaches"),
             cards: programme.coaches.map(({ coach }) => ({
               icon: "UserCheck",
               title: coach.fullName,
@@ -119,14 +132,14 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
         />
       )}
 
-      <ScheduleTable rows={programme.schedules} bookingUrl={bookingUrl} />
+      <ScheduleTable rows={programme.schedules} bookingUrl={bookingUrl} locale={locale} />
 
-      {programme.faqs.length > 0 && <FaqAccordion items={programme.faqs} locale={locale} heading="Frequently Asked Questions" />}
+      {programme.faqs.length > 0 && <FaqAccordion items={programme.faqs} locale={locale} heading={tFaq("heading")} />}
 
       {related.length > 0 && (
         <section className="bg-fsa-pale-bg py-[var(--fsa-section-y)]">
           <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
-            <h2 className="mb-10 font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-navy-900 sm:text-4xl">Related Programmes</h2>
+            <h2 className="mb-10 font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-navy-900 sm:text-4xl">{t("related")}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (
                 <ProgrammeCard key={p.id} programme={p} locale={locale} />
@@ -136,7 +149,7 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
         </section>
       )}
 
-      <CtaBannerSection locale={locale} content={{ heading: `Join ${name}`, body: "Spaces are limited — book your place today.", ctaLabel: "Book Now", ctaUrl: bookingUrl, style: "navy" }} />
+      <CtaBannerSection locale={locale} content={{ heading: t("joinHeading", { name }), body: t("joinBody"), ctaLabel: t("bookNow"), ctaUrl: bookingUrl, style: "navy" }} />
     </>
   );
 }

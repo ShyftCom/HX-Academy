@@ -18,8 +18,8 @@ export function CtaBannerSection({ content, locale }: { content: Record<string, 
   return (
     <section className={`${s.section} py-[var(--fsa-section-y)]`}>
       <div className="mx-auto max-w-2xl px-[var(--fsa-container-pad)] text-center">
-        {heading && <h2 className={`font-fsa-display text-3xl font-bold uppercase tracking-tight sm:text-4xl ${s.heading}`}>{heading}</h2>}
-        {body && <p className={`mt-4 text-lg ${s.body}`}>{body}</p>}
+        {heading && <h2 className={`font-fsa-display text-3xl font-bold uppercase tracking-tight sm:text-4xl ${s.heading}`} dir="auto">{heading}</h2>}
+        {body && <p className={`mt-4 text-lg ${s.body}`} dir="auto">{body}</p>}
         {content.ctaUrl && ctaLabel && (
           <div className="mt-8 flex justify-center">
             <FsaButton href={localeHref(content.ctaUrl, locale)} variant={s.button} size="lg">

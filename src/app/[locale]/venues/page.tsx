@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
+import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { VenueCard } from "@/components/website/cards/VenueCard";
 
-export const metadata: Metadata = {
-  title: "Venues | Football Skills Academy",
-  description: "Find a Football Skills Academy venue near you — training pitches, facilities and how to get there.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.venues" });
+  return pageMetadata({ locale, path: "/venues", title: t("title"), description: t("description") });
+}
 
 export default async function VenuesListingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "venues" });
 
   const venues = await db.station.findMany({
     where: { status: "active", isPubliclyListed: true },
@@ -21,16 +25,16 @@ export default async function VenuesListingPage({ params }: { params: Promise<{ 
     <>
       <Hero
         desktopImageUrl="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=80"
-        title="Our Venues"
-        subtitle="World-class facilities across our locations — find the venue closest to you."
+        title={t("heroTitle")}
+        subtitle={t("heroSubtitle")}
         minHeight="55vh"
       />
-      <Breadcrumb locale={locale} items={[{ label: "Venues" }]} />
+      <Breadcrumb locale={locale} items={[{ label: t("breadcrumb") }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">
         <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
           {venues.length === 0 ? (
-            <p className="py-16 text-center text-fsa-text-muted">Venue information is being updated — check back soon.</p>
+            <p className="py-16 text-center text-fsa-text-muted">{t("empty")}</p>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {venues.map((v) => (

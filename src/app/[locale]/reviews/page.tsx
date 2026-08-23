@@ -42,18 +42,28 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)} days ago`;
+/** Uses the reviews.{minutesAgo,hoursAgo,daysAgo,justNow} keys, which already
+ *  existed in both bundles but were never wired up — the page shipped "3m ago"
+ *  in English regardless of locale. */
+function useTimeAgo() {
+  const t = useTranslations("reviews");
+  return (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t("justNow");
+    if (mins < 60) return t("minutesAgo", { n: mins });
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return t("hoursAgo", { n: hrs });
+    return t("daysAgo", { n: Math.floor(hrs / 24) });
+  };
 }
 
 export default function ReviewsPage() {
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("reviews");
+  const tErr = useTranslations("errors");
+  const tCommon = useTranslations("common");
+  const timeAgo = useTimeAgo();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [total, setTotal] = useState(0);
   const [avgRating, setAvgRating] = useState(0);
@@ -84,10 +94,10 @@ export default function ReviewsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.reviewerName.trim() || !form.content.trim() || form.rating === 0) {
-      setFormError("Please fill in your name, rating, and review.");
+      setFormError(tErr("reviewFieldsRequired"));
       return;
     }
-    if (form.content.length < 20) { setFormError("Review must be at least 20 characters."); return; }
+    if (form.content.length < 20) { setFormError(tErr("reviewTooShort")); return; }
     setSubmitting(true);
     setFormError("");
     try {
@@ -100,7 +110,7 @@ export default function ReviewsPage() {
       setSubmitDone(true);
       setForm({ reviewerName: "", reviewerEmail: "", rating: 0, title: "", content: "" });
     } catch {
-      setFormError("Failed to submit. Please try again.");
+      setFormError(tErr("reviewSubmitFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -108,10 +118,10 @@ export default function ReviewsPage() {
 
   const getBreakdownCount = (r: number) => breakdown.find((b) => b.rating === r)?._count?.rating ?? 0;
 
-  const isRtl = locale === "ar";
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950" dir={isRtl ? "rtl" : "ltr"}>
+    // No `dir` here: <html> and the [locale] layout wrapper already carry it,
+    // and repeating it on an inner div only creates a second source of truth.
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="bg-gray-900 py-16 text-center text-white">
         <h1 className="text-4xl font-bold mb-2">{t("reviewsTitle")}</h1>
         <p className="text-gray-400">{t("basedOn").replace("{count}", String(total))}</p>
@@ -134,7 +144,7 @@ export default function ReviewsPage() {
                   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
                   return (
                     <div key={r} className="flex items-center gap-3 text-sm">
-                      <span className="w-6 text-right text-gray-500">{r}</span>
+                      <span className="w-6 text-end text-gray-500">{r}</span>
                       <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 flex-shrink-0" />
                       <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
@@ -150,7 +160,7 @@ export default function ReviewsPage() {
 
         {/* Sort */}
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">Sort by:</span>
+          <span className="text-sm text-gray-500">{t("sortBy")}</span>
           {[
             { value: "newest", label: t("mostRecent") },
             { value: "highest", label: t("highestRated") },
@@ -168,7 +178,7 @@ export default function ReviewsPage() {
 
         {/* Reviews list */}
         {loading ? (
-          <div className="text-center py-10 text-gray-400">Loading...</div>
+          <div className="text-center py-10 text-gray-400">{tCommon("loading")}</div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -203,7 +213,7 @@ export default function ReviewsPage() {
                   </button>
                 )}
                 {review.adminReply && (
-                  <div className="mt-3 pl-3 border-l-2 border-blue-300 dark:border-blue-600">
+                  <div className="mt-3 ps-3 border-s-2 border-blue-300 dark:border-blue-600">
                     <p className="text-xs font-medium text-blue-600 dark:text-blue-400">{t("adminReply")}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{review.adminReply}</p>
                   </div>

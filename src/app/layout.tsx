@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { getSettings } from "@/lib/settings";
 import { derivePrimaryTokens } from "@/lib/color";
+import { dirFor } from "@/i18n/routing";
+import { LOCALE_HEADER } from "@/proxy";
 
 // OBSIDIAN FLUX typography. Geist carries the whole interface — its tabular
 // lining figures are what keep dashboard columns aligned without per-cell
@@ -35,13 +38,23 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch {
     // DB unavailable — keep the fallback.
   }
+  // Deliberately no description here. This layout also wraps the admin, and the
+  // public [locale] pages each supply their own localised title + description
+  // via generateMetadata — an English fallback sentence at the root would leak
+  // into any public page that forgot to override it.
   return {
     title: academyName,
-    description: "Complete Football Academy Management Platform",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://footballskillsacademy.com"),
   };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Set by src/proxy.ts on public-site requests only. Admin, auth and player
+  // routes are not matched by the proxy, so they keep the French LTR default
+  // they have always had.
+  const locale = (await headers()).get(LOCALE_HEADER) ?? "fr";
+  const dir = dirFor(locale);
+
   // Admin-editable branding still overrides the palette, but it now feeds the
   // Obsidian token names rather than the retired --primary-red / --card pair.
   // Defaults are the Obsidian Flux values, so an academy that never opened
@@ -99,7 +112,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // classes on <body>, --font-geist was undefined at :root, the whole
     // declaration was invalid, and the UI silently fell back to system-ui.
     <html
-      lang="fr"
+      lang={locale}
+      dir={dir}
       className={`${geist.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >

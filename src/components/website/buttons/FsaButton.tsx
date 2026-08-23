@@ -75,7 +75,7 @@ export const FsaButton = React.forwardRef<HTMLButtonElement, FsaButtonProps>(
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
         {icon && !loading && (
           <span className={cn(bubbleVariants({ variant, size }))}>
-            {external ? <ArrowUpRight className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            {external ? <ArrowUpRight className="ob-flip-rtl w-4 h-4" /> : <ArrowRight className="ob-flip-rtl w-4 h-4" />}
           </span>
         )}
       </>

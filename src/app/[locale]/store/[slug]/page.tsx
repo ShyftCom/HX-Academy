@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { formatPrice } from "@/lib/public-format";
 import { ShoppingCart, Star, ChevronLeft, Share2, Check, Minus, Plus, MessageCircle } from "lucide-react";
 
 interface Attribute { id: string; name: string; value: string; group: { id: string; name: string } }
@@ -45,19 +46,28 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+/** Was hardcoded English ("3m ago") on a page that is otherwise translated. */
+function useTimeAgo() {
+  const t = useTranslations("reviews");
+  return (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t("justNow");
+    if (mins < 60) return t("minutesAgo", { n: mins });
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return t("hoursAgo", { n: hrs });
+    return t("daysAgo", { n: Math.floor(hrs / 24) });
+  };
 }
 
 export default function ProductDetailPage() {
   const { locale, slug } = useParams<{ locale: string; slug: string }>();
   const router = useRouter();
   const t = useTranslations("store");
+  const tc = useTranslations("common");
+  const tr = useTranslations("reviews");
+  const currency = tc("currency");
+  const timeAgo = useTimeAgo();
   const { addItem } = useCart();
 
   const [product, setProduct] = useState<ProductDetail | null>(null);
@@ -98,7 +108,7 @@ export default function ProductDetailPage() {
 
   if (!product) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center gap-4 text-gray-500">
-      <p className="text-xl">Product not found</p>
+      <p className="text-xl">{t("productNotFound")}</p>
       <Link href={`/${locale}/store`} className="text-blue-500 hover:underline flex items-center gap-1">
         <ChevronLeft className="w-4 h-4" /> Back to store
       </Link>
@@ -196,10 +206,10 @@ export default function ProductDetailPage() {
 
             <div>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {currentPrice.toLocaleString("fr-DZ")} DA
+                {formatPrice(currentPrice, locale, currency)}
               </p>
               {product.discountPrice && !hasVariants && (
-                <p className="text-sm line-through text-gray-400">{Number(product.price).toLocaleString("fr-DZ")} DA</p>
+                <p className="text-sm line-through text-gray-400">{formatPrice(Number(product.price), locale, currency)}</p>
               )}
             </div>
 
@@ -292,7 +302,7 @@ export default function ProductDetailPage() {
         {/* Description */}
         {product.description && (
           <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-lg font-semibold mb-3">Description</h2>
+            <h2 className="text-lg font-semibold mb-3">{t("description")}</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{product.description}</p>
           </div>
         )}
@@ -304,7 +314,7 @@ export default function ProductDetailPage() {
               <div className="text-center">
                 <p className="text-4xl font-bold">{avgRating.toFixed(1)}</p>
                 <StarDisplay rating={Math.round(avgRating)} />
-                <p className="text-sm text-gray-500 mt-1">{reviews.length} avis</p>
+                <p className="text-sm text-gray-500 mt-1">{tr("reviewCount", { count: reviews.length })}</p>
               </div>
             </div>
             <div className="space-y-4">
@@ -312,9 +322,9 @@ export default function ProductDetailPage() {
                 <div key={r.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-semibold text-sm">{r.reviewerName}</span>
-                    {r.isVerified && <span className="text-xs text-blue-500">✓ Vérifié</span>}
+                    {r.isVerified && <span className="text-xs text-blue-500">✓ {tr("verified")}</span>}
                     <StarDisplay rating={r.rating} />
-                    <span className="text-xs text-gray-400 ml-auto">{timeAgo(r.createdAt)}</span>
+                    <span className="text-xs text-gray-400 ms-auto">{timeAgo(r.createdAt)}</span>
                   </div>
                   {r.title && <p className="font-medium text-sm mb-1">{r.title}</p>}
                   <p className={`text-sm text-gray-600 dark:text-gray-300 ${expandedReview !== r.id ? "line-clamp-3" : ""}`}>{r.content}</p>
@@ -324,8 +334,8 @@ export default function ProductDetailPage() {
                     </button>
                   )}
                   {r.adminReply && (
-                    <div className="mt-3 pl-3 border-l-2 border-blue-300 dark:border-blue-600">
-                      <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Réponse de l'académie:</p>
+                    <div className="mt-3 ps-3 border-s-2 border-blue-300 dark:border-blue-600">
+                      <p className="text-xs font-medium text-blue-600 dark:text-blue-400">{tr("adminReply")}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{r.adminReply}</p>
                     </div>
                   )}

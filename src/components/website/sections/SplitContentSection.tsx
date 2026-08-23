@@ -16,9 +16,9 @@ export function SplitContentSection({ content, locale }: { content: Record<strin
 
   const textBlock = (
     <div className="flex flex-col justify-center">
-      {eyebrow && <span className="mb-3 text-sm font-bold uppercase tracking-widest text-fsa-heading-blue">{eyebrow}</span>}
-      {heading && <h2 className="font-fsa-display text-3xl font-bold uppercase leading-tight tracking-tight text-fsa-navy-900 sm:text-4xl">{heading}</h2>}
-      {body && <p className="mt-5 text-lg leading-relaxed text-fsa-text-muted">{body}</p>}
+      {eyebrow && <span className="mb-3 text-sm font-bold uppercase tracking-widest text-fsa-heading-blue" dir="auto">{eyebrow}</span>}
+      {heading && <h2 className="font-fsa-display text-3xl font-bold uppercase leading-tight tracking-tight text-fsa-navy-900 sm:text-4xl" dir="auto">{heading}</h2>}
+      {body && <p className="mt-5 text-lg leading-relaxed text-fsa-text-muted" dir="auto">{body}</p>}
       {bullets.length > 0 && (
         <ul className="mt-6 space-y-3">
           {bullets.map((b, i) => (
