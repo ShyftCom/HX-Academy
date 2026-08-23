@@ -191,13 +191,16 @@
       "description": "Nos équipes de développement offrent le plus haut niveau d'encadrement aux joueurs sélectionnés après évaluation, avec un parcours clair vers le football de compétition."
     },
     "whoWeAre": {
-      "title": "Qui sommes-nous"
+      "title": "Qui sommes-nous",
+      "description": "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun."
     },
     "methodology": {
-      "title": "Méthodologie"
+      "title": "Méthodologie",
+      "description": "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes."
     },
     "pathway": {
-      "title": "Parcours"
+      "title": "Parcours",
+      "description": "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy."
     },
     "reviews": {
       "title": "Avis",

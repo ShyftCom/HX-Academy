@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     path: `/${SLUG}`,
     title: adminOrTranslated(page?.metaTitle, t("title"), locale),
-    description: page?.metaDescription || undefined,
+    description: adminOrTranslated(page?.metaDescription, t("description"), locale) || undefined,
   });
 }
 
