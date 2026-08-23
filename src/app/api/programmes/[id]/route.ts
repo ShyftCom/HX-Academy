@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     include: {
       category: true,
-      schedules: { orderBy: { order: "asc" }, include: { venue: true, coach: true } },
+      schedules: { orderBy: { order: "asc" }, include: { station: true, coach: true } },
       venues: { include: { venue: true }, orderBy: { order: "asc" } },
       coaches: { include: { coach: true }, orderBy: { order: "asc" } },
       faqs: { orderBy: { order: "asc" } },

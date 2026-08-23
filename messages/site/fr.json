@@ -318,7 +318,16 @@
     "headingAt": "Horaires à {name}",
     "empty": "L'horaire de ce site est en cours de mise à jour — revenez bientôt.",
     "field": "Terrain",
-    "otherLocations": "Voir l'horaire d'un autre site"
+    "otherLocations": "Voir l'horaire d'un autre site",
+    "days": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
+    }
   },
   "squads": {
     "heroTitle": "Équipes de développement",

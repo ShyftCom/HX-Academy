@@ -3,6 +3,8 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import { ensureScheduleConstraints } from "./schedule-constraints";
+import { parseDayOfWeek, parseMinutes } from "../src/lib/schedule";
 
 dotenv.config();
 
@@ -77,6 +79,12 @@ async function main() {
     { name: "applications:manage", module: "applications", action: "manage", description: "Manage website applications/leads" },
     { name: "applications:export", module: "applications", action: "export", description: "Export website applications/leads" },
     { name: "file_requirements:manage", module: "file_requirements", action: "manage", description: "Manage application file requirements" },
+
+    // Schedules are location-scoped: website:view/website:edit decide whether a
+    // user may read or edit a schedule, this decides whose. Granted to Super
+    // Admin and Admin by the loop below, so existing installs keep the reach
+    // they had before. Everyone else is confined to their station_staff rows.
+    { name: "schedule:manage_all", module: "schedule", action: "manage_all", description: "Read and edit the schedule of every location, not only assigned ones" },
   ];
 
   const permissions: Record<string, any> = {};
@@ -592,6 +600,10 @@ async function main() {
       console.log(`⏭️  Kept ${existingStations.length} existing station(s) — no demo venues created`);
     }
 
+    // Same rule the migration's backfill uses for slots with no location of their own.
+    const defaultStationId =
+      (await db.station.findFirst({ orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }], select: { id: true } }))?.id ?? null;
+
     // Create Coaches (public-safe profiles, deliberately separate from StaffProfile/HRM data)
     const coachSeed = [
       { fullName: "Yanis Belkacem", role: "Head of Coaching", bio: "UEFA A-licensed coach with over a decade of youth development experience.", stationSlug: "city-football-academy" },
@@ -640,19 +652,25 @@ async function main() {
           metaDescription: "Weekly football training for players aged 6-16, delivered by qualified coaches at Football Skills Academy.",
         },
       });
-      const rows: [string, number, number, string, string, string, string, string, number][] = [
-        ["Under 8", 6, 8, "Skills", "Monday", "17:30", "18:45", "city-football-academy", 4000],
-        ["Under 10", 8, 10, "Skills", "Wednesday", "17:30", "18:45", "city-football-academy", 4000],
-        ["Under 12", 10, 12, "Skills", "Tuesday", "17:30", "18:45", "city-football-academy", 4500],
-        ["Under 14", 12, 14, "Skills", "Thursday", "18:30", "19:45", "city-football-academy", 4500],
-        ["Under 16", 14, 16, "Skills", "Thursday", "18:30", "19:45", "city-football-academy", 5000],
+      // Under 14 and Under 16 deliberately share Thursday 18:30-19:45 on *different*
+      // pitches: legal, and a live example of why the overlap rule is scoped per pitch.
+      const rows: [string, number, number, string, string, string, string, string, string, number][] = [
+        ["Under 8", 6, 8, "Skills", "Monday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
+        ["Under 10", 8, 10, "Skills", "Wednesday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
+        ["Under 12", 10, 12, "Skills", "Tuesday", "17:30", "18:45", "Pitch A", "city-football-academy", 4500],
+        ["Under 14", 12, 14, "Skills", "Thursday", "18:30", "19:45", "Pitch A", "city-football-academy", 4500],
+        ["Under 16", 14, 16, "Skills", "Thursday", "18:30", "19:45", "Pitch B", "city-football-academy", 5000],
       ];
       for (let i = 0; i < rows.length; i++) {
-        const [ageGroup, minAge, maxAge, sessionName, day, startTime, endTime, stationSlug, price] = rows[i];
-        await db.programmeSchedule.create({
+        const [ageGroup, minAge, maxAge, sessionName, day, startTime, endTime, field, stationSlug, price] = rows[i];
+        const stationId = venues[stationSlug]?.id ?? defaultStationId;
+        if (!stationId) continue;
+        await db.scheduleSlot.create({
           data: {
-            programmeId: programme.id, ageGroup, minAge, maxAge, sessionName, day, startTime, endTime,
-            venueId: venues[stationSlug]?.id ?? null, coachId: i < 2 ? coaches["Sofia Amrani"].id : coaches["Yanis Belkacem"].id,
+            stationId, programmeId: programme.id, ageGroup, minAge, maxAge, sessionName,
+            day, dayOfWeek: parseDayOfWeek(day), startTime, endTime,
+            startMinutes: parseMinutes(startTime), endMinutes: parseMinutes(endTime), field,
+            coachId: i < 2 ? coaches["Sofia Amrani"].id : coaches["Yanis Belkacem"].id,
             price, registrationStatus: "open", order: i,
           },
         });
@@ -689,13 +707,20 @@ async function main() {
           metaDescription: "A week of intensive football training and match play during the school holidays for players aged 6-16.",
         },
       });
-      await db.programmeSchedule.create({
-        data: {
-          programmeId: programme.id, ageGroup: "All ages", minAge: 6, maxAge: 16, sessionName: "Full day camp",
-          day: "Monday-Friday", startTime: "09:00", endTime: "15:00", venueId: venues["northside-sports-complex"]?.id ?? null,
-          coachId: coaches["Karim Ferhat"].id, price: 12000, registrationStatus: "open", order: 0,
-        },
-      });
+      // "Monday-Friday" names a range, not a weekday, so dayOfWeek stays null:
+      // the slot still displays, but is outside the per-day overlap rule and the
+      // admin flags it for review. See parseDayOfWeek in src/lib/schedule.ts.
+      const campStationId = venues["northside-sports-complex"]?.id ?? defaultStationId;
+      if (campStationId) {
+        await db.scheduleSlot.create({
+          data: {
+            stationId: campStationId, programmeId: programme.id, ageGroup: "All ages", minAge: 6, maxAge: 16,
+            sessionName: "Full day camp", day: "Monday-Friday", dayOfWeek: parseDayOfWeek("Monday-Friday"),
+            startTime: "09:00", endTime: "15:00", startMinutes: parseMinutes("09:00"), endMinutes: parseMinutes("15:00"),
+            coachId: coaches["Karim Ferhat"].id, price: 12000, registrationStatus: "open", order: 0,
+          },
+        });
+      }
       await db.programmeVenue.create({ data: { programmeId: programme.id, venueId: venues["northside-sports-complex"].id, order: 0 } });
     }
     console.log("✅ Programmes created");
@@ -1155,6 +1180,22 @@ async function main() {
     if (!existing) await db.attributeGroup.create({ data: { name } });
   }
   console.log("✅ Attribute groups created");
+
+  // Every location owns exactly one schedule. New stations get theirs from
+  // POST /api/stations; this backstops stations created any other way, including
+  // by an earlier version of this seed. Deliberately outside SEED_DEMO_CONTENT —
+  // it provisions real locations, not demo ones.
+  const stationsNeedingSchedule = await db.station.findMany({ where: { locationSchedule: null }, select: { id: true } });
+  for (const station of stationsNeedingSchedule) {
+    await db.locationSchedule.create({ data: { stationId: station.id } });
+  }
+  console.log(`✅ Location schedules provisioned (${stationsNeedingSchedule.length} new)`);
+
+  // `prisma db push` (this project's deploy mechanism) creates columns, indexes
+  // and foreign keys but not CHECK or EXCLUDE constraints, so the schedule's
+  // double-booking rules are applied here on every deploy. Idempotent.
+  await ensureScheduleConstraints(db);
+  console.log("✅ Schedule conflict constraints ensured");
 
   console.log("\n🎉 Seeding complete!");
 }

@@ -365,5 +365,42 @@
     "bottom_empty": "Aucun lien inférieur ajouté.",
     "column_ph": "Titre de la colonne…",
     "saved": "Pied de page enregistré !"
+  },
+  "schedule": {
+    "title": "Horaires par site",
+    "subtitle": "Chaque site a son propre horaire indépendant. Choisissez un site pour n'afficher et ne modifier que ses créneaux.",
+    "location": "Site",
+    "select_location": "Choisir un site",
+    "no_locations": "Aucun site disponible. Créez d'abord une station — son horaire est créé automatiquement avec elle.",
+    "empty_title": "{{name}} n'a encore aucun créneau",
+    "empty_body": "Ajoutez le premier créneau d'entraînement, ou partez de l'horaire d'un autre site comme modèle.",
+    "add_slot": "Ajouter un créneau",
+    "duplicate_from": "Copier depuis…",
+    "duplicate_action": "Dupliquer l'horaire",
+    "duplicated": "{{count}} créneau(x) copié(s)",
+    "duplicate_skipped": "Ignorés car en conflit : {{groups}}",
+    "field": "Terrain",
+    "field_hint": "Terrain au sein de ce site. Deux créneaux actifs sur le même terrain, le même jour et à la même heure sont refusés. Laissez vide si le site n'a qu'un terrain.",
+    "capacity": "Cap.",
+    "coach": "Entraîneur",
+    "no_coach": "Aucun entraîneur",
+    "active": "Actif",
+    "inactive": "Masqué",
+    "active_hint": "Les créneaux inactifs restent enregistrés mais sont masqués sur le site public et ignorés par le contrôle des conflits.",
+    "day_other": "Autre…",
+    "no_conflict_check": "Cette valeur ne désigne pas un seul jour de la semaine : ce créneau est exclu du contrôle des conflits.",
+    "days": {
+      "sunday": "Dimanche",
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi"
+    },
+    "error_overlap": "Conflit avec {{name}} ({{day}} {{start}}–{{end}}) sur {{field}}. Modifiez l'heure, le jour ou le terrain.",
+    "error_overlap_generic": "Ce créneau est en conflit avec un autre au même site, le même jour, à la même heure et sur le même terrain.",
+    "error_time_order": "L'heure de fin doit être postérieure à l'heure de début.",
+    "programme_tab_hint": "Ces créneaux appartiennent à des sites. Pour modifier l'horaire complet d'un site, allez dans Site web → Horaires."
   }
 }
