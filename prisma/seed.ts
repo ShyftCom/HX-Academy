@@ -932,7 +932,7 @@ async function main() {
       const navSeed = [
         { label: "Programmes", labelFr: "Programmes", labelAr: "البرامج", url: "/programmes", hasDropdown: false, position: 0 },
         { label: "Venues", labelFr: "Sites", labelAr: "المواقع", url: "/venues", hasDropdown: false, position: 1 },
-        { label: "Squads", labelFr: "Squads", labelAr: "الفرق", url: "/squads", hasDropdown: false, position: 2 },
+        { label: "Squads", labelFr: "Équipes", labelAr: "الفرق", url: "/squads", hasDropdown: false, position: 2 },
         {
           label: "Who We Are", labelFr: "Qui sommes-nous", labelAr: "من نحن", url: null, hasDropdown: true, position: 3,
           dropdownItems: [
