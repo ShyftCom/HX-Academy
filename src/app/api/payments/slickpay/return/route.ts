@@ -14,6 +14,10 @@ import { settleSlickPayPayment } from "@/lib/slickpay-settle";
 import { appUrl } from "@/lib/app-url";
 
 export const dynamic = "force-dynamic";
+// Settlement calls out to SlickPay; give it more room than the platform
+// default so a slow gateway is reported by our own error handling rather than
+// killed mid-verification.
+export const maxDuration = 30;
 
 export async function GET(req: NextRequest) {
   const paymentId = new URL(req.url).searchParams.get("payment");
