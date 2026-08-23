@@ -31,7 +31,7 @@ export default async function ProgrammesListingPage({ params, searchParams }: { 
   return (
     <>
       <Hero
-        desktopImageUrl="https://images.unsplash.com/photo-1470114716159-e389f8712fda?w=1600&q=80"
+        desktopImageUrl="/media/wide/speed-drill.jpg"
         title={t("heroTitle")}
         subtitle={t("heroSubtitle")}
         align="left"

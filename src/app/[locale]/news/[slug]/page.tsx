@@ -52,7 +52,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ loc
 
   return (
     <>
-      <Hero desktopImageUrl={article.coverImageUrl || "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1600&q=80"} title={title} minHeight="45vh" />
+      <Hero desktopImageUrl={article.coverImageUrl || "/media/wide/team-talk.jpg"} title={title} minHeight="45vh" />
       <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/news` }, { label: title }]} />
 
       <article className="bg-white py-[var(--fsa-section-y)]">

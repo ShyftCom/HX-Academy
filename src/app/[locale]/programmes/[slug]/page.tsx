@@ -73,7 +73,7 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
   return (
     <>
       <Hero
-        desktopImageUrl={programme.heroImageUrl || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=1600&q=80"}
+        desktopImageUrl={programme.heroImageUrl || "/media/wide/dribbling.jpg"}
         title={name}
         subtitle={ageRange || undefined}
         primaryCta={{ label: t("bookNow"), href: bookingUrl }}
