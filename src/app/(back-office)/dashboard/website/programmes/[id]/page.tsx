@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,18 +13,13 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { SortableList } from "@/components/website/admin/SortableList";
+import { ScheduleSlotEditor, type CoachOption, type SlotRow } from "@/components/website/admin/ScheduleSlotEditor";
 import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
 import { useTranslation } from "react-i18next";
 
-interface ScheduleRow {
-  id: string; ageGroup: string; minAge: number | null; maxAge: number | null;
-  sessionName: string | null; day: string | null; startTime: string | null; endTime: string | null;
-  venueId: string | null; price: number | null; registrationStatus: string;
-}
 interface Category { id: string; name: string }
-interface Venue { id: string; name: string }
+interface LocationOption { id: string; name: string; wilaya: string }
 interface ProgrammeDetail {
   id: string; slug: string; name: string; nameFr: string | null; nameAr: string | null;
   shortDescription: string | null; shortDescriptionFr: string | null; shortDescriptionAr: string | null;
@@ -35,10 +30,11 @@ interface ProgrammeDetail {
   promoBannerText: string | null; promoBannerTextFr: string | null; promoBannerTextAr: string | null; promoBannerUrl: string | null;
   bookingUrl: string | null; isFeatured: boolean; isPubliclyListed: boolean;
   metaTitle: string | null; metaDescription: string | null;
-  schedules: ScheduleRow[];
+  schedules: SlotRow[];
 }
 
-const EMPTY_SCHEDULE = { ageGroup: "Under 8", minAge: null, maxAge: null, sessionName: "Skills", day: "Monday", startTime: "17:30", endTime: "18:45", venueId: null, price: null, registrationStatus: "open" };
+/** Schedules belong to a location now, so a new row needs one — see addSchedule below. */
+const NEW_SLOT = { ageGroup: "Under 8", sessionName: "Skills", day: "Monday", startTime: "17:30", endTime: "18:45", field: "", registrationStatus: "open", isActive: true };
 
 export default function ProgrammeEditPage() {
   const { t } = useTranslation("website");
@@ -53,7 +49,10 @@ export default function ProgrammeEditPage() {
     queryFn: () => fetch(`/api/programmes/${id}`).then((r) => r.json()),
   });
   const { data: categories = [] } = useQuery<Category[]>({ queryKey: ["admin-programme-categories"], queryFn: () => fetch("/api/programmes/categories").then((r) => r.json()) });
-  const { data: venues = [] } = useQuery<Venue[]>({ queryKey: ["admin-venues-lite"], queryFn: () => fetch("/api/public/venues").then((r) => r.json()) });
+  // The locations this user may schedule into — not /api/public/venues, which
+  // hides unpublished branches and ignores per-user location scoping.
+  const { data: locations = [] } = useQuery<LocationOption[]>({ queryKey: ["schedule-locations"], queryFn: () => fetch("/api/locations").then((r) => r.json()) });
+  const { data: coaches = [] } = useQuery<CoachOption[]>({ queryKey: ["schedule-coaches"], queryFn: () => fetch("/api/coaches").then((r) => r.json()) });
 
   const [form, setForm] = useState<Record<string, unknown>>({});
   useEffect(() => { if (programme) setForm(programme as unknown as Record<string, unknown>); }, [programme]);
@@ -66,28 +65,53 @@ export default function ProgrammeEditPage() {
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
-  const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
+  const [schedules, setSchedules] = useState<SlotRow[]>([]);
   useEffect(() => { if (programme?.schedules) setSchedules(programme.schedules); }, [programme?.schedules]);
 
+  /** Shared failure path so a rejected overlap explains which slot is in the way. */
+  async function post(url: string, method: string, body?: unknown) {
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error("request failed"), { payload });
+    return payload;
+  }
+
+  function onWriteError(error: unknown) {
+    const payload = (error as { payload?: { error?: string; conflict?: Record<string, string | null> } }).payload ?? {};
+    if (payload.error === "schedule_time_order") toast.error(t("schedule.error_time_order"));
+    else if (payload.error === "schedule_overlap") {
+      const c = payload.conflict;
+      toast.error(c
+        ? t("schedule.error_overlap", { name: c.sessionName || c.ageGroup || "", day: c.day ?? "", start: c.startTime ?? "", end: c.endTime ?? "", field: c.field ?? "" })
+        : t("schedule.error_overlap_generic"));
+    } else toast.error(t("common:toast.save_failed"));
+    invalidate();
+  }
+
   const { mutate: addSchedule } = useMutation({
-    mutationFn: () => fetch(`/api/programmes/${id}/schedule`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(EMPTY_SCHEDULE) }).then((r) => r.json()),
+    // A slot must land somewhere: default to the first location the user can
+    // reach, which they can then change on the row itself.
+    mutationFn: () => post(`/api/programmes/${id}/schedule`, "POST", { ...NEW_SLOT, stationId: locations[0]?.id }),
     onSuccess: () => { toast.success(t("programmes.row_added")); invalidate(); },
+    onError: onWriteError,
   });
   const { mutate: updateSchedule } = useMutation({
-    mutationFn: ({ scheduleId, data }: { scheduleId: string; data: Partial<ScheduleRow> }) =>
-      fetch(`/api/programmes/${id}/schedule/${scheduleId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
+    mutationFn: ({ scheduleId, data }: { scheduleId: string; data: Partial<SlotRow> }) =>
+      post(`/api/programmes/${id}/schedule/${scheduleId}`, "PUT", data),
     onSuccess: () => invalidate(),
+    onError: onWriteError,
   });
   const { mutate: deleteSchedule } = useMutation({
-    mutationFn: (scheduleId: string) => fetch(`/api/programmes/${id}/schedule/${scheduleId}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (scheduleId: string) => post(`/api/programmes/${id}/schedule/${scheduleId}`, "DELETE"),
     onSuccess: () => { toast.success(t("programmes.row_removed")); invalidate(); setDeleteScheduleId(null); },
+    onError: onWriteError,
   });
   const { mutate: persistOrder } = useMutation({
-    mutationFn: (items: { id: string; order: number }[]) =>
-      fetch(`/api/programmes/${id}/schedule/reorder`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }).then((r) => r.json()),
+    mutationFn: (items: { id: string; order: number }[]) => post(`/api/programmes/${id}/schedule/reorder`, "PUT", { items }),
+    onError: onWriteError,
   });
 
-  function handleReorder(next: ScheduleRow[]) {
+  function handleReorder(next: SlotRow[]) {
     setSchedules(next);
     persistOrder(next.map((s, i) => ({ id: s.id, order: i })));
   }
@@ -181,45 +205,24 @@ export default function ProgrammeEditPage() {
 
       {tab === "schedule" && (
         <div className="space-y-3">
-          {schedules.length > 0 && (
-            <SortableList
-              items={schedules}
+          {/* Slots belong to locations now. This tab is the per-programme view of
+              them and can span several; Website → Schedules is the per-location one. */}
+          <p className="text-sm text-gray-500">{t("schedule.programme_tab_hint")}</p>
+          {locations.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-gray-500 dark:border-gray-700">{t("schedule.no_locations")}</div>
+          ) : (
+            <ScheduleSlotEditor
+              slots={schedules}
+              locations={locations}
+              coaches={coaches}
+              showLocation
               onReorder={handleReorder}
-              renderItem={(row, dragHandle) => (
-                <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                  {dragHandle}
-                  <Input className="w-28" value={row.ageGroup} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, ageGroup: e.target.value } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { ageGroup: e.target.value } })} placeholder={t("programmes.age_group")} />
-                  <Input className="w-28" value={row.sessionName ?? ""} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, sessionName: e.target.value } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { sessionName: e.target.value } })} placeholder={t("programmes.session")} />
-                  <Input className="w-28" value={row.day ?? ""} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, day: e.target.value } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { day: e.target.value } })} placeholder={t("programmes.day")} />
-                  <Input className="w-24" value={row.startTime ?? ""} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, startTime: e.target.value } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { startTime: e.target.value } })} placeholder="17:30" />
-                  <Input className="w-24" value={row.endTime ?? ""} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, endTime: e.target.value } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { endTime: e.target.value } })} placeholder="18:45" />
-                  <Select value={row.venueId ?? "none"} onValueChange={(v) => updateSchedule({ scheduleId: row.id, data: { venueId: v === "none" ? null : v } })}>
-                    <SelectTrigger className="w-36"><SelectValue placeholder={t("programmes.venue")} /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{t("programmes.no_venue")}</SelectItem>
-                      {venues.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Input className="w-24" type="number" value={row.price ?? ""} onChange={(e) => setSchedules((s) => s.map((r) => (r.id === row.id ? { ...r, price: e.target.value ? Number(e.target.value) : null } : r)))} onBlur={(e) => updateSchedule({ scheduleId: row.id, data: { price: e.target.value ? Number(e.target.value) : null } })} placeholder={t("common:labels.price")} />
-                  <Select value={row.registrationStatus} onValueChange={(v) => updateSchedule({ scheduleId: row.id, data: { registrationStatus: v } })}>
-                    <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="open">{t("programmes.status_open")}</SelectItem>
-                      <SelectItem value="waitlist">{t("programmes.status_waitlist")}</SelectItem>
-                      <SelectItem value="full">{t("programmes.status_full")}</SelectItem>
-                      <SelectItem value="closed">{t("programmes.status_closed")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <button onClick={() => setDeleteScheduleId(row.id)} className="ms-auto flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
+              onUpdate={(scheduleId, data) => updateSchedule({ scheduleId, data })}
+              onDelete={setDeleteScheduleId}
+              onAdd={() => addSchedule()}
+              addLabel={t("programmes.add_schedule")}
             />
           )}
-          <Button variant="outline" onClick={() => addSchedule()} className="w-full border-dashed">
-            <Plus className="h-4 w-4" /> {t("programmes.add_schedule")}
-          </Button>
         </div>
       )}
 

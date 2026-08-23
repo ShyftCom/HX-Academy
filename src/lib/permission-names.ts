@@ -72,6 +72,17 @@ export const PERMISSIONS = {
   // Website & Applications
   WEBSITE_VIEW: "website:view",
   WEBSITE_EDIT: "website:edit",
+  /**
+   * Schedules are location-scoped. website:view/website:edit still decide
+   * *whether* a user may read or edit a schedule at all; this one decides
+   * *whose* — holders reach every location, everyone else is confined to the
+   * stations they are assigned to in station_staff.
+   *
+   * Super Admin has it implicitly via "*", and the seed grants it to Admin
+   * along with every other permission, so existing installs keep the reach
+   * they had before schedules became location-scoped.
+   */
+  SCHEDULE_MANAGE_ALL: "schedule:manage_all",
   APPLICATIONS_VIEW: "applications:view",
   APPLICATIONS_MANAGE: "applications:manage",
   APPLICATIONS_EXPORT: "applications:export",
