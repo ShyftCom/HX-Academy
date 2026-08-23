@@ -1,5 +1,6 @@
 import * as Icons from "lucide-react";
 import { Flag } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { lf } from "./sections/localeField";
 
 export interface PathwayLevelData {
@@ -17,7 +18,8 @@ export interface PathwayLevelData {
   descriptionAr?: string | null;
 }
 
-export function PathwayTimeline({ levels, locale }: { levels: PathwayLevelData[]; locale: string }) {
+export async function PathwayTimeline({ levels, locale }: { levels: PathwayLevelData[]; locale: string }) {
+  const t = await getTranslations({ locale, namespace: "pathway" });
   if (levels.length === 0) return null;
 
   return (
@@ -38,7 +40,7 @@ export function PathwayTimeline({ levels, locale }: { levels: PathwayLevelData[]
               </div>
               <div className="flex-1 lg:mt-5">
                 <span className="text-xs font-bold uppercase tracking-wide" style={{ color: level.color }}>
-                  Stage {i + 1}
+                  {t("stage", { n: i + 1 })}
                 </span>
                 <h3 className="mt-0.5 font-fsa-display text-xl font-bold uppercase text-fsa-navy-900">{lf(level as unknown as Record<string, unknown>, "name", locale)}</h3>
                 {level.ageRangeLabel && <p className="text-sm font-semibold text-fsa-text-muted">{lf(level as unknown as Record<string, unknown>, "ageRangeLabel", locale)}</p>}

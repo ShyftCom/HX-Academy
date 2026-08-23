@@ -233,6 +233,9 @@
     "more": "Plus d'actualités",
     "readMore": "Lire la suite"
   },
+  "pathway": {
+    "stage": "Étape {n}"
+  },
   "pricing": {
     "popular": "Populaire",
     "applyNow": "S’inscrire"
@@ -311,7 +314,11 @@
       "waitlist": "Liste d'attente",
       "full": "Complet",
       "closed": "Fermé"
-    }
+    },
+    "headingAt": "Horaires à {name}",
+    "empty": "L'horaire de ce site est en cours de mise à jour — revenez bientôt.",
+    "field": "Terrain",
+    "otherLocations": "Voir l'horaire d'un autre site"
   },
   "squads": {
     "heroTitle": "Équipes de développement",
