@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Edit2, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/dialog";
@@ -17,11 +18,13 @@ import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 
 interface SCPlan {
-  id: string; name: string; programTrack: string | null; price: number;
-  description: string | null; isActive: boolean; order: number;
+  id: string; name: string; nameFr: string | null; nameAr: string | null;
+  programTrack: string | null; price: number;
+  description: string | null; descriptionFr: string | null; descriptionAr: string | null;
+  isActive: boolean; order: number;
 }
 
-const EMPTY = { name: "", programTrack: "", price: "", description: "" };
+const EMPTY = { name: "", nameFr: "", nameAr: "", programTrack: "", price: "", description: "", descriptionFr: "", descriptionAr: "" };
 
 export default function SummerCampPlansPage() {
   const { t } = useTranslation("summercamp");
@@ -75,7 +78,7 @@ export default function SummerCampPlansPage() {
 
   const openNew = () => { setForm(EMPTY); setModal("new"); };
   const openEdit = (p: SCPlan) => {
-    setForm({ name: p.name, programTrack: p.programTrack ?? "", price: String(p.price), description: p.description ?? "" });
+    setForm({ name: p.name, nameFr: p.nameFr ?? "", nameAr: p.nameAr ?? "", programTrack: p.programTrack ?? "", price: String(p.price), description: p.description ?? "", descriptionFr: p.descriptionFr ?? "", descriptionAr: p.descriptionAr ?? "" });
     setModal(p);
   };
 
@@ -133,7 +136,7 @@ export default function SummerCampPlansPage() {
             <DialogBody className="space-y-4">
               <div>
                 <Label>{t("plans.name")}</Label>
-                <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("plans.name_ph")} className="mt-1" />
+                <LocaleTextInput baseKey="name" values={form} onChange={(next) => setForm(next as typeof form)} />
               </div>
               <div>
                 <Label>{t("plans.track")}</Label>
@@ -145,7 +148,7 @@ export default function SummerCampPlansPage() {
               </div>
               <div>
                 <Label>{t("common:ui.description")}</Label>
-                <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder={t("plans.desc_ph")} rows={2} className="mt-1" />
+                <LocaleTextInput baseKey="description" values={form} onChange={(next) => setForm(next as typeof form)} multiline />
               </div>
             </DialogBody>
             <DialogFooter>

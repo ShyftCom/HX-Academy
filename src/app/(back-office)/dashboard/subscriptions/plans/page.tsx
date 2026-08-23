@@ -19,12 +19,17 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, Edit, Trash2, CreditCard } from "lucide-react";
+import { LocaleFields } from "@/components/website/admin/LocaleTextInput";
 import { useTranslation } from "react-i18next";
 
 const COLORS = ["#3B82F6","#10B981","#8B5CF6","#F59E0B","#EF4444","#EC4899","#14B8A6","#F97316"];
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
+  nameFr: z.string().optional(),
+  nameAr: z.string().optional(),
   description: z.string().optional(),
+  descriptionFr: z.string().optional(),
+  descriptionAr: z.string().optional(),
   duration: z.string().min(1, "Duration is required"),
   durationType: z.string(),
   price: z.string().min(1, "Price is required"),
@@ -70,13 +75,13 @@ export default function PlansPage() {
 
   const openAdd = () => {
     setEditPlan(null); setSelectedColor(COLORS[0]);
-    reset({ name: "", description: "", duration: "", durationType: "month", price: "", color: COLORS[0], isActive: true });
+    reset({ name: "", nameFr: "", nameAr: "", description: "", descriptionFr: "", descriptionAr: "", duration: "", durationType: "month", price: "", color: COLORS[0], isActive: true });
     setModalOpen(true);
   };
 
   const openEdit = (p: any) => {
     setEditPlan(p); setSelectedColor(p.color ?? COLORS[0]);
-    reset({ name: p.name, description: p.description ?? "", duration: String(p.duration), durationType: p.durationType, price: String(p.price), color: p.color, isActive: p.isActive });
+    reset({ name: p.name, nameFr: p.nameFr ?? "", nameAr: p.nameAr ?? "", description: p.description ?? "", descriptionFr: p.descriptionFr ?? "", descriptionAr: p.descriptionAr ?? "", duration: String(p.duration), durationType: p.durationType, price: String(p.price), color: p.color, isActive: p.isActive });
     setModalOpen(true);
   };
 
@@ -122,8 +127,9 @@ export default function PlansPage() {
           <DialogHeader><DialogTitle>{editPlan ? "Edit Plan" : "New Subscription Plan"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="space-y-4">
-              <Input {...register("name")} label={t("plans.name")} placeholder={t("plans.name_ph")} error={errors.name?.message} />
-              <Textarea {...register("description")} label={t("common:ui.description")} placeholder={t("plans.description_ph")} rows={2} />
+              <LocaleFields register={register as never} baseKey="name" label={t("plans.name")} placeholder={t("plans.name_ph")} />
+              {errors.name?.message && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              <LocaleFields register={register as never} baseKey="description" label={t("common:ui.description")} placeholder={t("plans.description_ph")} multiline rows={2} />
               <div className="grid grid-cols-2 gap-3">
                 <Input {...register("duration")} label={t("plans.duration")} type="number" min="1" placeholder="1" error={errors.duration?.message} />
                 <div>

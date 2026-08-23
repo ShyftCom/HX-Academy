@@ -35,9 +35,13 @@ export async function POST(req: NextRequest) {
     const plan = await db.summerCampPlan.create({
       data: {
         name: body.name,
+        nameFr: body.nameFr ?? null,
+        nameAr: body.nameAr ?? null,
         programTrack: body.programTrack ?? null,
         price: parseFloat(body.price) || 0,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         isActive: body.isActive ?? true,
         order: body.order ?? (maxOrder?.order ?? -1) + 1,
         stationId: body.stationId ?? null,

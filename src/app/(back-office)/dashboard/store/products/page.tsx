@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleFields } from "@/components/website/admin/LocaleTextInput";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,7 +28,11 @@ import { useTranslation } from "react-i18next";
 
 const schema = z.object({
   name: z.string().min(1, "Name required"),
+  nameFr: z.string().optional(),
+  nameAr: z.string().optional(),
   description: z.string().optional(),
+  descriptionFr: z.string().optional(),
+  descriptionAr: z.string().optional(),
   price: z.string().min(1, "Price required"),
   discountPrice: z.string().optional(),
   stock: z.string(),
@@ -86,8 +91,8 @@ export default function ProductsPage() {
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
-  const openAdd = () => { setEditProduct(null); setImages([]); reset({ name: "", description: "", price: "", discountPrice: "", stock: "0", sku: "", categoryId: "", status: "active", isFeatured: false }); setModalOpen(true); };
-  const openEdit = (p: any) => { setEditProduct(p); setImages(parseJsonSafe<string[]>(p.images, [])); reset({ name: p.name, description: p.description ?? "", price: String(p.price), discountPrice: p.discountPrice ? String(p.discountPrice) : "", stock: String(p.stock), sku: p.sku ?? "", categoryId: p.categoryId ?? "", status: p.status, isFeatured: p.isFeatured }); setModalOpen(true); };
+  const openAdd = () => { setEditProduct(null); setImages([]); reset({ name: "", nameFr: "", nameAr: "", description: "", descriptionFr: "", descriptionAr: "", price: "", discountPrice: "", stock: "0", sku: "", categoryId: "", status: "active", isFeatured: false }); setModalOpen(true); };
+  const openEdit = (p: any) => { setEditProduct(p); setImages(parseJsonSafe<string[]>(p.images, [])); reset({ name: p.name, nameFr: p.nameFr ?? "", nameAr: p.nameAr ?? "", description: p.description ?? "", descriptionFr: p.descriptionFr ?? "", descriptionAr: p.descriptionAr ?? "", price: String(p.price), discountPrice: p.discountPrice ? String(p.discountPrice) : "", stock: String(p.stock), sku: p.sku ?? "", categoryId: p.categoryId ?? "", status: p.status, isFeatured: p.isFeatured }); setModalOpen(true); };
 
   const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
@@ -162,8 +167,8 @@ export default function ProductsPage() {
           <DialogHeader><DialogTitle>{editProduct ? "Edit Product" : "Add Product"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("name")} label={t("products.name")} placeholder={t("products.name_ph")} error={errors.name?.message} className="col-span-2" />
-              <Textarea {...register("description")} label={t("common:ui.description")} placeholder={t("products.description_ph")} className="col-span-2" rows={2} />
+              <div className="col-span-2"><LocaleFields register={register as never} baseKey="name" label={t("products.name")} placeholder={t("products.name_ph")} />{errors.name?.message && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}</div>
+              <div className="col-span-2"><LocaleFields register={register as never} baseKey="description" label={t("common:ui.description")} placeholder={t("products.description_ph")} multiline rows={2} /></div>
               <Input {...register("price")} label={t("products.price")} type="number" min="0" placeholder="2500" error={errors.price?.message} />
               <Input {...register("discountPrice")} label={t("products.discount_price")} type="number" min="0" placeholder={t("products.optional")} />
               <Input {...register("stock")} label={t("products.stock")} type="number" min="0" placeholder="0" />
