@@ -11,6 +11,9 @@ import { auth } from "@/lib/auth";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { settleSlickPayPayment } from "@/lib/slickpay-settle";
 
+// Verification calls out to SlickPay — see the sibling routes.
+export const maxDuration = 30;
+
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePermissionResponse(PERMISSIONS.PAYMENTS_APPROVE);
   if (denied) return denied;

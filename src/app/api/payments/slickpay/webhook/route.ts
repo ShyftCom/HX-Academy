@@ -25,6 +25,10 @@ import { getSlickPayConfig } from "@/lib/slickpay";
 import { settleSlickPayPayment } from "@/lib/slickpay-settle";
 
 export const dynamic = "force-dynamic";
+// Settlement calls out to SlickPay; give it more room than the platform
+// default so a slow gateway is reported by our own error handling rather than
+// killed mid-verification.
+export const maxDuration = 30;
 
 function secretsMatch(received: string, expected: string): boolean {
   if (!received || !expected) return false;

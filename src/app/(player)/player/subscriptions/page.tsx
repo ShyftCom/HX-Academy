@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -38,10 +39,18 @@ export default function PlayerSubscriptionsPage() {
 
   const onlineAvailable = gateway?.available === true;
 
-  // Derived rather than synced through an effect: with the gateway off there is
-  // no card option to choose, so the page falls back to the manual flow it has
-  // always had, whatever the toggle last held.
-  const mode = onlineAvailable ? payMode : "manual";
+  // SlickPay rejects an invoice with no phone number, so a player whose
+  // profile is incomplete would reach SATIM only to be bounced. Catch it here
+  // instead, and point at the page where they can fix it. Email is not checked
+  // because the server falls back to the login email, which always exists.
+  const missingPhone = !player?.phone?.trim();
+
+  // Derived rather than synced through an effect: with the gateway off — or
+  // with a profile the gateway would reject — there is no card option to
+  // choose, so the page falls back to the manual flow it has always had,
+  // whatever the toggle last held. Without the missingPhone term the card
+  // tile would be disabled while the footer still offered "Pay by card".
+  const mode = onlineAvailable && !missingPhone ? payMode : "manual";
 
   // Report the outcome of a return trip from SATIM. Read straight off
   // window.location rather than useSearchParams so this page does not need a
@@ -204,8 +213,9 @@ export default function PlayerSubscriptionsPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
+                    disabled={missingPhone}
                     onClick={() => setPayMode("online")}
-                    className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-start transition-colors ${mode === "online" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 hover:border-gray-300 dark:border-gray-700"}`}
+                    className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-start transition-colors ${missingPhone ? "cursor-not-allowed border-gray-200 opacity-50 dark:border-gray-700" : mode === "online" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 hover:border-gray-300 dark:border-gray-700"}`}
                   >
                     <span className="flex items-center gap-1.5 text-sm font-medium"><CreditCard className="h-4 w-4" />Card</span>
                     <span className="text-xs text-gray-500">CIB / Edahabia — activates instantly</span>
@@ -219,6 +229,12 @@ export default function PlayerSubscriptionsPage() {
                     <span className="text-xs text-gray-500">Upload a receipt — admin approves</span>
                   </button>
                 </div>
+                {missingPhone && (
+                  <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                    Card payment needs a phone number on your profile.{" "}
+                    <Link href="/player/profile" className="font-medium underline">Add it here</Link>, then come back.
+                  </p>
+                )}
                 {gateway?.sandbox && mode === "online" && (
                   <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
                     Test mode — no real money will be taken.

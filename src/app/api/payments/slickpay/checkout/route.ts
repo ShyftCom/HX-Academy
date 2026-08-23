@@ -23,6 +23,15 @@ import {
   SlickPayError,
 } from "@/lib/slickpay";
 
+/**
+ * Vercel would otherwise apply its default function limit, which is shorter
+ * than the 20s timeout inside the SlickPay client — so a slow gateway got the
+ * invocation killed and showed the player a platform 504 instead of our own
+ * handled error. Observed for real: the sandbox intermittently takes over 20s
+ * to create an invoice, while normally answering in under two.
+ */
+export const maxDuration = 30;
+
 /** SlickPay rejects invoices at or below 100 DZD. */
 const MIN_AMOUNT_DZD = 100;
 
@@ -68,12 +77,22 @@ function missingContactFields(player: {
   fullName: string;
   phone: string | null;
   email: string | null;
+  user: { email: string };
 }): string[] {
   const missing: string[] = [];
   if (!player.phone?.trim()) missing.push("phone number");
-  if (!player.email?.trim()) missing.push("email address");
+  // Email is not listed: contactEmail() below always resolves one, because a
+  // Player is always attached to a User and User.email is required. Blocking
+  // on Player.email would have been a dead end anyway — the player profile
+  // page lets someone edit their phone and address but shows email read-only,
+  // so a player with a null Player.email could never have unblocked themselves.
   if (!splitName(player.fullName)) missing.push("full name (first and last)");
   return missing;
+}
+
+/** The player's own email if recorded, otherwise their login email. */
+function contactEmail(player: { email: string | null; user: { email: string } }): string {
+  return player.email?.trim() || player.user.email;
 }
 
 /** ["a", "b", "c"] -> "a, b and c" — three missing fields should not read as "a and b and c". */
@@ -123,7 +142,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const player = await db.player.findUnique({ where: { id: playerId } });
+    const player = await db.player.findUnique({
+      where: { id: playerId },
+      include: { user: { select: { email: true } } },
+    });
     if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
 
     // Fail here, with something the player can act on, rather than letting
@@ -252,7 +274,7 @@ export async function POST(req: NextRequest) {
         firstname,
         lastname,
         phone: player.phone ?? undefined,
-        email: player.email ?? undefined,
+        email: contactEmail(player),
         address,
         note: `Subscription: ${plan.name}`,
         items: [{ name: plan.name, price: amount, quantity: 1 }],
