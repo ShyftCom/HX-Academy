@@ -19,7 +19,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { id },
       data: {
         name: body.name,
+        nameFr: body.nameFr ?? null,
+        nameAr: body.nameAr ?? null,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         images: body.images !== undefined ? JSON.stringify(body.images) : undefined,
         price: body.price !== undefined ? parseFloat(body.price) : undefined,
         discountPrice: body.discountPrice !== undefined ? (body.discountPrice ? parseFloat(body.discountPrice) : null) : undefined,

@@ -18,9 +18,13 @@ export async function POST(req: NextRequest) {
     const field = await db.formField.create({
       data: {
         label: body.label,
+        labelFr: body.labelFr ?? null,
+        labelAr: body.labelAr ?? null,
         fieldName: body.fieldName ?? body.label.toLowerCase().replace(/\s+/g, "_"),
         fieldType: body.fieldType ?? "text",
         placeholder: body.placeholder ?? null,
+        placeholderFr: body.placeholderFr ?? null,
+        placeholderAr: body.placeholderAr ?? null,
         options: body.options ? JSON.stringify(body.options) : null,
         isRequired: body.isRequired ?? false,
         isDefault: false,

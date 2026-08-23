@@ -10,7 +10,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
     const field = await db.formField.update({
       where: { id },
-      data: { label: body.label, fieldType: body.fieldType, placeholder: body.placeholder ?? null, options: body.options ? JSON.stringify(body.options) : null, isRequired: body.isRequired, isActive: body.isActive },
+      data: { label: body.label, labelFr: body.labelFr ?? null, labelAr: body.labelAr ?? null, fieldType: body.fieldType, placeholder: body.placeholder ?? null, placeholderFr: body.placeholderFr ?? null, placeholderAr: body.placeholderAr ?? null, options: body.options ? JSON.stringify(body.options) : null, isRequired: body.isRequired, isActive: body.isActive },
     });
     return NextResponse.json(field);
   } catch { return NextResponse.json({ error: "Update failed" }, { status: 500 }); }

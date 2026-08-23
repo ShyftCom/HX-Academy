@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Globe, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/shared/page-header";
 import { useTranslation } from "react-i18next";
@@ -45,6 +46,8 @@ export default function FooterEditorPage() {
     backgroundColor: "#0a1628", textColor: "#ffffff", accentColor: "#1da1f2",
     logoUrl: "", tagline: "", taglineFr: "", taglineAr: "",
     copyrightText: "© 2026 Football Skills Academy. All rights reserved.",
+    copyrightTextFr: "",
+    copyrightTextAr: "",
     showTrustpilot: false, trustpilotUrl: "",
   });
   const [socialLinks, setSocialLinks] = useState(
@@ -72,6 +75,8 @@ export default function FooterEditorPage() {
       taglineFr: data.taglineFr ?? "",
       taglineAr: data.taglineAr ?? "",
       copyrightText: data.copyrightText ?? "© 2026 Football Skills Academy. All rights reserved.",
+      copyrightTextFr: data.copyrightTextFr ?? "",
+      copyrightTextAr: data.copyrightTextAr ?? "",
       showTrustpilot: data.showTrustpilot ?? false,
       trustpilotUrl: data.trustpilotUrl ?? "",
     });
@@ -172,7 +177,7 @@ export default function FooterEditorPage() {
         </div>
         <div>
           <label className="text-sm font-medium block mb-1">{t("footer.copyright")}</label>
-          <Input value={appearance.copyrightText} onChange={(e) => setAppearance((p) => ({ ...p, copyrightText: e.target.value }))} />
+          <LocaleTextInput baseKey="copyrightText" values={appearance as unknown as Record<string, unknown>} onChange={(next) => setAppearance(next as unknown as typeof appearance)} />
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={appearance.showTrustpilot} onCheckedChange={(v) => setAppearance((p) => ({ ...p, showTrustpilot: v }))} />

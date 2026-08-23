@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Edit2, Sun, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/dialog";
@@ -23,7 +24,7 @@ interface CampSession {
   station: { id: string; name: string } | null;
 }
 
-const EMPTY = { name: "", startDate: "", endDate: "", capacity: "", price: "", description: "" };
+const EMPTY = { name: "", nameFr: "", nameAr: "", startDate: "", endDate: "", capacity: "", price: "", description: "", descriptionFr: "", descriptionAr: "" };
 
 export default function SummerCampSessionsPage() {
   const { t } = useTranslation("summercamp");
@@ -66,11 +67,15 @@ export default function SummerCampSessionsPage() {
   const openEdit = (s: CampSession) => {
     setForm({
       name: s.name,
+      nameFr: (s as { nameFr?: string }).nameFr ?? "",
+      nameAr: (s as { nameAr?: string }).nameAr ?? "",
       startDate: s.startDate ? s.startDate.split("T")[0] : "",
       endDate: s.endDate ? s.endDate.split("T")[0] : "",
       capacity: s.capacity ? String(s.capacity) : "",
       price: s.price ? String(s.price) : "",
       description: s.description ?? "",
+      descriptionFr: (s as { descriptionFr?: string }).descriptionFr ?? "",
+      descriptionAr: (s as { descriptionAr?: string }).descriptionAr ?? "",
     });
     setModal(s);
   };
@@ -126,7 +131,7 @@ export default function SummerCampSessionsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{modal === "new" ? "New Session" : "Edit Session"}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
-              <div><Label>{t("sessions.name")}</Label><Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder={t("sessions.name_ph")} className="mt-1" /></div>
+              <div><Label>{t("sessions.name")}</Label><LocaleTextInput baseKey="name" values={form} onChange={(next) => setForm(next as typeof form)} /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>{t("sessions.start")}</Label><Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className="mt-1" /></div>
                 <div><Label>{t("sessions.end")}</Label><Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className="mt-1" /></div>

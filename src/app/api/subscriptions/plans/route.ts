@@ -20,7 +20,11 @@ export async function POST(req: NextRequest) {
     const plan = await db.subscriptionPlan.create({
       data: {
         name: body.name,
+        nameFr: body.nameFr ?? null,
+        nameAr: body.nameAr ?? null,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         duration: parseInt(body.duration),
         durationType: body.durationType ?? "month",
         price: parseFloat(body.price),

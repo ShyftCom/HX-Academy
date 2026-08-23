@@ -27,7 +27,11 @@ export async function POST(req: NextRequest) {
     const req_ = await db.fileRequirement.create({
       data: {
         title: body.title,
+        titleFr: body.titleFr ?? null,
+        titleAr: body.titleAr ?? null,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         isRequired: body.isRequired ?? true,
         allowedTypes: body.allowedTypes ?? "image/*,.pdf,.docx,.xlsx",
         maxSizeMb: body.maxSizeMb ?? 10,

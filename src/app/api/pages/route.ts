@@ -37,8 +37,14 @@ export async function POST(req: NextRequest) {
         template: body.template ?? "default",
         isPublished: body.isPublished ?? false,
         metaTitle: body.metaTitle ?? null,
+        metaTitleFr: body.metaTitleFr ?? null,
+        metaTitleAr: body.metaTitleAr ?? null,
         metaDescription: body.metaDescription ?? null,
+        metaDescriptionFr: body.metaDescriptionFr ?? null,
+        metaDescriptionAr: body.metaDescriptionAr ?? null,
         breadcrumbLabel: body.breadcrumbLabel ?? null,
+        breadcrumbLabelFr: body.breadcrumbLabelFr ?? null,
+        breadcrumbLabelAr: body.breadcrumbLabelAr ?? null,
       },
     });
     return NextResponse.json(page, { status: 201 });
