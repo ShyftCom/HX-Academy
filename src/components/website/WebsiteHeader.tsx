@@ -345,7 +345,7 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
           {/* Right side */}
           <div className="flex items-center gap-2.5">
             <LocationSelector locale={locale} dark={dark} />
-            {config.showLanguageSwitcher && <LanguageSwitcher variant="public" />}
+            {config.showLanguageSwitcher && <LanguageSwitcher variant="public" onDark={dark} />}
 
             <Link
               href={`/${locale}/store/cart`}

@@ -21,7 +21,14 @@ export async function VenueCard({ venue, locale }: { venue: VenueCardData; local
     <>
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-fsa-pale-bg">
         {venue.heroImageUrl && <Image src={venue.heroImageUrl} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {/* The title sits ~33% up the card, and with `via-transparent` at the
+            midpoint the old from-black/60 scrim had decayed to ~21% by then —
+            measured 2.38:1 against a bright patch of the seeded photo, under
+            the 3:1 large-text minimum. Holding 30% at the midpoint keeps the
+            whole text band legible over any uploaded image (worst case, a pure
+            white photo: 3.6:1 on the title, 6.3:1 on the wilaya line) while
+            leaving the top of the photo essentially untouched. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5">
           <h3 className="font-fsa-display text-2xl font-bold uppercase text-white">{venue.name}</h3>
           <p className="mt-1 flex items-center gap-1 text-sm text-white/85"><MapPin className="h-3.5 w-3.5" /> {venue.wilaya}</p>
