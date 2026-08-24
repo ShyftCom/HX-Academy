@@ -70,7 +70,11 @@ export async function getSlickPayConfig(): Promise<SlickPayConfig> {
   const s = await getSettings([...SLICKPAY_SETTING_KEYS]);
   const mode = (s.slickpay_mode || process.env.SLICKPAY_MODE || "sandbox") as string;
   return {
-    enabled: (s.slickpay_enabled ?? "") === "true",
+    // Env-backed like every other field here. It was the one setting read
+    // from the database alone, which quietly made the promise in the comment
+    // above false: SLICKPAY_ENABLED did nothing, so a local checkout could not
+    // be switched on from .env the way the key and mode could.
+    enabled: (s.slickpay_enabled || process.env.SLICKPAY_ENABLED || "") === "true",
     mode: mode === "production" ? "production" : "sandbox",
     publicKey: s.slickpay_public_key || process.env.SLICKPAY_PUBLIC_KEY || "",
     accountUuid: s.slickpay_account_uuid || process.env.SLICKPAY_ACCOUNT_UUID || "",

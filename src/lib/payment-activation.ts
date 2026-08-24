@@ -61,8 +61,29 @@ export async function activatePayment({
   if (!payment) throw new Error(`Payment ${paymentId} not found`);
 
   const now = new Date();
+  const duration = payment.plan?.duration;
+  const durationType = payment.plan?.durationType;
+
+  // A brand-new subscription runs from today.
   const startDate = now;
-  const endDate = computeEndDate(startDate, payment.plan?.duration, payment.plan?.durationType);
+  const endDate = computeEndDate(startDate, duration, durationType);
+
+  // A renewal adds to what is left instead of replacing it.
+  //
+  // Both this path and the manual approval it grew out of computed the new
+  // period from `now`, so renewing a subscription with twelve days still on it
+  // moved its end date to today plus one month and those twelve days were
+  // simply gone — the player paid for a month and received a month minus what
+  // they had already bought. Renewing early was penalised, which is precisely
+  // backwards.
+  //
+  // An unbroken membership also keeps its original start date: it is the same
+  // membership continuing, not a new one. A lapsed one starts again today,
+  // since there is no remaining time to add to.
+  const currentEnd = payment.subscription?.endDate ?? null;
+  const unbroken = currentEnd !== null && currentEnd > now;
+  const renewalStart = unbroken ? (payment.subscription?.startDate ?? now) : now;
+  const renewalEnd = computeEndDate(unbroken ? currentEnd : now, duration, durationType);
 
   // Claim and activate in one transaction.
   //
@@ -104,7 +125,7 @@ export async function activatePayment({
     if (payment.subscriptionId) {
       await tx.subscription.update({
         where: { id: payment.subscriptionId },
-        data: { status: "active", startDate, endDate },
+        data: { status: "active", startDate: renewalStart, endDate: renewalEnd },
       });
       return { claimed: true, subscriptionId: payment.subscriptionId };
     }

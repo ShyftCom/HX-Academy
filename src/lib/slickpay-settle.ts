@@ -50,20 +50,17 @@ export type SettleOutcome =
   | { result: "error"; paymentId: string | null; reason: string };
 
 /**
- * Tell the back office something needs a person, at most once per payment.
+ * Tell the back office something needs a person.
  *
  * Settlement is retried by the webhook, the return redirect and every admin
- * re-check, so an unguarded notify here would bury the dashboard under copies
- * of the same alert. `previousProviderStatus` is the value *before* this pass
- * wrote its flag: once it reads "amount_mismatch", the alert has already gone
- * out for this payment.
+ * re-check, so this must not fire on every pass or the dashboard fills with
+ * copies of one alert. The guard deliberately does not live here: it used to,
+ * as a read of `providerStatus` taken before this pass wrote its flag, and two
+ * concurrent settles both read the old value and both alerted. Each caller now
+ * gates on an atomic claim instead — the writer that moves the row into
+ * "amount_mismatch", or the one that wins activatePayment()'s race.
  */
-async function notifyAdminsOnce(
-  previousProviderStatus: string | null,
-  title: string,
-  message: string,
-): Promise<void> {
-  if (previousProviderStatus === "amount_mismatch") return;
+async function notifyAdmins(title: string, message: string): Promise<void> {
   const admins = await db.user.findMany({
     where: { role: { name: { in: ["Admin", "Super Admin"] } } },
     select: { id: true },
@@ -77,6 +74,53 @@ async function notifyAdminsOnce(
       link: "/dashboard/payments",
     });
   }
+}
+
+/**
+ * Park a paid payment in front of an admin instead of activating it.
+ *
+ * Deliberately not a failure: the card was charged, so the row stays pending
+ * rather than rejected, and `providerStatus` carries the flag that lets the
+ * approve route accept a human decision on it — that route refuses to touch a
+ * gateway payment in any other state.
+ */
+async function holdForReview(
+  payment: { id: string },
+  reason: string,
+  raw: unknown,
+): Promise<SettleOutcome> {
+  // The audit payload is refreshed on every pass: it is meant to be the last
+  // thing the gateway said, and a re-check should record the current reading.
+  await db.payment.update({
+    where: { id: payment.id },
+    data: { providerPayload: JSON.stringify(sanitizeProviderPayload(raw)) },
+  });
+
+  // The flag and the generated note are claimed exactly once, by the writer
+  // that first moves this payment into "amount_mismatch". That buys two
+  // things: concurrent settles cannot both alert, and a later re-check cannot
+  // overwrite a note the admin has written in the meantime — this branch reran
+  // on every re-check and put its own text back each time.
+  //
+  // The explicit null arm is not redundant. `providerStatus` is nullable, and
+  // a bare `not` compiles to SQL where NULL <> 'x' is NULL rather than true,
+  // so a row that never got a status could be skipped by the claim and never
+  // alert at all. Spelling both arms out does not depend on which way the
+  // query builder resolves that.
+  const claimed = await db.payment.updateMany({
+    where: {
+      id: payment.id,
+      OR: [{ providerStatus: null }, { providerStatus: { not: "amount_mismatch" } }],
+    },
+    data: { providerStatus: "amount_mismatch", adminNotes: reason },
+  });
+
+  if (claimed.count > 0) {
+    console.error(`SlickPay settlement held on payment ${payment.id}: ${reason}`);
+    await notifyAdmins("Payment needs review", reason);
+  }
+
+  return { result: "mismatch", paymentId: payment.id, reason };
 }
 
 export async function settleSlickPayPayment(
@@ -164,49 +208,49 @@ export async function settleSlickPayPayment(
     // mismatch means either the mapping is wrong (we are about to grant a
     // subscription off someone else's payment) or the amount charged is not
     // the amount owed. Neither should activate on its own.
-    const shortfall =
-      invoice.amount === null ? 0 : payment.amount - invoice.amount;
+    //
+    // An unreadable total is not a passing check. parseAmount() returns null
+    // whenever the amount is missing, non-numeric, or has moved in the
+    // response — and these payloads are unstable enough that createInvoice()
+    // already has to accept two different shapes of them (see slickpay.ts).
+    // Collapsing null to a shortfall of 0 meant the one branch that exists to
+    // verify the amount waved through every invoice whose amount it could not
+    // read, activating on the strength of the `paid` flag alone. Hold instead;
+    // an admin can still approve it, having actually looked at the invoice.
+    if (invoice.amount === null) {
+      return holdForReview(
+        payment,
+        `SlickPay reports this invoice as paid but returned no readable amount, ` +
+          `so the ${payment.amount} DA owed could not be confirmed. Activation ` +
+          `is on hold pending review.`,
+        invoice.raw,
+      );
+    }
+
+    const shortfall = payment.amount - invoice.amount;
 
     if (shortfall > AMOUNT_TOLERANCE_DZD) {
       // Underpaid. Holding is the only safe move: granting a full plan for
       // part of its price is a real loss, and the difference has to be chased
       // or refunded by a person either way.
-      const reason =
+      return holdForReview(
+        payment,
         `SlickPay reports this invoice as paid for ${invoice.amount} DA, but ` +
-        `${payment.amount} DA was owed. Activation is on hold pending review.`;
-
-      // Pending, not failed: the card was charged, so closing this would
-      // strand someone who has genuinely paid something. `providerStatus`
-      // carries the flag, which is what lets an admin approve it by hand once
-      // they have resolved it — see the approve route, which otherwise refuses
-      // to touch a gateway payment.
-      await db.payment.update({
-        where: { id: paymentId },
-        data: {
-          providerStatus: "amount_mismatch",
-          providerPayload: JSON.stringify(sanitizeProviderPayload(invoice.raw)),
-          adminNotes: reason,
-        },
-      });
-
-      console.error(`SlickPay amount mismatch on payment ${paymentId}: ${reason}`);
-      await notifyAdminsOnce(payment.providerStatus, "Payment needs review", reason);
-
-      return { result: "mismatch", paymentId, reason };
+          `${payment.amount} DA was owed. Activation is on hold pending review.`,
+        invoice.raw,
+      );
     }
 
-    if (shortfall < -AMOUNT_TOLERANCE_DZD) {
-      // Overpaid — most likely the plan got cheaper between checkout and
-      // settlement. The player has covered what they owe, so withholding the
-      // subscription would punish them for our own timing. Activate, and put
-      // the difference in front of an admin to refund.
-      const reason =
-        `SlickPay reports this invoice as paid for ${invoice.amount} DA, which is ` +
-        `more than the ${payment.amount} DA owed. The subscription was activated; ` +
-        `the difference may need refunding.`;
-      console.warn(`SlickPay overpayment on payment ${paymentId}: ${reason}`);
-      await notifyAdminsOnce(payment.providerStatus, "Payment overpaid", reason);
-    }
+    // Overpaid — most likely the plan got cheaper between checkout and
+    // settlement. The player has covered what they owe, so withholding the
+    // subscription would punish them for our own timing. Activate, and put the
+    // difference in front of an admin to refund.
+    const overpayment =
+      shortfall < -AMOUNT_TOLERANCE_DZD
+        ? `SlickPay reports this invoice as paid for ${invoice.amount} DA, which is ` +
+          `more than the ${payment.amount} DA owed. The subscription was activated; ` +
+          `the difference may need refunding.`
+        : null;
 
     const activation = await activatePayment({
       paymentId,
@@ -215,6 +259,15 @@ export async function settleSlickPayPayment(
       providerStatus: invoice.status,
       providerPayload: sanitizeProviderPayload(invoice.raw),
     });
+
+    // Alerted after activation, and only on the pass that did it: that claim
+    // is the atomic one, so the webhook and the return redirect landing
+    // together raise one refund alert between them rather than one each.
+    if (overpayment && activation.activated) {
+      console.warn(`SlickPay overpayment on payment ${paymentId}: ${overpayment}`);
+      await notifyAdmins("Payment overpaid", overpayment);
+    }
+
     return { result: "paid", alreadyActive: activation.alreadyActive, paymentId };
   }
 
