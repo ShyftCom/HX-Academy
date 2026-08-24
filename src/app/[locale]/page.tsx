@@ -49,6 +49,7 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
     return (
       <Hero
         desktopImageUrl="/media/wide/team-talk.jpg"
+        mobileImageUrl="/media/mobile/team-talk.jpg"
         title={t("emptyTitle")}
         subtitle={t("emptyBody")}
         align="center"

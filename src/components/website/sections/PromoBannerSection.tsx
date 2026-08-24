@@ -3,7 +3,7 @@ import { FsaButton } from "../buttons/FsaButton";
 import { localeHref } from "../localeHref";
 
 const BG_MAP: Record<string, string> = {
-  sky: "bg-gradient-to-br from-fsa-sky to-fsa-heading-blue text-fsa-navy-900",
+  sky: "bg-gradient-to-br from-fsa-sky to-fsa-heading-blue text-white",
   navy: "bg-gradient-to-br from-fsa-navy-900 to-fsa-navy-800 text-white",
 };
 
@@ -21,7 +21,7 @@ export function PromoBannerSection({ content, locale }: { content: Record<string
         className={`mx-auto overflow-hidden rounded-fsa-lg px-8 py-14 text-center sm:px-16 ${bgClass}`}
         style={{
           maxWidth: "var(--fsa-container-max)",
-          backgroundImage: content.imageUrl ? `linear-gradient(rgba(0,31,73,0.65), rgba(0,31,73,0.65)), url(${content.imageUrl})` : undefined,
+          backgroundImage: content.imageUrl ? `linear-gradient(rgba(27,19,21,0.68), rgba(27,19,21,0.68)), url(${content.imageUrl})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
           color: content.imageUrl ? "#fff" : undefined,

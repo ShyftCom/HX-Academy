@@ -4,7 +4,7 @@ import { localeHref } from "../localeHref";
 
 const STYLE_MAP: Record<string, { section: string; heading: string; body: string; button: "sky" | "navy" | "white" }> = {
   navy: { section: "bg-fsa-navy-900", heading: "text-white", body: "text-white/80", button: "sky" },
-  sky: { section: "bg-fsa-sky", heading: "text-fsa-navy-900", body: "text-fsa-navy-900/80", button: "navy" },
+  sky: { section: "bg-fsa-sky", heading: "text-white", body: "text-white/85", button: "white" },
   white: { section: "bg-white", heading: "text-fsa-navy-900", body: "text-fsa-text-muted", button: "navy" },
 };
 

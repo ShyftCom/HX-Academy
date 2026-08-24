@@ -12,6 +12,7 @@ import { FaqAccordion } from "@/components/website/FaqAccordion";
 import { FsaButton } from "@/components/website/buttons/FsaButton";
 import { lf } from "@/components/website/sections/localeField";
 import { localeHref } from "@/components/website/localeHref";
+import { mobileVariant } from "@/components/website/mobileVariant";
 
 async function getVenue(slug: string) {
   const venue = await db.station.findUnique({ where: { slug } });
@@ -61,7 +62,13 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
       {/* No stock fallback: an unphotographed venue gets the brand panel, so the
           page never shows a stadium that is not this one. Real photos go in
           Dashboard → Stations → [station] → Public / Marketing. */}
-      <Hero desktopImageUrl={venue.heroImageUrl || undefined} title={venue.name} subtitle={venue.wilaya} minHeight="55vh" />
+      <Hero
+        desktopImageUrl={venue.heroImageUrl || undefined}
+        mobileImageUrl={mobileVariant(venue.heroImageUrl)}
+        title={venue.name}
+        subtitle={venue.wilaya}
+        minHeight="55vh"
+      />
       <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/venues` }, { label: venue.name }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">

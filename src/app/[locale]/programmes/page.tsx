@@ -32,6 +32,7 @@ export default async function ProgrammesListingPage({ params, searchParams }: { 
     <>
       <Hero
         desktopImageUrl="/media/wide/speed-drill.jpg"
+        mobileImageUrl="/media/mobile/speed-drill.jpg"
         title={t("heroTitle")}
         subtitle={t("heroSubtitle")}
         align="left"

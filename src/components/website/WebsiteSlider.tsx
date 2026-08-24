@@ -84,7 +84,7 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
             {slide.ctaLabel && slide.ctaUrl && (
               <Link
                 href={slide.ctaUrl}
-                className="inline-flex items-center px-5 py-2.5 bg-fsa-sky text-fsa-navy-900 font-semibold text-sm rounded-fsa-pill hover:brightness-95 transition-all shadow-lg"
+                className="inline-flex items-center px-5 py-2.5 bg-fsa-sky text-white font-semibold text-sm rounded-fsa-pill hover:brightness-95 transition-all shadow-lg"
               >
                 {slide.ctaLabel}
               </Link>

@@ -10,13 +10,14 @@ import { cn } from "@/lib/utils";
 // Reference-inspired "pill button with a circular arrow bubble" CTA, built on the
 // same cva/Slot pattern as src/components/ui/button.tsx but with its own fsa-*
 // token-based variants — the admin Button's variants are hard-remapped to the red
-// brand color by globals.css and aren't reusable for the navy/sky-blue public site.
+// brand color by globals.css and aren't reusable for the public site's own ink/crimson
+// crest palette. `sky` is the crest crimson, `navy` the crest ink (see tokens.css).
 const fsaButtonVariants = cva(
   "inline-flex items-center justify-center gap-2.5 rounded-[var(--radius-fsa-pill)] font-semibold whitespace-nowrap transition-all duration-200 ease-[var(--ease-fsa-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fsa-sky)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        sky: "bg-fsa-sky text-fsa-navy-900 hover:brightness-95",
+        sky: "bg-fsa-sky text-white hover:brightness-110",
         navy: "bg-fsa-navy-900 text-white hover:bg-fsa-navy-800",
         white: "bg-white text-fsa-navy-900 hover:bg-white/90",
         // Paired with a white border, so it is only ever used over dark media
@@ -39,7 +40,7 @@ const fsaButtonVariants = cva(
 const bubbleVariants = cva("inline-flex items-center justify-center rounded-full shrink-0 transition-transform duration-200 group-hover:translate-x-0.5", {
   variants: {
     variant: {
-      sky: "bg-fsa-navy-900 text-white",
+      sky: "bg-white text-fsa-sky",
       navy: "bg-white text-fsa-navy-900",
       white: "bg-fsa-navy-900 text-white",
       outline: "bg-white/15 text-current",

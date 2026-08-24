@@ -113,7 +113,7 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
           aria-label={getLabel(item, locale)}
           onMouseEnter={cancelClose}
           onMouseLeave={delayedClose}
-          className="absolute top-full start-0 z-50 mt-2 min-w-[240px] overflow-hidden rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]"
+          className="absolute top-full start-0 z-50 mt-2 min-w-[240px] overflow-hidden rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(27,19,21,0.20)]"
         >
           {items.map((d) => (
             <Link
@@ -166,7 +166,7 @@ function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       {open && (
-        <div className="absolute start-0 top-full z-50 mt-2 max-h-80 min-w-[220px] overflow-auto rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]">
+        <div className="absolute start-0 top-full z-50 mt-2 max-h-80 min-w-[220px] overflow-auto rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(27,19,21,0.20)]">
           {venues.map((v) => (
             <Link
               key={v.id}

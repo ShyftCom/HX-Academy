@@ -1461,7 +1461,7 @@ model ProgrammeCategory {
   nameFr    String?
   nameAr    String?
   slug      String   @unique
-  colorTag  String   @default("#3996D6")
+  colorTag  String   @default("#A32F33")
   order     Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -1611,7 +1611,7 @@ model PathwayLevel {
   ageRangeLabel       String?
   ageRangeLabelFr     String?
   ageRangeLabelAr     String?
-  color               String     @default("#3996D6")
+  color               String     @default("#A32F33")
   icon                String?
   description         String?
   descriptionFr       String?

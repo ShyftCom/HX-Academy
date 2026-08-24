@@ -607,8 +607,8 @@ async function main() {
 
     // Create Programme Categories
     const categorySeed = [
-      { name: "Weekly Programmes", slug: "weekly-programmes", colorTag: "#3996D6" },
-      { name: "Holiday Camps", slug: "holiday-camps", colorTag: "#43C7ED" },
+      { name: "Weekly Programmes", slug: "weekly-programmes", colorTag: "#A32F33" },
+      { name: "Holiday Camps", slug: "holiday-camps", colorTag: "#C0453F" },
     ];
     const programmeCategories: Record<string, any> = {};
     for (const cat of categorySeed) {
@@ -704,10 +704,10 @@ async function main() {
     const pathwayCount = await db.pathwayLevel.count();
     if (pathwayCount === 0) {
       const levels = [
-        { name: "Foundation", ageRangeLabel: "Ages 6-8", color: "#43C7ED", description: "Introducing the fundamentals of the game in a fun, safe environment.", order: 0 },
-        { name: "Development", ageRangeLabel: "Ages 9-12", color: "#3996D6", description: "Building technical ability, decision-making and game understanding.", order: 1 },
-        { name: "Advanced", ageRangeLabel: "Ages 13-16", color: "#002B5C", description: "Preparing players for competitive football and representative squads.", order: 2 },
-        { name: "Development Squads", ageRangeLabel: "By assessment", color: "#001F49", description: "Our highest level of coaching for players identified through assessment.", order: 3 },
+        { name: "Foundation", ageRangeLabel: "Ages 6-8", color: "#C0453F", description: "Introducing the fundamentals of the game in a fun, safe environment.", order: 0 },
+        { name: "Development", ageRangeLabel: "Ages 9-12", color: "#A32F33", description: "Building technical ability, decision-making and game understanding.", order: 1 },
+        { name: "Advanced", ageRangeLabel: "Ages 13-16", color: "#3B1E22", description: "Preparing players for competitive football and representative squads.", order: 2 },
+        { name: "Development Squads", ageRangeLabel: "By assessment", color: "#1B1315", description: "Our highest level of coaching for players identified through assessment.", order: 3 },
       ];
       await db.pathwayLevel.createMany({ data: levels });
     }
@@ -922,7 +922,7 @@ async function main() {
       const header = await db.websiteHeaderConfig.create({
         data: {
           stationId: null,
-          backgroundColor: "#FFFFFF", textColor: "#001F49", accentColor: "#43C7ED",
+          backgroundColor: "#FFFFFF", textColor: "#1B1315", accentColor: "#A32F33",
           sticky: true, showLanguageSwitcher: true,
           ctaLabel: "Book Now", ctaLabelFr: "Réserver", ctaLabelAr: "احجز الآن",
           ctaUrl: "/apply", ctaStyle: "filled",
@@ -958,7 +958,7 @@ async function main() {
       const footer = await db.websiteFooterConfig.create({
         data: {
           stationId: null,
-          backgroundColor: "#001F49", textColor: "#FFFFFF", accentColor: "#43C7ED",
+          backgroundColor: "#1B1315", textColor: "#FFFFFF", accentColor: "#D9645E",
           tagline: "Train, compete and grow with Football Skills Academy.",
           taglineFr: "Entraînez-vous, progressez et grandissez avec Football Skills Academy.", taglineAr: "تدرّب وتقدّم وتطوّر مع أكاديمية Football Skills Academy.",
           copyrightText: `© ${new Date().getFullYear()} Football Skills Academy. All rights reserved.`,

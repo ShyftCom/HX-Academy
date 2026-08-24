@@ -84,7 +84,7 @@ function NewsletterForm({ textColor }: { textColor: string }) {
   if (status === "done") {
     return (
       <div className="flex items-center gap-2 rounded-fsa-pill bg-white/10 px-4 py-3 text-sm font-medium" style={{ color: textColor }}>
-        <CheckCircle2 className="h-4 w-4 text-fsa-sky" /> {t("subscribed")}
+        <CheckCircle2 className="h-4 w-4 text-fsa-heading-blue" /> {t("subscribed")}
       </div>
     );
   }
@@ -99,7 +99,7 @@ function NewsletterForm({ textColor }: { textColor: string }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={t("emailPlaceholder")}
-        className="h-11 min-w-0 flex-1 rounded-fsa-pill border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:border-fsa-sky focus:outline-none"
+        className="h-11 min-w-0 flex-1 rounded-fsa-pill border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:border-fsa-heading-blue focus:outline-none"
       />
       <FsaButton type="submit" variant="sky" size="sm" icon={false} loading={status === "loading"} disabled={status === "loading"}>
         {t("subscribe")}
@@ -119,9 +119,11 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
 
   if (!config) return null;
 
-  const bg = config.backgroundColor || "#001F49";
+  const bg = config.backgroundColor || "#1B1315";
   const text = config.textColor || "#ffffff";
-  const accent = config.accentColor || "#43C7ED";
+  // A lighter crimson than the crest accent: the footer sits on ink, and the
+  // column headings are 14px, so #C0453F would only reach 3.6:1 there.
+  const accent = config.accentColor || "#D9645E";
   const columns = [...(config.linkColumns ?? [])].sort((a, b) => a.position - b.position);
   const socials = config.socialLinks?.filter((s) => s.url);
   const tagline = getTagline(config, locale);
@@ -162,7 +164,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
                 className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/20"
                 style={{ color: text }}
               >
-                <Star className="h-4 w-4 fill-current text-fsa-sky" /> {t("footer.ratedOnTrustpilot")}
+                <Star className="h-4 w-4 fill-current text-fsa-heading-blue" /> {t("footer.ratedOnTrustpilot")}
               </a>
             )}
           </div>

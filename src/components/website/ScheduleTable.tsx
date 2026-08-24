@@ -52,7 +52,7 @@ export async function ScheduleTable({ rows, bookingUrl, locale }: { rows: Schedu
                 const status = statusOf(row.registrationStatus);
                 return (
                   <tr key={row.id}>
-                    <td className={`bg-fsa-sky px-5 py-4 font-fsa-display text-lg font-bold uppercase text-fsa-navy-900 ${i === 0 ? "rounded-ss-fsa-md" : ""} ${i === rows.length - 1 ? "rounded-es-fsa-md" : ""}`}>
+                    <td className={`bg-fsa-sky px-5 py-4 font-fsa-display text-lg font-bold uppercase text-white ${i === 0 ? "rounded-ss-fsa-md" : ""} ${i === rows.length - 1 ? "rounded-es-fsa-md" : ""}`}>
                       {row.ageGroup}
                       {(row.dobStart || row.dobEnd) && <div className="text-xs font-normal normal-case opacity-80">{fmtDob(row.dobStart)} – {fmtDob(row.dobEnd)}</div>}
                     </td>
@@ -80,7 +80,7 @@ export async function ScheduleTable({ rows, bookingUrl, locale }: { rows: Schedu
             return (
               <div key={row.id} className="overflow-hidden rounded-fsa-md border border-fsa-border bg-white">
                 <div className="flex items-center justify-between bg-fsa-sky px-4 py-3">
-                  <span className="font-fsa-display text-base font-bold uppercase text-fsa-navy-900">{row.ageGroup}</span>
+                  <span className="font-fsa-display text-base font-bold uppercase text-white">{row.ageGroup}</span>
                   <span className={`rounded-fsa-pill px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
                 </div>
                 <dl className="grid grid-cols-2 gap-y-2 px-4 py-3 text-sm">

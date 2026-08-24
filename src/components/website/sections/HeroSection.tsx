@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Hero } from "../Hero";
 import { lf } from "./localeField";
 import { localeHref } from "../localeHref";
+import { mobileVariant } from "../mobileVariant";
 
 export async function HeroSection({ content, locale }: { content: Record<string, any>; locale: string }) {
   const t = await getTranslations({ locale, namespace: "common" });
@@ -11,7 +12,7 @@ export async function HeroSection({ content, locale }: { content: Record<string,
   return (
     <Hero
       desktopImageUrl={content.imageUrl ?? ""}
-      mobileImageUrl={content.mobileImageUrl}
+      mobileImageUrl={content.mobileImageUrl ?? mobileVariant(content.imageUrl)}
       videoUrl={content.videoUrl}
       focalPoint={content.focalPoint}
       overlayColor={content.overlayColor}

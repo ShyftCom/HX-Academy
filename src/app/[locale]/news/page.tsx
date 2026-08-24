@@ -24,7 +24,7 @@ export default async function NewsListingPage({ params }: { params: Promise<{ lo
 
   return (
     <>
-      <Hero desktopImageUrl="/media/wide/squad-trip.jpg" title={t("heroTitle")} subtitle={t("heroSubtitle")} minHeight="50vh" />
+      <Hero desktopImageUrl="/media/wide/squad-trip.jpg" mobileImageUrl="/media/mobile/squad-trip.jpg" title={t("heroTitle")} subtitle={t("heroSubtitle")} minHeight="50vh" />
       <Breadcrumb locale={locale} items={[{ label: t("breadcrumb") }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">

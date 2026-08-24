@@ -15,6 +15,7 @@ import { ProgrammeCard } from "@/components/website/cards/ProgrammeCard";
 import { CtaBannerSection } from "@/components/website/sections/CtaBannerSection";
 import { lf } from "@/components/website/sections/localeField";
 import { localeHref } from "@/components/website/localeHref";
+import { mobileVariant } from "@/components/website/mobileVariant";
 
 async function getProgramme(slug: string) {
   const programme = await db.programme.findUnique({
@@ -69,11 +70,13 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
   // bare "/apply", which would otherwise drop the visitor through a redirect.
   const bookingUrl = localeHref(programme.bookingUrl || defaultBookingUrl, locale);
   const ageRange = lf(programme as unknown as Record<string, unknown>, "ageRangeLabel", locale);
+  const cover = programme.heroImageUrl || "/media/wide/dribbling.jpg";
 
   return (
     <>
       <Hero
-        desktopImageUrl={programme.heroImageUrl || "/media/wide/dribbling.jpg"}
+        desktopImageUrl={cover}
+        mobileImageUrl={mobileVariant(cover)}
         title={name}
         subtitle={ageRange || undefined}
         primaryCta={{ label: t("bookNow"), href: bookingUrl }}

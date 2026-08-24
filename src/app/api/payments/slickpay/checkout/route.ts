@@ -183,10 +183,20 @@ export async function POST(req: NextRequest) {
     // subscriptions with no refund path. Reuse a checkout that is still live
     // instead: same plan, same player, still pending, still inside the window
     // where its SATIM page works.
+    //
+    // `subscriptionId` has to match too, and matching on the plan alone was
+    // not enough. Activation extends the subscription named on the row it
+    // settles, so a renewal that reused a pending new-purchase row for the
+    // same plan settled against `subscriptionId: null` and created a second
+    // subscription instead of extending the one being renewed — and between
+    // two same-plan subscriptions it would have renewed whichever checkout
+    // happened to be open. Nothing stops a player holding two, since
+    // Subscription has no unique constraint on (playerId, planId).
     const reusable = await db.payment.findFirst({
       where: {
         playerId,
         planId: plan.id,
+        subscriptionId,
         provider: "slickpay",
         status: "pending",
         providerUrl: { not: null },
@@ -240,6 +250,19 @@ export async function POST(req: NextRequest) {
       player.address?.trim() ||
       (await getSetting("academy_address", "")).trim() ||
       "Algeria";
+
+    // Not fatal — the return redirect settles the payment on its own — but
+    // without a secret to echo, every callback SlickPay makes is rejected as
+    // unsigned and retried until it gives up, which is worth saying out loud
+    // rather than leaving to be inferred from a wall of 401s. The settings PUT
+    // generates one, so this only shows up when the gateway was switched on
+    // some other way.
+    if (!config.webhookSecret) {
+      console.warn(
+        "SlickPay has no webhook secret configured — its callbacks will be " +
+          "rejected. Save the gateway settings once to generate one.",
+      );
+    }
 
     let invoice;
     try {

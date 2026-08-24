@@ -9,6 +9,7 @@ import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { NewsCard } from "@/components/website/cards/NewsCard";
 import { lf } from "@/components/website/sections/localeField";
+import { mobileVariant } from "@/components/website/mobileVariant";
 
 async function getArticle(slug: string) {
   const article = await db.newsArticle.findUnique({ where: { slug }, include: { category: true } });
@@ -47,12 +48,13 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ loc
     take: 3,
   });
 
+  const cover = article.coverImageUrl || "/media/wide/team-talk.jpg";
   const title = lf(article as unknown as Record<string, unknown>, "title", locale);
   const body = lf(article as unknown as Record<string, unknown>, "body", locale);
 
   return (
     <>
-      <Hero desktopImageUrl={article.coverImageUrl || "/media/wide/team-talk.jpg"} title={title} minHeight="45vh" />
+      <Hero desktopImageUrl={cover} mobileImageUrl={mobileVariant(cover)} title={title} minHeight="45vh" />
       <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/news` }, { label: title }]} />
 
       <article className="bg-white py-[var(--fsa-section-y)]">
