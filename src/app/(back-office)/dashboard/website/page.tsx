@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Globe, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun, Trophy, MapPin, Users2, UserCheck, TrendingUp, HelpCircle, Newspaper, Mail, ArrowRightLeft } from "lucide-react";
+import { Globe, CalendarClock, PanelsTopLeft, UploadCloud, Inbox, ArrowRight, Users, Clock, Layers, Store, Star, Navigation, Sun, Trophy, MapPin, Users2, UserCheck, TrendingUp, HelpCircle, Newspaper, Mail, ArrowRightLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function WebsiteHubPage() {
@@ -21,6 +21,7 @@ export default function WebsiteHubPage() {
   const cards = [
     { href: "/dashboard/website/pages", icon: PanelsTopLeft, title: "Pages", desc: "Build the homepage and every Showcase Website page from reusable, drag-and-drop sections.", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30" },
     { href: "/dashboard/website/programmes", icon: Trophy, title: "Programmes", desc: "Manage programmes, categories, schedules and pricing shown on the public site.", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" },
+    { href: "/dashboard/website/schedule", icon: CalendarClock, title: "Schedules", desc: "Each location's training timetable — pick a location and edit only its slots.", color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
     { href: "/dashboard/website/venues", icon: MapPin, title: "Venues", desc: "Control which stations appear on the public Venues page and their order.", color: "text-rose-600 bg-rose-50 dark:bg-rose-900/30" },
     { href: "/dashboard/website/squads", icon: Users2, title: "Squad Registrations", desc: "Review Development Squad interest registrations submitted from the public site.", color: "text-violet-600 bg-violet-50 dark:bg-violet-900/30" },
     { href: "/dashboard/website/contact", icon: Mail, title: "Contact Submissions", desc: "Messages submitted from the public Contact Us page.", color: "text-sky-600 bg-sky-50 dark:bg-sky-900/30" },

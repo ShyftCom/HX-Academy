@@ -365,5 +365,42 @@
     "bottom_empty": "No bottom links added yet.",
     "column_ph": "Column title...",
     "saved": "Footer saved!"
+  },
+  "schedule": {
+    "title": "Location Schedules",
+    "subtitle": "Every location has its own independent timetable. Pick a location to view and edit only its slots.",
+    "location": "Location",
+    "select_location": "Select a location",
+    "no_locations": "No locations available. Create a station first — its schedule is created with it.",
+    "empty_title": "{{name}} has no time slots yet",
+    "empty_body": "Add the first training slot, or start from another location's schedule as a template.",
+    "add_slot": "Add time slot",
+    "duplicate_from": "Copy from…",
+    "duplicate_action": "Duplicate schedule",
+    "duplicated": "Copied {{count}} slot(s)",
+    "duplicate_skipped": "Skipped as conflicting: {{groups}}",
+    "field": "Pitch",
+    "field_hint": "Pitch or terrain within this location. Two active slots on the same pitch, day and time are rejected. Leave empty if the location has only one pitch.",
+    "capacity": "Cap.",
+    "coach": "Coach",
+    "no_coach": "No coach",
+    "active": "Active",
+    "inactive": "Hidden",
+    "active_hint": "Inactive slots stay saved but are hidden from the public site and skipped by conflict checks.",
+    "day_other": "Other…",
+    "no_conflict_check": "This value does not name a single weekday, so this slot is excluded from conflict checks.",
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+    "error_overlap": "Clashes with {{name}} ({{day}} {{start}}–{{end}}) on {{field}}. Change the time, the day or the pitch.",
+    "error_overlap_generic": "This slot clashes with another one at the same location, day, time and pitch.",
+    "error_time_order": "The end time must be after the start time.",
+    "programme_tab_hint": "These slots belong to locations. To edit a whole location's timetable, go to Website → Schedules."
   }
 }

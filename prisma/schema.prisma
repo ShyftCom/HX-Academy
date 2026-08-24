@@ -824,10 +824,11 @@ model Station {
   summerCampPlans    SummerCampPlan[]
 
   // ---- Showcase Website relations ----
-  programmeSchedules ProgrammeSchedule[]
-  programmeVenues    ProgrammeVenue[]
-  coaches            Coach[]
-  faqs               Faq[]
+  scheduleSlots    ScheduleSlot[]
+  locationSchedule LocationSchedule?
+  programmeVenues  ProgrammeVenue[]
+  coaches          Coach[]
+  faqs             Faq[]
 
   @@map("stations")
 }
@@ -1511,7 +1512,7 @@ model Programme {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  schedules     ProgrammeSchedule[]
+  schedules     ScheduleSlot[]
   venues        ProgrammeVenue[]
   coaches       ProgrammeCoach[]
   faqs          Faq[]
@@ -1521,33 +1522,77 @@ model Programme {
   @@map("programmes")
 }
 
-model ProgrammeSchedule {
-  id                 String    @id @default(cuid())
-  programmeId        String
-  programme          Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
-  ageGroup           String
-  minAge             Int?
-  maxAge             Int?
-  dobStart           DateTime?
-  dobEnd             DateTime?
-  sessionName        String?
-  sessionType        String?
-  day                String?
-  startTime          String?
-  endTime            String?
-  venueId            String?
-  venue              Station?  @relation(fields: [venueId], references: [id])
+/// Per-location schedule header. One row per station, created automatically
+/// whenever a station is created (see POST /api/stations and ensureLocationSchedule).
+/// It carries the handful of things that belong to the schedule as a whole
+/// rather than to any one slot; the slots themselves hang off `stations`
+/// directly via ScheduleSlot.stationId.
+model LocationSchedule {
+  id          String   @id @default(cuid())
+  stationId   String   @unique
+  station     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  notes       String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("location_schedules")
+}
+
+/// One training slot in one location's schedule.
+///
+/// Was `ProgrammeSchedule`, owned by a programme with an optional `venueId`.
+/// Ownership is now the other way round: the slot belongs to a station, and
+/// the programme link is optional metadata, so a location can run a session
+/// that is not part of any marketed programme.
+///
+/// The table name is deliberately left as `programme_schedules`: this project
+/// deploys with `prisma db push`, which would drop and recreate a renamed
+/// table rather than rename it.
+model ScheduleSlot {
+  id          String     @id @default(cuid())
+  stationId   String
+  station     Station    @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  programmeId String?
+  programme   Programme? @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+
+  ageGroup    String
+  minAge      Int?
+  maxAge      Int?
+  dobStart    DateTime?
+  dobEnd      DateTime?
+  sessionName String?
+  sessionType String?
+
+  /// `day`/`startTime`/`endTime` are the display strings the public table and
+  /// the admin inputs have always used and are still what gets rendered.
+  /// `dayOfWeek`/`startMinutes`/`endMinutes` are their typed mirrors — the form
+  /// the (stationId, dayOfWeek) index and the overlap constraint can actually
+  /// use. Both halves are derived together by parseSlotTiming() in
+  /// src/lib/schedule.ts and must never be written independently.
+  day          String?
+  dayOfWeek    Int?
+  startTime    String?
+  endTime      String?
+  startMinutes Int?
+  endMinutes   Int?
+  /// Pitch / terrain within the location. Empty string means "unspecified",
+  /// not NULL, so the overlap constraint can compare it with `=`.
+  field        String  @default("")
+
   coachId            String?
-  coach              Coach?    @relation(fields: [coachId], references: [id])
+  coach              Coach?   @relation(fields: [coachId], references: [id])
   capacity           Int?
   availableSpaces    Int?
   price              Float?
-  registrationStatus String    @default("open")
-  order              Int       @default(0)
-  isActive           Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  registrationStatus String   @default("open")
+  order              Int      @default(0)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
+  @@index([stationId])
+  @@index([stationId, dayOfWeek])
   @@map("programme_schedules")
 }
 
@@ -1595,8 +1640,8 @@ model Coach {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  programmes         ProgrammeCoach[]
-  programmeSchedules ProgrammeSchedule[]
+  programmes    ProgrammeCoach[]
+  scheduleSlots ScheduleSlot[]
 
   @@map("coaches")
 }

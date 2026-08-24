@@ -8,7 +8,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
     where: { slug },
     include: {
       category: true,
-      schedules: { where: { isActive: true }, orderBy: { order: "asc" }, include: { venue: true, coach: true } },
+      schedules: { where: { isActive: true }, orderBy: { order: "asc" }, include: { station: true, coach: true } },
       venues: { include: { venue: true }, orderBy: { order: "asc" } },
       coaches: { include: { coach: true }, orderBy: { order: "asc" } },
       faqs: { where: { isPublished: true }, orderBy: { order: "asc" } },
