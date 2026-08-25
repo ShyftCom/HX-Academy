@@ -166,12 +166,16 @@ export async function reorderSlots(body: unknown, stationId: string) {
  * reported rather than aborting the whole copy.
  */
 export async function duplicateSchedule(body: unknown, targetStationId: string) {
+  // Authorize the target location before looking at the body at all. Validating
+  // first let an unauthenticated caller tell a malformed request (400) from a
+  // well-formed one (401), which is a free probe of the request shape.
+  const target = await requireStationAccessResponse(PERMISSIONS.WEBSITE_EDIT, targetStationId);
+  if (target.denied) return target.denied;
+
   const sourceStationId = (body as { sourceStationId?: string })?.sourceStationId;
   if (!sourceStationId) return NextResponse.json({ error: "sourceStationId is required" }, { status: 400 });
   if (sourceStationId === targetStationId) return NextResponse.json({ error: "source and target are the same location" }, { status: 400 });
 
-  const target = await requireStationAccessResponse(PERMISSIONS.WEBSITE_EDIT, targetStationId);
-  if (target.denied) return target.denied;
   const source = await requireStationAccessResponse(PERMISSIONS.WEBSITE_VIEW, sourceStationId);
   if (source.denied) return source.denied;
 
