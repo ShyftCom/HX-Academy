@@ -19,11 +19,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatDate, timeAgo, getInitials } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 export default function UsersPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
+
+  // Mirrors the gates the user routes now enforce.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.USERS_CREATE);
+  const canEdit = can(PERMISSIONS.USERS_EDIT);
+  const canDelete = can(PERMISSIONS.USERS_DELETE);
+
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<any>(null);
@@ -85,8 +94,8 @@ export default function UsersPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
+          {canEdit && <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>}
+          {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -95,7 +104,7 @@ export default function UsersPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("users.title")} description={t("users.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("users.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("users.add")}</Button>}
       </PageHeader>
 
       <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("users.search")} className="w-64" />
