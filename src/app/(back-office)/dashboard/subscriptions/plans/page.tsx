@@ -21,6 +21,8 @@ import { formatCurrency } from "@/lib/utils";
 import { Plus, Edit, Trash2, CreditCard } from "lucide-react";
 import { LocaleFields } from "@/components/website/admin/LocaleTextInput";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const COLORS = ["#3B82F6","#10B981","#8B5CF6","#F59E0B","#EF4444","#EC4899","#14B8A6","#F97316"];
 const schema = z.object({
@@ -41,6 +43,13 @@ type FormData = z.infer<typeof schema>;
 export default function PlansPage() {
   const { t } = useTranslation("subscriptions");
   const qc = useQueryClient();
+  // Mirrors the gates the plan routes now enforce server-side. Staff reach
+  // this page on subscriptions:view alone and hold none of the three.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.SUBS_CREATE);
+  const canEdit = can(PERMISSIONS.SUBS_EDIT);
+  const canDelete = can(PERMISSIONS.SUBS_DELETE);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -90,7 +99,7 @@ export default function PlansPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("plans.title")} description={t("plans.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("plans.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("plans.add")}</Button>}
       </PageHeader>
 
       {plans?.length === 0 ? (
@@ -113,8 +122,8 @@ export default function PlansPage() {
                   <p className="text-sm text-gray-500">{plan.duration} {plan.durationType}{plan.duration > 1 ? "s" : ""}</p>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>
-                  <Button variant="outline" size="sm" onClick={() => setDeleteId(plan.id)} className="text-red-600 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(plan)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>}
+                  {canDelete && <Button variant="outline" size="sm" onClick={() => setDeleteId(plan.id)} className="text-red-600 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>}
                 </div>
               </CardContent>
             </Card>

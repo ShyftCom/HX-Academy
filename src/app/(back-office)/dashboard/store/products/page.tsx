@@ -25,6 +25,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatCurrency, parseJsonSafe } from "@/lib/utils";
 import { Plus, MoreHorizontal, Edit, Trash2, Upload, Package, X, Layers } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const schema = z.object({
   name: z.string().min(1, "Name required"),
@@ -45,6 +47,15 @@ type FormData = z.infer<typeof schema>;
 
 export default function ProductsPage() {
   const { t } = useTranslation("store");
+
+  // Mirrors the gates the store routes now enforce. The store nav needs
+  // store:view, so a role granted only that would otherwise be shown controls
+  // that can answer nothing but 403.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.STORE_CREATE);
+  const canEdit = can(PERMISSIONS.STORE_EDIT);
+  const canDelete = can(PERMISSIONS.STORE_DELETE);
+
   const qc = useQueryClient();
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -134,9 +145,9 @@ export default function ProductsPage() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
+          {canEdit && <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>}
           <DropdownMenuItem onClick={() => router.push(`/dashboard/store/products/${r.id}/variants`)}><Layers className="me-2 h-4 w-4" />{t("products.manage_variants")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
+          {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
     )},
@@ -145,7 +156,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("products.title")} description={t("products.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("products.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("products.add")}</Button>}
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">

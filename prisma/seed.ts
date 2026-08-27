@@ -40,6 +40,8 @@ async function main() {
     { name: "payments:create", module: "payments", action: "create", description: "Create payments" },
     { name: "payments:approve", module: "payments", action: "approve", description: "Approve payments" },
     { name: "payments:reject", module: "payments", action: "reject", description: "Reject payments" },
+    { name: "payments:edit", module: "payments", action: "edit", description: "Edit payments" },
+    { name: "payments:delete", module: "payments", action: "delete", description: "Delete payments" },
     // Store
     { name: "store:view", module: "store", action: "view", description: "View store" },
     { name: "store:create", module: "store", action: "create", description: "Create products" },

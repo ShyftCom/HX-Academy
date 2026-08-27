@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
   const session = await auth();
@@ -10,8 +11,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // The checkout form definition is store configuration. GET above stays
+  // session-only because the player store renders this form.
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_CREATE);
+  if (denied) return denied;
   try {
     const body = await req.json();
     const count = await db.formField.count();
@@ -38,8 +41,8 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   // Bulk reorder
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_EDIT);
+  if (denied) return denied;
   try {
     const body = await req.json();
     await Promise.all(

@@ -38,6 +38,13 @@ export const PERMISSIONS = {
   PAYMENTS_APPROVE: "payments:approve",
   PAYMENTS_REJECT: "payments:reject",
   PAYMENTS_CREATE: "payments:create",
+  // Editing and deleting a recorded payment are their own authority: they
+  // rewrite or erase the record of money having arrived, which is a different
+  // act from filing a new one. Both are seeded in prisma/seed.ts, and the seed
+  // grants every permission to Admin and Super Admin, so adding them here
+  // costs no role wiring.
+  PAYMENTS_EDIT: "payments:edit",
+  PAYMENTS_DELETE: "payments:delete",
   // Store
   STORE_VIEW: "store:view",
   STORE_CREATE: "store:create",

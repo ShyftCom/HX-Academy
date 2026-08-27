@@ -16,11 +16,21 @@ import { Plus, Edit, Trash2, Shield } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 export default function RolesPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Mirrors the gates the role routes now enforce. Editing a role rewrites its
+  // whole permission set, so it is the most consequential button in the app.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.ROLES_CREATE);
+  const canEdit = can(PERMISSIONS.ROLES_EDIT);
+  const canDelete = can(PERMISSIONS.ROLES_DELETE);
+
   const [editRole, setEditRole] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", description: "", permissionIds: [] as string[] });
@@ -61,7 +71,7 @@ export default function RolesPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("roles.title")} description={t("roles.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("roles.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("roles.add")}</Button>}
       </PageHeader>
 
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
@@ -88,8 +98,8 @@ export default function RolesPage() {
                     {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">+{role.permissions.length - 6} more</span>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>
-                    {!role.isSystem && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteId(role.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                    {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>}
+                    {canDelete && !role.isSystem && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteId(role.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </CardContent>
               </Card>

@@ -14,9 +14,20 @@ import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Plus, Edit, Trash2, Folder } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 export default function CategoriesPage() {
   const { t } = useTranslation("store");
+
+  // Mirrors the gates the store routes now enforce. The store nav needs
+  // store:view, so a role granted only that would otherwise be shown controls
+  // that can answer nothing but 403.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.STORE_CREATE);
+  const canEdit = can(PERMISSIONS.STORE_EDIT);
+  const canDelete = can(PERMISSIONS.STORE_DELETE);
+
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCat, setEditCat] = useState<any>(null);
@@ -54,8 +65,8 @@ export default function CategoriesPage() {
     { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.isActive ? "success" : "secondary"}>{r.isActive ? "Active" : "Inactive"}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />{t("common:ui.edit")}</Button>
-        <Button variant="outline" size="sm" onClick={() => setDeleteId(r.id)} className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button>
+        {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />{t("common:ui.edit")}</Button>}
+        {canDelete && <Button variant="outline" size="sm" onClick={() => setDeleteId(r.id)} className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button>}
       </div>
     )},
   ];
@@ -63,7 +74,7 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("categories.title")} description={t("categories.subtitle")}>
-        <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("categories.add")}</Button>
+        {canCreate && <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("categories.add")}</Button>}
       </PageHeader>
 
       {!isLoading && categories?.length === 0 ? (

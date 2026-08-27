@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
+  // Deliberately session-only, NOT gated on store:view. The player store lists
+  // the catalogue through this route and players hold no store:* permission,
+  // so gating it would empty the shop. Nothing here is confidential — the
+  // Product model carries no cost or margin, only what a buyer is shown.
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Whether the caller is shopping or running the shop decides what they may
+  // see. The portal asks for `public=true`, but that was the client's choice
+  // to make: dropping it returned drafts and archived products to anyone.
+  const isStoreStaff = await hasPermission(session.user.id, PERMISSIONS.STORE_VIEW);
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") ?? "1");
@@ -20,6 +30,9 @@ export async function GET(req: NextRequest) {
   if (categoryId) where.categoryId = categoryId;
   if (status) where.status = status;
   if (publicOnly) where.status = "active";
+  // A shopper sees the shop, not the stockroom: active products only, whatever
+  // the request asked for.
+  if (!isStoreStaff) where.status = "active";
 
   const [data, total] = await Promise.all([
     db.product.findMany({
@@ -36,6 +49,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requirePermissionResponse(PERMISSIONS.STORE_CREATE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
