@@ -26,27 +26,27 @@
  * precisely that, so this script runs it first and `db push` then finds nothing
  * left to change.
  *
- * Running it on an already-migrated database is a no-op: migration.sql is
- * idempotent throughout (IF NOT EXISTS / existence-checked constraints), which
- * is what makes it safe on every deploy.
+ * Running it on an already-migrated database is a no-op: the SQL is idempotent
+ * throughout (IF NOT EXISTS / existence-checked constraints), which is what
+ * makes it safe on every deploy.
+ *
+ * The SQL sits in scripts/, beside this file, and not in prisma/migrations/.
+ * It lived there once and was deleted by a squash to a 0_init baseline —
+ * reasonable housekeeping that had no way to know a build step read that path.
+ * The result was a build that died on ENOENT, and a deploy that would then have
+ * failed at exactly the step this script exists to prevent. What the build
+ * depends on now lives with the build script that owns it.
  *
  *   npm run db:migrate:schedule
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { Client } from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const MIGRATION_SQL = path.join(
-  __dirname,
-  "..",
-  "prisma",
-  "migrations",
-  "20260823000001_location_scoped_schedules",
-  "migration.sql",
-);
+const MIGRATION_SQL = path.join(__dirname, "schedule-migration.sql");
 
 /**
  * Mirrors isLocalPostgresUrl() in src/lib/db.ts. Deliberately re-inlined rather
@@ -61,6 +61,16 @@ async function main() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     console.error("❌ DATABASE_URL is not set — cannot apply the schedule migration.");
+    process.exit(1);
+  }
+
+  // Fail with the reason rather than a bare ENOENT stack, so that if this ever
+  // goes missing again the build log says what is wrong and what it costs.
+  if (!existsSync(MIGRATION_SQL)) {
+    console.error(`❌ Missing ${path.relative(process.cwd(), MIGRATION_SQL)}.`);
+    console.error("   It carries the backfill for programme_schedules.stationId.");
+    console.error("   Without it `prisma db push` cannot add that required column to a");
+    console.error("   populated database, and the deploy fails. Restore it before deploying.");
     process.exit(1);
   }
 
