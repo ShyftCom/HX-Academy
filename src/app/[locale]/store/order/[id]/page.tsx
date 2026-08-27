@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { formatPrice } from "@/lib/public-format";
 import { CheckCircle, Package, ShoppingBag } from "lucide-react";
 
 interface OrderItem { id: string; quantity: number; price: number; product: { name: string; images: string } }
@@ -17,6 +18,8 @@ interface WebsiteOrder {
 export default function OrderConfirmPage() {
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const t = useTranslations("store");
+  const tc = useTranslations("common");
+  const currency = tc("currency");
   const [order, setOrder] = useState<WebsiteOrder | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +40,7 @@ export default function OrderConfirmPage() {
 
   if (!order) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center gap-4 text-gray-500">
-      <p>Order not found</p>
+      <p>{t("orderNotFound")}</p>
       <Link href={`/${locale}/store`} className="text-blue-500 hover:underline">{t("backToStore")}</Link>
     </div>
   );
@@ -54,7 +57,7 @@ export default function OrderConfirmPage() {
           <p className="text-xl font-mono font-bold mb-4">{order.orderNumber}</p>
           <p className="text-gray-500 text-sm mb-8">{t("orderConfirmMsg")}</p>
 
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-left mb-6">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-start mb-6">
             <h2 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <Package className="w-4 h-4" /> {t("orderItems")}
             </h2>
@@ -62,22 +65,22 @@ export default function OrderConfirmPage() {
               {order.items?.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-gray-600 dark:text-gray-300">{item.product?.name} ×{item.quantity}</span>
-                  <span className="font-medium">{(Number(item.price) * item.quantity).toLocaleString("fr-DZ")} DA</span>
+                  <span className="font-medium">{formatPrice(Number(item.price) * item.quantity, locale, currency)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-200 dark:border-gray-600 mt-3 pt-3">
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{t("subtotal")}</span>
-                <span>{Number(order.subtotal).toLocaleString("fr-DZ")} DA</span>
+                <span>{formatPrice(Number(order.subtotal), locale, currency)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
                 <span>{t("shippingFee")}</span>
-                <span>{Number(order.shippingFee) === 0 ? t("freeShipping") : `${Number(order.shippingFee).toLocaleString("fr-DZ")} DA`}</span>
+                <span>{Number(order.shippingFee) === 0 ? t("freeShipping") : formatPrice(Number(order.shippingFee), locale, currency)}</span>
               </div>
               <div className="flex justify-between font-bold mt-1">
                 <span>{t("total")}</span>
-                <span>{Number(order.total).toLocaleString("fr-DZ")} DA</span>
+                <span>{formatPrice(Number(order.total), locale, currency)}</span>
               </div>
             </div>
           </div>

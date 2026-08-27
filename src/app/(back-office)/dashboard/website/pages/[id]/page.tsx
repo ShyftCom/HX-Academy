@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ChevronDown, Plus, Trash2, Eye, EyeOff, Save, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -29,7 +30,9 @@ interface SectionRow {
 }
 interface PageDetail {
   id: string; slug: string; title: string | null; isPublished: boolean;
-  metaTitle: string | null; metaDescription: string | null; breadcrumbLabel: string | null;
+  metaTitle: string | null; metaTitleFr: string | null; metaTitleAr: string | null;
+  metaDescription: string | null; metaDescriptionFr: string | null; metaDescriptionAr: string | null;
+  breadcrumbLabel: string | null; breadcrumbLabelFr: string | null; breadcrumbLabelAr: string | null;
   sections: SectionRow[];
 }
 
@@ -110,9 +113,9 @@ export default function PageBuilderPage() {
   const [sections, setSections] = useState<SectionRow[]>([]);
   useEffect(() => { if (page?.sections) setSections(page.sections); }, [page?.sections]);
 
-  const [meta, setMeta] = useState({ title: "", slug: "", metaTitle: "", metaDescription: "", breadcrumbLabel: "" });
+  const [meta, setMeta] = useState({ title: "", slug: "", metaTitle: "", metaTitleFr: "", metaTitleAr: "", metaDescription: "", metaDescriptionFr: "", metaDescriptionAr: "", breadcrumbLabel: "", breadcrumbLabelFr: "", breadcrumbLabelAr: "" });
   useEffect(() => {
-    if (page) setMeta({ title: page.title ?? "", slug: page.slug, metaTitle: page.metaTitle ?? "", metaDescription: page.metaDescription ?? "", breadcrumbLabel: page.breadcrumbLabel ?? "" });
+    if (page) setMeta({ title: page.title ?? "", slug: page.slug, metaTitle: page.metaTitle ?? "", metaTitleFr: page.metaTitleFr ?? "", metaTitleAr: page.metaTitleAr ?? "", metaDescription: page.metaDescription ?? "", metaDescriptionFr: page.metaDescriptionFr ?? "", metaDescriptionAr: page.metaDescriptionAr ?? "", breadcrumbLabel: page.breadcrumbLabel ?? "", breadcrumbLabelFr: page.breadcrumbLabelFr ?? "", breadcrumbLabelAr: page.breadcrumbLabelAr ?? "" });
   }, [page]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-page", id] });
@@ -242,9 +245,9 @@ export default function PageBuilderPage() {
             {page.slug !== "home" && (
               <div><Label>{t("pages.url_slug")}</Label><Input value={meta.slug} onChange={(e) => setMeta((m) => ({ ...m, slug: e.target.value }))} /></div>
             )}
-            <div><Label>{t("pages.breadcrumb")}</Label><Input value={meta.breadcrumbLabel} onChange={(e) => setMeta((m) => ({ ...m, breadcrumbLabel: e.target.value }))} placeholder={t("pages.defaults_to_title")} /></div>
-            <div><Label>{t("news.seo_title")}</Label><Input value={meta.metaTitle} onChange={(e) => setMeta((m) => ({ ...m, metaTitle: e.target.value }))} /></div>
-            <div><Label>{t("news.seo_description")}</Label><Textarea value={meta.metaDescription} onChange={(e) => setMeta((m) => ({ ...m, metaDescription: e.target.value }))} /></div>
+            <div><Label>{t("pages.breadcrumb")}</Label><LocaleTextInput baseKey="breadcrumbLabel" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} /></div>
+            <div><Label>{t("news.seo_title")}</Label><LocaleTextInput baseKey="metaTitle" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} /></div>
+            <div><Label>{t("news.seo_description")}</Label><LocaleTextInput baseKey="metaDescription" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} multiline /></div>
             <Button onClick={() => savePageMeta()} disabled={savingMeta} className="w-full">{savingMeta ? "Saving…" : "Save Settings"}</Button>
           </DialogBody>
         </DialogContent>

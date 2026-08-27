@@ -33,12 +33,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         template: body.template,
         isPublished: body.isPublished,
         metaTitle: body.metaTitle,
+        metaTitleFr: body.metaTitleFr ?? null,
+        metaTitleAr: body.metaTitleAr ?? null,
         metaDescription: body.metaDescription,
+        metaDescriptionFr: body.metaDescriptionFr ?? null,
+        metaDescriptionAr: body.metaDescriptionAr ?? null,
         ogImage: body.ogImage,
         canonicalUrl: body.canonicalUrl,
         noindex: body.noindex,
         nofollow: body.nofollow,
         breadcrumbLabel: body.breadcrumbLabel,
+        breadcrumbLabelFr: body.breadcrumbLabelFr ?? null,
+        breadcrumbLabelAr: body.breadcrumbLabelAr ?? null,
       },
     });
     return NextResponse.json(page);

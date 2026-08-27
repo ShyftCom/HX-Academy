@@ -45,7 +45,11 @@ export async function POST(req: NextRequest) {
     const product = await db.product.create({
       data: {
         name: body.name,
+        nameFr: body.nameFr ?? null,
+        nameAr: body.nameAr ?? null,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         images: JSON.stringify(body.images ?? []),
         price: parseFloat(body.price),
         discountPrice: body.discountPrice ? parseFloat(body.discountPrice) : null,

@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Loader2, GripVertical, Check, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 
-interface Req { id: string; title: string; description?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number; isActive: boolean; order: number; appliesTo: string; }
+interface Req { id: string; title: string; titleFr?: string; titleAr?: string; description?: string; descriptionFr?: string; descriptionAr?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number; isActive: boolean; order: number; appliesTo: string; }
 type FormState = Omit<Req, "id">;
 
-const blank: FormState = { title: "", description: "", isRequired: true, allowedTypes: "image/*,.pdf,.docx,.xlsx", maxSizeMb: 10, isActive: true, order: 0, appliesTo: "academy" };
+const blank: FormState = { title: "", titleFr: "", titleAr: "", description: "", descriptionFr: "", descriptionAr: "", isRequired: true, allowedTypes: "image/*,.pdf,.docx,.xlsx", maxSizeMb: 10, isActive: true, order: 0, appliesTo: "academy" };
 
 const APPLIES_LABELS: Record<string, string> = { academy: "Academy", summer_camp: "Summer Camp", both: "Both" };
 const APPLIES_COLORS: Record<string, string> = { academy: "bg-green-100 text-green-700", summer_camp: "bg-orange-100 text-orange-700", both: "bg-blue-100 text-blue-700" };
@@ -24,11 +25,11 @@ function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormS
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("common:ui.title_field")} <span className="text-red-500">*</span></label>
-          <input type="text" className={inputClass} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder={t("filereq.title_ph")} />
+          <LocaleTextInput baseKey="title" values={form as unknown as Record<string, unknown>} onChange={(next) => setForm(next as unknown as FormState)} />
         </div>
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("common:ui.description")}</label>
-          <textarea rows={2} className={inputClass} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} placeholder={t("filereq.instructions_ph")} />
+          <LocaleTextInput baseKey="description" values={form as unknown as Record<string, unknown>} onChange={(next) => setForm(next as unknown as FormState)} multiline />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("filereq.allowed_types")}</label>

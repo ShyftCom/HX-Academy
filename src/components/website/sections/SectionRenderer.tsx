@@ -38,7 +38,9 @@ function parseContent(raw: string): Record<string, any> {
 // pages, etc.) intentionally render nothing rather than crash the page, so
 // they can be added to a page's section list ahead of their component
 // existing without breaking anything.
-const IMPLEMENTED: Partial<Record<SectionType, (props: { content: Record<string, any>; locale: string }) => React.ReactNode>> = {
+// Some section components are async server components (they read translations
+// via getTranslations), so the return type has to allow a Promise as well.
+const IMPLEMENTED: Partial<Record<SectionType, (props: { content: Record<string, any>; locale: string }) => React.ReactNode | Promise<React.ReactNode>>> = {
   hero: HeroSection,
   richtext: RichTextSection,
   "split-content": SplitContentSection,

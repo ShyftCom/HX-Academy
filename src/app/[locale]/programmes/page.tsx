@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
+import { pageMetadata } from "@/lib/seo";
 import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { ProgrammeCard } from "@/components/website/cards/ProgrammeCard";
 import { lf } from "@/components/website/sections/localeField";
 
-export const metadata: Metadata = {
-  title: "Programmes | Football Skills Academy",
-  description: "Explore Football Skills Academy programmes — weekly training, holiday courses, development squads and more, for players aged 6-16.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.programmes" });
+  return pageMetadata({ locale, path: "/programmes", title: t("title"), description: t("description") });
+}
 
 export default async function ProgrammesListingPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ category?: string }> }) {
   const { locale } = await params;
   const { category } = await searchParams;
+  const t = await getTranslations({ locale, namespace: "programmes" });
 
   const [programmes, categories] = await Promise.all([
     db.programme.findMany({
@@ -28,13 +32,13 @@ export default async function ProgrammesListingPage({ params, searchParams }: { 
     <>
       <Hero
         desktopImageUrl="https://images.unsplash.com/photo-1470114716159-e389f8712fda?w=1600&q=80"
-        title="Programmes"
-        subtitle="Structured football programmes for every age and ability, all built around our long-term player development pathway."
+        title={t("heroTitle")}
+        subtitle={t("heroSubtitle")}
         align="left"
         verticalPosition="bottom"
         minHeight="55vh"
       />
-      <Breadcrumb locale={locale} items={[{ label: "Programmes" }]} />
+      <Breadcrumb locale={locale} items={[{ label: t("breadcrumb") }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">
         <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
@@ -44,7 +48,7 @@ export default async function ProgrammesListingPage({ params, searchParams }: { 
                 href={`/${locale}/programmes`}
                 className={`rounded-fsa-pill px-4 py-2 text-sm font-semibold transition-colors ${!category ? "bg-fsa-navy-900 text-white" : "border border-fsa-border text-fsa-navy-900 hover:bg-fsa-pale-bg"}`}
               >
-                All Programmes
+                {t("all")}
               </Link>
               {categories.map((c) => (
                 <Link
@@ -59,7 +63,7 @@ export default async function ProgrammesListingPage({ params, searchParams }: { 
           )}
 
           {programmes.length === 0 ? (
-            <p className="py-16 text-center text-fsa-text-muted">Programmes are being updated — check back soon.</p>
+            <p className="py-16 text-center text-fsa-text-muted">{t("empty")}</p>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {programmes.map((p) => (

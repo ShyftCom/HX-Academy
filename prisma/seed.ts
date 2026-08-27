@@ -447,20 +447,21 @@ async function main() {
           slug: "home",
           title: "Homepage",
           isPublished: true,
-          metaTitle: "Football Skills Academy — Train, Compete, Grow",
-          metaDescription: "Football Skills Academy runs year-round programmes, holiday courses and development squads for players aged 6-16, delivered by qualified coaches across our venues.",
+          metaTitle: "Football Skills Academy — Entraîne-toi, rivalise, progresse",
+          metaDescription: "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.",
           sections: {
             create: [
               {
                 type: "hero", order: 0, isEnabled: true,
                 content: JSON.stringify({
-                  eyebrow: "Football Skills Academy", eyebrowFr: "Football Skills Academy",
-                  heading: "Every Player.\nOne Clear Pathway.", headingFr: "Chaque joueur.\nUn seul chemin clair.",
+                  eyebrow: "Football Skills Academy", eyebrowFr: "Football Skills Academy", eyebrowAr: "Football Skills Academy",
+                  heading: "Every Player.\nOne Clear Pathway.", headingFr: "Chaque joueur.\nUn seul chemin clair.", headingAr: "كل لاعب.\nمسار واحد واضح.",
                   subheading: "Year-round football programmes for players aged 6-16, built around technical development, teamwork and a genuine love of the game.",
-                  subheadingFr: "Des programmes de football toute l'année pour les joueurs de 6 à 16 ans, centrés sur le développement technique, l'esprit d'équipe et le plaisir de jouer.",
-                  imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=1600&q=80",
-                  ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaUrl: "/programmes",
-                  secondaryCtaLabel: "Book a Trial", secondaryCtaLabelFr: "Réserver un essai", secondaryCtaUrl: "/apply",
+                  subheadingFr: "Des programmes de football toute l'année pour les joueurs de 6 à 16 ans, centrés sur le développement technique, l'esprit d'équipe et le plaisir de jouer.", subheadingAr: "برامج كروية على مدار السنة للاعبين من 6 إلى 16 سنة، تركّز على التطوير التقني وروح الفريق ومتعة اللعب.",
+                  imageUrl: "/media/home/hero-team-talk.jpg",
+                  focalPoint: "center 35%",
+                  ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes",
+                  secondaryCtaLabel: "Book a Trial", secondaryCtaLabelFr: "Réserver un essai", secondaryCtaLabelAr: "احجز حصة تجريبية", secondaryCtaUrl: "/apply",
                   overlayOpacity: 0.5,
                 }),
               },
@@ -468,10 +469,10 @@ async function main() {
                 type: "stats", order: 1, isEnabled: true,
                 content: JSON.stringify({
                   items: [
-                    { value: "200", suffix: "+", label: "Players trained", labelFr: "Joueurs formés" },
-                    { value: "5", suffix: "+", label: "Years of coaching", labelFr: "Années d'encadrement" },
-                    { value: "15", suffix: "", label: "Qualified coaches", labelFr: "Entraîneurs qualifiés" },
-                    { value: "3", suffix: "", label: "Venues", labelFr: "Sites d'entraînement" },
+                    { value: "200", suffix: "+", label: "Players trained", labelFr: "Joueurs formés", labelAr: "لاعبون تدرّبوا لدينا" },
+                    { value: "5", suffix: "+", label: "Years of coaching", labelFr: "Années d'encadrement", labelAr: "سنوات من التأطير" },
+                    { value: "15", suffix: "", label: "Qualified coaches", labelFr: "Entraîneurs qualifiés", labelAr: "مدربون مؤهَّلون" },
+                    { value: "3", suffix: "", label: "Venues", labelFr: "Sites d'entraînement", labelAr: "مواقع التدريب" },
                   ],
                 }),
               },
@@ -479,47 +480,61 @@ async function main() {
                 type: "split-content", order: 2, isEnabled: true,
                 content: JSON.stringify({
                   imagePosition: "right",
-                  eyebrow: "Who we are", eyebrowFr: "Qui sommes-nous",
-                  heading: "Built around long-term player development", headingFr: "Pensé pour le développement du joueur sur la durée",
+                  eyebrow: "Who we are", eyebrowFr: "Qui sommes-nous", eyebrowAr: "من نحن",
+                  heading: "Built around long-term player development", headingFr: "Pensé pour le développement du joueur sur la durée", headingAr: "مصمَّم لتطوير اللاعب على المدى الطويل",
                   body: "Football Skills Academy was founded to give young players a structured, age-appropriate pathway — from their first touch of the ball through to representative squad football. Every session is planned around what a player needs at that stage, not a one-size-fits-all drill sheet.",
-                  bodyFr: "Football Skills Academy a été fondée pour offrir aux jeunes joueurs un parcours structuré et adapté à leur âge, des premiers pas avec le ballon jusqu'au football en équipe représentative.",
-                  imageUrl: "https://images.unsplash.com/photo-1516731415730-0c607149933a?w=1200&q=80",
+                  bodyFr: "Football Skills Academy a été fondée pour offrir aux jeunes joueurs un parcours structuré et adapté à leur âge, des premiers pas avec le ballon jusqu'au football en équipe représentative.", bodyAr: "تأسست أكاديمية Football Skills Academy لتوفّر للاعبين الشباب مساراً منظّماً يناسب أعمارهم، من الخطوات الأولى مع الكرة إلى اللعب ضمن الفرق التمثيلية.",
+                  imageUrl: "/media/home/squad-team-photo.jpg",
                   bulletPoints: [
                     { text: "Qualified, DBS-checked coaches at every session", textFr: "Des entraîneurs qualifiés et vérifiés à chaque séance" },
                     { text: "Small coaching ratios across all age groups", textFr: "Un encadrement en petits groupes pour tous les âges" },
                     { text: "A clear pathway from Foundation to Development Squads", textFr: "Un parcours clair, de la base aux équipes de développement" },
                   ],
-                  ctaLabel: "Learn about our methodology", ctaLabelFr: "Découvrir notre méthodologie", ctaUrl: "/methodology",
+                  ctaLabel: "Learn about our methodology", ctaLabelFr: "Découvrir notre méthodologie", ctaLabelAr: "اكتشف منهجيتنا", ctaUrl: "/methodology",
                 }),
               },
               {
                 type: "feature-cards", order: 3, isEnabled: true,
                 content: JSON.stringify({
-                  heading: "Why families choose us", headingFr: "Pourquoi les familles nous choisissent",
+                  heading: "Why families choose us", headingFr: "Pourquoi les familles nous choisissent", headingAr: "لماذا تختارنا العائلات",
                   cards: [
-                    { icon: "Trophy", title: "Expert coaching", titleFr: "Coaching expert", body: "Structured sessions delivered by qualified coaches with a consistent academy-wide philosophy.", bodyFr: "Des séances structurées animées par des entraîneurs qualifiés." },
-                    { icon: "Users", title: "Team spirit", titleFr: "Esprit d'équipe", body: "Players build lasting friendships and learn what it means to compete as a team.", bodyFr: "Les joueurs tissent des liens durables et apprennent l'esprit d'équipe." },
-                    { icon: "Shield", title: "Safe environment", titleFr: "Environnement sûr", body: "Full safeguarding standards and medical support at every venue and session.", bodyFr: "Des normes de protection complètes à chaque séance." },
-                    { icon: "Zap", title: "Modern methodology", titleFr: "Méthodologie moderne", body: "Constraints-based coaching that builds decision-making, not just technique.", bodyFr: "Un coaching basé sur la prise de décision, pas seulement la technique." },
-                    { icon: "Star", title: "Competitive pathway", titleFr: "Parcours compétitif", body: "Game festivals, fixtures and a route into our Development Squads.", bodyFr: "Des matchs, festivals et un accès à nos équipes de développement." },
-                    { icon: "TrendingUp", title: "Real progression", titleFr: "Vraie progression", body: "Every player's development is tracked against clear, age-based milestones.", bodyFr: "Le développement de chaque joueur est suivi selon des étapes claires." },
+                    { icon: "Trophy", title: "Expert coaching", titleFr: "Coaching expert", titleAr: "تأطير متخصّص", body: "Structured sessions delivered by qualified coaches with a consistent academy-wide philosophy.", bodyFr: "Des séances structurées animées par des entraîneurs qualifiés.", bodyAr: "حصص منظّمة يشرف عليها مدربون مؤهَّلون." },
+                    { icon: "Users", title: "Team spirit", titleFr: "Esprit d'équipe", titleAr: "روح الفريق", body: "Players build lasting friendships and learn what it means to compete as a team.", bodyFr: "Les joueurs tissent des liens durables et apprennent l'esprit d'équipe.", bodyAr: "ينسج اللاعبون صداقات دائمة ويتعلّمون روح الفريق." },
+                    { icon: "Shield", title: "Safe environment", titleFr: "Environnement sûr", titleAr: "بيئة آمنة", body: "Full safeguarding standards and medical support at every venue and session.", bodyFr: "Des normes de protection complètes à chaque séance.", bodyAr: "معايير حماية شاملة في كل حصة." },
+                    { icon: "Zap", title: "Modern methodology", titleFr: "Méthodologie moderne", titleAr: "منهجية حديثة", body: "Constraints-based coaching that builds decision-making, not just technique.", bodyFr: "Un coaching basé sur la prise de décision, pas seulement la technique.", bodyAr: "تدريب يقوم على اتخاذ القرار، لا على التقنية وحدها." },
+                    { icon: "Star", title: "Competitive pathway", titleFr: "Parcours compétitif", titleAr: "مسار تنافسي", body: "Game festivals, fixtures and a route into our Development Squads.", bodyFr: "Des matchs, festivals et un accès à nos équipes de développement.", bodyAr: "مباريات ومهرجانات كروية وفرصة الانضمام إلى فرق التطوير لدينا." },
+                    { icon: "TrendingUp", title: "Real progression", titleFr: "Vraie progression", titleAr: "تقدّم حقيقي", body: "Every player's development is tracked against clear, age-based milestones.", bodyFr: "Le développement de chaque joueur est suivi selon des étapes claires.", bodyAr: "يُتابَع تطوّر كل لاعب وفق مراحل واضحة." },
                   ],
                 }),
               },
               {
                 type: "pricing-cards", order: 4, isEnabled: true,
-                content: JSON.stringify({ heading: "Plans & Pricing", headingFr: "Formules et tarifs", subheading: "Flexible plans to fit your schedule.", subheadingFr: "Des formules flexibles adaptées à votre emploi du temps." }),
+                content: JSON.stringify({ heading: "Plans & Pricing", headingFr: "Formules et tarifs", headingAr: "الصيغ والأسعار", subheading: "Flexible plans to fit your schedule.", subheadingFr: "Des formules flexibles adaptées à votre emploi du temps.", subheadingAr: "صيغ مرنة تناسب برنامجك." }),
               },
               {
-                type: "logo-cloud", order: 5, isEnabled: true,
-                content: JSON.stringify({ heading: "Sponsors & Partners", headingFr: "Sponsors & Partenaires" }),
-              },
-              {
-                type: "cta-banner", order: 6, isEnabled: true,
+                type: "gallery", order: 5, isEnabled: true,
                 content: JSON.stringify({
-                  heading: "Ready to join?", headingFr: "Prêt à nous rejoindre ?",
-                  body: "Book a trial session and see what Football Skills Academy is about.", bodyFr: "Réservez une séance d'essai et découvrez Football Skills Academy.",
-                  ctaLabel: "Book Now", ctaLabelFr: "Réserver", ctaUrl: "/apply", style: "navy",
+                  heading: "Inside the academy", headingFr: "Au cœur de l'académie", headingAr: "من داخل الأكاديمية",
+                  images: [
+                    { url: "/media/home/ball-control.jpg", caption: "Ball control", captionFr: "Contrôle de balle", captionAr: "التحكم بالكرة" },
+                    { url: "/media/home/speed-drill.jpg", caption: "Speed & agility", captionFr: "Vitesse et agilité", captionAr: "السرعة والرشاقة" },
+                    { url: "/media/home/dribbling-drill.jpg", caption: "Dribbling drills", captionFr: "Exercices de dribble", captionAr: "تمارين المراوغة" },
+                    { url: "/media/home/first-touch.jpg", caption: "First touch", captionFr: "Première touche", captionAr: "اللمسة الأولى" },
+                    { url: "/media/home/head-coach.jpg", caption: "On the training ground", captionFr: "Sur le terrain d'entraînement", captionAr: "في ميدان التدريب" },
+                    { url: "/media/home/squad-trip.jpg", caption: "Squad tour", captionFr: "Tournée de l'équipe", captionAr: "جولة الفريق" },
+                  ],
+                }),
+              },
+              {
+                type: "logo-cloud", order: 6, isEnabled: true,
+                content: JSON.stringify({ heading: "Sponsors & Partners", headingFr: "Sponsors & Partenaires", headingAr: "الرعاة والشركاء" }),
+              },
+              {
+                type: "cta-banner", order: 7, isEnabled: true,
+                content: JSON.stringify({
+                  heading: "Ready to join?", headingFr: "Prêt à nous rejoindre ?", headingAr: "هل أنت مستعد للانضمام إلينا؟",
+                  body: "Book a trial session and see what Football Skills Academy is about.", bodyFr: "Réservez une séance d'essai et découvrez Football Skills Academy.", bodyAr: "احجز حصة تجريبية واكتشف أكاديمية Football Skills Academy.",
+                  ctaLabel: "Book Now", ctaLabelFr: "Réserver", ctaLabelAr: "احجز", ctaUrl: "/apply", style: "navy",
                 }),
               },
             ],
@@ -611,15 +626,15 @@ async function main() {
           slug: "football-school",
           name: "Football School", nameFr: "École de Football",
           shortDescription: "All abilities welcome. Weekly technical training for players aged 6-16.",
-          shortDescriptionFr: "Tous niveaux bienvenus. Entraînement technique hebdomadaire pour les 6-16 ans.",
+          shortDescriptionFr: "Tous niveaux bienvenus. Entraînement technique hebdomadaire pour les 6-16 ans.", shortDescriptionAr: "جميع المستويات مرحَّب بها. تدريب تقني أسبوعي للفئة 6–16 سنة.",
           fullDescription: "Football School is our year-round weekly programme for boys and girls aged 6-16. Players train and develop at a world-class facility, focusing on technical development, decision-making, confidence and creativity — delivered by our qualified coaches following a single academy-wide methodology. Fun, skills and a long-term love of the game start here.",
-          fullDescriptionFr: "L'École de Football est notre programme hebdomadaire pour les garçons et filles de 6 à 16 ans, axé sur le développement technique, la prise de décision, la confiance et la créativité.",
+          fullDescriptionFr: "L'École de Football est notre programme hebdomadaire pour les garçons et filles de 6 à 16 ans, axé sur le développement technique, la prise de décision, la confiance et la créativité.", fullDescriptionAr: "مدرسة كرة القدم هي برنامجنا الأسبوعي للفتيان والفتيات من 6 إلى 16 سنة، ويركّز على التطوير التقني واتخاذ القرار والثقة بالنفس والإبداع.",
           heroImageUrl: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=1600&q=80",
           cardImageUrl: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=800&q=80",
           categoryId: programmeCategories["weekly-programmes"].id,
-          ageRangeLabel: "Ages 6-16", ageRangeLabelFr: "6 à 16 ans",
+          ageRangeLabel: "Ages 6-16", ageRangeLabelFr: "6 à 16 ans", ageRangeLabelAr: "من 6 إلى 16 سنة",
           minAge: 6, maxAge: 16,
-          priceLabel: "From 4,000 DA / month", priceLabelFr: "À partir de 4 000 DA / mois", priceFrom: 4000,
+          priceLabel: "From 4,000 DA / month", priceLabelFr: "À partir de 4 000 DA / mois", priceLabelAr: "ابتداءً من 4 000 دج / شهرياً", priceFrom: 4000,
           promoBannerText: "Football School Summer", promoBannerTextFr: "École de Football — Été",
           isFeatured: true, isPubliclyListed: true, displayOrder: 0,
           metaTitle: "Football School | Football Skills Academy",
@@ -649,9 +664,9 @@ async function main() {
 
       await db.faq.createMany({
         data: [
-          { question: "Who are the courses aimed at?", answer: "<p>Football School is open to all boys and girls aged 6-16, of all abilities.</p>", programmeId: programme.id, category: "football-school", order: 0 },
-          { question: "How much is the course?", answer: "<p>Pricing starts from 4,000 DA per month depending on age group — see the schedule above for full pricing.</p>", programmeId: programme.id, category: "football-school", order: 1 },
-          { question: "What should my child bring?", answer: "<p>Please bring boots, shin pads, a water bottle and both light and dark training tops.</p>", programmeId: programme.id, category: "football-school", order: 2 },
+          { question: "Who are the courses aimed at?", questionFr: "À qui s'adressent les séances ?", questionAr: "لمن تُوجَّه هذه الحصص؟", answer: "<p>Football School is open to all boys and girls aged 6-16, of all abilities.</p>", answerFr: "<p>L'École de Football est ouverte à tous les garçons et filles de 6 à 16 ans, quel que soit leur niveau.</p>", answerAr: "<p>مدرسة كرة القدم مفتوحة لجميع الفتيان والفتيات من 6 إلى 16 سنة، أياً كان مستواهم.</p>", programmeId: programme.id, category: "football-school", order: 0 },
+          { question: "How much is the course?", questionFr: "Quel est le tarif ?", questionAr: "ما هو السعر؟", answer: "<p>Pricing starts from 4,000 DA per month depending on age group — see the schedule above for full pricing.</p>", answerFr: "<p>Les tarifs débutent à 4 000 DA par mois selon la catégorie d'âge — voir le planning ci-dessus pour le détail.</p>", answerAr: "<p>تبدأ الأسعار من 4 000 دج شهرياً حسب الفئة العمرية — انظر الجدول أعلاه للتفاصيل.</p>", programmeId: programme.id, category: "football-school", order: 1 },
+          { question: "What should my child bring?", questionFr: "Que doit apporter mon enfant ?", questionAr: "ماذا يجب أن يُحضر طفلي؟", answer: "<p>Please bring boots, shin pads, a water bottle and both light and dark training tops.</p>", answerFr: "<p>Merci de prévoir des crampons, des protège-tibias, une bouteille d'eau et deux maillots d'entraînement, un clair et un foncé.</p>", answerAr: "<p>يُرجى إحضار حذاء كرة قدم وواقيات للساقين وقارورة ماء وقميصَي تدريب، أحدهما فاتح والآخر داكن.</p>", programmeId: programme.id, category: "football-school", order: 2 },
         ],
       });
     }
@@ -663,7 +678,7 @@ async function main() {
           slug: "holiday-football-camp",
           name: "Holiday Football Camp", nameFr: "Stage de Football",
           shortDescription: "A week of intensive training and match play during the school holidays.",
-          shortDescriptionFr: "Une semaine d'entraînement intensif et de matchs pendant les vacances scolaires.",
+          shortDescriptionFr: "Une semaine d'entraînement intensif et de matchs pendant les vacances scolaires.", shortDescriptionAr: "أسبوع من التدريب المكثّف والمباريات خلال العطلة المدرسية.",
           fullDescription: "Our Holiday Football Camp gives players a full week of training, small-sided games and tournaments during school holidays, led by our coaching team. A great way to keep progressing — or to try the academy for the first time.",
           heroImageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80",
           cardImageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80",
@@ -704,9 +719,9 @@ async function main() {
     if (generalFaqCount === 0) {
       await db.faq.createMany({
         data: [
-          { question: "What age groups do you coach?", answer: "<p>We coach players from age 6 through 16 across our Football School, Holiday Camps and Development Squads.</p>", category: "general", order: 0 },
-          { question: "Do you offer trial sessions?", answer: "<p>Yes — contact us or use the Book Now button on any programme page to arrange a trial session.</p>", category: "general", order: 1 },
-          { question: "What is your safeguarding policy?", answer: "<p>All coaches are vetted and DBS-checked, and every session follows our full safeguarding policy. Contact us for a copy.</p>", category: "general", order: 2 },
+          { question: "What age groups do you coach?", questionFr: "Quelles catégories d'âge encadrez-vous ?", questionAr: "ما الفئات العمرية التي تؤطّرونها؟", answer: "<p>We coach players from age 6 through 16 across our Football School, Holiday Camps and Development Squads.</p>", answerFr: "<p>Nous encadrons les joueurs de 6 à 16 ans, à travers l'École de Football, les stages de vacances et les équipes de développement.</p>", answerAr: "<p>نؤطّر اللاعبين من 6 إلى 16 سنة، عبر مدرسة كرة القدم وتربّصات العطل وفرق التطوير.</p>", category: "general", order: 0 },
+          { question: "Do you offer trial sessions?", questionFr: "Proposez-vous des séances d'essai ?", questionAr: "هل توفّرون حصصاً تجريبية؟", answer: "<p>Yes — contact us or use the Book Now button on any programme page to arrange a trial session.</p>", answerFr: "<p>Oui — contactez-nous ou utilisez le bouton « Réserver » sur n'importe quelle page de programme pour organiser une séance d'essai.</p>", answerAr: "<p>نعم — تواصل معنا أو استخدم زر «احجز الآن» في أي صفحة برنامج لترتيب حصة تجريبية.</p>", category: "general", order: 1 },
+          { question: "What is your safeguarding policy?", questionFr: "Quelle est votre politique de protection de l'enfance ?", questionAr: "ما هي سياستكم في حماية الأطفال؟", answer: "<p>All coaches are vetted and DBS-checked, and every session follows our full safeguarding policy. Contact us for a copy.</p>", answerFr: "<p>Tous nos entraîneurs font l'objet de vérifications, et chaque séance suit notre politique complète de protection de l'enfance. Contactez-nous pour en recevoir une copie.</p>", answerAr: "<p>يخضع جميع مدربينا للتدقيق، وتلتزم كل حصة بسياستنا الشاملة لحماية الأطفال. تواصل معنا للحصول على نسخة منها.</p>", category: "general", order: 2 },
         ],
       });
     }
@@ -716,8 +731,8 @@ async function main() {
     if (squadFaqCount === 0) {
       await db.faq.createMany({
         data: [
-          { question: "How are players selected for Development Squads?", answer: "<p>Players are assessed during their regular weekly sessions. Our coaching team identifies players ready for the next level and invites them to register.</p>", category: "squads", order: 0 },
-          { question: "Is there an additional cost for Development Squads?", answer: "<p>Yes — Development Squads have their own pricing, which will be confirmed once your registration is reviewed.</p>", category: "squads", order: 1 },
+          { question: "How are players selected for Development Squads?", questionFr: "Comment les joueurs sont-ils sélectionnés pour les équipes de développement ?", questionAr: "كيف يُختار اللاعبون لفرق التطوير؟", answer: "<p>Players are assessed during their regular weekly sessions. Our coaching team identifies players ready for the next level and invites them to register.</p>", answerFr: "<p>Les joueurs sont évalués pendant leurs séances hebdomadaires habituelles. Notre équipe d'encadrement identifie ceux qui sont prêts pour le niveau supérieur et les invite à s'inscrire.</p>", answerAr: "<p>يُقيَّم اللاعبون خلال حصصهم الأسبوعية المعتادة. ويحدّد طاقمنا التدريبي من هم جاهزون للمستوى الأعلى ويدعوهم إلى التسجيل.</p>", category: "squads", order: 0 },
+          { question: "Is there an additional cost for Development Squads?", questionFr: "Les équipes de développement ont-elles un coût supplémentaire ?", questionAr: "هل هناك تكلفة إضافية لفرق التطوير؟", answer: "<p>Yes — Development Squads have their own pricing, which will be confirmed once your registration is reviewed.</p>", answerFr: "<p>Oui — les équipes de développement ont leur propre tarification, qui vous sera confirmée après examen de votre inscription.</p>", answerAr: "<p>نعم — لفرق التطوير تسعيرة خاصة بها، تُؤكَّد لك بعد دراسة طلب تسجيلك.</p>", category: "squads", order: 1 },
         ],
       });
     }
@@ -729,45 +744,59 @@ async function main() {
       await db.landingPage.create({
         data: {
           slug: "who-we-are", title: "Who We Are", isPublished: true,
-          metaTitle: "Who We Are | Football Skills Academy",
-          metaDescription: "Football Skills Academy is built around long-term player development, qualified coaching and a safe, inclusive environment for every player.",
+          metaTitle: "Qui sommes-nous | Football Skills Academy",
+          metaDescription: "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.",
           sections: {
             create: [
               {
                 type: "hero", order: 0, isEnabled: true,
                 content: JSON.stringify({
                   heading: "Football Programmes\nBuilt Around Development",
+                  headingFr: "Des programmes de football\ncentrés sur le développement",
+                  headingAr: "برامج كروية\nمبنية على التطوير",
                   subheading: "We exist to help every player reach their potential — on the pitch and off it.",
+                  subheadingFr: "Nous existons pour aider chaque joueur à atteindre son potentiel, sur le terrain comme en dehors.",
+                  subheadingAr: "نحن هنا لمساعدة كل لاعب على بلوغ إمكاناته، داخل الملعب وخارجه.",
                   imageUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=1600&q=80",
-                  ctaLabel: "View Programmes", ctaUrl: "/programmes",
+                  ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes",
                 }),
               },
               {
                 type: "split-content", order: 1, isEnabled: true,
                 content: JSON.stringify({
                   imagePosition: "right",
-                  eyebrow: "Our story",
+                  eyebrow: "Our story", eyebrowFr: "Notre histoire", eyebrowAr: "قصتنا",
                   heading: "Founded on one simple idea",
+                  headingFr: "Née d'une idée simple",
+                  headingAr: "وُلدت من فكرة بسيطة",
                   body: "Football Skills Academy was founded to give every young player — regardless of starting ability — access to structured, high-quality coaching. We believe development takes time, and that the best results come from a clear, age-appropriate pathway rather than shortcuts.",
+                  bodyFr: "Football Skills Academy a été fondée pour donner à chaque jeune joueur, quel que soit son niveau de départ, accès à un encadrement structuré et de qualité. Nous croyons que la progression demande du temps, et que les meilleurs résultats viennent d'un parcours clair et adapté à l'âge, plutôt que de raccourcis.",
+                  bodyAr: "تأسست أكاديمية Football Skills Academy لتتيح لكل لاعب شاب، أياً كان مستواه في البداية، تأطيراً منظّماً وعالي الجودة. نؤمن بأن التطور يحتاج وقتاً، وأن أفضل النتائج تأتي من مسار واضح يناسب كل مرحلة عمرية، لا من الطرق المختصرة.",
                   imageUrl: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1200&q=80",
-                  ctaLabel: "Our Methodology", ctaUrl: "/methodology",
+                  ctaLabel: "Our Methodology", ctaLabelFr: "Notre méthodologie", ctaLabelAr: "منهجيتنا", ctaUrl: "/methodology",
                 }),
               },
               {
                 type: "feature-cards", order: 2, isEnabled: true,
                 content: JSON.stringify({
                   heading: "What makes us different",
+                  headingFr: "Ce qui nous distingue",
+                  headingAr: "ما الذي يميّزنا",
                   cards: [
-                    { icon: "TrendingUp", title: "Long-term development", body: "Every session is planned around a multi-year pathway, not just the next match." },
-                    { icon: "Shield", title: "Safeguarding first", body: "Fully vetted coaches and a comprehensive safeguarding policy at every venue." },
-                    { icon: "Users", title: "Inclusive environment", body: "All abilities are welcome — our job is to help every player improve from where they are." },
-                    { icon: "Award", title: "Coaching standards", body: "A single academy-wide coaching philosophy, consistently delivered across all venues." },
+                    { icon: "TrendingUp", title: "Long-term development", titleFr: "Développement sur la durée", titleAr: "تطوير على المدى الطويل", body: "Every session is planned around a multi-year pathway, not just the next match.", bodyFr: "Chaque séance s'inscrit dans un parcours pluriannuel, et pas seulement dans la préparation du prochain match.", bodyAr: "كل حصة تُخطَّط ضمن مسار يمتد لسنوات، لا استعداداً للمباراة المقبلة وحدها." },
+                    { icon: "Shield", title: "Safeguarding first", titleFr: "La protection avant tout", titleAr: "الحماية أولاً", body: "Fully vetted coaches and a comprehensive safeguarding policy at every venue.", bodyFr: "Des entraîneurs rigoureusement vérifiés et une politique de protection complète sur chaque site.", bodyAr: "مدربون خاضعون للتدقيق الكامل وسياسة حماية شاملة في كل موقع." },
+                    { icon: "Users", title: "Inclusive environment", titleFr: "Un environnement inclusif", titleAr: "بيئة شاملة", body: "All abilities are welcome — our job is to help every player improve from where they are.", bodyFr: "Tous les niveaux sont les bienvenus — notre rôle est d'aider chaque joueur à progresser depuis son point de départ.", bodyAr: "نرحّب بكل المستويات — مهمتنا أن نساعد كل لاعب على التقدّم انطلاقاً من حيث هو." },
+                    { icon: "Award", title: "Coaching standards", titleFr: "Des standards d'encadrement", titleAr: "معايير التأطير", body: "A single academy-wide coaching philosophy, consistently delivered across all venues.", bodyFr: "Une philosophie d'encadrement unique à l'académie, appliquée de la même façon sur tous les sites.", bodyAr: "فلسفة تدريب واحدة على مستوى الأكاديمية، تُطبَّق بالطريقة نفسها في جميع المواقع." },
                   ],
                 }),
               },
               {
                 type: "cta-banner", order: 3, isEnabled: true,
-                content: JSON.stringify({ heading: "Find your programme", body: "Explore our programmes and find the right fit for your player.", ctaLabel: "View Programmes", ctaUrl: "/programmes", style: "navy" }),
+                content: JSON.stringify({
+                  heading: "Find your programme", headingFr: "Trouvez votre programme", headingAr: "اعثر على برنامجك",
+                  body: "Explore our programmes and find the right fit for your player.", bodyFr: "Parcourez nos programmes et trouvez celui qui convient à votre joueur.", bodyAr: "تصفّح برامجنا واختر الأنسب للاعبك.",
+                  ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes", style: "navy",
+                }),
               },
             ],
           },
@@ -780,14 +809,17 @@ async function main() {
       await db.landingPage.create({
         data: {
           slug: "methodology", title: "Methodology", isPublished: true,
-          metaTitle: "Methodology | Football Skills Academy",
-          metaDescription: "Our coaching methodology develops technical, tactical, physical, psychological and social skills through age-appropriate, constraints-based sessions.",
+          metaTitle: "Méthodologie | Football Skills Academy",
+          metaDescription: "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.",
           sections: {
             create: [
               {
                 type: "hero", order: 0, isEnabled: true,
                 content: JSON.stringify({
-                  heading: "Our Methodology", subheading: "A single coaching philosophy, applied consistently across every age group and venue.",
+                  heading: "Our Methodology", headingFr: "Notre méthodologie", headingAr: "منهجيتنا",
+                  subheading: "A single coaching philosophy, applied consistently across every age group and venue.",
+                  subheadingFr: "Une philosophie d'encadrement unique, appliquée de la même façon à chaque catégorie d'âge et sur chaque site.",
+                  subheadingAr: "فلسفة تدريب واحدة، تُطبَّق بالطريقة نفسها في كل فئة عمرية وكل موقع.",
                   imageUrl: "https://images.unsplash.com/photo-1602674809991-8f1b40e0a2c4?w=1600&q=80",
                 }),
               },
@@ -795,25 +827,34 @@ async function main() {
                 type: "richtext", order: 1, isEnabled: true,
                 content: JSON.stringify({
                   heading: "Developing the whole player",
+                  headingFr: "Développer le joueur dans sa globalité",
+                  headingAr: "تطوير اللاعب في جميع جوانبه",
                   html: "<p>We coach five interconnected areas of player development: technical, tactical, physical, psychological and social. Sessions are designed around realistic game situations using constraints-based coaching — putting players in scenarios that force them to make decisions, rather than simply repeating drills.</p>",
+                  htmlFr: "<p>Nous travaillons cinq domaines interconnectés du développement du joueur : technique, tactique, physique, psychologique et social. Les séances sont construites autour de situations de jeu réalistes, selon une approche par contraintes — placer le joueur dans des scénarios qui l'obligent à décider, plutôt que répéter des exercices isolés.</p>",
+                  htmlAr: "<p>نعمل على خمسة مجالات مترابطة في تطوير اللاعب: التقني، والتكتيكي، والبدني، والنفسي، والاجتماعي. تُبنى الحصص حول وضعيات لعب واقعية وفق منهج قائم على القيود — أي وضع اللاعب في مواقف تفرض عليه اتخاذ القرار، بدل تكرار تمارين معزولة.</p>",
                 }),
               },
               {
                 type: "feature-cards", order: 2, isEnabled: true,
                 content: JSON.stringify({
                   heading: "The five pillars",
+                  headingFr: "Les cinq piliers",
+                  headingAr: "الركائز الخمس",
                   cards: [
-                    { icon: "Target", title: "Technical", body: "Ball mastery, passing, receiving and finishing built through repetition in game-realistic situations." },
-                    { icon: "Trophy", title: "Tactical", body: "Understanding roles, formations and decision-making appropriate to each age group." },
-                    { icon: "Zap", title: "Physical", body: "Age-appropriate athletic development including speed, agility and coordination." },
-                    { icon: "Star", title: "Psychological", body: "Confidence, resilience and the ability to make decisions under pressure." },
-                    { icon: "Users", title: "Social", body: "Teamwork, communication and what it means to support your teammates." },
+                    { icon: "Target", title: "Technical", titleFr: "Technique", titleAr: "التقني", body: "Ball mastery, passing, receiving and finishing built through repetition in game-realistic situations.", bodyFr: "Maîtrise du ballon, passe, contrôle et finition, travaillés par la répétition dans des situations proches du jeu.", bodyAr: "التحكم في الكرة والتمرير والاستقبال والإنهاء، تُبنى بالتكرار ضمن وضعيات قريبة من اللعب الحقيقي." },
+                    { icon: "Trophy", title: "Tactical", titleFr: "Tactique", titleAr: "التكتيكي", body: "Understanding roles, formations and decision-making appropriate to each age group.", bodyFr: "Compréhension des rôles, des systèmes de jeu et de la prise de décision adaptée à chaque catégorie d'âge.", bodyAr: "فهم الأدوار وأنظمة اللعب واتخاذ القرار بما يناسب كل فئة عمرية." },
+                    { icon: "Zap", title: "Physical", titleFr: "Physique", titleAr: "البدني", body: "Age-appropriate athletic development including speed, agility and coordination.", bodyFr: "Un développement athlétique adapté à l'âge : vitesse, agilité et coordination.", bodyAr: "تطوير بدني يناسب السن: السرعة والرشاقة والتناسق الحركي." },
+                    { icon: "Star", title: "Psychological", titleFr: "Psychologique", titleAr: "النفسي", body: "Confidence, resilience and the ability to make decisions under pressure.", bodyFr: "Confiance, résilience et capacité à décider sous pression.", bodyAr: "الثقة والقدرة على تجاوز الصعوبات واتخاذ القرار تحت الضغط." },
+                    { icon: "Users", title: "Social", titleFr: "Social", titleAr: "الاجتماعي", body: "Teamwork, communication and what it means to support your teammates.", bodyFr: "Travail d'équipe, communication et sens du soutien à ses coéquipiers.", bodyAr: "العمل الجماعي والتواصل ومعنى مساندة الزملاء." },
                   ],
                 }),
               },
               {
                 type: "cta-banner", order: 3, isEnabled: true,
-                content: JSON.stringify({ heading: "See our pathway in action", ctaLabel: "View Pathway", ctaUrl: "/pathway", style: "sky" }),
+                content: JSON.stringify({
+                  heading: "See our pathway in action", headingFr: "Découvrez notre parcours en pratique", headingAr: "شاهد مسارنا على أرض الواقع",
+                  ctaLabel: "View Pathway", ctaLabelFr: "Voir le parcours", ctaLabelAr: "عرض المسار", ctaUrl: "/pathway", style: "sky",
+                }),
               },
             ],
           },
@@ -826,26 +867,36 @@ async function main() {
       await db.landingPage.create({
         data: {
           slug: "pathway", title: "Pathway", isPublished: true,
-          metaTitle: "Player Pathway | Football Skills Academy",
-          metaDescription: "From Foundation to Development Squads — a clear, age-based pathway for every Football Skills Academy player.",
+          metaTitle: "Parcours du joueur | Football Skills Academy",
+          metaDescription: "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.",
           sections: {
             create: [
               {
                 type: "hero", order: 0, isEnabled: true,
                 content: JSON.stringify({
-                  heading: "The Player Pathway", subheading: "A clear route from a player's first session through to competitive Development Squad football.",
+                  heading: "The Player Pathway", headingFr: "Le parcours du joueur", headingAr: "مسار اللاعب",
+                  subheading: "A clear route from a player's first session through to competitive Development Squad football.",
+                  subheadingFr: "Un chemin clair, de la première séance jusqu'au football de compétition en équipe de développement.",
+                  subheadingAr: "طريق واضح، من الحصة الأولى إلى كرة القدم التنافسية ضمن فرق التطوير.",
                   imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80",
                 }),
               },
               {
                 type: "richtext", order: 1, isEnabled: true,
-                content: JSON.stringify({ html: "<p>Every player progresses through our pathway at their own pace, guided by ongoing assessment from our coaching team. Progression is based on ability and attitude, not just age.</p>" }),
+                content: JSON.stringify({
+                  html: "<p>Every player progresses through our pathway at their own pace, guided by ongoing assessment from our coaching team. Progression is based on ability and attitude, not just age.</p>",
+                  htmlFr: "<p>Chaque joueur avance dans le parcours à son rythme, accompagné par l'évaluation continue de notre équipe d'encadrement. La progression repose sur le niveau et l'état d'esprit, pas uniquement sur l'âge.</p>",
+                  htmlAr: "<p>يتقدّم كل لاعب في المسار وفق وتيرته الخاصة، بمتابعة وتقييم مستمرَّين من طاقمنا التدريبي. ويقوم التدرّج على المستوى والانضباط، لا على السن وحده.</p>",
+                }),
               },
               { type: "pathway-timeline", order: 2, isEnabled: true, content: JSON.stringify({ heading: "" }) },
-              { type: "faq-accordion", order: 3, isEnabled: true, content: JSON.stringify({ heading: "Frequently Asked Questions", category: "pathway" }) },
+              { type: "faq-accordion", order: 3, isEnabled: true, content: JSON.stringify({ heading: "Frequently Asked Questions", headingFr: "Questions fréquentes", headingAr: "الأسئلة الشائعة", category: "pathway" }) },
               {
                 type: "cta-banner", order: 4, isEnabled: true,
-                content: JSON.stringify({ heading: "Ready to start the journey?", ctaLabel: "View Programmes", ctaUrl: "/programmes", style: "navy" }),
+                content: JSON.stringify({
+                  heading: "Ready to start the journey?", headingFr: "Prêt à commencer l'aventure ?", headingAr: "هل أنت مستعد لبدء الرحلة؟",
+                  ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes", style: "navy",
+                }),
               },
             ],
           },
@@ -858,8 +909,8 @@ async function main() {
     if (pathwayFaqCount === 0) {
       await db.faq.createMany({
         data: [
-          { question: "How does my child move to the next stage?", answer: "<p>Our coaches continuously assess players during regular sessions and will discuss progression opportunities directly with parents.</p>", category: "pathway", order: 0 },
-          { question: "Can a player skip a stage?", answer: "<p>Progression is based on ability and readiness rather than age alone, so this is possible in some cases following assessment.</p>", category: "pathway", order: 1 },
+          { question: "How does my child move to the next stage?", questionFr: "Comment mon enfant passe-t-il à l'étape suivante ?", questionAr: "كيف ينتقل طفلي إلى المرحلة التالية؟", answer: "<p>Our coaches continuously assess players during regular sessions and will discuss progression opportunities directly with parents.</p>", answerFr: "<p>Nos entraîneurs évaluent les joueurs en continu pendant les séances et discutent directement des possibilités de progression avec les parents.</p>", answerAr: "<p>يقيّم مدربونا اللاعبين باستمرار خلال الحصص، ويناقشون فرص التدرّج مباشرة مع الأولياء.</p>", category: "pathway", order: 0 },
+          { question: "Can a player skip a stage?", questionFr: "Un joueur peut-il sauter une étape ?", questionAr: "هل يمكن للاعب أن يتخطّى مرحلة؟", answer: "<p>Progression is based on ability and readiness rather than age alone, so this is possible in some cases following assessment.</p>", answerFr: "<p>La progression repose sur le niveau et la maturité plutôt que sur l'âge seul : c'est donc possible dans certains cas, après évaluation.</p>", answerAr: "<p>يقوم التدرّج على المستوى والجاهزية لا على السن وحده، لذا فهذا ممكن في بعض الحالات بعد التقييم.</p>", category: "pathway", order: 1 },
         ],
       });
     }
@@ -881,7 +932,7 @@ async function main() {
       const navSeed = [
         { label: "Programmes", labelFr: "Programmes", labelAr: "البرامج", url: "/programmes", hasDropdown: false, position: 0 },
         { label: "Venues", labelFr: "Sites", labelAr: "المواقع", url: "/venues", hasDropdown: false, position: 1 },
-        { label: "Squads", labelFr: "Squads", labelAr: "الفرق", url: "/squads", hasDropdown: false, position: 2 },
+        { label: "Squads", labelFr: "Équipes", labelAr: "الفرق", url: "/squads", hasDropdown: false, position: 2 },
         {
           label: "Who We Are", labelFr: "Qui sommes-nous", labelAr: "من نحن", url: null, hasDropdown: true, position: 3,
           dropdownItems: [
@@ -910,13 +961,13 @@ async function main() {
           stationId: null,
           backgroundColor: "#001F49", textColor: "#FFFFFF", accentColor: "#43C7ED",
           tagline: "Train, compete and grow with Football Skills Academy.",
-          taglineFr: "Entraînez-vous, progressez et grandissez avec Football Skills Academy.",
+          taglineFr: "Entraînez-vous, progressez et grandissez avec Football Skills Academy.", taglineAr: "تدرّب وتقدّم وتطوّر مع أكاديمية Football Skills Academy.",
           copyrightText: `© ${new Date().getFullYear()} Football Skills Academy. All rights reserved.`,
         },
       });
       await db.footerLinkColumn.create({
         data: {
-          footerId: footer.id, title: "Explore", titleFr: "Découvrir", position: 0,
+          footerId: footer.id, title: "Explore", titleFr: "Découvrir", titleAr: "اكتشف", position: 0,
           links: { create: [
             { label: "Programmes", url: "/programmes", position: 0 },
             { label: "Venues", url: "/venues", position: 1 },
@@ -927,7 +978,7 @@ async function main() {
       });
       await db.footerLinkColumn.create({
         data: {
-          footerId: footer.id, title: "About", titleFr: "À propos", position: 1,
+          footerId: footer.id, title: "About", titleFr: "À propos", titleAr: "عن الأكاديمية", position: 1,
           links: { create: [
             { label: "Who We Are", url: "/who-we-are", position: 0 },
             { label: "Methodology", url: "/methodology", position: 1 },
@@ -942,7 +993,7 @@ async function main() {
       // academy — add the pages first, then the links, in Website → Footer.
       await db.footerBottomLink.createMany({
         data: [
-          { footerId: footer.id, label: "Safeguarding", labelFr: "Protection", url: "/contact#safeguarding", position: 0 },
+          { footerId: footer.id, label: "Safeguarding", labelFr: "Protection", labelAr: "حماية الأطفال", url: "/contact#safeguarding", position: 0 },
         ],
       });
       console.log("✅ Footer config created");
@@ -952,8 +1003,8 @@ async function main() {
     if (contactFaqCount === 0) {
       await db.faq.createMany({
         data: [
-          { question: "How quickly will I get a reply?", answer: "<p>We aim to respond to all enquiries within 1-2 working days.</p>", category: "contact", order: 0 },
-          { question: "I have a safeguarding concern — who do I contact?", answer: "<p>Please use the contact form or call us directly and mark your message as \"Safeguarding\" so it is treated as a priority.</p>", category: "contact", order: 1 },
+          { question: "How quickly will I get a reply?", questionFr: "Sous quel délai vais-je recevoir une réponse ?", questionAr: "في غضون كم من الوقت أتلقّى رداً؟", answer: "<p>We aim to respond to all enquiries within 1-2 working days.</p>", answerFr: "<p>Nous nous efforçons de répondre à toutes les demandes sous 1 à 2 jours ouvrés.</p>", answerAr: "<p>نحرص على الرد على جميع الاستفسارات في غضون يوم إلى يومَي عمل.</p>", category: "contact", order: 0 },
+          { question: "I have a safeguarding concern — who do I contact?", questionFr: "J'ai une préoccupation concernant la protection d'un enfant — qui dois-je contacter ?", questionAr: "لديّ مخاوف تتعلق بحماية طفل — بمن أتصل؟", answer: "<p>Please use the contact form or call us directly and mark your message as \"Safeguarding\" so it is treated as a priority.</p>", answerFr: "<p>Merci d'utiliser le formulaire de contact ou de nous appeler directement, en indiquant « Protection de l'enfance » dans votre message pour qu'il soit traité en priorité.</p>", answerAr: "<p>يُرجى استخدام نموذج الاتصال أو الاتصال بنا مباشرة، مع كتابة «حماية الأطفال» في رسالتك لتُعالَج على سبيل الأولوية.</p>", category: "contact", order: 1 },
         ],
       });
     }

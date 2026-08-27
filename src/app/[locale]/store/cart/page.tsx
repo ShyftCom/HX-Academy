@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { formatPrice } from "@/lib/public-format";
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 
 interface CartItem {
@@ -14,6 +15,8 @@ interface CartItem {
 export default function CartPage() {
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("store");
+  const tc = useTranslations("common");
+  const currency = tc("currency");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [shippingFee, setShippingFee] = useState(500);
   const [freeThreshold, setFreeThreshold] = useState(5000);
@@ -86,7 +89,7 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1">{item.name}</p>
                     {item.variantInfo && <p className="text-xs text-gray-500">{item.variantInfo}</p>}
-                    <p className="text-sm font-semibold mt-1">{(item.price * item.quantity).toLocaleString("fr-DZ")} DA</p>
+                    <p className="text-sm font-semibold mt-1">{formatPrice(item.price * item.quantity, locale, currency)}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => updateQty(idx, item.quantity - 1)} className="w-7 h-7 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -103,7 +106,7 @@ export default function CartPage() {
                 </div>
               ))}
               <Link href={`/${locale}/store`} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 pt-2">
-                ← {t("continueShopping")}
+                <span className="ob-flip-rtl" aria-hidden="true">←</span> {t("continueShopping")}
               </Link>
             </div>
 
@@ -113,18 +116,18 @@ export default function CartPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">{t("subtotal")}</span>
-                  <span>{subtotal.toLocaleString("fr-DZ")} DA</span>
+                  <span>{formatPrice(subtotal, locale, currency)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">{t("shippingFee")}</span>
-                  <span>{effectiveShipping === 0 ? <span className="text-green-600">{t("freeShipping")}</span> : `${effectiveShipping.toLocaleString("fr-DZ")} DA`}</span>
+                  <span>{effectiveShipping === 0 ? <span className="text-green-600">{t("freeShipping")}</span> : formatPrice(effectiveShipping, locale, currency)}</span>
                 </div>
                 {freeThreshold > 0 && effectiveShipping > 0 && (
-                  <p className="text-xs text-gray-400">Livraison gratuite à partir de {freeThreshold.toLocaleString("fr-DZ")} DA</p>
+                  <p className="text-xs text-gray-400">{t("freeShippingFrom", { amount: formatPrice(freeThreshold, locale, currency) })}</p>
                 )}
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2 flex justify-between font-semibold text-base">
                   <span>{t("total")}</span>
-                  <span>{total.toLocaleString("fr-DZ")} DA</span>
+                  <span>{formatPrice(total, locale, currency)}</span>
                 </div>
               </div>
               <Link href={`/${locale}/store/checkout`} className="mt-5 w-full flex items-center justify-center gap-2 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-semibold text-sm hover:bg-gray-700 transition-colors">

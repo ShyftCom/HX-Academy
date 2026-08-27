@@ -12,7 +12,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { id },
       data: {
         name: body.name,
+        nameFr: body.nameFr ?? null,
+        nameAr: body.nameAr ?? null,
         description: body.description ?? null,
+        descriptionFr: body.descriptionFr ?? null,
+        descriptionAr: body.descriptionAr ?? null,
         duration: body.duration ? parseInt(body.duration) : undefined,
         durationType: body.durationType,
         price: body.price ? parseFloat(body.price) : undefined,

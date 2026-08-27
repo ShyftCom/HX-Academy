@@ -26,7 +26,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       where: { id },
       data: {
         ...(body.title !== undefined && { title: body.title }),
+        ...(body.titleFr !== undefined && { titleFr: body.titleFr }),
+        ...(body.titleAr !== undefined && { titleAr: body.titleAr }),
         ...(body.description !== undefined && { description: body.description }),
+        ...(body.descriptionFr !== undefined && { descriptionFr: body.descriptionFr }),
+        ...(body.descriptionAr !== undefined && { descriptionAr: body.descriptionAr }),
         ...(body.isRequired !== undefined && { isRequired: body.isRequired }),
         ...(body.allowedTypes !== undefined && { allowedTypes: body.allowedTypes }),
         ...(body.maxSizeMb !== undefined && { maxSizeMb: body.maxSizeMb }),

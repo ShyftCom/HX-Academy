@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUp, Star, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { FsaButton } from "./buttons/FsaButton";
 import { localeHref } from "./localeHref";
 
@@ -13,7 +14,8 @@ interface BottomLink { id: string; label: string; labelFr: string | null; labelA
 interface FooterConfig {
   backgroundColor: string; textColor: string; accentColor: string;
   logoUrl: string | null; tagline: string | null; taglineFr: string | null; taglineAr: string | null;
-  copyrightText: string; showTrustpilot: boolean; trustpilotUrl: string | null;
+  copyrightText: string; copyrightTextFr: string | null; copyrightTextAr: string | null;
+  showTrustpilot: boolean; trustpilotUrl: string | null;
   linkColumns: FooterColumn[]; socialLinks: SocialLink[]; bottomLinks: BottomLink[];
 }
 
@@ -31,27 +33,34 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 function getLabel(item: { label: string; labelFr: string | null; labelAr: string | null }, locale: string): string {
   if (locale === "ar" && item.labelAr) return item.labelAr;
   if (locale === "fr" && item.labelFr) return item.labelFr;
+  if (locale === "ar" && item.labelFr) return item.labelFr;
   return item.label;
 }
 function getTitle(col: FooterColumn, locale: string): string {
   if (locale === "ar" && col.titleAr) return col.titleAr;
   if (locale === "fr" && col.titleFr) return col.titleFr;
+  if (locale === "ar" && col.titleFr) return col.titleFr;
   return col.title;
+}
+function getCopyright(config: FooterConfig, locale: string): string {
+  if (locale === "ar" && config.copyrightTextAr) return config.copyrightTextAr;
+  if (locale === "fr" && config.copyrightTextFr) return config.copyrightTextFr;
+  if (locale === "ar" && config.copyrightTextFr) return config.copyrightTextFr;
+  return config.copyrightText;
 }
 function getTagline(config: FooterConfig, locale: string): string | null {
   if (locale === "ar" && config.taglineAr) return config.taglineAr;
   if (locale === "fr" && config.taglineFr) return config.taglineFr;
+  if (locale === "ar" && config.taglineFr) return config.taglineFr;
   return config.tagline;
 }
 
-const COPY: Record<string, { newsletterTitle: string; newsletterBody: string; emailPlaceholder: string; subscribe: string; subscribed: string; backToTop: string }> = {
-  eng: { newsletterTitle: "Stay in the loop", newsletterBody: "Programme updates, trial dates and academy news — straight to your inbox.", emailPlaceholder: "Your email address", subscribe: "Subscribe", subscribed: "You're subscribed", backToTop: "Back to top" },
-  fr: { newsletterTitle: "Restez informé", newsletterBody: "Programmes, dates d'essais et actualités de l'académie, directement dans votre boîte mail.", emailPlaceholder: "Votre adresse e-mail", subscribe: "S'inscrire", subscribed: "Inscription confirmée", backToTop: "Haut de page" },
-  ar: { newsletterTitle: "ابقَ على اطلاع", newsletterBody: "تحديثات البرامج ومواعيد التجارب وأخبار الأكاديمية مباشرة إلى بريدك.", emailPlaceholder: "بريدك الإلكتروني", subscribe: "اشترك", subscribed: "تم الاشتراك", backToTop: "العودة إلى الأعلى" },
-};
+/* The private COPY table that used to live here (keyed "eng"/"fr"/"ar", falling
+   back to English) is gone. Footer strings are in messages/site/*.json under
+   the "footer" namespace like every other public string. */
 
-function NewsletterForm({ locale, textColor }: { locale: string; textColor: string }) {
-  const t = COPY[locale] ?? COPY.eng;
+function NewsletterForm({ textColor }: { textColor: string }) {
+  const t = useTranslations("footer");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -75,7 +84,7 @@ function NewsletterForm({ locale, textColor }: { locale: string; textColor: stri
   if (status === "done") {
     return (
       <div className="flex items-center gap-2 rounded-fsa-pill bg-white/10 px-4 py-3 text-sm font-medium" style={{ color: textColor }}>
-        <CheckCircle2 className="h-4 w-4 text-fsa-sky" /> {t.subscribed}
+        <CheckCircle2 className="h-4 w-4 text-fsa-sky" /> {t("subscribed")}
       </div>
     );
   }
@@ -89,17 +98,18 @@ function NewsletterForm({ locale, textColor }: { locale: string; textColor: stri
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder={t.emailPlaceholder}
+        placeholder={t("emailPlaceholder")}
         className="h-11 min-w-0 flex-1 rounded-fsa-pill border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:border-fsa-sky focus:outline-none"
       />
       <FsaButton type="submit" variant="sky" size="sm" icon={false} loading={status === "loading"} disabled={status === "loading"}>
-        {t.subscribe}
+        {t("subscribe")}
       </FsaButton>
     </form>
   );
 }
 
 export function WebsiteFooter({ locale, stationId }: { locale: string; stationId?: string }) {
+  const t = useTranslations();
   const [config, setConfig] = useState<FooterConfig | null>(null);
 
   useEffect(() => {
@@ -109,17 +119,15 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
 
   if (!config) return null;
 
-  const isRtl = locale === "ar";
   const bg = config.backgroundColor || "#001F49";
   const text = config.textColor || "#ffffff";
   const accent = config.accentColor || "#43C7ED";
   const columns = [...(config.linkColumns ?? [])].sort((a, b) => a.position - b.position);
   const socials = config.socialLinks?.filter((s) => s.url);
   const tagline = getTagline(config, locale);
-  const t = COPY[locale] ?? COPY.eng;
 
   return (
-    <footer style={{ backgroundColor: bg, color: text }} dir={isRtl ? "rtl" : "ltr"}>
+    <footer style={{ backgroundColor: bg, color: text }}>
       {/* Newsletter band */}
       <div className="border-b border-white/10">
         <div className="mx-auto flex flex-col items-start justify-between gap-6 px-[var(--fsa-container-pad)] py-10 lg:flex-row lg:items-center" style={{ maxWidth: "var(--fsa-container-max)" }}>
@@ -127,25 +135,25 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
             {/* text-current is required, not cosmetic: globals.css sets a colour
                 on h1-h6 directly, which beats the colour inherited from <footer>.
                 Without it this heading renders in the admin text colour. */}
-            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight text-current">{t.newsletterTitle}</h3>
-            <p className="mt-1 max-w-md text-sm" style={{ color: text, opacity: 0.75 }}>{t.newsletterBody}</p>
+            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight text-current">{t("footer.newsletterTitle")}</h3>
+            <p className="mt-1 max-w-md text-sm" style={{ color: text, opacity: 0.75 }}>{t("footer.newsletterBody")}</p>
           </div>
-          <NewsletterForm locale={locale} textColor={text} />
+          <NewsletterForm textColor={text} />
         </div>
       </div>
 
       <div className="mx-auto px-[var(--fsa-container-pad)] py-12" style={{ maxWidth: "var(--fsa-container-max)" }}>
         {/* Top: logo + tagline + socials */}
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div className={isRtl ? "md:order-last" : ""}>
+          <div>
             {config.logoUrl ? (
-              <img src={config.logoUrl} alt="Football Skills Academy" className="mb-3 h-10 object-contain" />
+              <img src={config.logoUrl} alt={t("a11y.logoAlt")} className="mb-3 h-10 object-contain" />
             ) : (
               <div className="mb-3 font-fsa-display text-xl font-extrabold uppercase tracking-tight" style={{ color: accent }}>
-                Football Skills Academy
+                {t("common.brand")}
               </div>
             )}
-            {tagline && <p style={{ color: text, opacity: 0.7 }} className="max-w-xs text-sm">{tagline}</p>}
+            {tagline && <p style={{ color: text, opacity: 0.7 }} className="max-w-xs text-sm" dir="auto">{tagline}</p>}
             {config.showTrustpilot && config.trustpilotUrl && (
               <a
                 href={config.trustpilotUrl}
@@ -154,7 +162,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
                 className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/20"
                 style={{ color: text }}
               >
-                <Star className="h-4 w-4 fill-current text-fsa-sky" /> Rated on Trustpilot
+                <Star className="h-4 w-4 fill-current text-fsa-sky" /> {t("footer.ratedOnTrustpilot")}
               </a>
             )}
           </div>
@@ -181,7 +189,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
         {/* Link columns */}
         {columns.length > 0 && (
           <div className="mb-10 grid gap-8" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))` }}>
-            {(isRtl ? [...columns].reverse() : columns).map((col) => (
+            {columns.map((col) => (
               <div key={col.id}>
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: accent }}>
                   {getTitle(col, locale)}
@@ -208,7 +216,7 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
 
         {/* Bottom bar */}
         <div className="flex flex-col gap-4 border-t pt-6 md:flex-row md:items-center md:justify-between" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-          <div className={`flex flex-wrap gap-4 ${isRtl ? "flex-row-reverse" : ""}`}>
+          <div className="flex flex-wrap gap-4">
             {config.bottomLinks?.map((l) => (
               <Link key={l.id} href={localeHref(l.url, locale)} style={{ color: text, opacity: 0.6 }} className="text-xs transition-opacity hover:opacity-100">
                 {getLabel(l, locale)}
@@ -216,13 +224,13 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
             ))}
           </div>
           <div className="flex items-center gap-4">
-            <p style={{ color: text, opacity: 0.5 }} className="text-xs">{config.copyrightText}</p>
+            <p style={{ color: text, opacity: 0.5 }} className="text-xs" dir="auto">{getCopyright(config, locale)}</p>
             <a
               href="#top"
               style={{ color: text, opacity: 0.6 }}
               className="inline-flex items-center gap-1 text-xs font-medium transition-opacity hover:opacity-100"
             >
-              <ArrowUp className="h-3.5 w-3.5" /> {t.backToTop}
+              <ArrowUp className="h-3.5 w-3.5" /> {t("footer.backToTop")}
             </a>
           </div>
         </div>

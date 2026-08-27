@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export interface BreadcrumbItem {
   label: string;
@@ -12,8 +13,9 @@ export interface BreadcrumbItem {
  * them from dynamic route segments, while still giving every page a single
  * consistent renderer + BreadcrumbList JSON-LD emitter.
  */
-export function Breadcrumb({ items, homeLabel = "Home", locale }: { items: BreadcrumbItem[]; homeLabel?: string; locale: string }) {
-  const trail: BreadcrumbItem[] = [{ label: homeLabel, href: `/${locale}` }, ...items];
+export async function Breadcrumb({ items, homeLabel, locale }: { items: BreadcrumbItem[]; homeLabel?: string; locale: string }) {
+  const t = await getTranslations({ locale });
+  const trail: BreadcrumbItem[] = [{ label: homeLabel ?? t("nav.home"), href: `/${locale}` }, ...items];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -27,7 +29,7 @@ export function Breadcrumb({ items, homeLabel = "Home", locale }: { items: Bread
   };
 
   return (
-    <nav aria-label="Breadcrumb" className="border-b border-fsa-border bg-white">
+    <nav aria-label={t("a11y.breadcrumb")} className="border-b border-fsa-border bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div
         className="mx-auto flex items-center gap-1.5 overflow-x-auto whitespace-nowrap px-[var(--fsa-container-pad)] py-3 text-sm"
@@ -37,7 +39,7 @@ export function Breadcrumb({ items, homeLabel = "Home", locale }: { items: Bread
           const isLast = i === trail.length - 1;
           return (
             <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-fsa-text-muted" aria-hidden="true" />}
+              {i > 0 && <ChevronRight className="ob-flip-rtl h-3.5 w-3.5 shrink-0 text-fsa-text-muted" aria-hidden="true" />}
               {isLast || !item.href ? (
                 <span className="font-medium text-fsa-navy-900" aria-current="page">
                   {item.label}

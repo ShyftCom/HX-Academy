@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { Sun, Check, ArrowRight, ChevronDown, X, Upload, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { formatPrice, formatDateShort } from "@/lib/public-format";
 
 interface SCPlan {
   id: string; name: string; programTrack: string | null; price: number; description: string | null;
@@ -12,11 +14,16 @@ interface SCPlan {
 interface Session { id: string; name: string; startDate: string; endDate: string; price?: number }
 interface FileReq { id: string; title: string; description?: string; isRequired: boolean; allowedTypes: string; maxSizeMb: number }
 
-const STEPS = ["Choose Plan", "Information", "Documents", "Review"];
+/** Step ids; the visible labels come from summerCamp.form.steps.<id>. */
+const STEPS = ["plan", "info", "documents", "review"] as const;
 
 export default function SummerCampLandingPage() {
   const { locale } = useParams<{ locale: string }>();
-  const isRtl = locale === "ar";
+  const t = useTranslations("summerCamp");
+  const tf = useTranslations("summerCamp.form");
+  const tc = useTranslations("common");
+  const tErr = useTranslations("errors");
+  const currency = tc("currency");
 
   const [data, setData] = useState<{ sessions: Session[]; plans: SCPlan[]; requirements: FileReq[]; settings: Record<string, string> } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,21 +60,21 @@ export default function SummerCampLandingPage() {
       const res = await fetch("/api/public/upload", { method: "POST", body: fd });
       const d = await res.json();
       if (res.ok) setUploadedFiles((p) => ({ ...p, [reqId]: { fileName: file.name, fileUrl: d.url, mimeType: file.type, size: file.size } }));
-      else toast.error(d.error ?? "Upload failed");
-    } catch { toast.error("Upload failed"); }
+      else toast.error(tErr("uploadFailed"));
+    } catch { toast.error(tErr("uploadFailed")); }
     setUploading((p) => ({ ...p, [reqId]: false }));
   }
 
   function validateStep(): boolean {
-    if (step === 0 && !selectedPlan) { toast.error("Please select a plan"); return false; }
+    if (step === 0 && !selectedPlan) { toast.error(tErr("planRequired")); return false; }
     if (step === 1) {
-      if (!form.fullName.trim()) { toast.error("Participant name is required"); return false; }
-      if (!form.guardianName.trim()) { toast.error("Guardian name is required"); return false; }
-      if (!form.guardianPhone.trim()) { toast.error("Guardian phone is required"); return false; }
+      if (!form.fullName.trim()) { toast.error(tErr("participantNameRequired")); return false; }
+      if (!form.guardianName.trim()) { toast.error(tErr("guardianNameRequired")); return false; }
+      if (!form.guardianPhone.trim()) { toast.error(tErr("guardianPhoneRequired")); return false; }
     }
     if (step === 2) {
       const missing = (data?.requirements ?? []).filter((r) => r.isRequired && !uploadedFiles[r.id]);
-      if (missing.length > 0) { toast.error(`Please upload: ${missing.map((r) => r.title).join(", ")}`); return false; }
+      if (missing.length > 0) { toast.error(tErr("documentsRequired", { items: missing.map((r) => r.title).join(", ") })); return false; }
     }
     return true;
   }
@@ -83,37 +90,42 @@ export default function SummerCampLandingPage() {
       });
       const d = await res.json();
       if (!res.ok) {
-        if (d.error === "duplicate") toast.error("An application already exists with this phone number.");
-        else toast.error(d.message ?? "Submission failed");
+        // The API's `message` is English prose; key off the machine-readable
+        // `error` code instead so the toast is in the visitor's language.
+        if (d.error === "duplicate") toast.error(tErr("duplicateApplication"));
+        else toast.error(tErr("submissionFailed"));
         return;
       }
       setSubmitted(true);
-    } catch { toast.error("Submission failed"); }
+    } catch { toast.error(tErr("submissionFailed")); }
     setSubmitting(false);
   }
 
   const s = data?.settings ?? {};
-  const pageTitle = s.sc_page_title || "Summer Camp";
+  // sc_page_* are single-column Settings rows with no per-locale variant (see
+  // the audit note). An admin-authored value is shown as-is in both locales;
+  // the fallback is translated rather than an English literal.
+  const pageTitle = s.sc_page_title || t("heroTitle");
   const heroImage = s.sc_page_hero_image || null;
-  const description = s.sc_page_description || "Join our summer camp program and develop your football skills in a fun, safe environment.";
-  const ctaLabel = s.sc_page_cta_label || "Register Now";
+  const description = s.sc_page_description || t("heroDescription");
+  const ctaLabel = s.sc_page_cta_label || t("heroCta");
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* HERO */}
       <section className="relative flex items-center justify-center min-h-[60vh] overflow-hidden"
         style={{ background: heroImage ? `linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.6)), url(${heroImage}) center/cover` : "linear-gradient(135deg,#f97316,#ea580c,#c2410c)" }}>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-20">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-4 py-1.5 text-sm font-medium text-white mb-6">
-            <Sun className="w-4 h-4" /> Summer Camp 2026
+            <Sun className="w-4 h-4" /> {t("badge")}
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">{pageTitle}</h1>
-          <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">{description}</p>
+          <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto" dir="auto">{description}</p>
           <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-8 py-4 rounded-xl text-lg hover:bg-orange-50 transition-colors shadow-xl"
           >
-            {ctaLabel} <ArrowRight className="w-5 h-5" />
+            {ctaLabel} <ArrowRight className="ob-flip-rtl w-5 h-5" />
           </button>
         </div>
       </section>
@@ -123,8 +135,8 @@ export default function SummerCampLandingPage() {
         <section className="py-16 bg-gray-50 dark:bg-gray-900">
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Camp Programs</h2>
-              <p className="text-gray-500 dark:text-gray-400">Choose the program that fits your child best</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t("plansHeading")}</h2>
+              <p className="text-gray-500 dark:text-gray-400">{t("plansSubheading")}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(data?.plans ?? []).map((plan) => (
@@ -136,12 +148,12 @@ export default function SummerCampLandingPage() {
                   {plan.programTrack && <p className="text-sm text-orange-500 font-medium mb-2">{plan.programTrack}</p>}
                   {plan.description && <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{plan.description}</p>}
                   <div className="flex items-center justify-between mt-auto">
-                    <span className="text-2xl font-black text-orange-600">{Number(plan.price).toLocaleString()} <span className="text-sm font-normal">DA</span></span>
+                    <span className="text-2xl font-black text-orange-600">{formatPrice(Number(plan.price), locale, currency)}</span>
                     <button
                       onClick={() => { setSelectedPlan(plan); setShowForm(true); setStep(1); }}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
                     >
-                      Register
+                      {t("register")}
                     </button>
                   </div>
                 </div>
@@ -154,21 +166,17 @@ export default function SummerCampLandingPage() {
       {/* WHY US */}
       <section className="py-16 max-w-5xl mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Why Choose Our Camp?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t("whyHeading")}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: "Professional Coaches", desc: "UEFA-certified coaching staff dedicated to youth development" },
-            { title: "Fun & Safe Environment", desc: "Age-appropriate activities in a supervised, inclusive setting" },
-            { title: "Skill Development", desc: "Structured drills and game situations to improve every aspect of the game" },
-          ].map((item, i) => (
-            <div key={i} className="flex gap-3">
+          {(["coaches", "safe", "skills"] as const).map((key) => (
+            <div key={key} className="flex gap-3">
               <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Check className="w-4 h-4 text-orange-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{t(`why.${key}.title`)}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t(`why.${key}.body`)}</p>
               </div>
             </div>
           ))}
@@ -178,8 +186,8 @@ export default function SummerCampLandingPage() {
       {/* CTA Banner */}
       <section className="bg-orange-500 py-12">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">Ready to sign up?</h2>
-          <p className="text-orange-100 mb-6">Limited spots available — register your child today.</p>
+          <h2 className="text-2xl font-bold text-white mb-3">{t("ctaHeading")}</h2>
+          <p className="text-orange-100 mb-6">{t("ctaBody")}</p>
           <button onClick={() => setShowForm(true)} className="bg-white text-orange-600 font-bold px-8 py-3 rounded-xl hover:bg-orange-50 transition-colors">
             {ctaLabel}
           </button>
@@ -193,8 +201,8 @@ export default function SummerCampLandingPage() {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Summer Camp Registration</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Step {step + 1} of {STEPS.length}</p>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{tf("title")}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{tf("stepOf", { current: step + 1, total: STEPS.length })}</p>
               </div>
               <button onClick={() => setShowForm(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
@@ -202,13 +210,13 @@ export default function SummerCampLandingPage() {
             {/* Step tabs */}
             <div className="px-6 pt-4">
               <div className="flex gap-1">
-                {STEPS.map((s, i) => (
-                  <div key={i} className={`flex-1 h-1.5 rounded-full transition-all ${i <= step ? "bg-orange-500" : "bg-gray-100 dark:bg-gray-700"}`} />
+                {STEPS.map((id, i) => (
+                  <div key={id} className={`flex-1 h-1.5 rounded-full transition-all ${i <= step ? "bg-orange-500" : "bg-gray-100 dark:bg-gray-700"}`} />
                 ))}
               </div>
               <div className="flex justify-between mt-1">
-                {STEPS.map((s, i) => (
-                  <span key={i} className={`text-xs ${i === step ? "text-orange-600 font-medium" : "text-gray-400"}`}>{s}</span>
+                {STEPS.map((id, i) => (
+                  <span key={id} className={`text-xs ${i === step ? "text-orange-600 font-medium" : "text-gray-400"}`}>{tf(`steps.${id}`)}</span>
                 ))}
               </div>
             </div>
@@ -217,10 +225,10 @@ export default function SummerCampLandingPage() {
               {submitted ? (
                 <div className="text-center py-8">
                   <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Application Submitted!</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6">We have received your registration. Our team will contact you shortly to confirm enrollment.</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{tf("doneTitle")}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">{tf("doneBody")}</p>
                   <button onClick={() => { setShowForm(false); setSubmitted(false); setStep(0); setSelectedPlan(null); setForm({ fullName: "", dateOfBirth: "", age: "", gender: "", healthNotes: "", notes: "", guardianName: "", guardianPhone: "", guardianEmail: "", guardianRelation: "parent", sessionId: "" }); setUploadedFiles({}); }} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors">
-                    Done
+                    {tc("done")}
                   </button>
                 </div>
               ) : (
@@ -228,24 +236,24 @@ export default function SummerCampLandingPage() {
                   {/* Step 0: Plan */}
                   {step === 0 && (
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">Choose a Program</h3>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">{tf("choosePlan")}</h3>
                       {loading ? <div className="text-center py-8 text-gray-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
                         : (data?.plans ?? []).length === 0 ? (
-                          <p className="text-center py-8 text-gray-400">No programs available at the moment.</p>
+                          <p className="text-center py-8 text-gray-400">{tf("noPlans")}</p>
                         ) : (
                           <div className="grid gap-3">
                             {(data?.plans ?? []).map((plan) => (
                               <button key={plan.id} onClick={() => setSelectedPlan(plan)}
-                                className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedPlan?.id === plan.id ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20" : "border-gray-200 dark:border-gray-700 hover:border-orange-200"}`}>
+                                className={`w-full text-start p-4 rounded-xl border-2 transition-all ${selectedPlan?.id === plan.id ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20" : "border-gray-200 dark:border-gray-700 hover:border-orange-200"}`}>
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="font-semibold text-gray-900 dark:text-white">{plan.name}</p>
                                     {plan.programTrack && <p className="text-sm text-orange-500">{plan.programTrack}</p>}
                                     {plan.description && <p className="text-sm text-gray-500 mt-0.5">{plan.description}</p>}
                                   </div>
-                                  <div className="text-right">
-                                    <p className="text-lg font-bold text-orange-600">{Number(plan.price).toLocaleString()} DA</p>
-                                    {selectedPlan?.id === plan.id && <Check className="w-5 h-5 text-orange-500 ml-auto mt-1" />}
+                                  <div className="text-end">
+                                    <p className="text-lg font-bold text-orange-600">{formatPrice(Number(plan.price), locale, currency)}</p>
+                                    {selectedPlan?.id === plan.id && <Check className="w-5 h-5 text-orange-500 ms-auto mt-1" />}
                                   </div>
                                 </div>
                               </button>
@@ -259,57 +267,57 @@ export default function SummerCampLandingPage() {
                   {step === 1 && (
                     <div className="space-y-4">
                       <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-sm">
-                        <span className="text-orange-700 dark:text-orange-300 font-medium">Plan: {selectedPlan?.name}</span>
-                        {selectedPlan?.price != null && <span className="text-orange-600 ml-2">— {Number(selectedPlan.price).toLocaleString()} DA</span>}
+                        <span className="text-orange-700 dark:text-orange-300 font-medium">{tf("planLabel", { name: selectedPlan?.name ?? "" })}</span>
+                        {selectedPlan?.price != null && <span className="text-orange-600 ms-2">— {formatPrice(Number(selectedPlan.price), locale, currency)}</span>}
                       </div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">Participant Information</h3>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">{tf("participantInfo")}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
-                          <input className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.fullName} onChange={(e) => setField("fullName", e.target.value)} placeholder="Participant's full name" />
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("fullName")} *</label>
+                          <input className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.fullName} onChange={(e) => setField("fullName", e.target.value)} placeholder={tf("fullNamePlaceholder")} />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("dateOfBirth")}</label>
                           <input type="date" className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.dateOfBirth} onChange={(e) => setField("dateOfBirth", e.target.value)} />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age</label>
-                          <input type="number" min={4} max={18} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.age} onChange={(e) => setField("age", e.target.value)} placeholder="Age" />
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("age")}</label>
+                          <input type="number" min={4} max={18} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.age} onChange={(e) => setField("age", e.target.value)} placeholder={tf("agePlaceholder")} />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("gender")}</label>
                           <select className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.gender} onChange={(e) => setField("gender", e.target.value)}>
-                            <option value="">Select...</option>
-                            <option value="M">Male</option>
-                            <option value="F">Female</option>
+                            <option value="">{tc("selectPlaceholder")}</option>
+                            <option value="M">{tc("male")}</option>
+                            <option value="F">{tc("female")}</option>
                           </select>
                         </div>
                         {(data?.sessions ?? []).length > 0 && (
                           <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Session (optional)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("session")}</label>
                             <select className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.sessionId} onChange={(e) => setField("sessionId", e.target.value)}>
-                              <option value="">No preference</option>
-                              {(data?.sessions ?? []).map((s) => <option key={s.id} value={s.id}>{s.name} ({new Date(s.startDate).toLocaleDateString()} – {new Date(s.endDate).toLocaleDateString()})</option>)}
+                              <option value="">{tc("noPreference")}</option>
+                              {(data?.sessions ?? []).map((sess) => <option key={sess.id} value={sess.id}>{sess.name} ({formatDateShort(sess.startDate, locale)} – {formatDateShort(sess.endDate, locale)})</option>)}
                             </select>
                           </div>
                         )}
                         <div className="col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Health Notes</label>
-                          <textarea rows={2} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none" value={form.healthNotes} onChange={(e) => setField("healthNotes", e.target.value)} placeholder="Any medical conditions, allergies, or special needs..." />
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("healthNotes")}</label>
+                          <textarea rows={2} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none" value={form.healthNotes} onChange={(e) => setField("healthNotes", e.target.value)} placeholder={tf("healthNotesPlaceholder")} />
                         </div>
                       </div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mt-2">Guardian / Parent Information</h3>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mt-2">{tf("guardianInfo")}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Guardian Full Name *</label>
-                          <input className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.guardianName} onChange={(e) => setField("guardianName", e.target.value)} placeholder="Parent/guardian name" />
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("guardianName")} *</label>
+                          <input className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.guardianName} onChange={(e) => setField("guardianName", e.target.value)} placeholder={tf("guardianNamePlaceholder")} />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone *</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("guardianPhone")} *</label>
                           <input type="tel" className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.guardianPhone} onChange={(e) => setField("guardianPhone", e.target.value)} placeholder="+213..." />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("guardianEmail")}</label>
                           <input type="email" className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.guardianEmail} onChange={(e) => setField("guardianEmail", e.target.value)} placeholder="email@example.com" />
                         </div>
                       </div>
@@ -319,9 +327,9 @@ export default function SummerCampLandingPage() {
                   {/* Step 2: Documents */}
                   {step === 2 && (
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">Required Documents</h3>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">{tf("documentsHeading")}</h3>
                       {(data?.requirements ?? []).length === 0 ? (
-                        <p className="text-gray-400 text-sm text-center py-6">No documents required for this registration.</p>
+                        <p className="text-gray-400 text-sm text-center py-6">{tf("noDocuments")}</p>
                       ) : (
                         <div className="space-y-3">
                           {(data?.requirements ?? []).map((req) => {
@@ -331,7 +339,7 @@ export default function SummerCampLandingPage() {
                                 <div className="flex items-center justify-between mb-2">
                                   <div>
                                     <span className="font-medium text-sm text-gray-800 dark:text-gray-200">{req.title}</span>
-                                    {req.isRequired && <span className="ml-2 text-xs text-red-500 font-medium">Required</span>}
+                                    {req.isRequired && <span className="ms-2 text-xs text-red-500 font-medium">{tf("documentRequired")}</span>}
                                     {req.description && <p className="text-xs text-gray-500 mt-0.5">{req.description}</p>}
                                   </div>
                                   {uploaded && (
@@ -347,7 +355,7 @@ export default function SummerCampLandingPage() {
                                 ) : (
                                   <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-500 hover:text-orange-500 transition-colors">
                                     {uploading[req.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                    {uploading[req.id] ? "Uploading..." : "Click to upload"}
+                                    {uploading[req.id] ? tf("uploading") : tf("clickToUpload")}
                                     <input type="file" className="hidden" accept={req.allowedTypes} onChange={(e) => handleFileUpload(req.id, e)} />
                                   </label>
                                 )}
@@ -362,14 +370,14 @@ export default function SummerCampLandingPage() {
                   {/* Step 3: Review */}
                   {step === 3 && (
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">Review Your Application</h3>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">{tf("reviewHeading")}</h3>
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2 text-sm">
-                        <div className="flex justify-between"><span className="text-gray-500">Plan</span><span className="font-medium">{selectedPlan?.name} — {Number(selectedPlan?.price ?? 0).toLocaleString()} DA</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Participant</span><span className="font-medium">{form.fullName}</span></div>
-                        {form.age && <div className="flex justify-between"><span className="text-gray-500">Age</span><span className="font-medium">{form.age}</span></div>}
-                        <div className="flex justify-between"><span className="text-gray-500">Guardian</span><span className="font-medium">{form.guardianName}</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Phone</span><span className="font-medium">{form.guardianPhone}</span></div>
-                        <div className="flex justify-between"><span className="text-gray-500">Documents</span><span className="font-medium">{Object.keys(uploadedFiles).length} uploaded</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewPlan")}</span><span className="font-medium">{selectedPlan?.name} — {formatPrice(Number(selectedPlan?.price ?? 0), locale, currency)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewParticipant")}</span><span className="font-medium">{form.fullName}</span></div>
+                        {form.age && <div className="flex justify-between"><span className="text-gray-500">{tf("reviewAge")}</span><span className="font-medium">{form.age}</span></div>}
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewGuardian")}</span><span className="font-medium">{form.guardianName}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewPhone")}</span><span className="font-medium">{form.guardianPhone}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewDocuments")}</span><span className="font-medium">{tf("documentsUploaded", { count: Object.keys(uploadedFiles).length })}</span></div>
                       </div>
                     </div>
                   )}
@@ -377,15 +385,15 @@ export default function SummerCampLandingPage() {
                   {/* Navigation */}
                   <div className="flex justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
                     <button onClick={() => step === 0 ? setShowForm(false) : setStep((s) => s - 1)} className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      {step === 0 ? "Cancel" : "Back"}
+                      {step === 0 ? tc("cancel") : tc("back")}
                     </button>
                     {step < STEPS.length - 1 ? (
                       <button onClick={() => validateStep() && setStep((s) => s + 1)} className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors">
-                        Next <ArrowRight className="w-4 h-4 inline ml-1" />
+                        {tc("next")} <ArrowRight className="ob-flip-rtl w-4 h-4 inline ms-1" />
                       </button>
                     ) : (
                       <button onClick={handleSubmit} disabled={submitting} className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors disabled:opacity-60">
-                        {submitting ? <><Loader2 className="w-4 h-4 animate-spin inline mr-1" />Submitting...</> : "Submit Application"}
+                        {submitting ? <><Loader2 className="w-4 h-4 animate-spin inline me-1" />{tf("submitting")}</> : tf("submit")}
                       </button>
                     )}
                   </div>

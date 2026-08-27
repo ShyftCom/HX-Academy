@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,7 +24,7 @@ export default function FormBuilderPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editField, setEditField] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState({ label: "", fieldType: "text", placeholder: "", isRequired: false, options: [] as string[] });
+  const [form, setForm] = useState({ label: "", labelFr: "", labelAr: "", fieldType: "text", placeholder: "", placeholderFr: "", placeholderAr: "", isRequired: false, options: [] as string[] });
   const [newOption, setNewOption] = useState("");
 
   const { data: fields, isLoading } = useQuery({
@@ -38,7 +39,7 @@ export default function FormBuilderPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editField ? "Field updated" : "Field added"); qc.invalidateQueries({ queryKey: ["form-fields"] }); setModalOpen(false); setEditField(null); setForm({ label: "", fieldType: "text", placeholder: "", isRequired: false, options: [] }); },
+    onSuccess: () => { toast.success(editField ? "Field updated" : "Field added"); qc.invalidateQueries({ queryKey: ["form-fields"] }); setModalOpen(false); setEditField(null); setForm({ label: "", labelFr: "", labelAr: "", fieldType: "text", placeholder: "", placeholderFr: "", placeholderAr: "", isRequired: false, options: [] }); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
@@ -55,10 +56,10 @@ export default function FormBuilderPage() {
     onError: () => toast.error(t("form.reorder_failed")),
   });
 
-  const openAdd = () => { setEditField(null); setForm({ label: "", fieldType: "text", placeholder: "", isRequired: false, options: [] }); setModalOpen(true); };
+  const openAdd = () => { setEditField(null); setForm({ label: "", labelFr: "", labelAr: "", fieldType: "text", placeholder: "", placeholderFr: "", placeholderAr: "", isRequired: false, options: [] }); setModalOpen(true); };
   const openEdit = (f: any) => {
     setEditField(f);
-    setForm({ label: f.label, fieldType: f.fieldType, placeholder: f.placeholder ?? "", isRequired: f.isRequired, options: f.options ? JSON.parse(f.options) : [] });
+    setForm({ label: f.label, labelFr: f.labelFr ?? "", labelAr: f.labelAr ?? "", fieldType: f.fieldType, placeholder: f.placeholder ?? "", placeholderFr: f.placeholderFr ?? "", placeholderAr: f.placeholderAr ?? "", isRequired: f.isRequired, options: f.options ? JSON.parse(f.options) : [] });
     setModalOpen(true);
   };
 
@@ -140,7 +141,7 @@ export default function FormBuilderPage() {
         <DialogContent size="md">
           <DialogHeader><DialogTitle>{editField ? "Edit Field" : "Add Form Field"}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label={t("form.label")} value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder={t("form.label_ph")} />
+            <LocaleTextInput baseKey="label" label={t("form.label")} values={form} onChange={(next) => setForm(next as typeof form)} />
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.field_type")}</label>
               <Select value={form.fieldType} onValueChange={(v) => setForm({ ...form, fieldType: v, options: [] })}>
@@ -148,7 +149,7 @@ export default function FormBuilderPage() {
                 <SelectContent>{FIELD_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            {!needsOptions && <Input label={t("form.placeholder")} value={form.placeholder} onChange={(e) => setForm({ ...form, placeholder: e.target.value })} placeholder={t("form.placeholder_ph")} />}
+            {!needsOptions && <LocaleTextInput baseKey="placeholder" label={t("form.placeholder")} values={form} onChange={(next) => setForm(next as typeof form)} />}
             {needsOptions && (
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("form.options")}</label>

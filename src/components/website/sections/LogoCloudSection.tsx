@@ -12,7 +12,7 @@ export async function LogoCloudSection({ content, locale }: { content: Record<st
   return (
     <section className="border-t border-fsa-border bg-white py-10">
       <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
-        {heading && <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-fsa-text-muted">{heading}</p>}
+        {heading && <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-fsa-text-muted" dir="auto">{heading}</p>}
         <div className="flex flex-wrap items-center justify-center gap-10">
           {sponsors.map((s) =>
             s.websiteUrl ? (

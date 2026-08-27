@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useId, useCallback } from "react";
 import Link from "next/link";
 import { Menu, X, ShoppingCart, ChevronDown, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { localeHref } from "./localeHref";
 import { useHeaderOverlay } from "./HeaderOverlayContext";
@@ -22,13 +23,26 @@ interface Venue { id: string; slug: string | null; name: string; wilaya: string 
 function getLabel(item: { label: string; labelFr?: string | null; labelAr?: string | null }, locale: string): string {
   if (locale === "ar" && item.labelAr) return item.labelAr;
   if (locale === "fr" && item.labelFr) return item.labelFr;
+  // Arabic falls back to French rather than to the English base column.
+  if (locale === "ar" && item.labelFr) return item.labelFr;
   return item.label;
 }
 
-function getCtaLabel(config: HeaderConfig, locale: string): string {
+/** Same resolution for the dropdown blurb. This used to render `d.description`
+ *  raw, ignoring descriptionFr/descriptionAr entirely — a guaranteed English
+ *  leak in the nav for every locale. */
+function getDescription(item: { description: string | null; descriptionFr: string | null; descriptionAr: string | null }, locale: string): string | null {
+  if (locale === "ar" && item.descriptionAr) return item.descriptionAr;
+  if (locale === "fr" && item.descriptionFr) return item.descriptionFr;
+  if (locale === "ar" && item.descriptionFr) return item.descriptionFr;
+  return item.description;
+}
+
+function getCtaLabel(config: HeaderConfig, locale: string, fallback: string): string {
   if (locale === "ar" && config.ctaLabelAr) return config.ctaLabelAr;
   if (locale === "fr" && config.ctaLabelFr) return config.ctaLabelFr;
-  return config.ctaLabel ?? "Book Now";
+  if (locale === "ar" && config.ctaLabelFr) return config.ctaLabelFr;
+  return config.ctaLabel ?? fallback;
 }
 
 function useCartCount() {
@@ -55,7 +69,6 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
   const wrapRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelId = useId();
-  const isRtl = locale === "ar";
 
   useEffect(() => {
     if (!open) return;
@@ -100,7 +113,7 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
           aria-label={getLabel(item, locale)}
           onMouseEnter={cancelClose}
           onMouseLeave={delayedClose}
-          className={`absolute top-full ${isRtl ? "right-0" : "left-0"} z-50 mt-2 min-w-[240px] overflow-hidden rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]`}
+          className="absolute top-full start-0 z-50 mt-2 min-w-[240px] overflow-hidden rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]"
         >
           {items.map((d) => (
             <Link
@@ -110,7 +123,7 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
               className="block px-5 py-3 text-[15px] font-semibold text-fsa-navy-900 transition-colors hover:bg-fsa-pale-bg focus-visible:bg-fsa-pale-bg focus-visible:outline-none"
             >
               {getLabel(d, locale)}
-              {d.description && <span className="mt-0.5 block text-xs font-normal text-fsa-text-muted">{d.description}</span>}
+              {getDescription(d, locale) && <span className="mt-0.5 block text-xs font-normal text-fsa-text-muted">{getDescription(d, locale)}</span>}
             </Link>
           ))}
         </div>
@@ -120,6 +133,7 @@ function NavDropdown({ item, locale, dark }: { item: NavItem; locale: string; da
 }
 
 function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
+  const t = useTranslations("nav");
   const [venues, setVenues] = useState<Venue[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -148,11 +162,11 @@ function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
         className={`flex items-center gap-1.5 rounded-fsa-pill border px-4 py-1.5 text-sm font-semibold transition-colors ${dark ? "border-white/40 text-white hover:bg-white/10" : "border-fsa-navy-900/20 text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
       >
         <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-        {venues.length === 1 ? venues[0].name : "Locations"}
+        {venues.length === 1 ? venues[0].name : t("locations")}
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 max-h-80 min-w-[220px] overflow-auto rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]">
+        <div className="absolute start-0 top-full z-50 mt-2 max-h-80 min-w-[220px] overflow-auto rounded-2xl border border-fsa-border bg-white py-2 shadow-[0_20px_50px_rgba(7,30,65,0.18)]">
           {venues.map((v) => (
             <Link
               key={v.id}
@@ -171,11 +185,11 @@ function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
 }
 
 function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale: string; onClose: () => void }) {
+  const t = useTranslations();
   const panelRef = useRef<HTMLDivElement>(null);
   const [openSub, setOpenSub] = useState<string | null>(null);
-  const isRtl = locale === "ar";
   const navItems = [...(config.navItems ?? [])].sort((a, b) => a.position - b.position).filter((i) => i.isActive);
-  const ctaLabel = getCtaLabel(config, locale);
+  const ctaLabel = getCtaLabel(config, locale, t("nav.bookNow"));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -201,16 +215,15 @@ function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale:
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Site navigation">
+    <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label={t("a11y.siteNavigation")}>
       <div className="absolute inset-0 bg-fsa-navy-900/60 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={panelRef}
-        dir={isRtl ? "rtl" : "ltr"}
-        className={`absolute top-0 ${isRtl ? "left-0" : "right-0"} flex h-full w-[86%] max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ease-[var(--ease-fsa-standard)]`}
+        className="absolute top-0 end-0 flex h-full w-[86%] max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ease-[var(--ease-fsa-standard)]"
       >
         <div className="flex items-center justify-between border-b border-fsa-border px-5 py-4">
-          <span className="font-fsa-display text-lg font-bold uppercase text-fsa-navy-900">Menu</span>
-          <button type="button" onClick={onClose} aria-label="Close menu" className="flex h-9 w-9 items-center justify-center rounded-lg text-fsa-navy-900 hover:bg-fsa-pale-bg">
+          <span className="font-fsa-display text-lg font-bold uppercase text-fsa-navy-900">{t("nav.menu")}</span>
+          <button type="button" onClick={onClose} aria-label={t("a11y.closeMenu")} className="flex h-9 w-9 items-center justify-center rounded-lg text-fsa-navy-900 hover:bg-fsa-pale-bg">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -259,6 +272,7 @@ function MobileMenu({ config, locale, onClose }: { config: HeaderConfig; locale:
 }
 
 export function WebsiteHeader({ locale, stationId }: { locale: string; stationId?: string }) {
+  const t = useTranslations();
   const [config, setConfig] = useState<HeaderConfig | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -281,10 +295,9 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
 
   if (!config) return null;
 
-  const isRtl = locale === "ar";
   const transparentPhase = overlay && !scrolled;
   const navItems = [...(config.navItems ?? [])].sort((a, b) => a.position - b.position).filter((i) => i.isActive);
-  const ctaLabel = getCtaLabel(config, locale);
+  const ctaLabel = getCtaLabel(config, locale, t("nav.bookNow"));
 
   const bg = transparentPhase ? "transparent" : config.backgroundColor || "#ffffff";
   const dark = transparentPhase; // "dark" = header sits on a dark hero, so header text/icons are white
@@ -292,30 +305,29 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
   return (
     <>
       <header
-        className="left-0 right-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300"
+        className="inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300"
         style={{
           position: overlay ? "fixed" : config.sticky ? "sticky" : "static",
           backgroundColor: bg,
           borderBottom: !transparentPhase ? "1px solid var(--color-fsa-border)" : "1px solid transparent",
           boxShadow: scrolled && !transparentPhase ? "var(--shadow-fsa-header)" : "none",
         }}
-        dir={isRtl ? "rtl" : "ltr"}
       >
         <div className="mx-auto flex h-20 items-center justify-between gap-4 px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
           {/* Logo */}
           <Link href={`/${locale}`} className="shrink-0">
             {config.logoUrl ? (
-              <img src={config.logoUrl} alt="Football Skills Academy" className="h-10 object-contain" />
+              <img src={config.logoUrl} alt={t("a11y.logoAlt")} className="h-10 object-contain" />
             ) : (
               <span className={`font-fsa-display text-xl font-extrabold uppercase tracking-tight ${dark ? "text-white" : "text-fsa-navy-900"}`}>
-                Football Skills Academy
+                {t("common.brand")}
               </span>
             )}
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden items-center gap-1 lg:flex">
-            {(isRtl ? [...navItems].reverse() : navItems).map((item) =>
+            {navItems.map((item) =>
               item.hasDropdown ? (
                 <NavDropdown key={item.id} item={item} locale={locale} dark={dark} />
               ) : (
@@ -338,11 +350,11 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
             <Link
               href={`/${locale}/store/cart`}
               className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
-              aria-label="Cart"
+              aria-label={t("a11y.cart")}
             >
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-fsa-error text-[10px] font-bold text-white">
+                <span className="absolute -end-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-fsa-error text-[10px] font-bold text-white">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
@@ -358,7 +370,7 @@ export function WebsiteHeader({ locale, stationId }: { locale: string; stationId
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-expanded={mobileOpen}
-              aria-label="Open menu"
+              aria-label={t("a11y.openMenu")}
               className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors lg:hidden ${dark ? "text-white hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
             >
               <Menu className="h-5 w-5" />

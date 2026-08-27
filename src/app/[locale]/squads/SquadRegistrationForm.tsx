@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FsaButton } from "@/components/website/buttons/FsaButton";
@@ -18,8 +19,7 @@ const EMPTY = {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-fsa-navy-900">
-        {label} {required && <span className="text-fsa-error">*</span>}
+      <span className="mb-1.5 block text-sm font-medium text-fsa-navy-900" dir="auto">{label} {required && <span className="text-fsa-error">*</span>}
       </span>
       {children}
     </label>
@@ -27,6 +27,9 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
+  const t = useTranslations("squads.form");
+  const tc = useTranslations("common");
+  const tErr = useTranslations("errors");
   const [form, setForm] = useState(EMPTY);
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -34,7 +37,7 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.privacyConsent) { setErrorMsg("Please accept the privacy policy to continue."); return; }
+    if (!form.privacyConsent) { setErrorMsg(tErr("privacyRequired")); return; }
     setStatus("loading");
     setErrorMsg("");
     try {
@@ -43,16 +46,17 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
       if (!res.ok) {
+        // The API replies in English prose; map the status to a translated
+        // string instead of showing the raw `message` to the visitor.
         setStatus("error");
-        setErrorMsg(data.message || "Something went wrong. Please try again.");
+        setErrorMsg(res.status === 429 ? tErr("tooManyRequests") : tErr("generic"));
         return;
       }
       setStatus("done");
     } catch {
       setStatus("error");
-      setErrorMsg("Something went wrong. Please try again.");
+      setErrorMsg(tErr("generic"));
     }
   }
 
@@ -60,8 +64,8 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
     return (
       <div className="flex flex-col items-center rounded-fsa-md border border-fsa-border bg-white p-10 text-center">
         <CheckCircle2 className="h-12 w-12 text-fsa-success" />
-        <h3 className="mt-4 font-fsa-display text-2xl font-bold uppercase text-fsa-navy-900">Registration Received</h3>
-        <p className="mt-2 max-w-md text-fsa-text-muted">Thank you — a member of our team will be in touch shortly to arrange the next steps.</p>
+        <h3 className="mt-4 font-fsa-display text-2xl font-bold uppercase text-fsa-navy-900">{t("doneTitle")}</h3>
+        <p className="mt-2 max-w-md text-fsa-text-muted">{t("doneBody")}</p>
       </div>
     );
   }
@@ -73,64 +77,64 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
       {/* Honeypot */}
       <input type="text" value={form.website} onChange={(e) => set({ website: e.target.value })} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <h3 className="mb-6 font-fsa-display text-2xl font-bold uppercase text-fsa-navy-900">Register Your Interest</h3>
+      <h3 className="mb-6 font-fsa-display text-2xl font-bold uppercase text-fsa-navy-900">{t("heading")}</h3>
 
       <fieldset className="mb-6">
-        <legend className="mb-3 text-sm font-bold uppercase tracking-wide text-fsa-heading-blue">Parent / Guardian</legend>
+        <legend className="mb-3 text-sm font-bold uppercase tracking-wide text-fsa-heading-blue">{t("parentLegend")}</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="First name" required><Input required value={form.parentFirstName} onChange={(e) => set({ parentFirstName: e.target.value })} className={inputClass} /></Field>
-          <Field label="Last name" required><Input required value={form.parentLastName} onChange={(e) => set({ parentLastName: e.target.value })} className={inputClass} /></Field>
-          <Field label="Email" required><Input type="email" required value={form.parentEmail} onChange={(e) => set({ parentEmail: e.target.value })} className={inputClass} /></Field>
-          <Field label="Phone" required><Input required value={form.parentPhone} onChange={(e) => set({ parentPhone: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("firstName")} required><Input required value={form.parentFirstName} onChange={(e) => set({ parentFirstName: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("lastName")} required><Input required value={form.parentLastName} onChange={(e) => set({ parentLastName: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("email")} required><Input type="email" required value={form.parentEmail} onChange={(e) => set({ parentEmail: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("phone")} required><Input required value={form.parentPhone} onChange={(e) => set({ parentPhone: e.target.value })} className={inputClass} /></Field>
         </div>
       </fieldset>
 
       <fieldset className="mb-6">
-        <legend className="mb-3 text-sm font-bold uppercase tracking-wide text-fsa-heading-blue">Player</legend>
+        <legend className="mb-3 text-sm font-bold uppercase tracking-wide text-fsa-heading-blue">{t("playerLegend")}</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="First name" required><Input required value={form.playerFirstName} onChange={(e) => set({ playerFirstName: e.target.value })} className={inputClass} /></Field>
-          <Field label="Last name" required><Input required value={form.playerLastName} onChange={(e) => set({ playerLastName: e.target.value })} className={inputClass} /></Field>
-          <Field label="Date of birth"><Input type="date" value={form.playerDateOfBirth} onChange={(e) => set({ playerDateOfBirth: e.target.value })} className={inputClass} /></Field>
-          <Field label="Gender">
+          <Field label={t("firstName")} required><Input required value={form.playerFirstName} onChange={(e) => set({ playerFirstName: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("lastName")} required><Input required value={form.playerLastName} onChange={(e) => set({ playerLastName: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("dateOfBirth")}><Input type="date" value={form.playerDateOfBirth} onChange={(e) => set({ playerDateOfBirth: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("gender")}>
             <select value={form.gender} onChange={(e) => set({ gender: e.target.value })} className={inputClass}>
-              <option value="">Prefer not to say</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="">{tc("preferNotToSay")}</option>
+              <option value="male">{tc("male")}</option>
+              <option value="female">{tc("female")}</option>
             </select>
           </Field>
-          <Field label="Preferred location">
+          <Field label={t("preferredLocation")}>
             <select value={form.preferredStationId} onChange={(e) => set({ preferredStationId: e.target.value })} className={inputClass}>
-              <option value="">No preference</option>
+              <option value="">{tc("noPreference")}</option>
               {venues.map((v) => <option key={v.id} value={v.id}>{v.name} — {v.wilaya}</option>)}
             </select>
           </Field>
-          <Field label="Current playing level"><Input value={form.currentPlayingLevel} onChange={(e) => set({ currentPlayingLevel: e.target.value })} className={inputClass} /></Field>
-          <Field label="Current club (if any)"><Input value={form.currentClub} onChange={(e) => set({ currentClub: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("currentPlayingLevel")}><Input value={form.currentPlayingLevel} onChange={(e) => set({ currentPlayingLevel: e.target.value })} className={inputClass} /></Field>
+          <Field label={t("currentClub")}><Input value={form.currentClub} onChange={(e) => set({ currentClub: e.target.value })} className={inputClass} /></Field>
         </div>
         <div className="mt-4">
-          <Field label="Medical notes"><Textarea value={form.medicalNotes} onChange={(e) => set({ medicalNotes: e.target.value })} rows={2} /></Field>
+          <Field label={t("medicalNotes")}><Textarea value={form.medicalNotes} onChange={(e) => set({ medicalNotes: e.target.value })} rows={2} /></Field>
         </div>
       </fieldset>
 
       <div className="mb-6">
-        <Field label="Additional message"><Textarea value={form.message} onChange={(e) => set({ message: e.target.value })} rows={3} /></Field>
+        <Field label={t("additionalMessage")}><Textarea value={form.message} onChange={(e) => set({ message: e.target.value })} rows={3} /></Field>
       </div>
 
       <div className="mb-6 space-y-3">
         <label className="flex items-start gap-2 text-sm text-fsa-text">
           <input type="checkbox" required checked={form.privacyConsent} onChange={(e) => set({ privacyConsent: e.target.checked })} className="mt-0.5" />
-          I agree to the privacy policy and consent to Football Skills Academy contacting me about this registration. *
+          {t("privacyConsent")} *
         </label>
         <label className="flex items-start gap-2 text-sm text-fsa-text">
           <input type="checkbox" checked={form.marketingConsent} onChange={(e) => set({ marketingConsent: e.target.checked })} className="mt-0.5" />
-          I would like to receive news and updates from Football Skills Academy.
+          {t("marketingConsent")}
         </label>
       </div>
 
       {errorMsg && <p className="mb-4 rounded-lg bg-fsa-error/10 px-4 py-2 text-sm text-fsa-error" role="alert">{errorMsg}</p>}
 
       <FsaButton type="submit" variant="sky" size="lg" disabled={status === "loading"} loading={status === "loading"} icon={status !== "loading"}>
-        {status === "loading" ? "Submitting…" : "Submit Registration"}
+        {status === "loading" ? t("submitting") : t("submit")}
       </FsaButton>
     </form>
   );

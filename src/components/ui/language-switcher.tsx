@@ -6,15 +6,36 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import i18n from "@/i18n";
 
-const LOCALES = [
-  { code: "fr",  flag: "🇫🇷", label: "Français" },
-  { code: "en",  flag: "🇬🇧", label: "English" },
-  { code: "ar",  flag: "🇩🇿", label: "العربية" },
+/**
+ * One component, two audiences.
+ *
+ *  - variant="public"  — the showcase site. French and Arabic only; English is
+ *                        gone. The locale lives in the URL (/fr/..., /ar/...)
+ *                        and the server renders from it, so switching is a
+ *                        navigation, not a client state change.
+ *  - variant="admin"   — the back-office. Still trilingual (i18next), still
+ *                        driven purely by client state because admin routes
+ *                        carry no locale segment.
+ *
+ * The two lists are separate on purpose: removing English from the public site
+ * must not remove it from the dashboard.
+ */
+const PUBLIC_LOCALES = [
+  { code: "fr", flag: "🇫🇷", label: "Français" },
+  { code: "ar", flag: "🇩🇿", label: "العربية" },
 ] as const;
 
-type LocaleCode = typeof LOCALES[number]["code"];
+const ADMIN_LOCALES = [
+  { code: "fr", flag: "🇫🇷", label: "Français" },
+  { code: "en", flag: "🇬🇧", label: "English" },
+  { code: "ar", flag: "🇩🇿", label: "العربية" },
+] as const;
+
+type LocaleCode = "fr" | "en" | "ar";
 
 const STORAGE_KEY = "shyftcom_lang";
+const COOKIE_KEY = "NEXT_LOCALE";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 function applyLocale(code: LocaleCode) {
   i18n.changeLanguage(code);
@@ -23,30 +44,37 @@ function applyLocale(code: LocaleCode) {
   document.documentElement.dir = code === "ar" ? "rtl" : "ltr";
 }
 
+/**
+ * Mirror the choice into the cookie next-intl reads on the next request, so a
+ * returning visitor who typed the bare domain lands on the locale they picked
+ * rather than whatever accept-language says. next-intl writes this itself on
+ * localised navigations; setting it here covers the admin, where there is no
+ * localised navigation to piggyback on.
+ */
+function persistLocaleCookie(code: LocaleCode) {
+  if (code !== "fr" && code !== "ar") return; // public site locales only
+  document.cookie = `${COOKIE_KEY}=${code}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+}
+
 function getStoredLocale(): LocaleCode {
   if (typeof window === "undefined") return "fr";
-  // Support legacy "eng" key from old switcher
+  // "eng" is the retired public URL segment; older browsers may still hold it.
   const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem("locale");
   if (raw === "eng") return "en";
   if (raw === "fr" || raw === "en" || raw === "ar") return raw;
   return "fr";
 }
 
-// The public site routes as /fr, /eng, /ar and renders its content on the
-// server from that segment, so the URL — not localStorage — is what the
-// visitor is actually looking at. Returns null on the admin and other
-// non-localised routes, where the stored preference is the only signal.
-//
-// Note the spelling difference: the URL segment is "eng", the i18n code "en".
+/**
+ * The public site renders its content on the server from the URL segment, so
+ * the URL — not localStorage — is what the visitor is actually looking at.
+ * Returns null on the admin and other non-localised routes, where the stored
+ * preference is the only signal.
+ */
 function localeFromPathname(pathname: string | null): LocaleCode | null {
   const segment = (pathname ?? "").split("/")[1];
-  if (segment === "eng") return "en";
   if (segment === "fr" || segment === "ar") return segment;
   return null;
-}
-
-function toUrlSegment(code: LocaleCode): string {
-  return code === "en" ? "eng" : code;
 }
 
 interface LanguageSwitcherProps {
@@ -59,6 +87,9 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  const isAdmin = variant === "admin";
+  const locales = isAdmin ? ADMIN_LOCALES : PUBLIC_LOCALES;
 
   // On a localised route the URL is authoritative and needs no state at all,
   // so the correct flag renders on the first pass. Only the admin, whose URLs
@@ -95,8 +126,10 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
     setOpen(false);
     setStoredLocale(code);
     applyLocale(code);
+    persistLocaleCookie(code);
 
-    // Persist preference to server
+    // Only signed-in users have a row to write to; anonymous visitors on the
+    // public site get a 401 here, which is why the failure is swallowed.
     fetch("/api/user/language", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -105,18 +138,21 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
 
     // Public pages are rendered on the server from the locale in the URL, so
     // changing only the client state left the visitor on French content with
-    // an Arabic layout. Move to the same path under the chosen locale and let
-    // the server re-render it. Admin routes are not localised by URL, so they
-    // keep working purely off the client state above.
+    // an Arabic layout. Swap the prefix in place and let the server re-render.
+    //
+    // `scroll: false` is what keeps the visitor where they were: without it
+    // Next resets to the top of the document, so switching language halfway
+    // down a programme page threw the reader back to the hero.
     if (urlLocale) {
       const segments = (pathname ?? "/").split("/");
-      segments[1] = toUrlSegment(code);
-      router.push(segments.join("/") + window.location.search);
+      segments[1] = code;
+      router.replace(segments.join("/") + window.location.search + window.location.hash, {
+        scroll: false,
+      });
     }
   }
 
-  const active = LOCALES.find((l) => l.code === current) ?? LOCALES[0];
-  const isAdmin = variant === "admin";
+  const active = locales.find((l) => l.code === current) ?? locales[0];
 
   const btnClass = isAdmin
     ? "flex h-9 items-center gap-1.5 rounded-[var(--ob-radius-control)] px-2.5 text-[13px] font-medium text-[var(--ob-text-secondary)] transition-colors hover:bg-[var(--ob-surface-high)] hover:text-[var(--ob-text)]"
@@ -132,16 +168,28 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
 
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(!open)} className={btnClass}>
-        <span>{active.flag}</span>
+      <button
+        onClick={() => setOpen(!open)}
+        className={btnClass}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={active.label}
+      >
+        <span aria-hidden="true">{active.flag}</span>
         <span>{active.code.toUpperCase()}</span>
-        <ChevronDown className="w-3 h-3 opacity-60" />
+        <ChevronDown className="w-3 h-3 opacity-60" aria-hidden="true" />
       </button>
       {open && (
-        <div className={dropdownClass}>
-          {LOCALES.map((l) => (
-            <div key={l.code} onClick={() => switchLocale(l.code)} className={itemClass(l.code)}>
-              <span>{l.flag}</span>
+        <div className={dropdownClass} role="listbox">
+          {locales.map((l) => (
+            <div
+              key={l.code}
+              role="option"
+              aria-selected={l.code === current}
+              onClick={() => switchLocale(l.code)}
+              className={itemClass(l.code)}
+            >
+              <span aria-hidden="true">{l.flag}</span>
               <span>{l.label}</span>
             </div>
           ))}

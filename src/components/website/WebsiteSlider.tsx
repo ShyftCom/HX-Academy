@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Slide {
   id: string; imageUrl: string; title: string | null; titleFr: string | null; titleAr: string | null;
@@ -14,14 +15,17 @@ function getLabel(slide: Slide, locale: string, field: "title" | "subtitle"): st
   if (field === "title") {
     if (locale === "ar" && slide.titleAr) return slide.titleAr;
     if (locale === "fr" && slide.titleFr) return slide.titleFr;
+    if (locale === "ar" && slide.titleFr) return slide.titleFr;
     return slide.title;
   }
   if (locale === "ar" && slide.subtitleAr) return slide.subtitleAr;
   if (locale === "fr" && slide.subtitleFr) return slide.subtitleFr;
+  if (locale === "ar" && slide.subtitleFr) return slide.subtitleFr;
   return slide.subtitle;
 }
 
 export function WebsiteSlider({ locale, stationId }: { locale: string; stationId?: string }) {
+  const t = useTranslations("a11y");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -42,7 +46,6 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
 
   if (slides.length === 0) return null;
 
-  const isRtl = locale === "ar";
   const slide = slides[current];
   const title = getLabel(slide, locale, "title");
   const subtitle = getLabel(slide, locale, "subtitle");
@@ -53,7 +56,6 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
       style={{ aspectRatio: "16/6", minHeight: "280px", maxHeight: "560px" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      dir={isRtl ? "rtl" : "ltr"}
     >
       {/* Slides */}
       {slides.map((s, i) => (
@@ -70,15 +72,13 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
       {/* Text overlay */}
       {(title || subtitle || slide.ctaLabel) && (
         <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-12">
-          <div className={`max-w-2xl ${isRtl ? "mr-auto text-right" : "ml-0 text-left"}`}>
+          <div className="max-w-2xl me-auto text-start">
             {title && (
-              <h2 className="font-fsa-display text-2xl md:text-4xl font-bold uppercase mb-2 text-white drop-shadow-md" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
-                {title}
+              <h2 className="font-fsa-display text-2xl md:text-4xl font-bold uppercase mb-2 text-white drop-shadow-md" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.4)" }} dir="auto">{title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-white/90 text-sm md:text-lg mb-4 drop-shadow">
-                {subtitle}
+              <p className="text-white/90 text-sm md:text-lg mb-4 drop-shadow" dir="auto">{subtitle}
               </p>
             )}
             {slide.ctaLabel && slide.ctaUrl && (
@@ -97,18 +97,18 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
       {slides.length > 1 && (
         <>
           <button
-            onClick={isRtl ? next : prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
-            aria-label="Previous"
+            onClick={prev}
+            className="absolute start-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+            aria-label={t("previousSlide")}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="ob-flip-rtl w-5 h-5" />
           </button>
           <button
-            onClick={isRtl ? prev : next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
-            aria-label="Next"
+            onClick={next}
+            className="absolute end-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+            aria-label={t("nextSlide")}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="ob-flip-rtl w-5 h-5" />
           </button>
 
           {/* Dots */}
@@ -118,7 +118,7 @@ export function WebsiteSlider({ locale, stationId }: { locale: string; stationId
                 key={i}
                 onClick={() => setCurrent(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"}`}
-                aria-label={`Go to slide ${i + 1}`}
+                aria-label={t("goToSlide", { n: i + 1 })}
               />
             ))}
           </div>

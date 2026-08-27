@@ -39,6 +39,8 @@ export async function PUT(req: NextRequest) {
     tagline: appearance?.tagline ?? null,
     taglineFr: appearance?.taglineFr ?? null,
     taglineAr: appearance?.taglineAr ?? null,
+    copyrightTextFr: appearance?.copyrightTextFr || null,
+    copyrightTextAr: appearance?.copyrightTextAr || null,
     copyrightText: appearance?.copyrightText ?? "© 2026 Football Skills Academy. All rights reserved.",
     showTrustpilot: appearance?.showTrustpilot ?? false,
     trustpilotUrl: appearance?.trustpilotUrl ?? null,
