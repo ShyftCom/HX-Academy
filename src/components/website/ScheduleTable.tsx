@@ -37,6 +37,21 @@ const STATUS_CLASS: Record<string, string> = {
 const STATUS_KEYS = ["open", "waitlist", "full", "closed"] as const;
 
 /**
+ * A start–end time, isolated from the surrounding text direction.
+ *
+ * "17:30–18:45" is two LTR digit runs either side of a neutral dash. Dropped
+ * straight into the Arabic page, the bidi algorithm resolves that neutral to the
+ * paragraph direction and lays the two runs out right-to-left — so the markup
+ * says 17:30–18:45 and the reader sees 18:45–17:30, the session appearing to end
+ * before it starts. `dir="ltr"` isolates the range so it always reads
+ * start-then-end, while the day label beside it stays RTL.
+ */
+function TimeRange({ start, end }: { start: string | null; end: string | null }) {
+  if (!start) return null;
+  return <span dir="ltr">{start}{end ? `–${end}` : ""}</span>;
+}
+
+/**
  * @param heading      Overrides the default "Programme schedule" title — the venue
  *                     page names the location instead.
  * @param showLocation Hides the location column where it would repeat the page it
@@ -96,7 +111,7 @@ export async function ScheduleTable({
                     <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">{row.sessionName ?? row.sessionType ?? "—"}</td>
                     <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">
                       {row.day && <span className="font-semibold text-white">{dayLabel(row)}</span>}
-                      {row.startTime && <span> {row.startTime}{row.endTime ? `–${row.endTime}` : ""}</span>}
+                      {row.startTime && <> <TimeRange start={row.startTime} end={row.endTime} /></>}
                     </td>
                     {showLocation && (
                       <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">
@@ -135,7 +150,7 @@ export async function ScheduleTable({
                   <dt className="text-fsa-text-muted">{t("session")}</dt>
                   <dd className="text-end text-fsa-navy-900">{row.sessionName ?? row.sessionType ?? "—"}</dd>
                   <dt className="text-fsa-text-muted">{t("dayTime")}</dt>
-                  <dd className="text-end text-fsa-navy-900">{dayLabel(row)} {row.startTime}{row.endTime ? `–${row.endTime}` : ""}</dd>
+                  <dd className="text-end text-fsa-navy-900">{dayLabel(row)} <TimeRange start={row.startTime} end={row.endTime} /></dd>
                   {showLocation && (
                     <>
                       <dt className="text-fsa-text-muted">{t("venue")}</dt>
