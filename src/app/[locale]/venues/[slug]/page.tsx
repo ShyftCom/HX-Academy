@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Phone, Mail, Car, Bus, Accessibility, Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -9,9 +10,11 @@ import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { ProgrammeCard } from "@/components/website/cards/ProgrammeCard";
 import { FaqAccordion } from "@/components/website/FaqAccordion";
+import { ScheduleTable } from "@/components/website/ScheduleTable";
 import { FsaButton } from "@/components/website/buttons/FsaButton";
 import { lf } from "@/components/website/sections/localeField";
 import { localeHref } from "@/components/website/localeHref";
+import { mobileVariant } from "@/components/website/mobileVariant";
 
 async function getVenue(slug: string) {
   const venue = await db.station.findUnique({ where: { slug } });
@@ -40,16 +43,33 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
 
   const t = await getTranslations({ locale, namespace: "venues" });
   const tFaq = await getTranslations({ locale, namespace: "faq" });
+  const tSchedule = await getTranslations({ locale, namespace: "schedule" });
 
-  const [programmes, faqs, defaultBookingUrl] = await Promise.all([
+  const [programmes, faqs, defaultBookingUrl, schedule, slots, otherVenues] = await Promise.all([
     db.programme.findMany({
-      where: { isPubliclyListed: true, OR: [{ venues: { some: { venueId: venue.id } } }, { schedules: { some: { venueId: venue.id } } }] },
+      where: { isPubliclyListed: true, OR: [{ venues: { some: { venueId: venue.id } } }, { schedules: { some: { stationId: venue.id } } }] },
       include: { category: true },
       take: 6,
     }),
     db.faq.findMany({ where: { isPublished: true, stationId: venue.id }, orderBy: { order: "asc" } }),
     getSetting("website_booking_url", "/apply"),
+    // This location's own schedule — nothing here is shared with any other venue.
+    db.locationSchedule.findUnique({ where: { stationId: venue.id } }),
+    db.scheduleSlot.findMany({
+      where: { stationId: venue.id, isActive: true },
+      orderBy: [{ dayOfWeek: "asc" }, { startMinutes: "asc" }, { order: "asc" }],
+    }),
+    // Lets a visitor jump straight to another location's schedule without going
+    // back to the index — plain links, so it works with no client JS and in RTL.
+    db.station.findMany({
+      where: { status: "active", isPubliclyListed: true, slug: { not: null }, id: { not: venue.id } },
+      orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true, slug: true },
+    }),
   ]);
+
+  // An unpublished header hides the timetable without deleting a single slot.
+  const showSchedule = schedule?.isPublished !== false;
 
   let facilities: string[] = [];
   try { facilities = JSON.parse(venue.facilities ?? "[]"); } catch { /* noop */ }
@@ -61,7 +81,13 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
       {/* No stock fallback: an unphotographed venue gets the brand panel, so the
           page never shows a stadium that is not this one. Real photos go in
           Dashboard → Stations → [station] → Public / Marketing. */}
-      <Hero desktopImageUrl={venue.heroImageUrl || undefined} title={venue.name} subtitle={venue.wilaya} minHeight="55vh" />
+      <Hero
+        desktopImageUrl={venue.heroImageUrl || undefined}
+        mobileImageUrl={mobileVariant(venue.heroImageUrl)}
+        title={venue.name}
+        subtitle={venue.wilaya}
+        minHeight="55vh"
+      />
       <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/venues` }, { label: venue.name }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">
@@ -107,6 +133,37 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
           </aside>
         </div>
       </section>
+
+      {showSchedule && (
+        <>
+          <ScheduleTable
+            rows={slots}
+            locale={locale}
+            heading={tSchedule("headingAt", { name: venue.name })}
+            showLocation={false}
+            emptyState
+            bookingUrl={localeHref(defaultBookingUrl, locale)}
+          />
+          {otherVenues.length > 0 && (
+            <section className="bg-fsa-pale-bg pb-[var(--fsa-section-y)]">
+              <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
+                <p className="mb-3 text-center text-sm font-semibold text-fsa-text-muted">{tSchedule("otherLocations")}</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {otherVenues.map((v) => (
+                    <Link
+                      key={v.id}
+                      href={`/${locale}/venues/${v.slug}`}
+                      className="rounded-fsa-pill border border-fsa-border bg-white px-4 py-2 text-sm text-fsa-navy-900 transition-colors hover:border-fsa-sky hover:bg-fsa-sky/10"
+                    >
+                      {v.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+        </>
+      )}
 
       {programmes.length > 0 && (
         <section className="bg-fsa-pale-bg py-[var(--fsa-section-y)]">

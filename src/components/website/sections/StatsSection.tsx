@@ -12,7 +12,7 @@ export function StatsSection({ content, locale }: { content: Record<string, any>
       >
         {items.map((s, i) => (
           <div key={i}>
-            <div className="font-fsa-display text-4xl font-extrabold text-fsa-sky sm:text-5xl">
+            <div className="font-fsa-display text-4xl font-extrabold text-fsa-heading-blue sm:text-5xl">
               {s.value}
               {s.suffix ?? ""}
             </div>

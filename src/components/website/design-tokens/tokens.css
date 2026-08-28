@@ -6,7 +6,11 @@
    colors like "blue" or "sky", because globals.css hard-remaps every
    Tailwind blue/green/indigo/
    purple/emerald/rose/violet utility class to the admin red brand
-   color -- reusing those names here would render red, not navy/sky.
+   color -- reusing those names here would render red, not our own ink/crimson.
+   The token NAMES (navy-900/navy-800/sky/heading-blue) are historical: they
+   are now the crest palette -- ink black, deep wine, and the two crimsons
+   sampled from the club logo -- not blues. Renaming them would touch 200+
+   call sites, so the names stayed and only the values moved.
    These @theme values are the build-time fallback defaults; the
    actual admin-editable values are injected at runtime, scoped to
    .fsa-site, by ThemeVars (see ThemeVars.tsx) -- see that file
@@ -15,16 +19,17 @@
 
 @theme {
   /* ---- Color tokens ---- */
-  --color-fsa-navy-900: #001f49;
-  --color-fsa-navy-800: #002b5c;
-  --color-fsa-sky: #43c7ed;
-  --color-fsa-heading-blue: #3996d6;
-  --color-fsa-pale-bg: #eef5fc;
-  --color-fsa-text: #071e41;
-  --color-fsa-text-muted: #5e6d82;
-  --color-fsa-border: #dce6f1;
-  --color-fsa-success: #168a55;
-  --color-fsa-error: #c0392b;
+  /* Sampled from the club crest: ink black shield, crimson crown/lynx, white outline. */
+  --color-fsa-navy-900: #1b1315; /* ink -- dark surfaces, headings, primary button */
+  --color-fsa-navy-800: #3b1e22; /* deep wine -- gradient mid, primary button hover */
+  --color-fsa-sky: #a32f33; /* crest crimson -- solid accents, always with white text on it */
+  --color-fsa-heading-blue: #c0453f; /* bright crimson -- eyebrows, links, accents on dark */
+  --color-fsa-pale-bg: #f8f2f2;
+  --color-fsa-text: #1f1719;
+  --color-fsa-text-muted: #6e6164;
+  --color-fsa-border: #e8dddd;
+  --color-fsa-success: #157347;
+  --color-fsa-error: #b3261e;
   --color-fsa-white: #ffffff;
 
   /* ---- Typography tokens (fonts registered as CSS vars in fonts.ts / applied in [locale]/layout.tsx) ---- */
@@ -38,7 +43,7 @@
   --radius-fsa-pill: 999px;
 
   /* ---- Shadow tokens ---- */
-  --shadow-fsa-card: 0 1px 2px rgba(7, 30, 65, 0.04), 0 8px 24px rgba(7, 30, 65, 0.08);
+  --shadow-fsa-card: 0 1px 2px rgba(27, 19, 21, 0.05), 0 8px 24px rgba(27, 19, 21, 0.10);
   --shadow-fsa-header: 0 1px 6px rgba(0, 0, 0, 0.08);
 
   /* ---- Animation tokens ---- */

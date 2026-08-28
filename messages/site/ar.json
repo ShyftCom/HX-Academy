@@ -318,7 +318,16 @@
     "headingAt": "الحصص في {name}",
     "empty": "جدول هذا الموقع قيد التحديث — عد قريبًا.",
     "field": "الملعب",
-    "otherLocations": "عرض جدول موقع آخر"
+    "otherLocations": "عرض جدول موقع آخر",
+    "days": {
+      "sunday": "الأحد",
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت"
+    }
   },
   "squads": {
     "heroTitle": "فرق التطوير",

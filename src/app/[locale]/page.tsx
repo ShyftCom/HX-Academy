@@ -48,7 +48,8 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
     // unavailable — a minimal, on-brand placeholder instead of a blank page.
     return (
       <Hero
-        desktopImageUrl="/media/home/hero-team-talk.jpg"
+        desktopImageUrl="/media/wide/team-talk.jpg"
+        mobileImageUrl="/media/mobile/team-talk.jpg"
         title={t("emptyTitle")}
         subtitle={t("emptyBody")}
         align="center"

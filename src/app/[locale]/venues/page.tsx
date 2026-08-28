@@ -24,7 +24,8 @@ export default async function VenuesListingPage({ params }: { params: Promise<{ 
   return (
     <>
       <Hero
-        desktopImageUrl="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=80"
+        desktopImageUrl="/media/wide/first-touch.jpg"
+        mobileImageUrl="/media/mobile/first-touch.jpg"
         title={t("heroTitle")}
         subtitle={t("heroSubtitle")}
         minHeight="55vh"

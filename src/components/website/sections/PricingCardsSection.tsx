@@ -31,10 +31,10 @@ export async function PricingCardsSection({ content, locale }: { content: Record
           {plans.map((plan, i) => (
             <div
               key={plan.id}
-              className={`relative flex flex-col rounded-fsa-md border bg-white p-7 ${i === 0 ? "border-2 border-fsa-sky shadow-[0_12px_32px_rgba(67,199,237,0.25)]" : "border-fsa-border"}`}
+              className={`relative flex flex-col rounded-fsa-md border bg-white p-7 ${i === 0 ? "border-2 border-fsa-sky shadow-[0_12px_32px_rgba(163,47,51,0.22)]" : "border-fsa-border"}`}
             >
               {i === 0 && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-fsa-pill bg-fsa-sky px-3 py-1 text-xs font-bold text-fsa-navy-900">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-fsa-pill bg-fsa-sky px-3 py-1 text-xs font-bold text-white">
                   {t("popular")}
                 </span>
               )}

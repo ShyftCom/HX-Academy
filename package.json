@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && npm run seed && next build",
+    "build": "prisma generate && tsx scripts/apply-schedule-migration.ts && prisma db push && npm run seed && next build",
     "start": "next start",
     "lint": "eslint",
     "check:i18n": "node scripts/check-translations.js",
     "seed": "tsx prisma/seed.ts",
     "db:push": "prisma db push",
+    "db:migrate:schedule": "tsx scripts/apply-schedule-migration.ts",
     "db:studio": "prisma studio",
     "audit:i18n-content": "tsx scripts/audit-untranslated.ts"
   },

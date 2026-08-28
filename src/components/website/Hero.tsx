@@ -44,7 +44,7 @@ export function Hero({
   mobileImageUrl,
   videoUrl,
   focalPoint = "center",
-  overlayColor = "#001F49",
+  overlayColor = "#1B1315",
   overlayOpacity = 0.45,
   eyebrow,
   title,

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body.name) return NextResponse.json({ error: "name is required" }, { status: 400 });
     const count = await db.pathwayLevel.count();
-    const level = await db.pathwayLevel.create({ data: { name: body.name, color: body.color ?? "#3996D6", order: count } });
+    const level = await db.pathwayLevel.create({ data: { name: body.name, color: body.color ?? "#A32F33", order: count } });
     return NextResponse.json(level, { status: 201 });
   } catch (error) {
     console.error(error);

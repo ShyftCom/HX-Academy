@@ -79,9 +79,18 @@ function localeFromPathname(pathname: string | null): LocaleCode | null {
 
 interface LanguageSwitcherProps {
   variant?: "public" | "admin";
+  /**
+   * Public variant only: true while the header is still transparent over a
+   * dark hero, false once it has gone solid white (WebsiteHeader's `dark`).
+   * Without it the control kept its white-on-translucent-white styling over
+   * the solid header and rendered at 1:1 contrast — invisible from first
+   * paint on the pages that have no hero at all (/apply, /summer-camp,
+   * /reviews, /store). Ignored by variant="admin", which is never overlaid.
+   */
+  onDark?: boolean;
 }
 
-export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ variant = "admin", onDark = true }: LanguageSwitcherProps) {
   const [open, setOpen] = useState(false);
   const [storedLocale, setStoredLocale] = useState<LocaleCode>("fr");
   const ref = useRef<HTMLDivElement>(null);
@@ -154,17 +163,39 @@ export function LanguageSwitcher({ variant = "admin" }: LanguageSwitcherProps) {
 
   const active = locales.find((l) => l.code === current) ?? locales[0];
 
+  // The public control mirrors the sibling nav items in WebsiteHeader, which
+  // swap on the same flag: white over the hero, ink once the header is solid.
+  const publicBtn = onDark
+    ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+    : "border-fsa-navy-900/20 bg-transparent text-fsa-navy-900 hover:bg-fsa-navy-900/5";
+
   const btnClass = isAdmin
     ? "flex h-9 items-center gap-1.5 rounded-[var(--ob-radius-control)] px-2.5 text-[13px] font-medium text-[var(--ob-text-secondary)] transition-colors hover:bg-[var(--ob-surface-high)] hover:text-[var(--ob-text)]"
-    : "flex items-center gap-1.5 rounded-[var(--ob-radius-control)] border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/20";
+    : `flex items-center gap-1.5 rounded-[var(--ob-radius-control)] border px-3 py-1.5 text-sm font-medium transition-colors ${publicBtn}`;
+
+  // The panel opens against the page, not the header, so on a solid header it
+  // needs a light surface of its own rather than the dark one used over a hero.
+  const publicPanel = onDark
+    ? "border-white/10 bg-[#131313]"
+    : "border-fsa-border bg-white";
 
   const dropdownClass = isAdmin
     ? "ob-glass absolute end-0 z-50 mt-1 w-40 overflow-hidden rounded-[var(--ob-radius-container)] py-1 shadow-[0_12px_32px_rgba(0,0,0,0.45)]"
-    : "absolute end-0 z-50 mt-1 w-40 overflow-hidden rounded-[var(--ob-radius-container)] border border-white/10 bg-[#131313] py-1 shadow-lg";
+    : `absolute end-0 z-50 mt-1 w-40 overflow-hidden rounded-[var(--ob-radius-container)] border py-1 shadow-lg ${publicPanel}`;
+
+  // The selected row used --ob-primary, which is the *admin* brand colour set
+  // on :root from the primary_color setting — a cross-system leak that made
+  // this row render Vercel blue on the crimson showcase site. ThemeVars.tsx
+  // keeps the two theming systems independent on purpose, so the public
+  // variant uses the crest accent (white on it clears AA at 6.97:1).
+  const publicItem = (selected: boolean) => {
+    if (selected) return "bg-fsa-sky font-medium text-white";
+    return onDark ? "text-gray-200 hover:bg-white/10" : "text-fsa-navy-900 hover:bg-fsa-pale-bg";
+  };
 
   const itemClass = (code: string) => isAdmin
     ? `flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors ${code === current ? "bg-[var(--ob-primary-soft)] font-medium text-[var(--ob-primary-light)]" : "text-[var(--ob-text-secondary)] hover:bg-[var(--ob-surface-high)] hover:text-[var(--ob-text)]"}`
-    : `flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors ${code === current ? "bg-[var(--ob-primary)] font-medium text-white" : "text-gray-200 hover:bg-white/10"}`;
+    : `flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors ${publicItem(code === current)}`;
 
   return (
     <div className="relative" ref={ref}>

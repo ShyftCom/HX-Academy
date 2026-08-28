@@ -28,7 +28,8 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   return (
     <>
       <Hero
-        desktopImageUrl="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=1600&q=80"
+        desktopImageUrl="/media/wide/head-coach.jpg"
+        mobileImageUrl="/media/mobile/head-coach.jpg"
         title={t("heroTitle")}
         subtitle={t("heroSubtitle")}
         minHeight="50vh"

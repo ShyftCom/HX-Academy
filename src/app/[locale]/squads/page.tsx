@@ -35,7 +35,8 @@ export default async function SquadsPage({ params }: { params: Promise<{ locale:
   return (
     <>
       <Hero
-        desktopImageUrl="https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=1600&q=80"
+        desktopImageUrl="/media/wide/team-photo.jpg"
+        mobileImageUrl="/media/mobile/team-photo.jpg"
         title={t("heroTitle")}
         subtitle={t("heroSubtitle")}
         primaryCta={{ label: t("heroCta"), href: "#register" }}

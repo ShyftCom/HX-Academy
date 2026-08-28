@@ -40,7 +40,7 @@ export async function ProgrammeCard({ programme, locale }: { programme: Programm
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-fsa-pale-bg">
         {image && <Image src={image} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />}
         {programme.isFeatured && (
-          <span className="absolute start-3 top-3 rounded-fsa-pill bg-fsa-sky px-3 py-1 text-xs font-bold text-fsa-navy-900">{t("featured")}</span>
+          <span className="absolute start-3 top-3 rounded-fsa-pill bg-fsa-sky px-3 py-1 text-xs font-bold text-white">{t("featured")}</span>
         )}
         {programme.category && (
           <span className="absolute bottom-3 start-3 rounded-fsa-pill bg-fsa-navy-900/80 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">

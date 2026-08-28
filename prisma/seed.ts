@@ -3,6 +3,8 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import { ensureScheduleConstraints } from "./schedule-constraints";
+import { parseDayOfWeek, parseMinutes } from "../src/lib/schedule";
 
 dotenv.config();
 
@@ -79,6 +81,12 @@ async function main() {
     { name: "applications:manage", module: "applications", action: "manage", description: "Manage website applications/leads" },
     { name: "applications:export", module: "applications", action: "export", description: "Export website applications/leads" },
     { name: "file_requirements:manage", module: "file_requirements", action: "manage", description: "Manage application file requirements" },
+
+    // Schedules are location-scoped: website:view/website:edit decide whether a
+    // user may read or edit a schedule, this decides whose. Granted to Super
+    // Admin and Admin by the loop below, so existing installs keep the reach
+    // they had before. Everyone else is confined to their station_staff rows.
+    { name: "schedule:manage_all", module: "schedule", action: "manage_all", description: "Read and edit the schedule of every location, not only assigned ones" },
   ];
 
   const permissions: Record<string, any> = {};
@@ -460,8 +468,7 @@ async function main() {
                   heading: "Every Player.\nOne Clear Pathway.", headingFr: "Chaque joueur.\nUn seul chemin clair.", headingAr: "كل لاعب.\nمسار واحد واضح.",
                   subheading: "Year-round football programmes for players aged 6-16, built around technical development, teamwork and a genuine love of the game.",
                   subheadingFr: "Des programmes de football toute l'année pour les joueurs de 6 à 16 ans, centrés sur le développement technique, l'esprit d'équipe et le plaisir de jouer.", subheadingAr: "برامج كروية على مدار السنة للاعبين من 6 إلى 16 سنة، تركّز على التطوير التقني وروح الفريق ومتعة اللعب.",
-                  imageUrl: "/media/home/hero-team-talk.jpg",
-                  focalPoint: "center 35%",
+                  imageUrl: "/media/wide/team-talk.jpg",
                   ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes",
                   secondaryCtaLabel: "Book a Trial", secondaryCtaLabelFr: "Réserver un essai", secondaryCtaLabelAr: "احجز حصة تجريبية", secondaryCtaUrl: "/apply",
                   overlayOpacity: 0.5,
@@ -486,7 +493,7 @@ async function main() {
                   heading: "Built around long-term player development", headingFr: "Pensé pour le développement du joueur sur la durée", headingAr: "مصمَّم لتطوير اللاعب على المدى الطويل",
                   body: "Football Skills Academy was founded to give young players a structured, age-appropriate pathway — from their first touch of the ball through to representative squad football. Every session is planned around what a player needs at that stage, not a one-size-fits-all drill sheet.",
                   bodyFr: "Football Skills Academy a été fondée pour offrir aux jeunes joueurs un parcours structuré et adapté à leur âge, des premiers pas avec le ballon jusqu'au football en équipe représentative.", bodyAr: "تأسست أكاديمية Football Skills Academy لتوفّر للاعبين الشباب مساراً منظّماً يناسب أعمارهم، من الخطوات الأولى مع الكرة إلى اللعب ضمن الفرق التمثيلية.",
-                  imageUrl: "/media/home/squad-team-photo.jpg",
+                  imageUrl: "/media/card/team-photo.jpg",
                   bulletPoints: [
                     { text: "Qualified, DBS-checked coaches at every session", textFr: "Des entraîneurs qualifiés et vérifiés à chaque séance" },
                     { text: "Small coaching ratios across all age groups", textFr: "Un encadrement en petits groupes pour tous les âges" },
@@ -551,7 +558,7 @@ async function main() {
       {
         name: "City Football Academy", slug: "city-football-academy", wilaya: "Algiers", wilayaCode: 16,
         address: "Bab Ezzouar, Algiers", isPubliclyListed: true, displayOrder: 0,
-        heroImageUrl: "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1200&q=80",
+        heroImageUrl: "/media/wide/team-talk.jpg",
         shortDescription: "Our flagship venue with 3 full-size pitches and a dedicated indoor training hall.",
         facilities: JSON.stringify(["3 full-size pitches", "Indoor training hall", "Floodlit 5-a-side courts", "Clubhouse & changing rooms"]),
         pitchType: "3G artificial turf", changingRooms: "6 changing rooms with showers",
@@ -559,7 +566,7 @@ async function main() {
       {
         name: "Riverside Training Centre", slug: "riverside-training-centre", wilaya: "Oran", wilayaCode: 31,
         address: "Riverside Park, Oran", isPubliclyListed: true, displayOrder: 1,
-        heroImageUrl: "https://images.unsplash.com/photo-1487466365202-1afdb86c764e?w=1200&q=80",
+        heroImageUrl: "/media/wide/first-touch.jpg",
         shortDescription: "A modern riverside venue used for our weekly programmes and game festivals.",
         facilities: JSON.stringify(["2 full-size pitches", "Parking on site", "Spectator area"]),
         pitchType: "Natural grass", changingRooms: "4 changing rooms",
@@ -567,7 +574,7 @@ async function main() {
       {
         name: "Northside Sports Complex", slug: "northside-sports-complex", wilaya: "Constantine", wilayaCode: 25,
         address: "Northside District, Constantine", isPubliclyListed: true, displayOrder: 2,
-        heroImageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1200&q=80",
+        heroImageUrl: "/media/wide/team-photo.jpg",
         shortDescription: "Home to our Development Squads and holiday camp programmes.",
         facilities: JSON.stringify(["4 pitches", "Gym", "Meeting rooms"]),
         pitchType: "3G artificial turf", changingRooms: "6 changing rooms with showers",
@@ -595,6 +602,10 @@ async function main() {
       console.log(`⏭️  Kept ${existingStations.length} existing station(s) — no demo venues created`);
     }
 
+    // Same rule the migration's backfill uses for slots with no location of their own.
+    const defaultStationId =
+      (await db.station.findFirst({ orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }], select: { id: true } }))?.id ?? null;
+
     // Create Coaches (public-safe profiles, deliberately separate from StaffProfile/HRM data)
     const coachSeed = [
       { fullName: "Yanis Belkacem", role: "Head of Coaching", bio: "UEFA A-licensed coach with over a decade of youth development experience.", stationSlug: "city-football-academy" },
@@ -610,8 +621,8 @@ async function main() {
 
     // Create Programme Categories
     const categorySeed = [
-      { name: "Weekly Programmes", slug: "weekly-programmes", colorTag: "#3996D6" },
-      { name: "Holiday Camps", slug: "holiday-camps", colorTag: "#43C7ED" },
+      { name: "Weekly Programmes", slug: "weekly-programmes", colorTag: "#A32F33" },
+      { name: "Holiday Camps", slug: "holiday-camps", colorTag: "#C0453F" },
     ];
     const programmeCategories: Record<string, any> = {};
     for (const cat of categorySeed) {
@@ -631,8 +642,8 @@ async function main() {
           shortDescriptionFr: "Tous niveaux bienvenus. Entraînement technique hebdomadaire pour les 6-16 ans.", shortDescriptionAr: "جميع المستويات مرحَّب بها. تدريب تقني أسبوعي للفئة 6–16 سنة.",
           fullDescription: "Football School is our year-round weekly programme for boys and girls aged 6-16. Players train and develop at a world-class facility, focusing on technical development, decision-making, confidence and creativity — delivered by our qualified coaches following a single academy-wide methodology. Fun, skills and a long-term love of the game start here.",
           fullDescriptionFr: "L'École de Football est notre programme hebdomadaire pour les garçons et filles de 6 à 16 ans, axé sur le développement technique, la prise de décision, la confiance et la créativité.", fullDescriptionAr: "مدرسة كرة القدم هي برنامجنا الأسبوعي للفتيان والفتيات من 6 إلى 16 سنة، ويركّز على التطوير التقني واتخاذ القرار والثقة بالنفس والإبداع.",
-          heroImageUrl: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=1600&q=80",
-          cardImageUrl: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=800&q=80",
+          heroImageUrl: "/media/wide/speed-drill.jpg",
+          cardImageUrl: "/media/card/speed-drill.jpg",
           categoryId: programmeCategories["weekly-programmes"].id,
           ageRangeLabel: "Ages 6-16", ageRangeLabelFr: "6 à 16 ans", ageRangeLabelAr: "من 6 إلى 16 سنة",
           minAge: 6, maxAge: 16,
@@ -643,19 +654,25 @@ async function main() {
           metaDescription: "Weekly football training for players aged 6-16, delivered by qualified coaches at Football Skills Academy.",
         },
       });
-      const rows: [string, number, number, string, string, string, string, string, number][] = [
-        ["Under 8", 6, 8, "Skills", "Monday", "17:30", "18:45", "city-football-academy", 4000],
-        ["Under 10", 8, 10, "Skills", "Wednesday", "17:30", "18:45", "city-football-academy", 4000],
-        ["Under 12", 10, 12, "Skills", "Tuesday", "17:30", "18:45", "city-football-academy", 4500],
-        ["Under 14", 12, 14, "Skills", "Thursday", "18:30", "19:45", "city-football-academy", 4500],
-        ["Under 16", 14, 16, "Skills", "Thursday", "18:30", "19:45", "city-football-academy", 5000],
+      // Under 14 and Under 16 deliberately share Thursday 18:30-19:45 on *different*
+      // pitches: legal, and a live example of why the overlap rule is scoped per pitch.
+      const rows: [string, number, number, string, string, string, string, string, string, number][] = [
+        ["Under 8", 6, 8, "Skills", "Monday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
+        ["Under 10", 8, 10, "Skills", "Wednesday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
+        ["Under 12", 10, 12, "Skills", "Tuesday", "17:30", "18:45", "Pitch A", "city-football-academy", 4500],
+        ["Under 14", 12, 14, "Skills", "Thursday", "18:30", "19:45", "Pitch A", "city-football-academy", 4500],
+        ["Under 16", 14, 16, "Skills", "Thursday", "18:30", "19:45", "Pitch B", "city-football-academy", 5000],
       ];
       for (let i = 0; i < rows.length; i++) {
-        const [ageGroup, minAge, maxAge, sessionName, day, startTime, endTime, stationSlug, price] = rows[i];
-        await db.programmeSchedule.create({
+        const [ageGroup, minAge, maxAge, sessionName, day, startTime, endTime, field, stationSlug, price] = rows[i];
+        const stationId = venues[stationSlug]?.id ?? defaultStationId;
+        if (!stationId) continue;
+        await db.scheduleSlot.create({
           data: {
-            programmeId: programme.id, ageGroup, minAge, maxAge, sessionName, day, startTime, endTime,
-            venueId: venues[stationSlug]?.id ?? null, coachId: i < 2 ? coaches["Sofia Amrani"].id : coaches["Yanis Belkacem"].id,
+            stationId, programmeId: programme.id, ageGroup, minAge, maxAge, sessionName,
+            day, dayOfWeek: parseDayOfWeek(day), startTime, endTime,
+            startMinutes: parseMinutes(startTime), endMinutes: parseMinutes(endTime), field,
+            coachId: i < 2 ? coaches["Sofia Amrani"].id : coaches["Yanis Belkacem"].id,
             price, registrationStatus: "open", order: i,
           },
         });
@@ -682,8 +699,8 @@ async function main() {
           shortDescription: "A week of intensive training and match play during the school holidays.",
           shortDescriptionFr: "Une semaine d'entraînement intensif et de matchs pendant les vacances scolaires.", shortDescriptionAr: "أسبوع من التدريب المكثّف والمباريات خلال العطلة المدرسية.",
           fullDescription: "Our Holiday Football Camp gives players a full week of training, small-sided games and tournaments during school holidays, led by our coaching team. A great way to keep progressing — or to try the academy for the first time.",
-          heroImageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80",
-          cardImageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80",
+          heroImageUrl: "/media/wide/squad-trip.jpg",
+          cardImageUrl: "/media/card/squad-trip.jpg",
           categoryId: programmeCategories["holiday-camps"].id,
           ageRangeLabel: "Ages 6-16", minAge: 6, maxAge: 16,
           priceLabel: "From 12,000 DA / week", priceFrom: 12000,
@@ -692,13 +709,20 @@ async function main() {
           metaDescription: "A week of intensive football training and match play during the school holidays for players aged 6-16.",
         },
       });
-      await db.programmeSchedule.create({
-        data: {
-          programmeId: programme.id, ageGroup: "All ages", minAge: 6, maxAge: 16, sessionName: "Full day camp",
-          day: "Monday-Friday", startTime: "09:00", endTime: "15:00", venueId: venues["northside-sports-complex"]?.id ?? null,
-          coachId: coaches["Karim Ferhat"].id, price: 12000, registrationStatus: "open", order: 0,
-        },
-      });
+      // "Monday-Friday" names a range, not a weekday, so dayOfWeek stays null:
+      // the slot still displays, but is outside the per-day overlap rule and the
+      // admin flags it for review. See parseDayOfWeek in src/lib/schedule.ts.
+      const campStationId = venues["northside-sports-complex"]?.id ?? defaultStationId;
+      if (campStationId) {
+        await db.scheduleSlot.create({
+          data: {
+            stationId: campStationId, programmeId: programme.id, ageGroup: "All ages", minAge: 6, maxAge: 16,
+            sessionName: "Full day camp", day: "Monday-Friday", dayOfWeek: parseDayOfWeek("Monday-Friday"),
+            startTime: "09:00", endTime: "15:00", startMinutes: parseMinutes("09:00"), endMinutes: parseMinutes("15:00"),
+            coachId: coaches["Karim Ferhat"].id, price: 12000, registrationStatus: "open", order: 0,
+          },
+        });
+      }
       await db.programmeVenue.create({ data: { programmeId: programme.id, venueId: venues["northside-sports-complex"].id, order: 0 } });
     }
     console.log("✅ Programmes created");
@@ -707,10 +731,10 @@ async function main() {
     const pathwayCount = await db.pathwayLevel.count();
     if (pathwayCount === 0) {
       const levels = [
-        { name: "Foundation", ageRangeLabel: "Ages 6-8", color: "#43C7ED", description: "Introducing the fundamentals of the game in a fun, safe environment.", order: 0 },
-        { name: "Development", ageRangeLabel: "Ages 9-12", color: "#3996D6", description: "Building technical ability, decision-making and game understanding.", order: 1 },
-        { name: "Advanced", ageRangeLabel: "Ages 13-16", color: "#002B5C", description: "Preparing players for competitive football and representative squads.", order: 2 },
-        { name: "Development Squads", ageRangeLabel: "By assessment", color: "#001F49", description: "Our highest level of coaching for players identified through assessment.", order: 3 },
+        { name: "Foundation", ageRangeLabel: "Ages 6-8", color: "#C0453F", description: "Introducing the fundamentals of the game in a fun, safe environment.", order: 0 },
+        { name: "Development", ageRangeLabel: "Ages 9-12", color: "#A32F33", description: "Building technical ability, decision-making and game understanding.", order: 1 },
+        { name: "Advanced", ageRangeLabel: "Ages 13-16", color: "#3B1E22", description: "Preparing players for competitive football and representative squads.", order: 2 },
+        { name: "Development Squads", ageRangeLabel: "By assessment", color: "#1B1315", description: "Our highest level of coaching for players identified through assessment.", order: 3 },
       ];
       await db.pathwayLevel.createMany({ data: levels });
     }
@@ -759,7 +783,7 @@ async function main() {
                   subheading: "We exist to help every player reach their potential — on the pitch and off it.",
                   subheadingFr: "Nous existons pour aider chaque joueur à atteindre son potentiel, sur le terrain comme en dehors.",
                   subheadingAr: "نحن هنا لمساعدة كل لاعب على بلوغ إمكاناته، داخل الملعب وخارجه.",
-                  imageUrl: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=1600&q=80",
+                  imageUrl: "/media/wide/head-coach.jpg",
                   ctaLabel: "View Programmes", ctaLabelFr: "Voir les programmes", ctaLabelAr: "عرض البرامج", ctaUrl: "/programmes",
                 }),
               },
@@ -774,7 +798,7 @@ async function main() {
                   body: "Football Skills Academy was founded to give every young player — regardless of starting ability — access to structured, high-quality coaching. We believe development takes time, and that the best results come from a clear, age-appropriate pathway rather than shortcuts.",
                   bodyFr: "Football Skills Academy a été fondée pour donner à chaque jeune joueur, quel que soit son niveau de départ, accès à un encadrement structuré et de qualité. Nous croyons que la progression demande du temps, et que les meilleurs résultats viennent d'un parcours clair et adapté à l'âge, plutôt que de raccourcis.",
                   bodyAr: "تأسست أكاديمية Football Skills Academy لتتيح لكل لاعب شاب، أياً كان مستواه في البداية، تأطيراً منظّماً وعالي الجودة. نؤمن بأن التطور يحتاج وقتاً، وأن أفضل النتائج تأتي من مسار واضح يناسب كل مرحلة عمرية، لا من الطرق المختصرة.",
-                  imageUrl: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1200&q=80",
+                  imageUrl: "/media/card/team-talk.jpg",
                   ctaLabel: "Our Methodology", ctaLabelFr: "Notre méthodologie", ctaLabelAr: "منهجيتنا", ctaUrl: "/methodology",
                 }),
               },
@@ -822,7 +846,7 @@ async function main() {
                   subheading: "A single coaching philosophy, applied consistently across every age group and venue.",
                   subheadingFr: "Une philosophie d'encadrement unique, appliquée de la même façon à chaque catégorie d'âge et sur chaque site.",
                   subheadingAr: "فلسفة تدريب واحدة، تُطبَّق بالطريقة نفسها في كل فئة عمرية وكل موقع.",
-                  imageUrl: "https://images.unsplash.com/photo-1602674809991-8f1b40e0a2c4?w=1600&q=80",
+                  imageUrl: "/media/wide/dribbling.jpg",
                 }),
               },
               {
@@ -880,7 +904,7 @@ async function main() {
                   subheading: "A clear route from a player's first session through to competitive Development Squad football.",
                   subheadingFr: "Un chemin clair, de la première séance jusqu'au football de compétition en équipe de développement.",
                   subheadingAr: "طريق واضح، من الحصة الأولى إلى كرة القدم التنافسية ضمن فرق التطوير.",
-                  imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80",
+                  imageUrl: "/media/wide/ball-control.jpg",
                 }),
               },
               {
@@ -925,7 +949,7 @@ async function main() {
       const header = await db.websiteHeaderConfig.create({
         data: {
           stationId: null,
-          backgroundColor: "#FFFFFF", textColor: "#001F49", accentColor: "#43C7ED",
+          backgroundColor: "#FFFFFF", textColor: "#1B1315", accentColor: "#A32F33",
           sticky: true, showLanguageSwitcher: true,
           ctaLabel: "Book Now", ctaLabelFr: "Réserver", ctaLabelAr: "احجز الآن",
           ctaUrl: "/apply", ctaStyle: "filled",
@@ -961,7 +985,7 @@ async function main() {
       const footer = await db.websiteFooterConfig.create({
         data: {
           stationId: null,
-          backgroundColor: "#001F49", textColor: "#FFFFFF", accentColor: "#43C7ED",
+          backgroundColor: "#1B1315", textColor: "#FFFFFF", accentColor: "#D9645E",
           tagline: "Train, compete and grow with Football Skills Academy.",
           taglineFr: "Entraînez-vous, progressez et grandissez avec Football Skills Academy.", taglineAr: "تدرّب وتقدّم وتطوّر مع أكاديمية Football Skills Academy.",
           copyrightText: `© ${new Date().getFullYear()} Football Skills Academy. All rights reserved.`,
@@ -1024,7 +1048,7 @@ async function main() {
           title: "Welcome to Football Skills Academy",
           excerpt: "We're excited to launch our new Showcase Website, with programmes, venues and Development Squads all in one place.",
           body: "<p>We're excited to launch our redesigned website — a single place to explore our programmes, find your nearest venue, and register interest in our Development Squads.</p><p>Whether your player is just starting out or ready for the next step, our team is here to help you find the right fit.</p>",
-          coverImageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1200&q=80",
+          coverImageUrl: "/media/wide/team-photo.jpg",
           categoryId: newsCategory.id, authorName: "Football Skills Academy",
           isPublished: true, isFeatured: true, publishedAt: new Date(),
         },
@@ -1039,7 +1063,7 @@ async function main() {
           title: "Holiday Football Camp Dates Announced",
           excerpt: "Our next Holiday Football Camp is open for registration — a full week of training and match play.",
           body: "<p>Registration is now open for our next Holiday Football Camp. Places are limited, so early registration is recommended.</p><p>See the Programmes page for full pricing and schedule details.</p>",
-          coverImageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1200&q=80",
+          coverImageUrl: "/media/wide/squad-trip.jpg",
           categoryId: newsCategory.id, authorName: "Football Skills Academy",
           isPublished: true, isFeatured: false, publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         },
@@ -1158,6 +1182,22 @@ async function main() {
     if (!existing) await db.attributeGroup.create({ data: { name } });
   }
   console.log("✅ Attribute groups created");
+
+  // Every location owns exactly one schedule. New stations get theirs from
+  // POST /api/stations; this backstops stations created any other way, including
+  // by an earlier version of this seed. Deliberately outside SEED_DEMO_CONTENT —
+  // it provisions real locations, not demo ones.
+  const stationsNeedingSchedule = await db.station.findMany({ where: { locationSchedule: null }, select: { id: true } });
+  for (const station of stationsNeedingSchedule) {
+    await db.locationSchedule.create({ data: { stationId: station.id } });
+  }
+  console.log(`✅ Location schedules provisioned (${stationsNeedingSchedule.length} new)`);
+
+  // `prisma db push` (this project's deploy mechanism) creates columns, indexes
+  // and foreign keys but not CHECK or EXCLUDE constraints, so the schedule's
+  // double-booking rules are applied here on every deploy. Idempotent.
+  await ensureScheduleConstraints(db);
+  console.log("✅ Schedule conflict constraints ensured");
 
   console.log("\n🎉 Seeding complete!");
 }

@@ -232,7 +232,16 @@ const SITE_PREFIXES = [
   path.join("src", "app", "[locale]"),
   path.join("src", "components", "website"),
 ];
+/**
+ * ...except src/components/website/admin, which is back-office UI that happens
+ * to live under the website folder: those components are rendered by
+ * /dashboard/website/* pages and call useTranslation() (i18next), not
+ * next-intl. Without this exclusion every key they use is reported as missing
+ * from messages/site — the exact failure mode the split above exists to avoid.
+ */
+const SITE_EXCLUDED_PREFIXES = [path.join("src", "components", "website", "admin")];
 function isSiteFile(relPath) {
+  if (SITE_EXCLUDED_PREFIXES.some((prefix) => relPath.startsWith(prefix))) return false;
   return SITE_PREFIXES.some((prefix) => relPath.startsWith(prefix));
 }
 

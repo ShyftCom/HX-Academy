@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!body.name) return NextResponse.json({ error: "name is required" }, { status: 400 });
     const count = await db.programmeCategory.count();
     const category = await db.programmeCategory.create({
-      data: { name: body.name, nameFr: body.nameFr ?? null, nameAr: body.nameAr ?? null, slug: slugify(body.name), colorTag: body.colorTag ?? "#3996D6", order: count },
+      data: { name: body.name, nameFr: body.nameFr ?? null, nameAr: body.nameAr ?? null, slug: slugify(body.name), colorTag: body.colorTag ?? "#A32F33", order: count },
     });
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
