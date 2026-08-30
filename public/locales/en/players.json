@@ -86,7 +86,10 @@
     "orders": "Orders",
     "no_subscriptions": "No subscriptions",
     "no_payments": "No payments",
-    "no_orders": "No orders"
+    "no_orders": "No orders",
+    "documents": "Documents",
+    "no_documents": "No documents uploaded yet",
+    "open_document": "Open"
   },
   "no_plan": "No Plan",
   "delete": {

@@ -254,6 +254,7 @@ export default function PlayersPage() {
                   <TabsTrigger value="subscriptions">{t("tabs.subscriptions")}</TabsTrigger>
                   <TabsTrigger value="payments">{t("tabs.payments")}</TabsTrigger>
                   <TabsTrigger value="orders">{t("tabs.orders")}</TabsTrigger>
+                  <TabsTrigger value="documents">{t("tabs.documents")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="info">
                   <div className="grid grid-cols-2 gap-3 text-sm">
@@ -290,6 +291,20 @@ export default function PlayersPage() {
                         <span className="text-sm font-medium">{formatCurrency(o.totalAmount)}</span>
                       </div>
                     )) : <p className="text-sm text-gray-400">{t("tabs.no_orders")}</p>}
+                  </div>
+                </TabsContent>
+                {/* Uploaded by the player from their portal, after conversion. */}
+                <TabsContent value="documents">
+                  <div className="space-y-2">
+                    {playerDetail.documents?.length ? playerDetail.documents.map((d: any) => (
+                      <div key={d.id} className="rounded-lg border p-3 flex items-center justify-between gap-3 dark:border-gray-700">
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">{d.requirement?.title ?? d.fileName}</p>
+                          <p className="text-xs text-gray-400 truncate">{d.fileName} · {formatDate(d.createdAt)}</p>
+                        </div>
+                        <a href={d.fileUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-medium text-blue-600 hover:underline">{t("tabs.open_document")}</a>
+                      </div>
+                    )) : <p className="text-sm text-gray-400">{t("tabs.no_documents")}</p>}
                   </div>
                 </TabsContent>
               </Tabs>

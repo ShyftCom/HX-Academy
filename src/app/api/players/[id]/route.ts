@@ -14,6 +14,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       subscriptions: { include: { plan: true }, orderBy: { createdAt: "desc" } },
       payments: { include: { plan: true, paymentMethod: true }, orderBy: { createdAt: "desc" } },
       orders: { include: { items: { include: { product: true } }, status: true }, orderBy: { createdAt: "desc" } },
+      documents: { include: { requirement: true }, orderBy: { createdAt: "desc" } },
     },
   });
   if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });

@@ -86,7 +86,10 @@
     "orders": "Commandes",
     "no_subscriptions": "Aucun abonnement",
     "no_payments": "Aucun paiement",
-    "no_orders": "Aucune commande"
+    "no_orders": "Aucune commande",
+    "documents": "Documents",
+    "no_documents": "Aucun document téléversé",
+    "open_document": "Ouvrir"
   },
   "no_plan": "Aucune formule",
   "delete": {
