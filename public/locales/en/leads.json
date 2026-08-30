@@ -95,7 +95,21 @@
   },
   "convert": {
     "success": "Lead converted to player",
-    "failed": "Conversion failed"
+    "failed": "Conversion failed",
+    "title": "Create the player's account",
+    "intro": "Closing this lead creates the player's login. They sign in with these details, then choose a plan, pay, and upload their documents from their portal.",
+    "email_label": "Email",
+    "password_label": "Password",
+    "password_placeholder": "At least 8 characters",
+    "password_hint": "Generated for you — edit it if you'd rather set your own. Ask the player to change it after their first login.",
+    "generate": "Generate",
+    "submit": "Create account",
+    "credentials_title": "Account created",
+    "credentials_hint": "Pass these to the player. The password is shown once and cannot be retrieved later.",
+    "next_steps": "They can now sign in, choose a plan, pay by card or upload a receipt, and finish uploading their documents.",
+    "copy": "Copy",
+    "copied": "Credentials copied",
+    "close": "Done"
   },
   "empty": {
     "no_leads": "No leads found",

@@ -9,11 +9,15 @@ import {
   ChevronRight, ArrowRight, User, Phone, Mail, MapPin, Calendar,
   Tag, UserCheck, CheckCircle2, Circle, FileText, PhoneCall,
   MailOpen, ClipboardList, Paperclip, Archive, RefreshCw,
-  Loader2, AlertTriangle, Plus, X,
+  Loader2, AlertTriangle, Plus, X, Copy, KeyRound,
 } from "lucide-react";
 import { formatDate, timeAgo } from "@/lib/utils";
 import { StatusBadge, type LeadStatus } from "@/components/leads/status-badge";
 import { BookingModal } from "@/components/calendar/booking-modal";
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { generatePassword } from "@/lib/generate-password";
 import { useTranslation } from "react-i18next";
 
 interface Lead {
@@ -113,6 +117,10 @@ export default function LeadDetailPage() {
   const [noteText, setNoteText] = useState("");
   const [addingNote, setAddingNote] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [convertForm, setConvertForm] = useState({ email: "", password: "" });
+  /** Set once the account exists; the password is never retrievable again. */
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Auto-open booking modal when status changes to "Meeting booked" on this lead
   useEffect(() => {
@@ -191,14 +199,38 @@ export default function LeadDetailPage() {
   });
 
   const convertMutation = useMutation({
-    mutationFn: () => fetch(`/api/leads/${id}/convert`, { method: "POST" }).then((r) => r.json()),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const res = await fetch(`/api/leads/${id}/convert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: convertForm.email.trim(), password: convertForm.password }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? tl("convert.failed"));
+      return json as { credentials: { email: string; password: string } };
+    },
+    onSuccess: (json) => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
       qc.invalidateQueries({ queryKey: ["lead-activity", id] });
+      // The dialog stays open on purpose — it now shows the one and only copy
+      // of the password the admin has to pass on.
+      setCredentials(json.credentials);
       toast.success(tl("convert.success"));
     },
-    onError: () => toast.error(tl("convert.failed")),
+    onError: (e: Error) => toast.error(e.message || tl("convert.failed")),
   });
+
+  function openConvertDialog() {
+    setCredentials(null);
+    setConvertForm({ email: lead?.email ?? "", password: generatePassword() });
+    setConvertOpen(true);
+  }
+
+  async function copyCredentials() {
+    if (!credentials) return;
+    await navigator.clipboard.writeText(`${credentials.email} / ${credentials.password}`);
+    toast.success(tl("convert.copied"));
+  }
 
   if (leadLoading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--text-muted)" }} /></div>;
@@ -282,12 +314,11 @@ export default function LeadDetailPage() {
             </button>
             {!lead.isConverted && (
               <button
-                onClick={() => convertMutation.mutate()}
-                disabled={convertMutation.isPending}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
+                onClick={openConvertDialog}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all"
                 style={{ background: "#10B981" }}
               >
-                {convertMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                <CheckCircle2 className="w-3.5 h-3.5" />
                 {tl("actions.convert_to_player")}
               </button>
             )}
@@ -545,6 +576,81 @@ export default function LeadDetailPage() {
           qc.invalidateQueries({ queryKey: ["lead-activity", id] });
         }}
       />
+
+      {/* Closing the lead = opening the player's account. */}
+      <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>{credentials ? tl("convert.credentials_title") : tl("convert.title")}</DialogTitle>
+          </DialogHeader>
+
+          {credentials ? (
+            <>
+              <DialogBody className="space-y-4">
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.credentials_hint")}</p>
+                <div className="rounded-xl p-4 space-y-2 font-mono text-sm" style={{ background: "var(--muted-bg)" }}>
+                  <div><span style={{ color: "var(--text-muted)" }}>{tl("convert.email_label")}: </span>{credentials.email}</div>
+                  <div><span style={{ color: "var(--text-muted)" }}>{tl("convert.password_label")}: </span>{credentials.password}</div>
+                </div>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.next_steps")}</p>
+              </DialogBody>
+              <DialogFooter>
+                <Button variant="outline" onClick={copyCredentials}>
+                  <Copy className="me-2 h-4 w-4" />{tl("convert.copy")}
+                </Button>
+                <Button onClick={() => setConvertOpen(false)}>{tl("convert.close")}</Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogBody className="space-y-4">
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.intro")}</p>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                    {tl("convert.email_label")} <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={convertForm.email}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, email: e.target.value }))}
+                    placeholder="joueur@exemple.com"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                    {tl("convert.password_label")} <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={convertForm.password}
+                      onChange={(e) => setConvertForm((f) => ({ ...f, password: e.target.value }))}
+                      placeholder={tl("convert.password_placeholder")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setConvertForm((f) => ({ ...f, password: generatePassword() }))}
+                    >
+                      <KeyRound className="me-2 h-4 w-4" />{tl("convert.generate")}
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{tl("convert.password_hint")}</p>
+                </div>
+              </DialogBody>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setConvertOpen(false)}>{tc("actions.cancel")}</Button>
+                <Button
+                  onClick={() => convertMutation.mutate()}
+                  loading={convertMutation.isPending}
+                  disabled={!convertForm.email.trim() || convertForm.password.trim().length < 8}
+                >
+                  {tl("convert.submit")}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
