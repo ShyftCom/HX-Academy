@@ -19,7 +19,8 @@
       "plan": "الصيغة",
       "info": "المعلومات",
       "documents": "الوثائق",
-      "review": "المراجعة"
+      "review": "المراجعة",
+      "survey": "الاستبيان"
     },
     "choosePlanHeading": "اختر صيغتك",
     "choosePlanBody": "اختر الاشتراك الأنسب لك.",
@@ -63,7 +64,11 @@
     "doneTitle": "تم إرسال الطلب!",
     "doneThanks": "شكراً لك، {name}!",
     "doneBody": "سنراجع طلبك ونتواصل معك قريباً على {contact}.",
-    "perDuration": "{price} / {duration} {unit}"
+    "perDuration": "{price} / {duration} {unit}",
+    "surveyHeading": "بعض الأسئلة",
+    "surveyBody": "تساعد إجاباتك فريقنا على التحضير لمقابلتك.",
+    "nextStepsBody": "بعد الإرسال، سيتصل بك فريقنا لاستكمال تسجيلك وفتح حساب لك. عندها ستختار صيغة الاشتراك، وتدفع، وترفع وثائقك من فضاء اللاعب الخاص بك.",
+    "doneNext": "بمجرد قبول ملفك، سننشئ لك حساباً: عندها يمكنك اختيار صيغة الاشتراك والدفع ورفع وثائقك من فضاء اللاعب الخاص بك."
   },
   "common": {
     "brand": "Football Skills Academy",
@@ -128,7 +133,7 @@
     "privacyRequired": "يُرجى الموافقة على سياسة الخصوصية للمتابعة.",
     "submissionFailed": "تعذّر إرسال الطلب.",
     "uploadFailed": "تعذّر تحميل الملف.",
-    "fileTooLarge": "حجم الملف كبير جداً (10 ميغابايت كحد أقصى).",
+    "fileTooLarge": "حجم الملف كبير جداً ({size} ميغابايت كحد أقصى).",
     "fileTypeNotAllowed": "نوع الملف غير مسموح به.",
     "noFileProvided": "لم يتم اختيار أي ملف.",
     "notFound": "غير موجود.",

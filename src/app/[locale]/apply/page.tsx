@@ -4,11 +4,20 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { formatNumber } from "@/lib/public-format";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Upload, Loader2, CheckCircle2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, CheckCircle2 } from "lucide-react";
 
+/**
+ * Public application form — a *lead* form, nothing more.
+ *
+ * It collects the survey the Super Admin configured and the applicant's own
+ * details, and stops there. Choosing a subscription plan, paying for it and
+ * uploading documents all used to live in this same wizard, which asked a
+ * stranger to pick a plan and hand over an ID card before anyone had spoken to
+ * them. Those steps now happen in the player portal, after an admin has closed
+ * the lead and created the account.
+ */
 function ApplyFormInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -16,88 +25,58 @@ function ApplyFormInner() {
   const t = useTranslations("apply");
   const tc = useTranslations("common");
   const tErr = useTranslations("errors");
+  /**
+   * Set when the visitor arrived from a plan card. Never shown — it rides
+   * along on the lead purely so the sales team can see what caught their eye.
+   */
   const planParam = searchParams.get("plan");
 
-  const [step, setStep] = useState(planParam ? 1 : 0);
+  const [step, setStep] = useState(0);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [form, setForm] = useState({ fullName: "", phone: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
   const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string | string[]>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, { fileName: string; fileUrl: string; mimeType?: string; size?: number }>>({});
-  const [uploading, setUploading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetch("/api/public/landing")
       .then((r) => r.json())
       .then((d) => {
         setData(d);
-        if (planParam) {
-          const plan = d.plans?.find((p: any) => p.id === planParam);
-          if (plan) setSelectedPlan(plan);
-        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [planParam]);
+  }, []);
 
-  /** Step ids; visible labels come from apply.steps.<id>. */
-  const STEPS = ["plan", "info", "documents", "review"] as const;
-  const plans = data?.plans ?? [];
   const survey = data?.survey;
-  const fileReqs = data?.fileRequirements ?? [];
-  const currencySymbol = data?.settings?.currency_symbol ?? "DZD";
+  const hasSurvey = Boolean(survey?.questions?.length);
+
+  /** Step ids; visible labels come from apply.steps.<id>. The survey step is dropped when none is configured. */
+  const STEPS: readonly string[] = hasSurvey ? ["survey", "info", "review"] : ["info", "review"];
+  const current = STEPS[step];
+  const lastStep = STEPS.length - 1;
 
   const setField = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
 
-  async function handleFileUpload(reqId: string, e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading((p) => ({ ...p, [reqId]: true }));
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("folder", "applications");
-      const res = await fetch("/api/public/upload", { method: "POST", body: fd });
-      const d = await res.json();
-      if (res.ok) {
-        setUploadedFiles((p) => ({ ...p, [reqId]: { fileName: file.name, fileUrl: d.url, mimeType: file.type, size: file.size } }));
-      } else {
-        toast.error(tErr("uploadFailed"));
-      }
-    } catch {
-      toast.error(tErr("uploadFailed"));
-    }
-    setUploading((p) => ({ ...p, [reqId]: false }));
-  }
-
-  function removeFile(reqId: string) {
-    setUploadedFiles((p) => { const n = { ...p }; delete n[reqId]; return n; });
-  }
-
   function validateStep(): boolean {
-    if (step === 0 && !selectedPlan) { toast.error(tErr("planRequired")); return false; }
-    if (step === 1) {
+    if (current === "survey") {
+      for (const q of survey.questions) {
+        // The question text itself is admin-authored and has no per-locale
+        // column; only the surrounding sentence is translated.
+        const answer = surveyAnswers[q.id];
+        const answered = Array.isArray(answer) ? answer.length > 0 : Boolean(answer?.toString().trim());
+        if (q.isRequired && !answered) { toast.error(tErr("documentsRequired", { items: q.question })); return false; }
+      }
+    }
+    if (current === "info") {
       if (!form.fullName.trim()) { toast.error(tErr("participantNameRequired")); return false; }
       if (!form.phone.trim()) { toast.error(tErr("guardianPhoneRequired")); return false; }
-      if (survey) {
-        for (const q of survey.questions) {
-          // The question text itself is admin-authored and has no per-locale
-          // column; only the surrounding sentence is translated.
-          if (q.isRequired && !surveyAnswers[q.id]) { toast.error(tErr("documentsRequired", { items: q.question })); return false; }
-        }
-      }
-    }
-    if (step === 2) {
-      const missing = fileReqs.filter((r: any) => r.isRequired && !uploadedFiles[r.id]);
-      if (missing.length > 0) { toast.error(tErr("documentsRequired", { items: missing.map((r: any) => r.title).join(", ") })); return false; }
     }
     return true;
   }
 
-  function next() { if (validateStep()) setStep((p) => Math.min(p + 1, 3)); }
+  function next() { if (validateStep()) setStep((p) => Math.min(p + 1, lastStep)); }
   function back() { setStep((p) => Math.max(p - 1, 0)); }
 
   async function handleSubmit() {
@@ -112,7 +91,7 @@ function ApplyFormInner() {
         parentPhone: form.parentPhone || undefined,
         address: form.address || undefined,
         categoryInterest: form.categoryInterest || undefined,
-        selectedPlanId: selectedPlan?.id,
+        selectedPlanId: planParam ?? undefined,
         surveyAnswers: Object.entries(surveyAnswers)
           .filter(([, v]) => v && (Array.isArray(v) ? v.length > 0 : v.toString().trim()))
           .map(([questionId, answer]) => ({
@@ -120,13 +99,6 @@ function ApplyFormInner() {
             surveyId: survey?.id,
             answer: Array.isArray(answer) ? JSON.stringify(answer) : String(answer),
           })),
-        files: Object.entries(uploadedFiles).map(([requirementId, f]) => ({
-          requirementId,
-          fileName: f.fileName,
-          fileUrl: f.fileUrl,
-          mimeType: f.mimeType,
-          size: f.size,
-        })),
       };
 
       const res = await fetch("/api/public/apply", {
@@ -134,7 +106,6 @@ function ApplyFormInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const resp = await res.json();
 
       if (res.status === 409) { toast.error(tErr("duplicateApplication")); return; }
       if (!res.ok) { toast.error(tErr("submissionFailed")); return; }
@@ -206,7 +177,8 @@ function ApplyFormInner() {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{t("doneTitle")}</h2>
         <p className="text-gray-500 dark:text-gray-400 mb-2">{t("doneThanks", { name: form.fullName })}</p>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">{t("doneBody", { contact: form.phone || form.email })}</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-2">{t("doneBody", { contact: form.phone || form.email })}</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">{t("doneNext")}</p>
         <Link href={`/${locale}`} className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
           <ArrowLeft className="ob-flip-rtl w-4 h-4" /> {t("backToHome")}
         </Link>
@@ -252,34 +224,28 @@ function ApplyFormInner() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
-          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+          <motion.div key={current} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
 
-            {/* STEP 0: Choose Plan */}
-            {step === 0 && (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("choosePlanHeading")}</h2>
-                <p className="text-gray-500 dark:text-gray-400">{t("choosePlanBody")}</p>
-                <div className="grid gap-4 mt-6">
-                  {plans.map((plan: any) => (
-                    <div key={plan.id} onClick={() => setSelectedPlan(plan)} className={`border-2 rounded-xl p-5 cursor-pointer transition-all ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-50 dark:bg-green-900/20" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"}`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-bold text-gray-900 dark:text-white text-lg">{plan.name}</h3>
-                          <p className="text-green-600 font-semibold">{t("perDuration", { price: `${currencySymbol} ${formatNumber(plan.price, locale)}`, duration: plan.duration, unit: plan.durationType })}</p>
-                          {plan.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{plan.description}</p>}
-                        </div>
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ms-4 ${selectedPlan?.id === plan.id ? "border-green-500 bg-green-500" : "border-gray-300"}`}>
-                          {selectedPlan?.id === plan.id && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                      </div>
+            {/* Survey configured by the Super Admin */}
+            {current === "survey" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{survey.title || t("surveyHeading")}</h2>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">{survey.description || t("surveyBody")}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+                  {survey.questions.map((q: any) => (
+                    <div key={q.id}>
+                      <label className={labelClass}>{q.question} {q.isRequired && <span className="text-red-500">*</span>}</label>
+                      {renderSurveyQuestion(q)}
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* STEP 1: Personal Info + Survey */}
-            {step === 1 && (
+            {/* Personal info */}
+            {current === "info" && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("personalHeading")}</h2>
@@ -324,84 +290,17 @@ function ApplyFormInner() {
                     </div>
                   </div>
                 </div>
-
-                {survey && survey.questions.length > 0 && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{survey.title}</h3>
-                    {survey.questions.map((q: any) => (
-                      <div key={q.id}>
-                        <label className={labelClass}>{q.question} {q.isRequired && <span className="text-red-500">*</span>}</label>
-                        {renderSurveyQuestion(q)}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
-            {/* STEP 2: File Uploads */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("documentsHeading")}</h2>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">{t("documentsBody")}</p>
-                </div>
-                {fileReqs.length === 0 ? (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">{t("noDocuments")}</div>
-                ) : (
-                  <div className="space-y-4">
-                    {fileReqs.map((req: any) => (
-                      <div key={req.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900 dark:text-white">{req.title}</p>
-                              {req.isRequired ? <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">{t("required")}</span> : <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">{t("optional")}</span>}
-                            </div>
-                            {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{req.description}</p>}
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("accepted", { types: req.allowedTypes, size: req.maxSizeMb })}</p>
-                          </div>
-                          {uploadedFiles[req.id] && <Check className="w-5 h-5 text-green-500 flex-shrink-0 ms-2" />}
-                        </div>
-                        {uploadedFiles[req.id] ? (
-                          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg px-3 py-2">
-                            <span className="text-sm text-green-700 dark:text-green-400 flex-1 truncate">{uploadedFiles[req.id].fileName}</span>
-                            <button onClick={() => removeFile(req.id)} className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><X className="w-4 h-4" /></button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer block">
-                            <input type="file" className="hidden" accept={req.allowedTypes} onChange={(e) => handleFileUpload(req.id, e)} />
-                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-all">
-                              {uploading[req.id] ? (
-                                <Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-400" />
-                              ) : (
-                                <><Upload className="w-5 h-5 mx-auto text-gray-400 dark:text-gray-500 mb-1" /><span className="text-sm text-gray-500 dark:text-gray-400">{t("clickToUpload")}</span></>
-                              )}
-                            </div>
-                          </label>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 3: Review */}
-            {step === 3 && (
+            {/* Review */}
+            {current === "review" && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("reviewHeading")}</h2>
                   <p className="text-gray-500 dark:text-gray-400 mt-1">{t("reviewBody")}</p>
                 </div>
                 <div className="space-y-4">
-                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" /> {t("selectedPlan")}
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 font-medium">{selectedPlan?.name}</p>
-                    <p className="text-green-600 text-sm">{t("perDuration", { price: `${currencySymbol} ${formatNumber(selectedPlan?.price ?? 0, locale)}`, duration: selectedPlan?.duration ?? "", unit: selectedPlan?.durationType ?? "" })}</p>
-                  </div>
                   <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> {t("yourInformation")}</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
@@ -410,22 +309,15 @@ function ApplyFormInner() {
                       ))}
                     </div>
                   </div>
-                  {Object.keys(uploadedFiles).length > 0 && (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-yellow-500 rounded-full" /> {t("uploadedDocuments", { count: Object.keys(uploadedFiles).length })}</h3>
-                      <div className="space-y-1">
-                        {Object.values(uploadedFiles).map((f, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"><Check className="w-4 h-4 text-green-500" />{f.fileName}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   {Object.keys(surveyAnswers).filter((k) => surveyAnswers[k]).length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2"><div className="w-2 h-2 bg-purple-500 rounded-full" /> {t("surveyAnswers")}</h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{t("surveyAnswered", { count: Object.keys(surveyAnswers).filter((k) => surveyAnswers[k]).length })}</p>
                     </div>
                   )}
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-5">
+                    <p className="text-sm text-green-800 dark:text-green-300">{t("nextStepsBody")}</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -437,7 +329,7 @@ function ApplyFormInner() {
           <button onClick={step === 0 ? () => router.push(`/${locale}`) : back} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium transition-colors">
             <ArrowLeft className="ob-flip-rtl w-4 h-4" /> {step === 0 ? t("backToHome") : tc("back")}
           </button>
-          {step < 3 ? (
+          {step < lastStep ? (
             <button onClick={next} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors">
               {t("continue")} <ArrowRight className="ob-flip-rtl w-4 h-4" />
             </button>

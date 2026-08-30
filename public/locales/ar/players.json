@@ -86,7 +86,10 @@
     "orders": "الطلبات",
     "no_subscriptions": "لا توجد اشتراكات",
     "no_payments": "لا توجد مدفوعات",
-    "no_orders": "لا توجد طلبات"
+    "no_orders": "لا توجد طلبات",
+    "documents": "المستندات",
+    "no_documents": "لم يتم رفع أي مستند بعد",
+    "open_document": "فتح"
   },
   "no_plan": "لا توجد باقة",
   "delete": {

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useHydrated } from "@/hooks/use-hydrated";
 import Link from "next/link";
-import { Bell, CreditCard, Home, LogOut, Moon, ShoppingBag, Sun, User } from "lucide-react";
+import { Bell, CreditCard, FileText, Home, LogOut, Moon, ShoppingBag, Sun, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { cn, getInitials } from "@/lib/utils";
@@ -17,6 +17,7 @@ import { I18nProvider } from "@/components/providers/i18n-provider";
 const navItems = [
   { href: "/player", icon: Home, tKey: "player.home" },
   { href: "/player/subscriptions", icon: CreditCard, tKey: "player.subscriptions" },
+  { href: "/player/documents", icon: FileText, tKey: "player.documents" },
   { href: "/player/store", icon: ShoppingBag, tKey: "player.store" },
   { href: "/player/notifications", icon: Bell, tKey: "player.notifications" },
   { href: "/player/profile", icon: User, tKey: "player.profile" },

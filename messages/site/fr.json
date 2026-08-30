@@ -19,7 +19,8 @@
       "plan": "Formule",
       "info": "Informations",
       "documents": "Documents",
-      "review": "Récapitulatif"
+      "review": "Récapitulatif",
+      "survey": "Questionnaire"
     },
     "choosePlanHeading": "Choisissez votre formule",
     "choosePlanBody": "Sélectionnez l’abonnement qui vous convient le mieux.",
@@ -63,7 +64,11 @@
     "doneTitle": "Inscription envoyée !",
     "doneThanks": "Merci, {name} !",
     "doneBody": "Nous étudions votre dossier et vous contacterons prochainement au {contact}.",
-    "perDuration": "{price} / {duration} {unit}"
+    "perDuration": "{price} / {duration} {unit}",
+    "surveyHeading": "Quelques questions",
+    "surveyBody": "Vos réponses aident notre équipe à préparer votre entretien.",
+    "nextStepsBody": "Après l’envoi, notre équipe vous contacte pour finaliser votre inscription et vous ouvrir un compte. Vous choisirez ensuite votre formule, réglerez votre abonnement et téléverserez vos documents depuis votre espace joueur.",
+    "doneNext": "Une fois votre dossier validé, nous vous créerons un compte : vous pourrez alors choisir votre formule, payer et téléverser vos documents depuis votre espace joueur."
   },
   "common": {
     "brand": "Football Skills Academy",
@@ -128,7 +133,7 @@
     "privacyRequired": "Merci d'accepter la politique de confidentialité pour continuer.",
     "submissionFailed": "L'envoi a échoué.",
     "uploadFailed": "Le téléversement a échoué.",
-    "fileTooLarge": "Fichier trop volumineux (10 Mo maximum).",
+    "fileTooLarge": "Fichier trop volumineux ({size} Mo maximum).",
     "fileTypeNotAllowed": "Type de fichier non autorisé.",
     "noFileProvided": "Aucun fichier fourni.",
     "notFound": "Introuvable.",

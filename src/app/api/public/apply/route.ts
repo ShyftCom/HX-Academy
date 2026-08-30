@@ -13,8 +13,11 @@ const schema = z.object({
   categoryInterest: z.string().optional(),
   selectedPlanId: z.string().optional(),
   surveyAnswers: z.array(z.object({ questionId: z.string(), surveyId: z.string().optional(), answer: z.string() })).optional(),
-  files: z.array(z.object({ requirementId: z.string().optional(), fileName: z.string(), fileUrl: z.string(), mimeType: z.string().optional(), size: z.number().optional() })).optional(),
 });
+
+// Documents are deliberately not accepted here. The public form only creates a
+// lead; files are uploaded by the player once the account exists, so this
+// unauthenticated endpoint no longer takes arbitrary file URLs.
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,19 +67,6 @@ export async function POST(req: NextRequest) {
           questionId: a.questionId,
           surveyId: a.surveyId ?? "",
           answer: a.answer,
-        })),
-      });
-    }
-
-    if (data.files?.length) {
-      await db.applicationFile.createMany({
-        data: data.files.map((f) => ({
-          leadId: lead.id,
-          requirementId: f.requirementId ?? null,
-          fileName: f.fileName,
-          fileUrl: f.fileUrl,
-          mimeType: f.mimeType ?? null,
-          size: f.size ?? null,
         })),
       });
     }

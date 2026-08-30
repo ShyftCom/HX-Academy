@@ -277,6 +277,7 @@ model Player {
   orders             Order[]
   notifications      Notification[]
   affiliateReferrals AffiliateReferral[]
+  documents          ApplicationFile[]
 
   @@map("players")
 }
@@ -739,11 +740,17 @@ model FileRequirement {
   @@map("file_requirements")
 }
 
+// Holds the documents a requirement asks for, at both stages of the funnel:
+// attached to a Lead when an admin uploads on the applicant's behalf, and
+// attached to a Player once the account exists and the player uploads their
+// own. Exactly one of leadId / playerId is set.
 model ApplicationFile {
   id            String           @id @default(cuid())
-  leadId        String
+  leadId        String?
+  playerId      String?
   requirementId String?
-  lead          Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead          Lead?            @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  player        Player?          @relation(fields: [playerId], references: [id], onDelete: Cascade)
   requirement   FileRequirement? @relation(fields: [requirementId], references: [id])
   fileName      String
   fileUrl       String
@@ -751,6 +758,8 @@ model ApplicationFile {
   size          Int?
   createdAt     DateTime         @default(now())
 
+  @@index([leadId])
+  @@index([playerId])
   @@map("application_files")
 }
 

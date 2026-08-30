@@ -7,9 +7,29 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate, formatCurrency, getInitials, timeAgo } from "@/lib/utils";
 import { differenceInDays, parseISO } from "date-fns";
-import { CreditCard, ShoppingBag, Bell, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { CreditCard, ShoppingBag, Bell, AlertTriangle, CheckCircle, Info, Circle, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
+
+/** One line of the "finish your registration" checklist. */
+function OnboardingStep({ done, title, hint, href, cta, icon: Icon }: { done: boolean; title: string; hint: string; href: string; cta: string; icon: React.ElementType }) {
+  return (
+    <div className="flex items-start gap-3">
+      {done
+        ? <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
+        : <Circle className="mt-0.5 h-5 w-5 shrink-0 text-gray-300" />}
+      <div className="min-w-0 flex-1">
+        <p className={`text-sm font-medium ${done ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"}`}>{title}</p>
+        {!done && <p className="text-xs text-gray-500">{hint}</p>}
+        {!done && (
+          <Link href={href} className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline">
+            <Icon className="h-3.5 w-3.5" />{cta}<ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function PlayerHomePage() {
   const { data: session } = useSession();
@@ -26,12 +46,26 @@ export default function PlayerHomePage() {
     queryFn: () => fetch("/api/notifications?perPage=5").then((r) => r.json()),
   });
 
+  const { data: docs } = useQuery({
+    queryKey: ["player-documents"],
+    queryFn: () => fetch("/api/player/documents").then((r) => r.json()),
+  });
+
   if (isLoading || !playerId) return <FullPageLoader />;
 
   const activeSub = player?.subscriptions?.find((s: any) => s.status === "active");
   const daysLeft = activeSub?.endDate ? differenceInDays(parseISO(activeSub.endDate), new Date()) : null;
   const recentOrders = player?.orders?.slice(0, 3) ?? [];
   const recentPayments = player?.payments?.slice(0, 3) ?? [];
+
+  // Registration finishes here, in the portal, not on the public form: pick a
+  // plan and pay for it, then hand over the paperwork.
+  const requiredDocs = (docs?.requirements ?? []).filter((r: any) => r.isRequired);
+  const uploadedRequirementIds = new Set((docs?.documents ?? []).map((d: any) => d.requirementId));
+  const docsDone = requiredDocs.length > 0 && requiredDocs.every((r: any) => uploadedRequirementIds.has(r.id));
+  const paymentPending = player?.payments?.some((p: any) => p.status === "pending") ?? false;
+  const onboardingComplete = Boolean(activeSub) && (requiredDocs.length === 0 || docsDone);
+
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
@@ -51,6 +85,31 @@ export default function PlayerHomePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Finish registration — hidden once there is nothing left to do */}
+      {!onboardingComplete && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Finish your registration</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <OnboardingStep
+              done={Boolean(activeSub)}
+              title="Choose your plan and pay"
+              hint={paymentPending ? "Your payment is with the team for approval." : "Pay by card, or upload a transfer receipt for approval."}
+              href="/player/subscriptions"
+              cta="Choose a plan"
+              icon={CreditCard}
+            />
+            <OnboardingStep
+              done={requiredDocs.length === 0 || docsDone}
+              title="Upload your documents"
+              hint={`${requiredDocs.filter((r: any) => uploadedRequirementIds.has(r.id)).length} of ${requiredDocs.length} uploaded`}
+              href="/player/documents"
+              cta="Upload documents"
+              icon={FileText}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Subscription Status */}
       <Card>

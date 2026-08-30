@@ -49,9 +49,22 @@ export default function SummerCampLandingPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  /** Matches the real cap on a public upload: Vercel drops a request body over 4.5MB. */
+  const PUBLIC_UPLOAD_MAX_MB = 4;
+
   async function handleFileUpload(reqId: string, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    // Clearing the input lets the visitor re-pick the same file after a failure.
+    e.target.value = "";
     if (!file) return;
+
+    // Checked here rather than left to the server: an oversized body never
+    // gets a response at all, so the box would spin forever.
+    if (file.size > PUBLIC_UPLOAD_MAX_MB * 1024 * 1024) {
+      toast.error(tErr("fileTooLarge", { size: PUBLIC_UPLOAD_MAX_MB }));
+      return;
+    }
+
     setUploading((p) => ({ ...p, [reqId]: true }));
     try {
       const fd = new FormData();
@@ -61,8 +74,11 @@ export default function SummerCampLandingPage() {
       const d = await res.json();
       if (res.ok) setUploadedFiles((p) => ({ ...p, [reqId]: { fileName: file.name, fileUrl: d.url, mimeType: file.type, size: file.size } }));
       else toast.error(tErr("uploadFailed"));
-    } catch { toast.error(tErr("uploadFailed")); }
-    setUploading((p) => ({ ...p, [reqId]: false }));
+    } catch {
+      toast.error(tErr("uploadFailed"));
+    } finally {
+      setUploading((p) => ({ ...p, [reqId]: false }));
+    }
   }
 
   function validateStep(): boolean {

@@ -3,11 +3,18 @@ import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
+import { generatePassword } from "@/lib/generate-password";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+
+  // Read once: the summer-camp branch below reads its own fields off the same body.
+  const body = (await req.json().catch(() => ({}))) as {
+    sessionId?: string; paymentStatus?: string; paidAmount?: number;
+    email?: string; password?: string;
+  };
 
   try {
     const lead = await db.lead.findUnique({ where: { id }, include: { status: true } });
@@ -18,8 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // ── Summer Camp conversion ──
     if (lead.leadType === "summer_camp") {
-      const body = await req.json().catch(() => ({}));
-      const { sessionId, paymentStatus, paidAmount } = body as { sessionId?: string; paymentStatus?: string; paidAmount?: number };
+      const { sessionId, paymentStatus, paidAmount } = body;
 
       // Parse camp-specific data stored on the lead
       let campData: { sessionId?: string; gender?: string; healthNotes?: string; guardianRelation?: string } = {};
@@ -82,14 +88,43 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ summerCampPlayer: player }, { status: 201 });
     }
 
-    // ── Academy conversion (original flow) ──
-    let user = lead.email ? await db.user.findUnique({ where: { email: lead.email } }) : null;
+    // ── Academy conversion: close the lead by opening the player's account ──
+    //
+    // The credentials are set here, by the admin closing the lead, and handed
+    // back once in the response so they can be passed on to the player. They
+    // used to be silently derived from the lead's phone number, which meant
+    // nobody could tell the player what their password was — and anyone who
+    // knew the phone number could log in as them.
+    const email = (body.email ?? lead.email ?? "").trim().toLowerCase();
+    if (!email) {
+      return NextResponse.json({ error: "An email address is required to create the player's account" }, { status: 400 });
+    }
+
+    const plainPassword = body.password?.trim() || generatePassword();
+    if (plainPassword.length < 8) {
+      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    }
 
     const playerRole = await db.role.findFirst({ where: { name: "Player" } });
-    const password = await hashPassword(lead.phone ?? "hxacademy123");
+    const password = await hashPassword(plainPassword);
 
-    if (!user) {
-      const email = lead.email || `player-${Date.now()}@hxacademy.local`;
+    let user = await db.user.findUnique({ where: { email }, include: { player: true, role: true } });
+
+    if (user) {
+      if (user.player) {
+        return NextResponse.json({ error: "That email already belongs to a player account" }, { status: 400 });
+      }
+      // A staff or admin login must not be quietly repurposed — and its
+      // password certainly must not be reset by converting a lead.
+      if (user.role && user.role.name !== "Player") {
+        return NextResponse.json({ error: "That email already belongs to a staff account" }, { status: 400 });
+      }
+      user = await db.user.update({
+        where: { id: user.id },
+        data: { name: lead.fullName, password, roleId: playerRole?.id ?? user.roleId, isActive: true },
+        include: { player: true, role: true },
+      });
+    } else {
       user = await db.user.create({
         data: {
           name: lead.fullName,
@@ -98,11 +133,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           roleId: playerRole?.id ?? null,
           isActive: true,
         },
+        include: { player: true, role: true },
       });
     }
-
-    const existingPlayer = await db.player.findUnique({ where: { userId: user.id } });
-    if (existingPlayer) return NextResponse.json({ error: "Player record already exists for this user" }, { status: 400 });
 
     const refMatch = lead.notes?.match(/__ref:([A-Z0-9]+)__/);
     const refCode = refMatch?.[1] ?? null;
@@ -117,7 +150,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         userId: user.id,
         fullName: lead.fullName,
         phone: lead.phone ?? null,
-        email: lead.email ?? null,
+        email,
         dateOfBirth: lead.dateOfBirth,
         age: lead.age,
         parentName: lead.parentName ?? null,
@@ -143,7 +176,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    await db.lead.update({ where: { id }, data: { isConverted: true, convertedAt: new Date() } });
+    await db.lead.update({ where: { id }, data: { isConverted: true, convertedAt: new Date(), email } });
 
     await logLeadActivity({
       leadId: id,
@@ -167,11 +200,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       userId: user.id,
       playerId: player.id,
       title: "Welcome to HX Academy!",
-      message: `Your account has been created. Your temporary password is your phone number.`,
+      message: "Your account is ready. Next: choose your plan, pay, then upload your documents.",
       type: "success",
     });
 
-    return NextResponse.json({ player, user: { id: user.id, email: user.email } }, { status: 201 });
+    // The plaintext password is returned exactly once, to the admin who just
+    // set it, so they can pass it to the player. It is never stored or logged.
+    return NextResponse.json(
+      { player, user: { id: user.id, email: user.email }, credentials: { email, password: plainPassword } },
+      { status: 201 },
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Conversion failed" }, { status: 500 });

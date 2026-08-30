@@ -95,7 +95,21 @@
   },
   "convert": {
     "success": "Lead converti en joueur",
-    "failed": "Échec de la conversion"
+    "failed": "Échec de la conversion",
+    "title": "Créer le compte du joueur",
+    "intro": "Clôturer ce lead crée l’accès du joueur. Il se connecte avec ces identifiants, puis choisit sa formule, paie et téléverse ses documents depuis son espace.",
+    "email_label": "E-mail",
+    "password_label": "Mot de passe",
+    "password_placeholder": "8 caractères minimum",
+    "password_hint": "Généré automatiquement — modifiez-le si vous préférez le choisir. Demandez au joueur de le changer après sa première connexion.",
+    "generate": "Générer",
+    "submit": "Créer le compte",
+    "credentials_title": "Compte créé",
+    "credentials_hint": "Transmettez ces identifiants au joueur. Le mot de passe n’est affiché qu’une seule fois.",
+    "next_steps": "Il peut maintenant se connecter, choisir sa formule, payer par carte ou déposer un justificatif, puis téléverser ses documents.",
+    "copy": "Copier",
+    "copied": "Identifiants copiés",
+    "close": "Terminé"
   },
   "empty": {
     "no_leads": "Aucun lead trouvé",
