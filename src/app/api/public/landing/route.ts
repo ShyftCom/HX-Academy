@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { SECRET_SETTING_KEYS } from "@/lib/settings";
+import { APPLICATION_SURVEY_SETTING } from "@/lib/setting-keys";
 
 export async function GET(req: NextRequest) {
   try {
@@ -42,11 +43,16 @@ export async function GET(req: NextRequest) {
       orderBy: { price: "asc" },
     });
 
-    const activeSurveyId = raw["lp_active_survey_id"] ?? "";
+    // Which survey the application form asks. Chosen by a Super Admin on the
+    // Survey Builder page; empty means the form skips the survey step. The
+    // isActive filter is what makes the Active toggle on that page mean
+    // something here — switching a survey off takes it off the public form
+    // without anyone having to clear the setting too.
+    const activeSurveyId = raw[APPLICATION_SURVEY_SETTING] ?? "";
     let survey = null;
     if (activeSurveyId) {
-      const rawSurvey = await db.survey.findUnique({
-        where: { id: activeSurveyId },
+      const rawSurvey = await db.survey.findFirst({
+        where: { id: activeSurveyId, isActive: true },
         include: { questions: { orderBy: { order: "asc" } } },
       });
       if (rawSurvey) {

@@ -16,10 +16,14 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDate } from "@/lib/utils";
-import { Plus, Edit, Trash2, FileText, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, X, ClipboardList, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { APPLICATION_SURVEY_SETTING } from "@/lib/setting-keys";
 
 const QTYPES = ["text", "number", "select", "radio", "checkbox", "textarea"];
+
+/** Sentinel for "no survey" — Radix Select cannot hold an empty string as a value. */
+const NO_SURVEY = "__none__";
 
 export default function SurveysPage() {
   const { t } = useTranslation("surveys");
@@ -34,9 +38,43 @@ export default function SurveysPage() {
   const [deleteQId, setDeleteQId] = useState<string | null>(null);
   const [qForm, setQForm] = useState({ question: "", questionType: "text", isRequired: false, options: [] as string[] });
   const [newOption, setNewOption] = useState("");
+  /** Only set once the admin touches the select; otherwise the saved setting shows through. */
+  const [pickedSurveyId, setPickedSurveyId] = useState<string | undefined>(undefined);
 
   const { data: surveys, isLoading } = useQuery({ queryKey: ["surveys"], queryFn: () => fetch("/api/surveys").then((r) => r.json()) });
   const { data: surveyDetail } = useQuery({ queryKey: ["survey", selectedSurvey?.id], queryFn: () => fetch(`/api/surveys/${selectedSurvey.id}`).then((r) => r.json()), enabled: !!selectedSurvey?.id });
+
+  // Which survey the public application form asks. Stored as a setting rather
+  // than a column, because "in use on the form" is a property of the form, not
+  // of the survey — only one can hold it at a time.
+  const { data: settings } = useQuery<Record<string, string>>({ queryKey: ["settings"], queryFn: () => fetch("/api/settings").then((r) => r.json()) });
+  const savedSurveyId = settings?.[APPLICATION_SURVEY_SETTING] ?? "";
+
+  // Derived rather than copied into state by an effect: the select shows the
+  // admin's pick if they have made one, otherwise whatever is saved, and
+  // undefined until the settings land so it never flashes "No survey" first.
+  const formSurveyId = pickedSurveyId ?? (settings ? savedSurveyId || NO_SURVEY : undefined);
+
+  const saveFormSurveyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [APPLICATION_SURVEY_SETTING]: id === NO_SURVEY ? "" : id }),
+      });
+      const json = await res.json();
+      // settings:edit is a separate permission from survey editing, so surface
+      // what the server said rather than a generic failure.
+      if (!res.ok) throw new Error(json.error ?? t("common:toast.save_failed"));
+      return json;
+    },
+    onSuccess: () => { toast.success(t("form_survey.saved")); qc.invalidateQueries({ queryKey: ["settings"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const chosenSurvey = surveys?.find((s: any) => s.id === formSurveyId);
+  const chosenIsInactive = Boolean(chosenSurvey && !chosenSurvey.isActive);
+  const chosenHasNoQuestions = Boolean(chosenSurvey && (chosenSurvey._count?.questions ?? 0) === 0);
 
   const saveSurveyMutation = useMutation({
     mutationFn: async () => {
@@ -87,6 +125,52 @@ export default function SurveysPage() {
         <Button onClick={openAddSurvey}><Plus className="me-2 h-4 w-4" />{t("new")}</Button>
       </PageHeader>
 
+      {/* Which survey the public application form asks, if any. */}
+      <Card>
+        <CardContent className="p-5">
+          <div className="mb-3 flex items-start gap-2">
+            <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+            <div>
+              <h3 className="font-semibold">{t("form_survey.heading")}</h3>
+              <p className="text-sm text-gray-500">{t("form_survey.body")}</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="min-w-0 flex-1">
+              <Select value={formSurveyId} onValueChange={setPickedSurveyId} disabled={!settings}>
+                <SelectTrigger><SelectValue placeholder={t("form_survey.placeholder")} /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_SURVEY}>{t("form_survey.none")}</SelectItem>
+                  {surveys?.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.title} — {s._count?.questions ?? 0} {t("form_survey.questions_suffix")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={() => formSurveyId && saveFormSurveyMutation.mutate(formSurveyId)}
+              loading={saveFormSurveyMutation.isPending}
+              disabled={!formSurveyId || formSurveyId === (savedSurveyId || NO_SURVEY)}
+            >
+              {t("form_survey.save")}
+            </Button>
+          </div>
+          {/* Two ways the chosen survey still would not appear on the form. */}
+          {chosenIsInactive && (
+            <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{t("form_survey.inactive_warning")}
+            </p>
+          )}
+          {chosenHasNoQuestions && (
+            <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{t("form_survey.empty_warning")}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {isLoading ? <div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>
         : surveys?.length === 0 ? <EmptyState icon={FileText} title={t("empty")} description={t("empty_body")} action={{ label: t("new"), onClick: openAddSurvey }} />
         : (
@@ -99,6 +183,7 @@ export default function SurveysPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold">{s.title}</h3>
                         <Badge variant={s.isActive ? "success" : "secondary"}>{s.isActive ? "Active" : "Inactive"}</Badge>
+                        {s.id === savedSurveyId && <Badge variant="outline">{t("form_survey.in_use")}</Badge>}
                       </div>
                       {s.description && <p className="text-sm text-gray-500">{s.description}</p>}
                       <p className="text-xs text-gray-400 mt-1">{s._count?.questions ?? 0} questions · {s._count?.answers ?? 0} responses</p>

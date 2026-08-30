@@ -20,5 +20,17 @@
   "delete_question_body": "This question and all its answers will be deleted.",
   "saved": "Survey saved",
   "question_saved": "Question saved",
-  "question_deleted": "Question deleted"
+  "question_deleted": "Question deleted",
+  "form_survey": {
+    "heading": "Application form survey",
+    "body": "The questions asked at the start of the public application form, before the applicant's own details. Leave it on “No survey” to skip that step entirely.",
+    "placeholder": "Choose a survey",
+    "none": "No survey — skip that step",
+    "questions_suffix": "questions",
+    "save": "Save",
+    "saved": "Application form updated",
+    "in_use": "On the application form",
+    "inactive_warning": "This survey is switched off, so the form skips it. Turn it Active to make it appear.",
+    "empty_warning": "This survey has no questions yet, so the form skips it. Add at least one question."
+  }
 }

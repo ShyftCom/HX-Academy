@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { APPLICATION_SURVEY_SETTING } from "@/lib/setting-keys";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -29,6 +30,10 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   try {
     await db.survey.delete({ where: { id } });
+    // Leave no dangling pointer behind: the public form would silently skip
+    // the survey step, and the picker would show nothing selected while the
+    // setting still held a deleted id.
+    await db.setting.deleteMany({ where: { key: APPLICATION_SURVEY_SETTING, value: id } });
     return NextResponse.json({ message: "Deleted" });
   } catch { return NextResponse.json({ error: "Delete failed" }, { status: 500 }); }
 }
