@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate, getInitials } from "@/lib/utils";
 import { Upload, Save, Lock } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
+import { uploadFile } from "@/lib/upload-client";
 
 export default function PlayerProfilePage() {
   const { data: session } = useSession();
@@ -48,14 +49,19 @@ export default function PlayerProfilePage() {
   });
 
   const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
     setUploading(true);
-    const fd = new FormData(); fd.append("file", file); fd.append("folder", "players");
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const d = await res.json();
-    if (res.ok) { setPhoto(d.url); toast.success("Photo uploaded"); }
-    else toast.error("Upload failed");
-    setUploading(false);
+    try {
+      const blob = await uploadFile(file, { folder: "players", maxSizeMb: 25 });
+      setPhoto(blob.url);
+      toast.success("Photo uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (isLoading || !playerId) return <FullPageLoader />;

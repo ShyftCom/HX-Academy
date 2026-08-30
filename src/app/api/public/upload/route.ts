@@ -19,8 +19,12 @@ export async function POST(req: NextRequest) {
 
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 });
+    // Vercel caps a serverless function's request body at 4.5MB. Anything
+    // larger never reaches this handler — the connection is dropped mid-body,
+    // which the browser sees as a request that simply never finishes. Stating
+    // the real limit turns a hung spinner into an error the visitor can act on.
+    const maxSize = 4 * 1024 * 1024;
+    if (file.size > maxSize) return NextResponse.json({ error: "File too large (max 4MB)" }, { status: 413 });
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
