@@ -214,6 +214,12 @@ async function main() {
     { key: "slickpay_enabled", value: "false" },
     { key: "slickpay_mode", value: "sandbox" },
     { key: "slickpay_account_uuid", value: "" },
+    // Meta Pixel stays off until a Super Admin pastes a Pixel ID into
+    // Settings → Meta Pixel. Not a credential (it is embedded in public page
+    // HTML on every load), so unlike the SlickPay keys above it is seeded
+    // like any other plain setting.
+    { key: "meta_pixel_enabled", value: "false" },
+    { key: "meta_pixel_id", value: "" },
   ];
 
   for (const s of defaultSettings) {

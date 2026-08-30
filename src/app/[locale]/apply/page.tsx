@@ -139,6 +139,7 @@ function ApplyFormInner() {
       if (res.status === 409) { toast.error(tErr("duplicateApplication")); return; }
       if (!res.ok) { toast.error(tErr("submissionFailed")); return; }
 
+      window.fbq?.("track", "Lead");
       setSubmitted(true);
     } catch {
       toast.error(tErr("generic"));

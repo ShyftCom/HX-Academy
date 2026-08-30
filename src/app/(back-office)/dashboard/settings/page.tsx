@@ -84,6 +84,7 @@ export default function SettingsPage() {
           <TabsTrigger value="branding">{t("settings.branding")}</TabsTrigger>
           <TabsTrigger value="payments">{t("settings.payment_methods")}</TabsTrigger>
           <TabsTrigger value="slickpay">{t("settings.slickpay.tab")}</TabsTrigger>
+          <TabsTrigger value="meta_pixel">{t("settings.meta_pixel.tab")}</TabsTrigger>
           <TabsTrigger value="social">{t("settings.social")}</TabsTrigger>
           <TabsTrigger value="legal">{t("settings.legal")}</TabsTrigger>
         </TabsList>
@@ -138,6 +139,20 @@ export default function SettingsPage() {
 
         <TabsContent value="slickpay">
           <SlickPaySettings />
+        </TabsContent>
+
+        <TabsContent value="meta_pixel">
+          <Card><CardContent className="pt-5 space-y-4 max-w-2xl">
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("settings.meta_pixel.intro")}</p>
+            <div className="flex items-center gap-3">
+              <Switch checked={settings.meta_pixel_enabled === "true"} onCheckedChange={(v) => upd("meta_pixel_enabled", v ? "true" : "false")} />
+              <span className="text-sm">{t("settings.meta_pixel.enabled")}</span>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t("settings.meta_pixel.enabled_hint")}</p>
+            <Input label={t("settings.meta_pixel.pixel_id")} value={settings.meta_pixel_id ?? ""} onChange={(e) => upd("meta_pixel_id", e.target.value.trim())} placeholder="857829187136751" />
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t("settings.meta_pixel.pixel_id_hint")}</p>
+            <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />{t("settings.meta_pixel.save")}</Button>
+          </CardContent></Card>
         </TabsContent>
 
         <TabsContent value="social">

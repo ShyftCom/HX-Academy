@@ -107,6 +107,15 @@
       "saved": "SlickPay settings saved",
       "production_warning": "Production mode charges real cards. Test in sandbox first.",
       "copied": "Copied"
+    },
+    "meta_pixel": {
+      "tab": "Meta Pixel",
+      "intro": "Loads the Meta (Facebook) Pixel on every public page and reports a Lead event the moment someone finishes the application survey.",
+      "enabled": "Enable Meta Pixel",
+      "enabled_hint": "When off, the pixel script is not loaded and nothing is sent to Meta.",
+      "pixel_id": "Pixel ID",
+      "pixel_id_hint": "From Meta Events Manager. Digits only, e.g. 857829187136751.",
+      "save": "Save Meta Pixel settings"
     }
   },
   "pixels": {
