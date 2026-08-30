@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FsaButton } from "@/components/website/buttons/FsaButton";
 
+/** Already localised by the page — the form only prints it. */
 interface Venue { id: string; name: string; wilaya: string }
 
 const EMPTY = {

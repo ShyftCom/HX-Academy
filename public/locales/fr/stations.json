@@ -20,6 +20,7 @@
     "settings": "Paramètres",
     "meetings": "Rendez-vous",
     "no_staff": "Aucun personnel affecté à cette station.",
+    "public_name": "Nom public du site",
     "public_page": "Page publique du site",
     "show_public": "Afficher sur la page Sites publique",
     "show_hint": "Si désactivé, cette station n'apparaîtra pas sur le site public.",

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LocaleTextInput } from "./LocaleTextInput";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { useTranslation } from "react-i18next";
 
@@ -27,7 +28,11 @@ export interface SlotRow {
   stationId: string;
   station?: { id: string; name: string } | null;
   ageGroup: string;
+  ageGroupFr?: string | null;
+  ageGroupAr?: string | null;
   sessionName: string | null;
+  sessionNameFr?: string | null;
+  sessionNameAr?: string | null;
   day: string | null;
   dayOfWeek: number | null;
   startTime: string | null;
@@ -121,19 +126,24 @@ export function ScheduleSlotEditor({
             <div className={`mb-2 flex flex-wrap items-center gap-2 rounded-lg border p-3 ${row.isActive ? "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900" : "border-dashed border-gray-300 bg-gray-50 opacity-70 dark:border-gray-700 dark:bg-gray-950"}`}>
               {dragHandle}
 
-              <Input
-                className="w-28"
-                value={row.ageGroup}
-                onChange={(e) => patchLocal(row.id, { ageGroup: e.target.value })}
-                onBlur={(e) => onUpdate(row.id, { ageGroup: e.target.value })}
-                placeholder={t("programmes.age_group")}
+              {/* Age group and session are display copy, not codes — the FR/AR
+                  tabs are what keeps the public timetable from printing an
+                  English "Under 8" on the Arabic page. */}
+              <LocaleTextInput
+                className="w-32"
+                baseKey="ageGroup"
+                label={t("programmes.age_group")}
+                values={row as unknown as Record<string, unknown>}
+                onChange={(next) => patchLocal(row.id, next as Partial<SlotRow>)}
+                onCommit={(patch) => onUpdate(row.id, patch as Partial<SlotRow>)}
               />
-              <Input
-                className="w-28"
-                value={row.sessionName ?? ""}
-                onChange={(e) => patchLocal(row.id, { sessionName: e.target.value })}
-                onBlur={(e) => onUpdate(row.id, { sessionName: e.target.value })}
-                placeholder={t("programmes.session")}
+              <LocaleTextInput
+                className="w-32"
+                baseKey="sessionName"
+                label={t("programmes.session")}
+                values={row as unknown as Record<string, unknown>}
+                onChange={(next) => patchLocal(row.id, next as Partial<SlotRow>)}
+                onCommit={(patch) => onUpdate(row.id, patch as Partial<SlotRow>)}
               />
 
               <Select value={daySelectValue(row)} onValueChange={(v) => handleDayChange(row, v)}>

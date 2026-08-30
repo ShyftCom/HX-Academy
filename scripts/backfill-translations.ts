@@ -1,10 +1,15 @@
 /**
- * One-off backfill: fills missing French and Arabic on public-site content.
+ * Fills missing French and Arabic on public-site content.
  *
  * The showcase content was seeded in English before the public site went
  * French/Arabic-only. prisma/seed.ts now carries fr + ar for all of it, but it
  * only writes rows that do not already exist — so an installation seeded
  * earlier keeps the English values. This script closes that gap in place.
+ *
+ * It runs on every deploy (see the `build` script), right after the seed: that
+ * is the only way the translations reach an environment whose database was
+ * populated by an older seed. Because it only ever fills an empty field, a
+ * deploy that has nothing to do is a no-op that reports "filled: 0".
  *
  * Safe to re-run:
  *   - It only ever fills a field that is currently empty. An existing
@@ -164,6 +169,7 @@ const T: Record<string, Pair> = {
   Methodology: { fr: "Méthodologie", ar: "المنهجية" },
   Pathway: { fr: "Parcours", ar: "المسار" },
   "Contact Us": { fr: "Nous contacter", ar: "اتصل بنا" },
+  Squads: { fr: "Équipes", ar: "الفرق" },
   Explore: { fr: "Explorer", ar: "استكشف" },
   About: { fr: "À propos", ar: "عن الأكاديمية" },
   Safeguarding: { fr: "Protection de l'enfance", ar: "حماية الأطفال" },
@@ -497,12 +503,173 @@ const T: Record<string, Pair> = {
     ar: "أي تعليمات خاصة…",
   },
 
+  // ---------------- Page & programme SEO, English base ----------------
+  // These rows were seeded before the locale columns existed, so their base
+  // column still holds English. The French-keyed entries above cover pages
+  // whose base was later rewritten to French; these cover the ones that never
+  // were.
+  "Football Skills Academy — Train, Compete, Grow": {
+    fr: "Football Skills Academy — Entraîne-toi, rivalise, progresse",
+    ar: "Football Skills Academy — تدرّب، نافس، تطوّر",
+  },
+  "Football Skills Academy runs year-round programmes, holiday courses and development squads for players aged 6-16, delivered by qualified coaches across our venues.": {
+    fr: "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.",
+    ar: "تقدّم أكاديمية Football Skills Academy برامج على مدار السنة وتربّصات للعطل وفرق تطوير للاعبين من 6 إلى 16 سنة، بإشراف مدربين مؤهَّلين في جميع مواقعنا.",
+  },
+  "Who We Are | Football Skills Academy": {
+    fr: "Qui sommes-nous | Football Skills Academy",
+    ar: "من نحن | Football Skills Academy",
+  },
+  "Football Skills Academy is built around long-term player development, qualified coaching and a safe, inclusive environment for every player.": {
+    fr: "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.",
+    ar: "تقوم أكاديمية Football Skills Academy على تطوير اللاعب على المدى الطويل، وتأطير مؤهَّل، وبيئة آمنة وشاملة للجميع.",
+  },
+  "Methodology | Football Skills Academy": {
+    fr: "Méthodologie | Football Skills Academy",
+    ar: "منهجيتنا | Football Skills Academy",
+  },
+  "Our coaching methodology develops technical, tactical, physical, psychological and social skills through age-appropriate, constraints-based sessions.": {
+    fr: "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.",
+    ar: "تطوّر منهجيتنا المهارات التقنية والتكتيكية والبدنية والنفسية والاجتماعية عبر حصص تناسب كل فئة عمرية وتُبنى على وضعيات اللعب.",
+  },
+  "Player Pathway | Football Skills Academy": {
+    fr: "Parcours du joueur | Football Skills Academy",
+    ar: "مسار اللاعب | Football Skills Academy",
+  },
+  "From Foundation to Development Squads — a clear, age-based pathway for every Football Skills Academy player.": {
+    fr: "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.",
+    ar: "من التكوين الأولي إلى فرق التطوير — مسار واضح يناسب كل مرحلة عمرية لكل لاعب في أكاديمية Football Skills Academy.",
+  },
+  "Football School | Football Skills Academy": {
+    fr: "École de Football | Football Skills Academy",
+    ar: "مدرسة كرة القدم | Football Skills Academy",
+  },
+  "Weekly football training for players aged 6-16, delivered by qualified coaches at Football Skills Academy.": {
+    fr: "Entraînement de football hebdomadaire pour les joueurs de 6 à 16 ans, encadré par des entraîneurs qualifiés à Football Skills Academy.",
+    ar: "تدريب كروي أسبوعي للاعبين من 6 إلى 16 سنة، بإشراف مدربين مؤهَّلين في أكاديمية Football Skills Academy.",
+  },
+  "Holiday Football Camp | Football Skills Academy": {
+    fr: "Stage de Football | Football Skills Academy",
+    ar: "تربّص كرة القدم | Football Skills Academy",
+  },
+  "A week of intensive football training and match play during the school holidays for players aged 6-16.": {
+    fr: "Une semaine d'entraînement intensif et de matchs pendant les vacances scolaires, pour les joueurs de 6 à 16 ans.",
+    ar: "أسبوع من التدريب المكثّف والمباريات خلال العطلة المدرسية، للاعبين من 6 إلى 16 سنة.",
+  },
+
+  // ---------------- News article bodies ----------------
+  "<p>We're excited to launch our redesigned website — a single place to explore our programmes, find your nearest venue, and register interest in our Development Squads.</p><p>Whether your player is just starting out or ready for the next step, our team is here to help you find the right fit.</p>": {
+    fr: "<p>Nous sommes ravis de lancer notre nouveau site — un seul endroit pour découvrir nos programmes, trouver le site le plus proche de chez vous et manifester votre intérêt pour nos équipes de développement.</p><p>Que votre joueur débute ou soit prêt pour l'étape suivante, notre équipe est là pour vous aider à trouver la formule qui lui convient.</p>",
+    ar: "<p>يسعدنا إطلاق موقعنا الجديد — مكان واحد لاستكشاف برامجنا، والعثور على أقرب موقع إليك، وتسجيل اهتمامك بفرق التطوير لدينا.</p><p>سواء كان لاعبك في بدايته أو جاهزاً للخطوة التالية، فريقنا هنا لمساعدتك على اختيار الصيغة المناسبة.</p>",
+  },
+  "<p>Registration is now open for our next Holiday Football Camp. Places are limited, so early registration is recommended.</p><p>See the Programmes page for full pricing and schedule details.</p>": {
+    fr: "<p>Les inscriptions sont ouvertes pour notre prochain stage de football. Les places sont limitées : il est conseillé de s'inscrire tôt.</p><p>Consultez la page Programmes pour le détail des tarifs et du planning.</p>",
+    ar: "<p>فُتح باب التسجيل في تربّص كرة القدم القادم. الأماكن محدودة، لذا يُنصح بالتسجيل مبكراً.</p><p>راجع صفحة البرامج للاطلاع على الأسعار والجدول كاملاً.</p>",
+  },
+
+  // ---------------- Split-content bullet points & gallery captions ----------------
+  "Qualified, DBS-checked coaches at every session": {
+    fr: "Des entraîneurs qualifiés et vérifiés à chaque séance",
+    ar: "مدربون مؤهَّلون ومدقَّق في سوابقهم في كل حصة",
+  },
+  "Small coaching ratios across all age groups": {
+    fr: "Un encadrement en petits groupes pour tous les âges",
+    ar: "تأطير ضمن مجموعات صغيرة لجميع الأعمار",
+  },
+  "A clear pathway from Foundation to Development Squads": {
+    fr: "Un parcours clair, de la base aux équipes de développement",
+    ar: "مسار واضح من مرحلة التأسيس إلى فرق التطوير",
+  },
+  "Inside the academy": { fr: "Au cœur de l'académie", ar: "من داخل الأكاديمية" },
+  "Ball control": { fr: "Contrôle de balle", ar: "التحكم بالكرة" },
+  "Speed & agility": { fr: "Vitesse et agilité", ar: "السرعة والرشاقة" },
+  "Dribbling drills": { fr: "Exercices de dribble", ar: "تمارين المراوغة" },
+  "First touch": { fr: "Première touche", ar: "اللمسة الأولى" },
+  "On the training ground": { fr: "Sur le terrain d'entraînement", ar: "في ميدان التدريب" },
+  "Squad tour": { fr: "Tournée de l'équipe", ar: "جولة الفريق" },
+
+  // ---------------- Venue facilities (a JSON list, one label per entry) ----------------
+  "3 full-size pitches": { fr: "3 terrains grand format", ar: "3 ملاعب بالحجم الكامل" },
+  "2 full-size pitches": { fr: "2 terrains grand format", ar: "ملعبان بالحجم الكامل" },
+  "4 pitches": { fr: "4 terrains", ar: "4 ملاعب" },
+  "Indoor training hall": { fr: "Salle d'entraînement couverte", ar: "قاعة تدريب مغطّاة" },
+  "Floodlit 5-a-side courts": { fr: "Terrains de foot à 5 éclairés", ar: "ملاعب خماسية مضاءة" },
+  "Clubhouse & changing rooms": { fr: "Club-house et vestiaires", ar: "نادٍ وغرف تبديل الملابس" },
+  "Parking on site": { fr: "Parking sur place", ar: "موقف سيارات في المكان" },
+  "Spectator area": { fr: "Espace spectateurs", ar: "فضاء للمتفرّجين" },
+  Gym: { fr: "Salle de musculation", ar: "قاعة رياضية" },
+  "Meeting rooms": { fr: "Salles de réunion", ar: "قاعات اجتماعات" },
+
+  // ---------------- Location names ----------------
+  // Cities keep their French spelling (that *is* the French name) and take the
+  // Arabic exonym; the demo venues get a translated descriptor.
+  Alger: { fr: "Alger", ar: "الجزائر" },
+  Oran: { fr: "Oran", ar: "وهران" },
+  Constantine: { fr: "Constantine", ar: "قسنطينة" },
+  "City Football Academy": { fr: "City Football Academy", ar: "أكاديمية المدينة لكرة القدم" },
+  "Riverside Training Centre": { fr: "Centre d'entraînement Riverside", ar: "مركز ريفرسايد للتدريب" },
+  "Northside Sports Complex": { fr: "Complexe sportif Northside", ar: "مركّب نورثسايد الرياضي" },
+
+  // ---------------- Homepage copy, original seed wording ----------------
+  // The homepage was reworded after production was seeded ("Players Trained"
+  // is "Players trained" today, "Ready to join us?" is "Ready to join?"), so
+  // an install from that era needs the older spellings keyed too. Where its
+  // French survives, the BY_FR fallback would catch these anyway; keying them
+  // means a row that lost even its French still resolves.
+  "Players Trained": { fr: "Joueurs formés", ar: "لاعبون تدرّبوا لدينا" },
+  "Years of Coaching": { fr: "Années d'encadrement", ar: "سنوات من التأطير" },
+  "Qualified Coaches": { fr: "Entraîneurs qualifiés", ar: "مدربون مؤهَّلون" },
+  "Built for long-term player development": {
+    fr: "Pensé pour le développement du joueur sur la durée",
+    ar: "مصمَّم لتطوير اللاعب على المدى الطويل",
+  },
+  "Expert Coaching": { fr: "Coaching expert", ar: "تأطير متخصّص" },
+  "Team Spirit": { fr: "Esprit d'équipe", ar: "روح الفريق" },
+  "Safe Environment": { fr: "Environnement sûr", ar: "بيئة آمنة" },
+  "Modern Methodology": { fr: "Méthodologie moderne", ar: "منهجية حديثة" },
+  "Competitive Pathway": { fr: "Parcours compétitif", ar: "مسار تنافسي" },
+  "Real Progress": { fr: "Vraie progression", ar: "تقدّم حقيقي" },
+  "Ready to join us?": { fr: "Prêt à nous rejoindre ?", ar: "هل أنت مستعد للانضمام إلينا؟" },
+
+  // The homepage stat label. Its base was "Training Venues" when production was
+  // seeded and is plain "Venues" today — and bare "Venues" is already spoken
+  // for above by the nav item, whose French is the shorter "Sites". Keying the
+  // original wording is what reaches the rows that actually need it.
+  "Training Venues": { fr: "Sites d'entraînement", ar: "مواقع التدريب" },
+
+  // ---------------- Schedule slot labels ----------------
+  "Under 8": { fr: "Moins de 8 ans", ar: "أقل من 8 سنوات" },
+  "Under 10": { fr: "Moins de 10 ans", ar: "أقل من 10 سنوات" },
+  "Under 12": { fr: "Moins de 12 ans", ar: "أقل من 12 سنة" },
+  "Under 14": { fr: "Moins de 14 ans", ar: "أقل من 14 سنة" },
+  "Under 16": { fr: "Moins de 16 ans", ar: "أقل من 16 سنة" },
+  Skills: { fr: "Technique", ar: "المهارات" },
+  "All ages": { fr: "Tous les âges", ar: "جميع الأعمار" },
+  "Full day camp": { fr: "Stage à la journée", ar: "تربّص ليوم كامل" },
+
   // Footer copyright line.
   "© 2026 Football Skills Academy. All rights reserved.": {
     fr: "© 2026 Football Skills Academy. Tous droits réservés.",
     ar: "© 2026 Football Skills Academy. جميع الحقوق محفوظة.",
   },
 };
+
+/**
+ * The same table, indexed by its French value.
+ *
+ * Rows seeded before the Arabic columns existed keep the English wording of
+ * that older seed in their base column — wording that has since been edited
+ * ("Players Trained" is now "Players trained", "Ready to join us?" is now
+ * "Ready to join?"), so a lookup on the base misses. Their French, though, was
+ * written from the same source as this table and still matches exactly. So a
+ * base miss falls through to the French value before giving up, which fills the
+ * Arabic on every row an editor had already translated into French.
+ *
+ * First entry wins on a duplicate French value, matching the base-keyed table's
+ * "translate a repeated phrase once" behaviour.
+ */
+const BY_FR: Record<string, Pair> = {};
+for (const pair of Object.values(T)) if (!(pair.fr in BY_FR)) BY_FR[pair.fr] = pair;
 
 /** Fields that carry translatable copy inside a LandingSection content blob. */
 const SECTION_FIELDS = [
@@ -515,6 +682,9 @@ const SECTION_FIELDS = [
   "eyebrow",
   "title",
   "label",
+  // Nested in `bulletPoints[]` and `images[]` — reached by the recursive walk.
+  "text",
+  "caption",
 ];
 
 const filled: string[] = [];
@@ -524,7 +694,10 @@ const untranslated = new Set<string>();
 function fill(base: string | null, fr: unknown, ar: unknown, field: string, where: string) {
   if (!base || !base.trim()) return null;
   if (fr && ar) return null;
-  const pair = T[base] ?? T[base.trim()];
+  const pair =
+    T[base] ??
+    T[base.trim()] ??
+    (typeof fr === "string" && fr ? BY_FR[fr] ?? BY_FR[fr.trim()] : undefined);
   if (!pair) {
     untranslated.add(`${where}.${field} :: ${base.replace(/\s+/g, " ").slice(0, 80)}`);
     return null;
@@ -532,6 +705,39 @@ function fill(base: string | null, fr: unknown, ar: unknown, field: string, wher
   const patch: Record<string, string> = {};
   if (!fr) patch[`${field}Fr`] = pair.fr;
   if (!ar) patch[`${field}Ar`] = pair.ar;
+  filled.push(`${where}.${field} [${Object.keys(patch).map((k) => k.slice(-2).toLowerCase()).join("+")}]`);
+  return patch;
+}
+
+/**
+ * Station.facilities is a JSON array of short labels rather than one string, so
+ * it is translated element by element.
+ *
+ * A locale's list is only written when *every* element resolved: a list where
+ * half the bullets fell back to English would read worse than the French list
+ * the ar -> fr chain already gives us.
+ */
+function fillJsonList(base: string | null, fr: unknown, ar: unknown, field: string, where: string) {
+  if (!base) return null;
+  if (fr && ar) return null;
+  let items: unknown;
+  try {
+    items = JSON.parse(base);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const labels = items.filter((i): i is string => typeof i === "string");
+  if (labels.length !== items.length) return null;
+
+  const pairs = labels.map((l) => T[l] ?? T[l.trim()]);
+  if (pairs.some((p) => !p)) {
+    untranslated.add(`${where}.${field} :: ${labels.filter((l, i) => !pairs[i]).join(" | ").slice(0, 80)}`);
+    return null;
+  }
+  const patch: Record<string, string> = {};
+  if (!fr) patch[`${field}Fr`] = JSON.stringify(pairs.map((p) => p!.fr));
+  if (!ar) patch[`${field}Ar`] = JSON.stringify(pairs.map((p) => p!.ar));
   filled.push(`${where}.${field} [${Object.keys(patch).map((k) => k.slice(-2).toLowerCase()).join("+")}]`);
   return patch;
 }
@@ -565,6 +771,15 @@ async function main() {
     ["name", "ageRangeLabel", "description", "entryRequirements", "objectives"],
     (id, data) => db.pathwayLevel.update({ where: { id }, data })
   );
+  await run("HeaderNavItem", await db.headerNavItem.findMany(), ["label"], (id, data) =>
+    db.headerNavItem.update({ where: { id }, data })
+  );
+  await run(
+    "HeaderNavDropdownItem",
+    await db.headerNavDropdownItem.findMany(),
+    ["label", "description"],
+    (id, data) => db.headerNavDropdownItem.update({ where: { id }, data })
+  );
   await run("FooterLink", await db.footerLink.findMany(), ["label"], (id, data) =>
     db.footerLink.update({ where: { id }, data })
   );
@@ -580,8 +795,11 @@ async function main() {
   await run("HeaderConfig", await db.websiteHeaderConfig.findMany(), ["ctaLabel"], (id, data) =>
     db.websiteHeaderConfig.update({ where: { id }, data })
   );
-  await run("NewsArticle", await db.newsArticle.findMany(), ["title", "excerpt"], (id, data) =>
-    db.newsArticle.update({ where: { id }, data })
+  await run(
+    "NewsArticle",
+    await db.newsArticle.findMany(),
+    ["title", "excerpt", "body", "metaTitle", "metaDescription"],
+    (id, data) => db.newsArticle.update({ where: { id }, data })
   );
   await run("NewsCategory", await db.newsCategory.findMany(), ["name"], (id, data) =>
     db.newsCategory.update({ where: { id }, data })
@@ -589,7 +807,7 @@ async function main() {
   await run(
     "Programme",
     await db.programme.findMany(),
-    ["name", "shortDescription", "fullDescription", "ageRangeLabel", "priceLabel", "promoBannerText"],
+    ["name", "shortDescription", "fullDescription", "ageRangeLabel", "priceLabel", "promoBannerText", "metaTitle", "metaDescription"],
     (id, data) => db.programme.update({ where: { id }, data })
   );
   await run("ProgrammeCategory", await db.programmeCategory.findMany(), ["name"], (id, data) =>
@@ -601,8 +819,19 @@ async function main() {
   await run(
     "Station",
     await db.station.findMany(),
-    ["shortDescription", "fullDescription", "parkingInfo", "transportInfo", "accessibilityInfo"],
+    ["name", "shortDescription", "fullDescription", "parkingInfo", "transportInfo", "accessibilityInfo"],
     (id, data) => db.station.update({ where: { id }, data })
+  );
+  for (const st of await db.station.findMany()) {
+    const patch = fillJsonList(st.facilities, st.facilitiesFr, st.facilitiesAr, "facilities", `Station/${st.slug ?? st.id.slice(0, 6)}`);
+    if (patch && !DRY) await db.station.update({ where: { id: st.id }, data: patch });
+  }
+  // Age group / session are admin-typed display copy on the public timetable.
+  await run(
+    "ScheduleSlot",
+    await db.scheduleSlot.findMany(),
+    ["ageGroup", "sessionName", "sessionType"],
+    (id, data) => db.scheduleSlot.update({ where: { id }, data })
   );
   await run("WebsiteSlide", await db.websiteSlide.findMany(), ["title", "subtitle"], (id, data) =>
     db.websiteSlide.update({ where: { id }, data })
@@ -685,4 +914,10 @@ async function main() {
   await db.$disconnect();
 }
 
-main();
+// Content translations must never be what breaks a deploy: the site renders
+// (in French, via the ar -> fr fallback) whether or not this succeeds. Failures
+// are logged loudly and the build carries on.
+main().catch((error) => {
+  console.error("⚠️  translation backfill failed — continuing:", error);
+  process.exit(0);
+});

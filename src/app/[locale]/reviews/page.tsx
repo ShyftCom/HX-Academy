@@ -124,7 +124,7 @@ export default function ReviewsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="bg-gray-900 py-16 text-center text-white">
         <h1 className="text-4xl font-bold mb-2">{t("reviewsTitle")}</h1>
-        <p className="text-gray-400">{t("basedOn").replace("{count}", String(total))}</p>
+        <p className="text-gray-400">{t("basedOn", { count: total })}</p>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
@@ -136,7 +136,7 @@ export default function ReviewsPage() {
               <div className="text-center flex-shrink-0">
                 <p className="text-6xl font-bold text-gray-900 dark:text-white">{avgRating.toFixed(1)}</p>
                 <StarDisplay rating={Math.round(avgRating)} />
-                <p className="text-sm text-gray-500 mt-1">{t("basedOn").replace("{count}", String(total))}</p>
+                <p className="text-sm text-gray-500 mt-1">{t("basedOn", { count: total })}</p>
               </div>
               <div className="flex-1 w-full space-y-2">
                 {[5, 4, 3, 2, 1].map((r) => {

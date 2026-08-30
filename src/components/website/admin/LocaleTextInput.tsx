@@ -73,20 +73,26 @@ export function LocaleTextInput({
   baseKey,
   values,
   onChange,
+  onCommit,
   label,
   multiline,
+  className,
 }: {
   baseKey: string;
   values: Record<string, unknown>;
   onChange: (next: Record<string, unknown>) => void;
+  /** Called on blur with just the edited key. For editors that keep typing
+   *  local and persist once the field is left (the schedule grid). */
+  onCommit?: (patch: Record<string, unknown>) => void;
   label?: string;
   multiline?: boolean;
+  className?: string;
 }) {
   const [tab, setTab] = useState<LocaleCode>("Fr");
   const Field = multiline ? Textarea : Input;
 
   return (
-    <div className="space-y-1.5">
+    <div className={cn("space-y-1.5", className)}>
       <div className="flex items-center justify-between">
         {label && <label className="text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>}
         <TabStrip active={tab} onSelect={setTab} idPrefix={`lti-${baseKey}`} />
@@ -94,6 +100,7 @@ export function LocaleTextInput({
       <Field
         value={(values[keyFor(baseKey, tab)] as string) ?? ""}
         onChange={(e) => onChange({ ...values, [keyFor(baseKey, tab)]: e.target.value })}
+        onBlur={onCommit ? (e) => onCommit({ [keyFor(baseKey, tab)]: e.target.value }) : undefined}
         placeholder={tab === "base" ? undefined : FALLBACK_HINT}
         dir={tab === "Ar" ? "rtl" : undefined}
       />

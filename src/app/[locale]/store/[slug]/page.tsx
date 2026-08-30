@@ -266,7 +266,7 @@ export default function ProductDetailPage() {
                 disabled={!canAdd}
                 className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-colors ${canAdd ? (added ? "bg-green-500 text-white" : "bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-700") : "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"}`}
               >
-                {added ? <span className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> Ajouté!</span> : (
+                {added ? <span className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> {t("added")}</span> : (
                   <span className="flex items-center justify-center gap-2"><ShoppingCart className="w-4 h-4" /> {t("addToCart")}</span>
                 )}
               </button>

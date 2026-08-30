@@ -20,7 +20,7 @@ import {
  * through either URL shape.
  */
 
-export const SLOT_INCLUDE = { station: { select: { id: true, name: true } }, coach: { select: { id: true, fullName: true } } } as const;
+export const SLOT_INCLUDE = { station: { select: { id: true, name: true, nameFr: true, nameAr: true } }, coach: { select: { id: true, fullName: true } } } as const;
 
 /** Errors the client turns into translated copy; `conflict` names the slot in the way. */
 type ConflictPayload = { error: string; conflict?: Record<string, unknown> };

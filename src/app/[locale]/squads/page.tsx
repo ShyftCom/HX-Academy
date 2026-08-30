@@ -7,6 +7,8 @@ import { Hero } from "@/components/website/Hero";
 import { Breadcrumb } from "@/components/website/Breadcrumb";
 import { FaqAccordion } from "@/components/website/FaqAccordion";
 import { SquadRegistrationForm } from "./SquadRegistrationForm";
+import { lf } from "@/components/website/sections/localeField";
+import { wilayaLabel, wilayaNames } from "@/lib/public-wilaya";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -27,10 +29,18 @@ export default async function SquadsPage({ params }: { params: Promise<{ locale:
   const t = await getTranslations({ locale, namespace: "squads" });
   const tFaq = await getTranslations({ locale, namespace: "faq" });
 
+  const wilayas = await wilayaNames();
   const [venues, faqs] = await Promise.all([
-    db.station.findMany({ where: { status: "active", isPubliclyListed: true }, select: { id: true, name: true, wilaya: true }, orderBy: { displayOrder: "asc" } }),
+    db.station.findMany({ where: { status: "active", isPubliclyListed: true }, select: { id: true, name: true, nameFr: true, nameAr: true, wilaya: true, wilayaCode: true }, orderBy: { displayOrder: "asc" } }),
     db.faq.findMany({ where: { isPublished: true, category: "squads" }, orderBy: { order: "asc" } }),
   ]);
+
+  // The form is a client component, so the province label is resolved here.
+  const venueOptions = venues.map((v) => ({
+    id: v.id,
+    name: lf(v as unknown as Record<string, unknown>, "name", locale),
+    wilaya: wilayaLabel(wilayas, v, locale),
+  }));
 
   return (
     <>
@@ -71,7 +81,7 @@ export default async function SquadsPage({ params }: { params: Promise<{ locale:
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {venues.map((v) => (
                 <span key={v.id} className="rounded-fsa-pill border border-fsa-border bg-white px-5 py-2.5 text-sm font-semibold text-fsa-navy-900">
-                  {v.name} — {v.wilaya}
+                  <span dir="auto">{lf(v as unknown as Record<string, unknown>, "name", locale)}</span> — <span dir="auto">{wilayaLabel(wilayas, v, locale)}</span>
                 </span>
               ))}
             </div>
@@ -81,7 +91,7 @@ export default async function SquadsPage({ params }: { params: Promise<{ locale:
 
       <section id="register" className="bg-white py-[var(--fsa-section-y)]">
         <div className="mx-auto max-w-2xl px-[var(--fsa-container-pad)]">
-          <SquadRegistrationForm venues={venues} />
+          <SquadRegistrationForm venues={venueOptions} />
         </div>
       </section>
 

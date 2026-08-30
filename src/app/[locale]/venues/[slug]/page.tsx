@@ -13,6 +13,7 @@ import { FaqAccordion } from "@/components/website/FaqAccordion";
 import { ScheduleTable } from "@/components/website/ScheduleTable";
 import { FsaButton } from "@/components/website/buttons/FsaButton";
 import { lf } from "@/components/website/sections/localeField";
+import { wilayaLabel, wilayaNames } from "@/lib/public-wilaya";
 import { localeHref } from "@/components/website/localeHref";
 import { mobileVariant } from "@/components/website/mobileVariant";
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/venues/${slug}`,
-    title: venue.name,
+    title: lf(record, "name", locale) || venue.name,
     description: lf(record, "shortDescription", locale) || undefined,
     images: venue.heroImageUrl ? [venue.heroImageUrl] : undefined,
   });
@@ -64,17 +65,23 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
     db.station.findMany({
       where: { status: "active", isPubliclyListed: true, slug: { not: null }, id: { not: venue.id } },
       orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
-      select: { id: true, name: true, slug: true },
+      select: { id: true, name: true, nameFr: true, nameAr: true, slug: true },
     }),
   ]);
 
   // An unpublished header hides the timetable without deleting a single slot.
   const showSchedule = schedule?.isPublished !== false;
 
+  // Each locale holds its own JSON list; lf() picks one, then it is parsed.
   let facilities: string[] = [];
-  try { facilities = JSON.parse(venue.facilities ?? "[]"); } catch { /* noop */ }
+  try {
+    const parsed = JSON.parse(lf(venue as unknown as Record<string, unknown>, "facilities", locale) || "[]");
+    if (Array.isArray(parsed)) facilities = parsed.filter((f): f is string => typeof f === "string");
+  } catch { /* noop */ }
 
   const description = lf(venue as unknown as Record<string, unknown>, "fullDescription", locale) || lf(venue as unknown as Record<string, unknown>, "shortDescription", locale);
+  const venueName = lf(venue as unknown as Record<string, unknown>, "name", locale) || venue.name;
+  const venueWilaya = wilayaLabel(await wilayaNames(), venue, locale);
 
   return (
     <>
@@ -84,11 +91,11 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
       <Hero
         desktopImageUrl={venue.heroImageUrl || undefined}
         mobileImageUrl={mobileVariant(venue.heroImageUrl)}
-        title={venue.name}
-        subtitle={venue.wilaya}
+        title={venueName}
+        subtitle={venueWilaya}
         minHeight="55vh"
       />
-      <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/venues` }, { label: venue.name }]} />
+      <Breadcrumb locale={locale} items={[{ label: t("breadcrumb"), href: `/${locale}/venues` }, { label: venueName }]} />
 
       <section className="bg-white py-[var(--fsa-section-y)]">
         <div className="mx-auto grid grid-cols-1 gap-12 px-[var(--fsa-container-pad)] lg:grid-cols-3" style={{ maxWidth: "var(--fsa-container-max)" }}>
@@ -102,7 +109,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
                   {facilities.map((f, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm text-fsa-text">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fsa-sky/20"><Check className="h-3 w-3 text-fsa-navy-900" /></span>
-                      {f}
+                      <span dir="auto">{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -139,7 +146,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
           <ScheduleTable
             rows={slots}
             locale={locale}
-            heading={tSchedule("headingAt", { name: venue.name })}
+            heading={tSchedule("headingAt", { name: venueName })}
             showLocation={false}
             emptyState
             bookingUrl={localeHref(defaultBookingUrl, locale)}
@@ -155,7 +162,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
                       href={`/${locale}/venues/${v.slug}`}
                       className="rounded-fsa-pill border border-fsa-border bg-white px-4 py-2 text-sm text-fsa-navy-900 transition-colors hover:border-fsa-sky hover:bg-fsa-sky/10"
                     >
-                      {v.name}
+                      <span dir="auto">{lf(v as unknown as Record<string, unknown>, "name", locale) || v.name}</span>
                     </Link>
                   ))}
                 </div>
@@ -168,7 +175,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ lo
       {programmes.length > 0 && (
         <section className="bg-fsa-pale-bg py-[var(--fsa-section-y)]">
           <div className="mx-auto px-[var(--fsa-container-pad)]" style={{ maxWidth: "var(--fsa-container-max)" }}>
-            <h2 className="mb-10 font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-navy-900 sm:text-4xl">{t("programmesAt", { name: venue.name })}</h2>
+            <h2 className="mb-10 font-fsa-display text-3xl font-bold uppercase tracking-tight text-fsa-navy-900 sm:text-4xl">{t("programmesAt", { name: venueName })}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {programmes.map((p) => <ProgrammeCard key={p.id} programme={p} locale={locale} />)}
             </div>

@@ -64,12 +64,18 @@ const optionalInt = z.number().int().nullable().optional();
  */
 export const slotInputSchema = z.object({
   ageGroup: z.string().min(1, "ageGroup is required"),
+  ageGroupFr: z.string().nullable().optional(),
+  ageGroupAr: z.string().nullable().optional(),
   minAge: optionalInt,
   maxAge: optionalInt,
   dobStart: z.string().nullable().optional(),
   dobEnd: z.string().nullable().optional(),
   sessionName: z.string().nullable().optional(),
+  sessionNameFr: z.string().nullable().optional(),
+  sessionNameAr: z.string().nullable().optional(),
   sessionType: z.string().nullable().optional(),
+  sessionTypeFr: z.string().nullable().optional(),
+  sessionTypeAr: z.string().nullable().optional(),
   day: z.string().nullable().optional(),
   startTime: z.string().nullable().optional(),
   endTime: z.string().nullable().optional(),
@@ -101,7 +107,13 @@ export const slotUpdateSchema = slotInputSchema.partial().extend({ stationId: z.
  */
 export function slotWriteData(input: Partial<SlotInput> & { stationId?: string }): Record<string, unknown> {
   const data: Record<string, unknown> = {};
-  const copy = ["ageGroup", "minAge", "maxAge", "sessionName", "sessionType", "programmeId", "coachId", "capacity", "availableSpaces", "price", "registrationStatus", "isActive"] as const;
+  const copy = [
+    "ageGroup", "ageGroupFr", "ageGroupAr",
+    "minAge", "maxAge",
+    "sessionName", "sessionNameFr", "sessionNameAr",
+    "sessionType", "sessionTypeFr", "sessionTypeAr",
+    "programmeId", "coachId", "capacity", "availableSpaces", "price", "registrationStatus", "isActive",
+  ] as const;
   for (const key of copy) if (input[key] !== undefined) data[key] = input[key];
   // Only ever set on update. createSlot appends the route's stationId after this,
   // so a create body can never redirect a slot to another location.

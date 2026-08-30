@@ -15,7 +15,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 const EDITABLE_FIELDS = [
   "slug", "title", "titleFr", "titleAr", "excerpt", "excerptFr", "excerptAr",
   "body", "bodyFr", "bodyAr", "coverImageUrl", "categoryId", "authorName",
-  "isPublished", "isFeatured", "metaTitle", "metaDescription", "ogImage",
+  "isPublished", "isFeatured",
+  "metaTitle", "metaTitleFr", "metaTitleAr",
+  "metaDescription", "metaDescriptionFr", "metaDescriptionAr", "ogImage",
 ] as const;
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

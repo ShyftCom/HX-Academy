@@ -20,6 +20,7 @@
     "settings": "Settings",
     "meetings": "Meetings",
     "no_staff": "No staff assigned to this station.",
+    "public_name": "Public venue name",
     "public_page": "Public Venue Page",
     "show_public": "Show on public Venues page",
     "show_hint": "When off, this station will not appear on the public website.",

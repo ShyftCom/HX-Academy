@@ -16,6 +16,22 @@ const isLocal = /^postgres(ql)?:\/\/[^/@]*@?(localhost|127\.0\.0\.1|\[::1\])[:/]
 const adapter = isLocal ? new PrismaPg({ connectionString }) : new PrismaNeon({ connectionString });
 const db = new PrismaClient({ adapter });
 
+/**
+ * Public labels for the seeded timetable rows, keyed by their English base.
+ * ScheduleSlot.ageGroup / sessionName are free text an admin edits, so they
+ * carry the same field/fieldFr/fieldAr trio as the rest of the public copy.
+ */
+const SLOT_LABELS: Record<string, { fr: string; ar: string }> = {
+  "Under 8": { fr: "Moins de 8 ans", ar: "أقل من 8 سنوات" },
+  "Under 10": { fr: "Moins de 10 ans", ar: "أقل من 10 سنوات" },
+  "Under 12": { fr: "Moins de 12 ans", ar: "أقل من 12 سنة" },
+  "Under 14": { fr: "Moins de 14 ans", ar: "أقل من 14 سنة" },
+  "Under 16": { fr: "Moins de 16 ans", ar: "أقل من 16 سنة" },
+  Skills: { fr: "Technique", ar: "المهارات" },
+  "All ages": { fr: "Tous les âges", ar: "جميع الأعمار" },
+  "Full day camp": { fr: "Stage à la journée", ar: "تربّص ليوم كامل" },
+};
+
 async function main() {
   console.log("🌱 Seeding database...");
 
@@ -464,7 +480,11 @@ async function main() {
           title: "Homepage",
           isPublished: true,
           metaTitle: "Football Skills Academy — Entraîne-toi, rivalise, progresse",
+          metaTitleFr: "Football Skills Academy — Entraîne-toi, rivalise, progresse",
+          metaTitleAr: "Football Skills Academy — تدرّب، نافس، تطوّر",
           metaDescription: "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.",
+          metaDescriptionFr: "Football Skills Academy propose des programmes à l'année, des stages de vacances et des équipes de développement pour les joueurs de 6 à 16 ans, encadrés par des entraîneurs qualifiés sur tous nos sites.",
+          metaDescriptionAr: "تقدّم أكاديمية Football Skills Academy برامج على مدار السنة وتربّصات للعطل وفرق تطوير للاعبين من 6 إلى 16 سنة، بإشراف مدربين مؤهَّلين في جميع مواقعنا.",
           sections: {
             create: [
               {
@@ -501,9 +521,9 @@ async function main() {
                   bodyFr: "Football Skills Academy a été fondée pour offrir aux jeunes joueurs un parcours structuré et adapté à leur âge, des premiers pas avec le ballon jusqu'au football en équipe représentative.", bodyAr: "تأسست أكاديمية Football Skills Academy لتوفّر للاعبين الشباب مساراً منظّماً يناسب أعمارهم، من الخطوات الأولى مع الكرة إلى اللعب ضمن الفرق التمثيلية.",
                   imageUrl: "/media/card/team-photo.jpg",
                   bulletPoints: [
-                    { text: "Qualified, DBS-checked coaches at every session", textFr: "Des entraîneurs qualifiés et vérifiés à chaque séance" },
-                    { text: "Small coaching ratios across all age groups", textFr: "Un encadrement en petits groupes pour tous les âges" },
-                    { text: "A clear pathway from Foundation to Development Squads", textFr: "Un parcours clair, de la base aux équipes de développement" },
+                    { text: "Qualified, DBS-checked coaches at every session", textFr: "Des entraîneurs qualifiés et vérifiés à chaque séance", textAr: "مدربون مؤهَّلون ومدقَّق في سوابقهم في كل حصة" },
+                    { text: "Small coaching ratios across all age groups", textFr: "Un encadrement en petits groupes pour tous les âges", textAr: "تأطير ضمن مجموعات صغيرة لجميع الأعمار" },
+                    { text: "A clear pathway from Foundation to Development Squads", textFr: "Un parcours clair, de la base aux équipes de développement", textAr: "مسار واضح من مرحلة التأسيس إلى فرق التطوير" },
                   ],
                   ctaLabel: "Learn about our methodology", ctaLabelFr: "Découvrir notre méthodologie", ctaLabelAr: "اكتشف منهجيتنا", ctaUrl: "/methodology",
                 }),
@@ -562,27 +582,36 @@ async function main() {
     // Create Venues (Station extended with Showcase Website marketing fields)
     const venueSeed = [
       {
-        name: "City Football Academy", slug: "city-football-academy", wilaya: "Algiers", wilayaCode: 16,
+        name: "City Football Academy", nameFr: "City Football Academy", nameAr: "أكاديمية المدينة لكرة القدم",
+        slug: "city-football-academy", wilaya: "Algiers", wilayaCode: 16,
         address: "Bab Ezzouar, Algiers", isPubliclyListed: true, displayOrder: 0,
         heroImageUrl: "/media/wide/team-talk.jpg",
         shortDescription: "Our flagship venue with 3 full-size pitches and a dedicated indoor training hall.",
         facilities: JSON.stringify(["3 full-size pitches", "Indoor training hall", "Floodlit 5-a-side courts", "Clubhouse & changing rooms"]),
+        facilitiesFr: JSON.stringify(["3 terrains grand format", "Salle d'entraînement couverte", "Terrains de foot à 5 éclairés", "Club-house et vestiaires"]),
+        facilitiesAr: JSON.stringify(["3 ملاعب بالحجم الكامل", "قاعة تدريب مغطّاة", "ملاعب خماسية مضاءة", "نادٍ وغرف تبديل الملابس"]),
         pitchType: "3G artificial turf", changingRooms: "6 changing rooms with showers",
       },
       {
-        name: "Riverside Training Centre", slug: "riverside-training-centre", wilaya: "Oran", wilayaCode: 31,
+        name: "Riverside Training Centre", nameFr: "Centre d'entraînement Riverside", nameAr: "مركز ريفرسايد للتدريب",
+        slug: "riverside-training-centre", wilaya: "Oran", wilayaCode: 31,
         address: "Riverside Park, Oran", isPubliclyListed: true, displayOrder: 1,
         heroImageUrl: "/media/wide/first-touch.jpg",
         shortDescription: "A modern riverside venue used for our weekly programmes and game festivals.",
         facilities: JSON.stringify(["2 full-size pitches", "Parking on site", "Spectator area"]),
+        facilitiesFr: JSON.stringify(["2 terrains grand format", "Parking sur place", "Espace spectateurs"]),
+        facilitiesAr: JSON.stringify(["ملعبان بالحجم الكامل", "موقف سيارات في المكان", "فضاء للمتفرّجين"]),
         pitchType: "Natural grass", changingRooms: "4 changing rooms",
       },
       {
-        name: "Northside Sports Complex", slug: "northside-sports-complex", wilaya: "Constantine", wilayaCode: 25,
+        name: "Northside Sports Complex", nameFr: "Complexe sportif Northside", nameAr: "مركّب نورثسايد الرياضي",
+        slug: "northside-sports-complex", wilaya: "Constantine", wilayaCode: 25,
         address: "Northside District, Constantine", isPubliclyListed: true, displayOrder: 2,
         heroImageUrl: "/media/wide/team-photo.jpg",
         shortDescription: "Home to our Development Squads and holiday camp programmes.",
         facilities: JSON.stringify(["4 pitches", "Gym", "Meeting rooms"]),
+        facilitiesFr: JSON.stringify(["4 terrains", "Salle de musculation", "Salles de réunion"]),
+        facilitiesAr: JSON.stringify(["4 ملاعب", "قاعة رياضية", "قاعات اجتماعات"]),
         pitchType: "3G artificial turf", changingRooms: "6 changing rooms with showers",
       },
     ];
@@ -614,14 +643,14 @@ async function main() {
 
     // Create Coaches (public-safe profiles, deliberately separate from StaffProfile/HRM data)
     const coachSeed = [
-      { fullName: "Yanis Belkacem", role: "Head of Coaching", bio: "UEFA A-licensed coach with over a decade of youth development experience.", stationSlug: "city-football-academy" },
-      { fullName: "Sofia Amrani", role: "Foundation Phase Lead", bio: "Specialist in technical development for players aged 6-10.", stationSlug: "city-football-academy" },
-      { fullName: "Karim Ferhat", role: "Development Squad Coach", bio: "Former semi-professional player focused on the transition to competitive football.", stationSlug: "northside-sports-complex" },
+      { fullName: "Yanis Belkacem", role: "Head of Coaching", roleFr: "Responsable de l'encadrement", roleAr: "مسؤول التأطير", bio: "UEFA A-licensed coach with over a decade of youth development experience.", stationSlug: "city-football-academy" },
+      { fullName: "Sofia Amrani", role: "Foundation Phase Lead", roleFr: "Responsable de la phase d'initiation", roleAr: "مسؤول مرحلة التأسيس", bio: "Specialist in technical development for players aged 6-10.", stationSlug: "city-football-academy" },
+      { fullName: "Karim Ferhat", role: "Development Squad Coach", roleFr: "Entraîneur des équipes de développement", roleAr: "مدرّب فرق التطوير", bio: "Former semi-professional player focused on the transition to competitive football.", stationSlug: "northside-sports-complex" },
     ];
     const coaches: Record<string, any> = {};
     for (const c of coachSeed) {
       const existing = await db.coach.findFirst({ where: { fullName: c.fullName } });
-      coaches[c.fullName] = existing ?? (await db.coach.create({ data: { fullName: c.fullName, role: c.role, bio: c.bio, stationId: venues[c.stationSlug]?.id ?? null, isActive: true } }));
+      coaches[c.fullName] = existing ?? (await db.coach.create({ data: { fullName: c.fullName, role: c.role, roleFr: c.roleFr, roleAr: c.roleAr, bio: c.bio, stationId: venues[c.stationSlug]?.id ?? null, isActive: true } }));
     }
     console.log("✅ Coaches created");
 
@@ -657,11 +686,18 @@ async function main() {
           promoBannerText: "Football School Summer", promoBannerTextFr: "École de Football — Été",
           isFeatured: true, isPubliclyListed: true, displayOrder: 0,
           metaTitle: "Football School | Football Skills Academy",
+          metaTitleFr: "École de Football | Football Skills Academy",
+          metaTitleAr: "مدرسة كرة القدم | Football Skills Academy",
           metaDescription: "Weekly football training for players aged 6-16, delivered by qualified coaches at Football Skills Academy.",
+          metaDescriptionFr: "Entraînement de football hebdomadaire pour les joueurs de 6 à 16 ans, encadré par des entraîneurs qualifiés à Football Skills Academy.",
+          metaDescriptionAr: "تدريب كروي أسبوعي للاعبين من 6 إلى 16 سنة، بإشراف مدربين مؤهَّلين في أكاديمية Football Skills Academy.",
         },
       });
       // Under 14 and Under 16 deliberately share Thursday 18:30-19:45 on *different*
       // pitches: legal, and a live example of why the overlap rule is scoped per pitch.
+      // Age group and session are public copy on the timetable, so a fresh
+      // install seeds their FR/AR alongside the English base rather than
+      // leaving the Arabic page to print "Under 8".
       const rows: [string, number, number, string, string, string, string, string, string, number][] = [
         ["Under 8", 6, 8, "Skills", "Monday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
         ["Under 10", 8, 10, "Skills", "Wednesday", "17:30", "18:45", "Pitch A", "city-football-academy", 4000],
@@ -676,6 +712,8 @@ async function main() {
         await db.scheduleSlot.create({
           data: {
             stationId, programmeId: programme.id, ageGroup, minAge, maxAge, sessionName,
+            ageGroupFr: SLOT_LABELS[ageGroup]?.fr, ageGroupAr: SLOT_LABELS[ageGroup]?.ar,
+            sessionNameFr: SLOT_LABELS[sessionName]?.fr, sessionNameAr: SLOT_LABELS[sessionName]?.ar,
             day, dayOfWeek: parseDayOfWeek(day), startTime, endTime,
             startMinutes: parseMinutes(startTime), endMinutes: parseMinutes(endTime), field,
             coachId: i < 2 ? coaches["Sofia Amrani"].id : coaches["Yanis Belkacem"].id,
@@ -712,7 +750,11 @@ async function main() {
           priceLabel: "From 12,000 DA / week", priceFrom: 12000,
           isFeatured: false, isPubliclyListed: true, displayOrder: 1,
           metaTitle: "Holiday Football Camp | Football Skills Academy",
+          metaTitleFr: "Stage de Football | Football Skills Academy",
+          metaTitleAr: "تربّص كرة القدم | Football Skills Academy",
           metaDescription: "A week of intensive football training and match play during the school holidays for players aged 6-16.",
+          metaDescriptionFr: "Une semaine d'entraînement intensif et de matchs pendant les vacances scolaires, pour les joueurs de 6 à 16 ans.",
+          metaDescriptionAr: "أسبوع من التدريب المكثّف والمباريات خلال العطلة المدرسية، للاعبين من 6 إلى 16 سنة.",
         },
       });
       // "Monday-Friday" names a range, not a weekday, so dayOfWeek stays null:
@@ -723,7 +765,9 @@ async function main() {
         await db.scheduleSlot.create({
           data: {
             stationId: campStationId, programmeId: programme.id, ageGroup: "All ages", minAge: 6, maxAge: 16,
-            sessionName: "Full day camp", day: "Monday-Friday", dayOfWeek: parseDayOfWeek("Monday-Friday"),
+            ageGroupFr: SLOT_LABELS["All ages"].fr, ageGroupAr: SLOT_LABELS["All ages"].ar,
+            sessionName: "Full day camp", sessionNameFr: SLOT_LABELS["Full day camp"].fr, sessionNameAr: SLOT_LABELS["Full day camp"].ar,
+            day: "Monday-Friday", dayOfWeek: parseDayOfWeek("Monday-Friday"),
             startTime: "09:00", endTime: "15:00", startMinutes: parseMinutes("09:00"), endMinutes: parseMinutes("15:00"),
             coachId: coaches["Karim Ferhat"].id, price: 12000, registrationStatus: "open", order: 0,
           },
@@ -777,7 +821,11 @@ async function main() {
         data: {
           slug: "who-we-are", title: "Who We Are", isPublished: true,
           metaTitle: "Qui sommes-nous | Football Skills Academy",
+          metaTitleFr: "Qui sommes-nous | Football Skills Academy",
+          metaTitleAr: "من نحن | Football Skills Academy",
           metaDescription: "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.",
+          metaDescriptionFr: "Football Skills Academy repose sur le développement du joueur sur la durée, un encadrement qualifié et un environnement sûr et inclusif pour chacun.",
+          metaDescriptionAr: "تقوم أكاديمية Football Skills Academy على تطوير اللاعب على المدى الطويل، وتأطير مؤهَّل، وبيئة آمنة وشاملة للجميع.",
           sections: {
             create: [
               {
@@ -842,7 +890,11 @@ async function main() {
         data: {
           slug: "methodology", title: "Methodology", isPublished: true,
           metaTitle: "Méthodologie | Football Skills Academy",
+          metaTitleFr: "Méthodologie | Football Skills Academy",
+          metaTitleAr: "منهجيتنا | Football Skills Academy",
           metaDescription: "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.",
+          metaDescriptionFr: "Notre méthodologie développe les compétences techniques, tactiques, physiques, psychologiques et sociales à travers des séances adaptées à l'âge et construites par contraintes.",
+          metaDescriptionAr: "تطوّر منهجيتنا المهارات التقنية والتكتيكية والبدنية والنفسية والاجتماعية عبر حصص تناسب كل فئة عمرية وتُبنى على وضعيات اللعب.",
           sections: {
             create: [
               {
@@ -900,7 +952,11 @@ async function main() {
         data: {
           slug: "pathway", title: "Pathway", isPublished: true,
           metaTitle: "Parcours du joueur | Football Skills Academy",
+          metaTitleFr: "Parcours du joueur | Football Skills Academy",
+          metaTitleAr: "مسار اللاعب | Football Skills Academy",
           metaDescription: "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.",
+          metaDescriptionFr: "De la formation initiale aux équipes de développement — un parcours clair et adapté à l'âge pour chaque joueur de Football Skills Academy.",
+          metaDescriptionAr: "من التكوين الأولي إلى فرق التطوير — مسار واضح يناسب كل مرحلة عمرية لكل لاعب في أكاديمية Football Skills Academy.",
           sections: {
             create: [
               {
@@ -1044,7 +1100,7 @@ async function main() {
 
     // Create News category + articles
     const existingNewsCat = await db.newsCategory.findUnique({ where: { slug: "academy-news" } });
-    const newsCategory = existingNewsCat ?? (await db.newsCategory.create({ data: { name: "Academy News", nameFr: "Actualités de l'académie", slug: "academy-news", order: 0 } }));
+    const newsCategory = existingNewsCat ?? (await db.newsCategory.create({ data: { name: "Academy News", nameFr: "Actualités de l'académie", nameAr: "أخبار الأكاديمية", slug: "academy-news", order: 0 } }));
 
     const existingArticle1 = await db.newsArticle.findUnique({ where: { slug: "welcome-to-football-skills-academy" } });
     if (!existingArticle1) {
@@ -1052,8 +1108,14 @@ async function main() {
         data: {
           slug: "welcome-to-football-skills-academy",
           title: "Welcome to Football Skills Academy",
+          titleFr: "Bienvenue à Football Skills Academy",
+          titleAr: "مرحباً بكم في أكاديمية Football Skills Academy",
           excerpt: "We're excited to launch our new Showcase Website, with programmes, venues and Development Squads all in one place.",
+          excerptFr: "Nous sommes heureux de lancer notre nouveau site : programmes, sites d'entraînement et équipes de développement réunis au même endroit.",
+          excerptAr: "يسعدنا إطلاق موقعنا الجديد، حيث تجتمع البرامج ومواقع التدريب وفرق التطوير في مكان واحد.",
           body: "<p>We're excited to launch our redesigned website — a single place to explore our programmes, find your nearest venue, and register interest in our Development Squads.</p><p>Whether your player is just starting out or ready for the next step, our team is here to help you find the right fit.</p>",
+          bodyFr: "<p>Nous sommes ravis de lancer notre nouveau site — un seul endroit pour découvrir nos programmes, trouver le site le plus proche de chez vous et manifester votre intérêt pour nos équipes de développement.</p><p>Que votre joueur débute ou soit prêt pour l'étape suivante, notre équipe est là pour vous aider à trouver la formule qui lui convient.</p>",
+          bodyAr: "<p>يسعدنا إطلاق موقعنا الجديد — مكان واحد لاستكشاف برامجنا، والعثور على أقرب موقع إليك، وتسجيل اهتمامك بفرق التطوير لدينا.</p><p>سواء كان لاعبك في بدايته أو جاهزاً للخطوة التالية، فريقنا هنا لمساعدتك على اختيار الصيغة المناسبة.</p>",
           coverImageUrl: "/media/wide/team-photo.jpg",
           categoryId: newsCategory.id, authorName: "Football Skills Academy",
           isPublished: true, isFeatured: true, publishedAt: new Date(),
@@ -1067,8 +1129,14 @@ async function main() {
         data: {
           slug: "summer-holiday-camp-dates-announced",
           title: "Holiday Football Camp Dates Announced",
+          titleFr: "Les dates du stage de football sont annoncées",
+          titleAr: "الإعلان عن مواعيد تربّص كرة القدم",
           excerpt: "Our next Holiday Football Camp is open for registration — a full week of training and match play.",
+          excerptFr: "Les inscriptions à notre prochain stage de football sont ouvertes : une semaine complète d'entraînement et de matchs.",
+          excerptAr: "فُتح التسجيل في تربّصنا المقبل لكرة القدم — أسبوع كامل من التدريب والمباريات.",
           body: "<p>Registration is now open for our next Holiday Football Camp. Places are limited, so early registration is recommended.</p><p>See the Programmes page for full pricing and schedule details.</p>",
+          bodyFr: "<p>Les inscriptions sont ouvertes pour notre prochain stage de football. Les places sont limitées : il est conseillé de s'inscrire tôt.</p><p>Consultez la page Programmes pour le détail des tarifs et du planning.</p>",
+          bodyAr: "<p>فُتح باب التسجيل في تربّص كرة القدم القادم. الأماكن محدودة، لذا يُنصح بالتسجيل مبكراً.</p><p>راجع صفحة البرامج للاطلاع على الأسعار والجدول كاملاً.</p>",
           coverImageUrl: "/media/wide/squad-trip.jpg",
           categoryId: newsCategory.id, authorName: "Football Skills Academy",
           isPublished: true, isFeatured: false, publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),

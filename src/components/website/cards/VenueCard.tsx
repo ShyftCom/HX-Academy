@@ -3,11 +3,15 @@ import Image from "next/image";
 import { MapPin, ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { lf } from "../sections/localeField";
+import { wilayaLabel, wilayaNames } from "@/lib/public-wilaya";
 
 export interface VenueCardData {
   slug: string | null;
   name: string;
+  nameFr?: string | null;
+  nameAr?: string | null;
   wilaya: string;
+  wilayaCode?: number | null;
   heroImageUrl?: string | null;
   shortDescription?: string | null;
   shortDescriptionFr?: string | null;
@@ -16,7 +20,10 @@ export interface VenueCardData {
 
 export async function VenueCard({ venue, locale }: { venue: VenueCardData; locale: string }) {
   const t = await getTranslations({ locale, namespace: "venues" });
-  const desc = lf(venue as unknown as Record<string, unknown>, "shortDescription", locale);
+  const wilaya = wilayaLabel(await wilayaNames(), venue, locale);
+  const record = venue as unknown as Record<string, unknown>;
+  const name = lf(record, "name", locale);
+  const desc = lf(record, "shortDescription", locale);
   const content = (
     <>
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-fsa-pale-bg">
@@ -30,8 +37,8 @@ export async function VenueCard({ venue, locale }: { venue: VenueCardData; local
             leaving the top of the photo essentially untouched. */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5">
-          <h3 className="font-fsa-display text-2xl font-bold uppercase text-white">{venue.name}</h3>
-          <p className="mt-1 flex items-center gap-1 text-sm text-white/85"><MapPin className="h-3.5 w-3.5" /> {venue.wilaya}</p>
+          <h3 className="font-fsa-display text-2xl font-bold uppercase text-white" dir="auto">{name}</h3>
+          <p className="mt-1 flex items-center gap-1 text-sm text-white/85"><MapPin className="h-3.5 w-3.5" /> <span dir="auto">{wilaya}</span></p>
         </div>
       </div>
       {desc && (

@@ -171,7 +171,7 @@ export default function StorePage() {
         {/* Product grid */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-sm text-gray-500">{total} produits</p>
+            <p className="text-sm text-gray-500">{t("productCount", { count: total })}</p>
             <div className="flex items-center gap-2">
               <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-800">
                 <option value="newest">{t("newest")}</option>

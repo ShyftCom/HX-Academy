@@ -39,10 +39,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/programmes/${slug}`,
-    // metaTitle/metaDescription are single-column in the schema; fall back to
-    // the localised name/description rather than to the English base value.
-    title: programme.metaTitle || lf(record, "name", locale),
-    description: programme.metaDescription || lf(record, "shortDescription", locale) || undefined,
+    // An admin-set SEO override wins, but only in the locale being rendered:
+    // an English metaTitle left over from before the locale columns existed
+    // must not outrank the translated programme name.
+    title: lf(record, "metaTitle", locale) || lf(record, "name", locale),
+    description: lf(record, "metaDescription", locale) || lf(record, "shortDescription", locale) || undefined,
     images: programme.ogImage ? [programme.ogImage] : undefined,
   });
 }
@@ -124,12 +125,18 @@ export default async function ProgrammeDetailPage({ params }: { params: Promise<
           locale={locale}
           content={{
             heading: t("meetCoaches"),
+            // The card's own trio, not a pre-resolved string: FeatureCardsSection
+            // runs lf() over `body`/`bodyFr`/`bodyAr` itself, so passing the
+            // resolved value as `body` and the French as `bodyFr` made French
+            // win back on the Arabic page.
             cards: programme.coaches.map(({ coach }) => ({
               icon: "UserCheck",
               title: coach.fullName,
               titleFr: coach.fullName,
-              body: lf(coach as unknown as Record<string, unknown>, "role", locale),
+              titleAr: coach.fullName,
+              body: coach.role,
               bodyFr: coach.roleFr,
+              bodyAr: coach.roleAr,
             })),
           }}
         />

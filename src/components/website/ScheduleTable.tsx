@@ -1,17 +1,24 @@
 import { getTranslations } from "next-intl/server";
 import { FsaButton } from "./buttons/FsaButton";
 import { formatDateShort, formatNumber } from "@/lib/public-format";
-import { DAY_KEYS } from "@/lib/schedule";
+import { DAY_KEYS, parseDayOfWeek } from "@/lib/schedule";
+import { lf } from "./sections/localeField";
 
 export interface ScheduleRow {
   id: string;
   ageGroup: string;
+  ageGroupFr?: string | null;
+  ageGroupAr?: string | null;
   minAge: number | null;
   maxAge: number | null;
   dobStart: Date | string | null;
   dobEnd: Date | string | null;
   sessionName: string | null;
+  sessionNameFr?: string | null;
+  sessionNameAr?: string | null;
   sessionType: string | null;
+  sessionTypeFr?: string | null;
+  sessionTypeAr?: string | null;
   day: string | null;
   /** Set whenever `day` names exactly one weekday; drives the translated label. */
   dayOfWeek?: number | null;
@@ -20,7 +27,7 @@ export interface ScheduleRow {
   /** The location this slot belongs to. Every slot has one since schedules became
    *  location-scoped; it is optional here only so callers that already know the
    *  location (the venue page) need not select it. */
-  station?: { name: string } | null;
+  station?: { name: string; nameFr?: string | null; nameAr?: string | null } | null;
   field?: string | null;
   price: number | null;
   registrationStatus: string;
@@ -79,9 +86,31 @@ export async function ScheduleTable({
   if (rows.length === 0 && !emptyState) return null;
   const fmtDob = (d: Date | string | null) => formatDateShort(d, locale);
   /** `day` is stored as free text and is historically English. Translate it via
-   *  dayOfWeek where the value names one weekday; fall back to the raw string
-   *  for ranges like "Monday-Friday", which no single day key can express. */
-  const dayLabel = (row: ScheduleRow) => (row.dayOfWeek != null ? t(`days.${DAY_KEYS[row.dayOfWeek]}`) : row.day);
+   *  dayOfWeek where the value names one weekday. A range like "Monday-Friday"
+   *  has no dayOfWeek — no single key can express it — so translate its two
+   *  ends instead, and only fall back to the raw string when neither end is a
+   *  weekday this app recognises. */
+  const dayLabel = (row: ScheduleRow) => {
+    if (row.dayOfWeek != null) return t(`days.${DAY_KEYS[row.dayOfWeek]}`);
+    if (!row.day) return row.day;
+    const ends = row.day.split(/\s*[-–—/]\s*/);
+    if (ends.length === 2) {
+      const from = parseDayOfWeek(ends[0]);
+      const to = parseDayOfWeek(ends[1]);
+      if (from != null && to != null) return `${t(`days.${DAY_KEYS[from]}`)} – ${t(`days.${DAY_KEYS[to]}`)}`;
+    }
+    return row.day;
+  };
+  /** Age group, session and location are admin-typed labels carrying the
+   *  field/fieldFr/fieldAr trio, so they resolve through lf() like the rest of
+   *  the public copy rather than printing whatever the base column holds. */
+  const ageGroupLabel = (row: ScheduleRow) => lf(row as unknown as Record<string, unknown>, "ageGroup", locale) || row.ageGroup;
+  const sessionLabel = (row: ScheduleRow) => {
+    const rec = row as unknown as Record<string, unknown>;
+    return lf(rec, "sessionName", locale) || lf(rec, "sessionType", locale) || "—";
+  };
+  const stationLabel = (row: ScheduleRow) =>
+    (row.station ? lf(row.station as unknown as Record<string, unknown>, "name", locale) : "") || "—";
   const statusOf = (raw: string) => {
     const key = (STATUS_KEYS as readonly string[]).includes(raw) ? raw : "open";
     return { label: t(`status.${key}`), className: STATUS_CLASS[key] };
@@ -105,17 +134,17 @@ export async function ScheduleTable({
                 return (
                   <tr key={row.id}>
                     <td className={`bg-fsa-sky px-5 py-4 font-fsa-display text-lg font-bold uppercase text-white ${i === 0 ? "rounded-ss-fsa-md" : ""} ${i === rows.length - 1 ? "rounded-es-fsa-md" : ""}`}>
-                      {row.ageGroup}
+                      <span dir="auto">{ageGroupLabel(row)}</span>
                       {(row.dobStart || row.dobEnd) && <div className="text-xs font-normal normal-case opacity-80">{fmtDob(row.dobStart)} – {fmtDob(row.dobEnd)}</div>}
                     </td>
-                    <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">{row.sessionName ?? row.sessionType ?? "—"}</td>
+                    <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90" dir="auto">{sessionLabel(row)}</td>
                     <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">
                       {row.day && <span className="font-semibold text-white">{dayLabel(row)}</span>}
                       {row.startTime && <> <TimeRange start={row.startTime} end={row.endTime} /></>}
                     </td>
                     {showLocation && (
                       <td className="bg-fsa-navy-900 px-5 py-4 text-sm text-white/90">
-                        {row.station?.name ?? "—"}
+                        <span dir="auto">{stationLabel(row)}</span>
                         {row.field ? <div className="text-xs opacity-70">{row.field}</div> : null}
                       </td>
                     )}
@@ -137,7 +166,7 @@ export async function ScheduleTable({
             return (
               <div key={row.id} className="overflow-hidden rounded-fsa-md border border-fsa-border bg-white">
                 <div className="flex items-center justify-between bg-fsa-sky px-4 py-3">
-                  <span className="font-fsa-display text-base font-bold uppercase text-white">{row.ageGroup}</span>
+                  <span className="font-fsa-display text-base font-bold uppercase text-white" dir="auto">{ageGroupLabel(row)}</span>
                   <span className={`rounded-fsa-pill px-2.5 py-1 text-xs font-semibold ${status.className}`}>{status.label}</span>
                 </div>
                 <dl className="grid grid-cols-2 gap-y-2 px-4 py-3 text-sm">
@@ -148,13 +177,13 @@ export async function ScheduleTable({
                     </>
                   )}
                   <dt className="text-fsa-text-muted">{t("session")}</dt>
-                  <dd className="text-end text-fsa-navy-900">{row.sessionName ?? row.sessionType ?? "—"}</dd>
+                  <dd className="text-end text-fsa-navy-900" dir="auto">{sessionLabel(row)}</dd>
                   <dt className="text-fsa-text-muted">{t("dayTime")}</dt>
                   <dd className="text-end text-fsa-navy-900">{dayLabel(row)} <TimeRange start={row.startTime} end={row.endTime} /></dd>
                   {showLocation && (
                     <>
                       <dt className="text-fsa-text-muted">{t("venue")}</dt>
-                      <dd className="text-end text-fsa-navy-900">{row.station?.name ?? "—"}</dd>
+                      <dd className="text-end text-fsa-navy-900" dir="auto">{stationLabel(row)}</dd>
                     </>
                   )}
                   {row.field ? (

@@ -243,7 +243,9 @@
   },
   "pricing": {
     "popular": "Populaire",
-    "applyNow": "S’inscrire"
+    "applyNow": "S’inscrire",
+    "perMonth": "{count} mois",
+    "perYear": "{count, plural, one {# an} other {# ans}}"
   },
   "programmes": {
     "heroTitle": "Programmes",
@@ -386,6 +388,8 @@
   "store": {
     "title": "Boutique",
     "products": "Produits",
+    "productCount": "{count, plural, one {# produit} other {# produits}}",
+    "added": "Ajouté !",
     "cart": "Panier",
     "checkout": "Paiement",
     "allProducts": "Tous les produits",

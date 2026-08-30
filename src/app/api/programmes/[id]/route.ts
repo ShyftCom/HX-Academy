@@ -30,7 +30,8 @@ const EDITABLE_FIELDS = [
   "minAge", "maxAge", "priceFrom",
   "priceLabel", "priceLabelFr", "priceLabelAr",
   "promoBannerText", "promoBannerTextFr", "promoBannerTextAr", "promoBannerUrl", "bookingUrl",
-  "metaTitle", "metaDescription", "ogImage",
+  "metaTitle", "metaTitleFr", "metaTitleAr",
+  "metaDescription", "metaDescriptionFr", "metaDescriptionAr", "ogImage",
   "isFeatured", "isPubliclyListed", "displayOrder",
 ] as const;
 

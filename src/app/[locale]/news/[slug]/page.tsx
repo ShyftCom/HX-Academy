@@ -26,10 +26,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/news/${slug}`,
-    // metaTitle/metaDescription have no per-locale column yet (see the audit
-    // note on NewsArticle) — the localised title is the better default.
-    title: article.metaTitle || lf(record, "title", locale),
-    description: article.metaDescription || lf(record, "excerpt", locale) || undefined,
+    // An admin-set SEO override wins, but only in the locale being rendered:
+    // an English metaTitle left over from before the locale columns existed
+    // must not outrank the translated headline.
+    title: lf(record, "metaTitle", locale) || lf(record, "title", locale),
+    description: lf(record, "metaDescription", locale) || lf(record, "excerpt", locale) || undefined,
     images: image ? [image] : undefined,
   });
 }

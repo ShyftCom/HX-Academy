@@ -6,6 +6,14 @@ import { lf } from "./localeField";
 import { localeHref } from "../localeHref";
 import { formatNumber } from "@/lib/public-format";
 
+/**
+ * SubscriptionPlan.durationType is an untranslated code ("month" / "year" —
+ * the only two the plan editor offers). Mapping it to a message key keeps the
+ * public card from printing the raw English word; an unrecognised value falls
+ * back to the code itself rather than throwing on a missing message.
+ */
+const DURATION_KEYS: Record<string, string> = { month: "perMonth", year: "perYear" };
+
 export async function PricingCardsSection({ content, locale }: { content: Record<string, any>; locale: string }) {
   const t = await getTranslations({ locale, namespace: "pricing" });
   const heading = lf(content, "heading", locale);
@@ -44,7 +52,7 @@ export async function PricingCardsSection({ content, locale }: { content: Record
                   {currencySymbol} {formatNumber(plan.price, locale)}
                 </span>
                 <span className="ms-1 text-sm text-fsa-text-muted">
-                  / {plan.duration} {plan.durationType}
+                  / {DURATION_KEYS[plan.durationType] ? t(DURATION_KEYS[plan.durationType], { count: plan.duration }) : `${plan.duration} ${plan.durationType}`}
                 </span>
               </div>
               {plan.description && <p className="mt-2 text-sm text-fsa-text-muted" dir="auto">{lf(plan as never, "description", locale)}</p>}

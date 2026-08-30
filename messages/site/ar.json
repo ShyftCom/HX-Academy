@@ -243,7 +243,9 @@
   },
   "pricing": {
     "popular": "الأكثر طلباً",
-    "applyNow": "سجّل الآن"
+    "applyNow": "سجّل الآن",
+    "perMonth": "{count, plural, one {شهر} two {شهران} few {# أشهر} many {# شهراً} other {# شهر}}",
+    "perYear": "{count, plural, one {سنة} two {سنتان} few {# سنوات} many {# سنة} other {# سنة}}"
   },
   "programmes": {
     "heroTitle": "البرامج",
@@ -386,6 +388,8 @@
   "store": {
     "title": "المتجر",
     "products": "المنتجات",
+    "productCount": "{count, plural, zero {لا توجد منتجات} one {منتج واحد} two {منتجان} few {# منتجات} many {# منتجاً} other {# منتج}}",
+    "added": "تمت الإضافة!",
     "cart": "السلة",
     "checkout": "الدفع",
     "allProducts": "جميع المنتجات",

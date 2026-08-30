@@ -28,6 +28,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     where: { id },
     data: {
       name: body.name,
+      nameFr: body.nameFr, nameAr: body.nameAr,
       wilaya: body.wilaya,
       wilayaCode: body.wilayaCode ? Number(body.wilayaCode) : undefined,
       address: body.address,
@@ -43,6 +44,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       shortDescription: body.shortDescription, shortDescriptionFr: body.shortDescriptionFr, shortDescriptionAr: body.shortDescriptionAr,
       fullDescription: body.fullDescription, fullDescriptionFr: body.fullDescriptionFr, fullDescriptionAr: body.fullDescriptionAr,
       facilities: body.facilities !== undefined ? JSON.stringify(body.facilities ?? []) : undefined,
+      facilitiesFr: body.facilitiesFr !== undefined ? JSON.stringify(body.facilitiesFr ?? []) : undefined,
+      facilitiesAr: body.facilitiesAr !== undefined ? JSON.stringify(body.facilitiesAr ?? []) : undefined,
       pitchType: body.pitchType,
       changingRooms: body.changingRooms,
       parkingInfo: body.parkingInfo, parkingInfoFr: body.parkingInfoFr, parkingInfoAr: body.parkingInfoAr,

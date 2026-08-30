@@ -8,7 +8,6 @@ import { ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -167,8 +166,8 @@ export default function ProgrammeEditPage() {
             </div>
             <div className="space-y-4 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
               <p className="text-sm font-semibold">{t("news.seo")}</p>
-              <div><Label>{t("news.seo_title")}</Label><Input value={(form.metaTitle as string) ?? ""} onChange={(e) => set({ metaTitle: e.target.value })} /></div>
-              <div><Label>{t("news.seo_description")}</Label><Textarea value={(form.metaDescription as string) ?? ""} onChange={(e) => set({ metaDescription: e.target.value })} /></div>
+              <LocaleTextInput baseKey="metaTitle" values={form} onChange={set} label={t("news.seo_title")} />
+              <LocaleTextInput baseKey="metaDescription" values={form} onChange={set} label={t("news.seo_description")} multiline />
             </div>
           </div>
 

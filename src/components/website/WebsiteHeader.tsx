@@ -18,7 +18,7 @@ interface HeaderConfig {
   ctaUrl: string | null; ctaStyle: string;
   navItems: NavItem[];
 }
-interface Venue { id: string; slug: string | null; name: string; wilaya: string }
+interface Venue { id: string; slug: string | null; name: string; nameFr?: string | null; nameAr?: string | null; wilaya: string; wilayaFr?: string | null; wilayaAr?: string | null }
 
 function getLabel(item: { label: string; labelFr?: string | null; labelAr?: string | null }, locale: string): string {
   if (locale === "ar" && item.labelAr) return item.labelAr;
@@ -26,6 +26,19 @@ function getLabel(item: { label: string; labelFr?: string | null; labelAr?: stri
   // Arabic falls back to French rather than to the English base column.
   if (locale === "ar" && item.labelFr) return item.labelFr;
   return item.label;
+}
+
+/** Same ar -> fr -> base resolution for a location's name. */
+function venueName(v: Venue, locale: string): string {
+  if (locale === "ar") return v.nameAr || v.nameFr || v.name;
+  if (locale === "fr") return v.nameFr || v.name;
+  return v.name;
+}
+
+/** The province, already resolved to both languages by /api/public/venues. */
+function venueWilaya(v: Venue, locale: string): string {
+  if (locale === "ar") return v.wilayaAr || v.wilayaFr || v.wilaya;
+  return v.wilayaFr || v.wilaya;
 }
 
 /** Same resolution for the dropdown blurb. This used to render `d.description`
@@ -162,7 +175,7 @@ function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
         className={`flex items-center gap-1.5 rounded-fsa-pill border px-4 py-1.5 text-sm font-semibold transition-colors ${dark ? "border-white/40 text-white hover:bg-white/10" : "border-fsa-navy-900/20 text-fsa-navy-900 hover:bg-fsa-navy-900/5"}`}
       >
         <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-        {venues.length === 1 ? venues[0].name : t("locations")}
+        {venues.length === 1 ? venueName(venues[0], locale) : t("locations")}
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       {open && (
@@ -174,8 +187,8 @@ function LocationSelector({ locale, dark }: { locale: string; dark: boolean }) {
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-sm font-medium text-fsa-navy-900 hover:bg-fsa-pale-bg"
             >
-              {v.name}
-              <span className="ms-1.5 text-xs font-normal text-fsa-text-muted">{v.wilaya}</span>
+              <span dir="auto">{venueName(v, locale)}</span>
+              <span className="ms-1.5 text-xs font-normal text-fsa-text-muted" dir="auto">{venueWilaya(v, locale)}</span>
             </Link>
           ))}
         </div>

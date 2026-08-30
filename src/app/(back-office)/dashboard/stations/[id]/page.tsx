@@ -35,6 +35,18 @@ export default function StationDetailPage() {
   const [form, setForm] = useState<any>({});
   const [marketing, setMarketing] = useState<Record<string, unknown>>({});
   const setMarketingField = (patch: Record<string, unknown>) => setMarketing((m) => ({ ...m, ...patch }));
+  /** One facilities column as editable newline text — stored as a JSON array,
+   *  and already an array in state once it has been edited this session. */
+  const facilityLines = (key: string) => {
+    const raw = marketing[key];
+    if (Array.isArray(raw)) return (raw as string[]).join("\n");
+    try {
+      const parsed = JSON.parse((raw as string) || "[]");
+      return Array.isArray(parsed) ? parsed.join("\n") : "";
+    } catch {
+      return "";
+    }
+  };
 
   const saveMarketingMut = useMutation({
     mutationFn: (data: Record<string, unknown>) => fetch(`/api/stations/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
@@ -148,6 +160,7 @@ export default function StationDetailPage() {
                 <Label>{t("detail.url_slug")}</Label>
                 <Input value={(marketing.slug as string) ?? ""} onChange={(e) => setMarketingField({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-") })} placeholder={t("detail.slug_ph")} />
               </div>
+              <LocaleTextInput baseKey="name" values={marketing} onChange={setMarketingField} label={t("detail.public_name")} />
               <ImageUrlInput label={t("detail.hero_image")} value={(marketing.heroImageUrl as string) ?? ""} onChange={(url) => setMarketingField({ heroImageUrl: url })} />
               <LocaleTextInput baseKey="shortDescription" values={marketing} onChange={setMarketingField} label={t("detail.short_desc")} multiline />
               <LocaleTextInput baseKey="fullDescription" values={marketing} onChange={setMarketingField} label={t("detail.full_desc")} multiline />
@@ -155,15 +168,25 @@ export default function StationDetailPage() {
                 <div className="space-y-1"><Label>{t("detail.pitch_type")}</Label><Input value={(marketing.pitchType as string) ?? ""} onChange={(e) => setMarketingField({ pitchType: e.target.value })} placeholder={t("detail.pitch_ph")} /></div>
                 <div className="space-y-1"><Label>{t("detail.changing_rooms")}</Label><Input value={(marketing.changingRooms as string) ?? ""} onChange={(e) => setMarketingField({ changingRooms: e.target.value })} /></div>
               </div>
-              <div className="space-y-1">
-                <Label>{t("detail.facilities")}</Label>
-                <Textarea
-                  value={Array.isArray(marketing.facilities) ? (marketing.facilities as string[]).join("\n") : (() => { try { return JSON.parse((marketing.facilities as string) ?? "[]").join("\n"); } catch { return ""; } })()}
-                  onChange={(e) => setMarketingField({ facilities: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
-                  placeholder={"3 full-size pitches\nIndoor training hall\nParking on site"}
-                  rows={4}
-                />
-              </div>
+              {/* One list per locale. The columns hold JSON arrays, so the
+                  tabbed textarea works on newline text and converts either way. */}
+              <LocaleTextInput
+                baseKey="facilities"
+                label={t("detail.facilities")}
+                multiline
+                values={{
+                  facilities: facilityLines("facilities"),
+                  facilitiesFr: facilityLines("facilitiesFr"),
+                  facilitiesAr: facilityLines("facilitiesAr"),
+                }}
+                onChange={(next) =>
+                  setMarketingField(
+                    Object.fromEntries(
+                      Object.entries(next).map(([k, v]) => [k, String(v ?? "").split("\n").map((line) => line.trim()).filter(Boolean)])
+                    )
+                  )
+                }
+              />
               <div className="space-y-1"><Label>{t("detail.maps_url")}</Label><Input value={(marketing.googleMapsUrl as string) ?? ""} onChange={(e) => setMarketingField({ googleMapsUrl: e.target.value })} placeholder="https://maps.google.com/…" /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1"><Label>{t("detail.parking")}</Label><Textarea value={(marketing.parkingInfo as string) ?? ""} onChange={(e) => setMarketingField({ parkingInfo: e.target.value })} rows={2} /></div>
