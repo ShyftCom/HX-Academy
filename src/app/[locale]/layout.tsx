@@ -8,6 +8,7 @@ import { ThemeVars } from "@/components/website/design-tokens/ThemeVars";
 import { allFontVariables } from "@/components/website/design-tokens/fonts";
 import { HeaderOverlayProvider } from "@/components/website/HeaderOverlayContext";
 import { OrganizationSchema } from "@/components/website/OrganizationSchema";
+import { MetaPixel } from "@/components/website/MetaPixel";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -47,6 +48,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider locale={locale} messages={messages}>
       <ThemeVars />
       <OrganizationSchema locale={locale} />
+      <MetaPixel />
       <div
         id="top"
         dir={dir}

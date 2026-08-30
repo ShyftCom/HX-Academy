@@ -107,6 +107,15 @@
       "saved": "Paramètres SlickPay enregistrés",
       "production_warning": "Le mode production débite de vraies cartes. Testez d'abord en bac à sable.",
       "copied": "Copié"
+    },
+    "meta_pixel": {
+      "tab": "Pixel Meta",
+      "intro": "Charge le Pixel Meta (Facebook) sur chaque page publique et envoie un événement Lead dès qu'une personne termine le questionnaire de candidature.",
+      "enabled": "Activer le Pixel Meta",
+      "enabled_hint": "Désactivé, le script n'est pas chargé et rien n'est envoyé à Meta.",
+      "pixel_id": "ID du pixel",
+      "pixel_id_hint": "Disponible dans le Gestionnaire d'événements Meta. Chiffres uniquement, ex. 857829187136751.",
+      "save": "Enregistrer le Pixel Meta"
     }
   },
   "pixels": {
