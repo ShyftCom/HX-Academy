@@ -4,6 +4,12 @@ import { db } from "@/lib/db";
 import { APPLICATION_SURVEY_SETTING } from "@/lib/setting-keys";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Signed-in only. The survey id is public (it rides along on
+  // /api/public/landing), and the rows carry `disqualifyingOptions` — the
+  // answers a Super Admin marked as rejecting an applicant. Handing those to
+  // an anonymous caller would tell every visitor which answers to avoid.
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const survey = await db.survey.findUnique({
     where: { id },

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 
 /**
  * Public application form — a *lead* form, nothing more.
@@ -35,7 +35,8 @@ function ApplyFormInner() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  /** True while the survey answers are being screened server-side. */
+  const [screening, setScreening] = useState(false);
   const [form, setForm] = useState({ fullName: "", phone: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
   const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string | string[]>>({});
 
@@ -76,7 +77,50 @@ function ApplyFormInner() {
     return true;
   }
 
-  function next() { if (validateStep()) setStep((p) => Math.min(p + 1, lastStep)); }
+  /** Answers in the shape both the screening and the submit route expect. */
+  function answerPayload() {
+    return Object.entries(surveyAnswers)
+      .filter(([, v]) => v && (Array.isArray(v) ? v.length > 0 : v.toString().trim()))
+      .map(([questionId, answer]) => ({
+        questionId,
+        surveyId: survey?.id,
+        answer: Array.isArray(answer) ? JSON.stringify(answer) : String(answer),
+      }));
+  }
+
+  /**
+   * Leaving the survey step asks the server whether these answers disqualify
+   * the applicant. The Super Admin can mark individual options as rejecting,
+   * and those options are never sent to the browser — so the decision cannot
+   * be made here. A disqualified visitor never reaches the details step and no
+   * lead is created for them.
+   */
+  async function screenSurvey(): Promise<boolean> {
+    setScreening(true);
+    try {
+      const res = await fetch("/api/public/apply/screen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: answerPayload() }),
+      });
+      if (res.ok && (await res.json()).disqualified) {
+        router.push(`/${locale}/apply/not-eligible`);
+        return false;
+      }
+    } catch {
+      // The submit route screens again, so a failure here only costs the early
+      // exit — let the applicant carry on rather than blocking them.
+    } finally {
+      setScreening(false);
+    }
+    return true;
+  }
+
+  async function next() {
+    if (!validateStep()) return;
+    if (current === "survey" && !(await screenSurvey())) return;
+    setStep((p) => Math.min(p + 1, lastStep));
+  }
   function back() { setStep((p) => Math.max(p - 1, 0)); }
 
   async function handleSubmit() {
@@ -92,13 +136,7 @@ function ApplyFormInner() {
         address: form.address || undefined,
         categoryInterest: form.categoryInterest || undefined,
         selectedPlanId: planParam ?? undefined,
-        surveyAnswers: Object.entries(surveyAnswers)
-          .filter(([, v]) => v && (Array.isArray(v) ? v.length > 0 : v.toString().trim()))
-          .map(([questionId, answer]) => ({
-            questionId,
-            surveyId: survey?.id,
-            answer: Array.isArray(answer) ? JSON.stringify(answer) : String(answer),
-          })),
+        surveyAnswers: answerPayload(),
       };
 
       const res = await fetch("/api/public/apply", {
@@ -110,8 +148,12 @@ function ApplyFormInner() {
       if (res.status === 409) { toast.error(tErr("duplicateApplication")); return; }
       if (!res.ok) { toast.error(tErr("submissionFailed")); return; }
 
+      // The route screens the answers one last time. If it turned the
+      // applicant away, no lead exists — so no Lead event either.
+      if ((await res.json()).disqualified) { router.push(`/${locale}/apply/not-eligible`); return; }
+
       window.fbq?.("track", "Lead");
-      setSubmitted(true);
+      router.push(`/${locale}/apply/eligible`);
     } catch {
       toast.error(tErr("generic"));
     } finally {
@@ -166,23 +208,6 @@ function ApplyFormInner() {
   if (loading) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-    </div>
-  );
-
-  if (submitted) return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-      <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center max-w-md">
-        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-12 h-12 text-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{t("doneTitle")}</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-2">{t("doneThanks", { name: form.fullName })}</p>
-        <p className="text-gray-500 dark:text-gray-400 mb-2">{t("doneBody", { contact: form.phone || form.email })}</p>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">{t("doneNext")}</p>
-        <Link href={`/${locale}`} className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
-          <ArrowLeft className="ob-flip-rtl w-4 h-4" /> {t("backToHome")}
-        </Link>
-      </motion.div>
     </div>
   );
 
@@ -330,7 +355,8 @@ function ApplyFormInner() {
             <ArrowLeft className="ob-flip-rtl w-4 h-4" /> {step === 0 ? t("backToHome") : tc("back")}
           </button>
           {step < lastStep ? (
-            <button onClick={next} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors">
+            <button onClick={next} disabled={screening} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors">
+              {screening ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {t("continue")} <ArrowRight className="ob-flip-rtl w-4 h-4" />
             </button>
           ) : (

@@ -32,5 +32,30 @@
     "in_use": "Sur le formulaire d’inscription",
     "inactive_warning": "Ce questionnaire est désactivé : le formulaire l’ignore. Activez-le pour qu’il apparaisse.",
     "empty_warning": "Ce questionnaire n’a encore aucune question : le formulaire l’ignore. Ajoutez-en au moins une."
+  },
+  "disqualify": {
+    "help": "Marquez une option comme rejetante pour arrêter l’inscription : la personne qui la choisit est envoyée vers la page « Non éligible » et ne devient jamais un prospect.",
+    "mark": "Rejette",
+    "marked": "Rejetante",
+    "mark_title": "Marquer cette réponse comme disqualifiante",
+    "marked_title": "Cette réponse disqualifie le candidat — cliquez pour annuler",
+    "badge": "{{n}} rejetante(s)"
+  },
+  "outcome_pages": {
+    "heading": "Pages de fin du formulaire d’inscription",
+    "body": "Les deux pages sur lesquelles arrive un candidat. Chacune affiche un message au centre de la page.",
+    "field_title": "Titre",
+    "field_body": "Message",
+    "save": "Enregistrer les pages",
+    "saved": "Pages de fin mises à jour",
+    "fallback_hint": "Laissez le texte arabe vide pour reprendre le texte français.",
+    "qualified": {
+      "label": "Qualifié",
+      "hint": "Affichée après l’envoi du formulaire. Le prospect arrive dans votre pipeline."
+    },
+    "rejected": {
+      "label": "Non éligible",
+      "hint": "Affichée dès qu’une réponse rejetante est choisie. Aucune information n’est demandée et aucun prospect n’est créé."
+    }
   }
 }

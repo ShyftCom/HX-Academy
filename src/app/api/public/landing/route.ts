@@ -58,7 +58,10 @@ export async function GET(req: NextRequest) {
       if (rawSurvey) {
         survey = {
           ...rawSurvey,
-          questions: rawSurvey.questions.map((q) => ({
+          // `disqualifyingOptions` is stripped on purpose. Publishing it would
+          // tell every visitor which answers to avoid; the form posts its
+          // answers to /api/public/apply/screen and lets the server decide.
+          questions: rawSurvey.questions.map(({ disqualifyingOptions: _hidden, ...q }) => ({
             ...q,
             options: (() => { try { return JSON.parse(q.options ?? "[]"); } catch { return []; } })(),
           })),

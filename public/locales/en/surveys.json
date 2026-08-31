@@ -32,5 +32,30 @@
     "in_use": "On the application form",
     "inactive_warning": "This survey is switched off, so the form skips it. Turn it Active to make it appear.",
     "empty_warning": "This survey has no questions yet, so the form skips it. Add at least one question."
+  },
+  "disqualify": {
+    "help": "Mark an option as rejecting to end the application there: whoever picks it is sent to the “Not eligible” page and never becomes a lead.",
+    "mark": "Rejects",
+    "marked": "Rejecting",
+    "mark_title": "Mark this answer as disqualifying",
+    "marked_title": "This answer disqualifies the applicant — click to undo",
+    "badge": "{{n}} rejecting"
+  },
+  "outcome_pages": {
+    "heading": "End pages of the application form",
+    "body": "The two pages an applicant lands on. Both are shown as one message in the middle of the page.",
+    "field_title": "Title",
+    "field_body": "Message",
+    "save": "Save pages",
+    "saved": "End pages updated",
+    "fallback_hint": "Leave the Arabic text empty to fall back to the French one.",
+    "qualified": {
+      "label": "Qualified",
+      "hint": "Shown after the form is sent. The lead reaches your pipeline."
+    },
+    "rejected": {
+      "label": "Not eligible",
+      "hint": "Shown as soon as a rejecting answer is picked. No details are asked and no lead is created."
+    }
   }
 }

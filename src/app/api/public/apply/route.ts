@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { screenSurveyAnswers } from "@/lib/survey-screening";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -26,6 +27,17 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
 
     const data = parsed.data;
+
+    // Screened again here, not only at the survey step. The step-level check
+    // is a redirect the browser performs; this one is what actually keeps a
+    // disqualified applicant out of the pipeline, since nothing stops a caller
+    // from posting straight to this route.
+    if (data.surveyAnswers?.length) {
+      const { disqualified } = await screenSurveyAnswers(data.surveyAnswers);
+      if (disqualified) {
+        return NextResponse.json({ success: false, disqualified: true }, { status: 200 });
+      }
+    }
 
     if (!data.phone && !data.email) {
       return NextResponse.json({ error: "Phone or email is required" }, { status: 400 });
