@@ -55,33 +55,44 @@ export async function POST(req: NextRequest) {
     const defaultStatus = await db.leadStatus.findFirst({ where: { isDefault: true } })
       ?? await db.leadStatus.findFirst({ orderBy: { order: "asc" } });
 
-    const lead = await db.lead.create({
-      data: {
-        fullName: data.fullName,
-        phone: data.phone ?? null,
-        email: data.email || null,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        age: data.dateOfBirth ? Math.floor((Date.now() - new Date(data.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365)) : null,
-        parentName: data.parentName ?? null,
-        parentPhone: data.parentPhone ?? null,
-        address: data.address ?? null,
-        categoryInterest: data.categoryInterest ?? null,
-        source: "website",
-        statusId: defaultStatus?.id ?? null,
-        selectedPlanId: data.selectedPlanId ?? null,
-      },
-    });
-
-    if (data.surveyAnswers?.length) {
-      await db.surveyAnswer.createMany({
-        data: data.surveyAnswers.map((a) => ({
-          leadId: lead.id,
-          questionId: a.questionId,
-          surveyId: a.surveyId ?? "",
-          answer: a.answer,
-        })),
+    // The lead and its survey answers are one submission, not two writes: a
+    // bad questionId/surveyId used to leave the lead behind with no answers
+    // attached while the caller still saw a 500, and the phone/email was then
+    // stuck — any real resubmission got refused as a duplicate against the
+    // orphaned row. Wrapping both in a transaction means a failed answer
+    // insert rolls the lead back too, so "submission failed" actually means
+    // nothing was saved.
+    const lead = await db.$transaction(async (tx) => {
+      const created = await tx.lead.create({
+        data: {
+          fullName: data.fullName,
+          phone: data.phone ?? null,
+          email: data.email || null,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+          age: data.dateOfBirth ? Math.floor((Date.now() - new Date(data.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365)) : null,
+          parentName: data.parentName ?? null,
+          parentPhone: data.parentPhone ?? null,
+          address: data.address ?? null,
+          categoryInterest: data.categoryInterest ?? null,
+          source: "website",
+          statusId: defaultStatus?.id ?? null,
+          selectedPlanId: data.selectedPlanId ?? null,
+        },
       });
-    }
+
+      if (data.surveyAnswers?.length) {
+        await tx.surveyAnswer.createMany({
+          data: data.surveyAnswers.map((a) => ({
+            leadId: created.id,
+            questionId: a.questionId,
+            surveyId: a.surveyId ?? "",
+            answer: a.answer,
+          })),
+        });
+      }
+
+      return created;
+    });
 
     return NextResponse.json({ success: true, leadId: lead.id }, { status: 201 });
   } catch (error) {
