@@ -21,7 +21,8 @@ import { SearchInput } from "@/components/shared/search-input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
-import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound } from "lucide-react";
+import { generatePassword } from "@/lib/generate-password";
+import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
@@ -34,6 +35,7 @@ const POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward", "Winger"];
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email"),
+  password: z.string().optional(),
   phone: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.string().optional(),
@@ -61,6 +63,8 @@ export default function PlayersPage() {
   const [editPlayer, setEditPlayer] = useState<any>(null);
   const [viewPlayer, setViewPlayer] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  /** Set once the account exists; the password is never retrievable again. */
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Mirrors the gates the player routes now enforce. Staff reach this page on
   // players:view alone, so without this every action below is a 403 — the
@@ -100,9 +104,22 @@ export default function PlayersPage() {
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Failed"); }
       return res.json();
     },
-    onSuccess: () => { toast.success(editPlayer ? "Player updated" : "Player created"); qc.invalidateQueries({ queryKey: ["players"] }); setModalOpen(false); reset(); setEditPlayer(null); },
+    onSuccess: (data: any) => {
+      toast.success(editPlayer ? "Player updated" : "Player created");
+      qc.invalidateQueries({ queryKey: ["players"] });
+      setModalOpen(false);
+      reset();
+      setEditPlayer(null);
+      if (data?.credentials) setCredentials(data.credentials);
+    },
     onError: (e: any) => toast.error(e.message ?? "Save failed"),
   });
+
+  const copyCredentials = async () => {
+    if (!credentials) return;
+    await navigator.clipboard.writeText(`${credentials.email} / ${credentials.password}`);
+    toast.success(t("credentials.copied"));
+  };
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
@@ -127,7 +144,7 @@ export default function PlayersPage() {
     onError: (e: any) => toast.error(e.message ?? "Failed to update password"),
   });
 
-  const openAdd = () => { setEditPlayer(null); reset({ fullName: "", email: "", phone: "" }); setModalOpen(true); };
+  const openAdd = () => { setEditPlayer(null); reset({ fullName: "", email: "", phone: "", password: generatePassword() }); setModalOpen(true); };
   const openEdit = (p: any) => {
     setEditPlayer(p);
     reset({ fullName: p.fullName, email: p.email ?? "", phone: p.phone ?? "", dateOfBirth: p.dateOfBirth ? new Date(p.dateOfBirth).toISOString().split("T")[0] : "", gender: p.gender ?? "", category: p.category ?? "", team: p.team ?? "", position: p.position ?? "", parentName: p.parentName ?? "", parentPhone: p.parentPhone ?? "", address: p.address ?? "", emergencyContact: p.emergencyContact ?? "", medicalNotes: p.medicalNotes ?? "", notes: p.notes ?? "" });
@@ -207,10 +224,29 @@ export default function PlayersPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="2xl">
           <DialogHeader><DialogTitle>{editPlayer ? "Edit Player" : "Add New Player"}</DialogTitle></DialogHeader>
-          <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
+          <form
+            onSubmit={handleSubmit((d) => {
+              if (!editPlayer && (!d.password || d.password.trim().length < 8)) {
+                toast.error(t("form.password_too_short"));
+                return;
+              }
+              saveMutation.mutate(d);
+            })}
+          >
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
               <Input {...register("fullName")} label={t("form.full_name_req")} placeholder={t("form.full_name_ph")} error={errors.fullName?.message} />
               <Input {...register("email")} label={t("form.email_req")} placeholder={t("form.email_ph")} error={errors.email?.message} />
+              {!editPlayer && (
+                <div className="col-span-2">
+                  <div className="flex items-end gap-2">
+                    <Input {...register("password")} label={t("form.password_req")} placeholder={t("form.password_ph")} className="flex-1" />
+                    <Button type="button" variant="outline" onClick={() => setValue("password", generatePassword())}>
+                      <KeyRound className="me-2 h-4 w-4" />{t("form.generate")}
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">{t("form.password_hint")}</p>
+                </div>
+              )}
               <Input {...register("phone")} label={t("common:ui.phone")} placeholder="+213 ..." />
               <Input {...register("dateOfBirth")} label={t("common:ui.date_of_birth")} type="date" />
               <div>
@@ -354,6 +390,24 @@ export default function PlayersPage() {
             >
               Save Password
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Credentials Dialog — shown once, right after creating a player account */}
+      <Dialog open={!!credentials} onOpenChange={(o) => !o && setCredentials(null)}>
+        <DialogContent size="sm">
+          <DialogHeader><DialogTitle>{t("credentials.title")}</DialogTitle></DialogHeader>
+          <DialogBody className="space-y-3">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("credentials.hint")}</p>
+            <div className="rounded-lg border p-3 text-sm space-y-1 dark:border-gray-700">
+              <div><span className="text-gray-400">{t("credentials.email_label")}: </span>{credentials?.email}</div>
+              <div><span className="text-gray-400">{t("credentials.password_label")}: </span>{credentials?.password}</div>
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="outline" onClick={copyCredentials}><Copy className="me-2 h-4 w-4" />{t("credentials.copy")}</Button>
+            <Button onClick={() => setCredentials(null)}>{t("credentials.close")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

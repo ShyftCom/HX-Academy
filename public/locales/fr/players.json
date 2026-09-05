@@ -54,7 +54,12 @@
     "medical_ph": "Conditions médicales éventuelles…",
     "notes_ph": "Notes complémentaires…",
     "male": "Masculin",
-    "female": "Féminin"
+    "female": "Féminin",
+    "password_req": "Mot de passe *",
+    "password_ph": "8 caractères minimum",
+    "password_hint": "Affiché une seule fois après la création — communiquez-le au joueur.",
+    "password_too_short": "Le mot de passe doit contenir au moins 8 caractères",
+    "generate": "Générer"
   },
   "profile": {
     "title": "Profil du joueur",
@@ -101,6 +106,15 @@
     "min": "6 caractères minimum",
     "confirm": "Confirmer le mot de passe",
     "repeat": "Répétez le nouveau mot de passe"
+  },
+  "credentials": {
+    "title": "Compte joueur créé",
+    "hint": "Enregistrez ces identifiants maintenant — le mot de passe ne sera plus jamais affiché.",
+    "email_label": "Email",
+    "password_label": "Mot de passe",
+    "copy": "Copier",
+    "copied": "Copié dans le presse-papiers",
+    "close": "Fermer"
   },
   "toast": {
     "status_updated": "Statut du joueur mis à jour",

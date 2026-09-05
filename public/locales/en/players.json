@@ -54,7 +54,12 @@
     "medical_ph": "Any medical conditions...",
     "notes_ph": "Additional notes...",
     "male": "Male",
-    "female": "Female"
+    "female": "Female",
+    "password_req": "Password *",
+    "password_ph": "Min. 8 characters",
+    "password_hint": "Shown once after creating — share it with the player.",
+    "password_too_short": "Password must be at least 8 characters",
+    "generate": "Generate"
   },
   "profile": {
     "title": "Player Profile",
@@ -101,6 +106,15 @@
     "min": "Min. 6 characters",
     "confirm": "Confirm Password",
     "repeat": "Repeat new password"
+  },
+  "credentials": {
+    "title": "Player Account Created",
+    "hint": "Save these credentials now — the password won't be shown again.",
+    "email_label": "Email",
+    "password_label": "Password",
+    "copy": "Copy",
+    "copied": "Copied to clipboard",
+    "close": "Close"
   },
   "toast": {
     "status_updated": "Player status updated",

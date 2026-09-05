@@ -3,6 +3,7 @@ import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+import { generatePassword } from "@/lib/generate-password";
 
 export async function GET(req: NextRequest) {
   // The academy's whole roster — every player's name, phone and email — with
@@ -50,8 +51,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   // This does not just create a player row: it creates the linked *user
-  // account*, with a password defaulted from the phone number. On auth() alone
-  // any signed-in user could mint accounts on the academy's login.
+  // account*. On auth() alone any signed-in user could mint accounts on the
+  // academy's login.
   const denied = await requirePermissionResponse(PERMISSIONS.PLAYERS_CREATE);
   if (denied) return denied;
 
@@ -66,8 +67,13 @@ export async function POST(req: NextRequest) {
     const existing = await db.user.findUnique({ where: { email: body.email } });
     if (existing) return NextResponse.json({ error: "Email already in use" }, { status: 400 });
 
+    const plainPassword = (body.password ?? "").trim() || generatePassword();
+    if (plainPassword.length < 8) {
+      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    }
+
     const playerRole = await db.role.findFirst({ where: { name: "Player" } });
-    const password = await hashPassword(body.phone ?? "hxacademy123");
+    const password = await hashPassword(plainPassword);
 
     const user = await db.user.create({
       data: { name: body.fullName, email: body.email, password, roleId: playerRole?.id ?? null, isActive: true },
@@ -97,7 +103,9 @@ export async function POST(req: NextRequest) {
     });
 
     await logActivity({ userId: session.user.id, action: "create", module: "players", description: `Created player: ${player.fullName}` });
-    return NextResponse.json(player, { status: 201 });
+    // The plaintext password is returned exactly once, to the admin who just
+    // set it, so they can pass it to the player. It is never stored or logged.
+    return NextResponse.json({ ...player, credentials: { email: body.email, password: plainPassword } }, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Create failed" }, { status: 500 });
