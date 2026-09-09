@@ -30,7 +30,7 @@ export default function AffiliatesPage() {
 
   const { data: users = [] } = useQuery<any[]>({
     queryKey: ["users"],
-    queryFn: () => fetch("/api/users").then((r) => r.json()),
+    queryFn: () => fetch("/api/users").then((r) => r.json()).then((d) => d.data ?? d),
   });
 
   const totalReferrals = affiliates.reduce((s: number, a: any) => s + (a._count?.referrals ?? 0), 0);

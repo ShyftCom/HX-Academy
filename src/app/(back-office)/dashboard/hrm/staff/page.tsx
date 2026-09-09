@@ -31,7 +31,7 @@ export default function StaffPage() {
 
   const { data: users = [] } = useQuery<any[]>({
     queryKey: ["users"],
-    queryFn: () => fetch("/api/users").then((r) => r.json()),
+    queryFn: () => fetch("/api/users").then((r) => r.json()).then((d) => d.data ?? d),
   });
 
   const createMut = useMutation({
