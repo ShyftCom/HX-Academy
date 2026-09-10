@@ -37,8 +37,10 @@ function ApplyFormInner() {
   const [submitting, setSubmitting] = useState(false);
   /** True while the survey answers are being screened server-side. */
   const [screening, setScreening] = useState(false);
-  const [form, setForm] = useState({ fullName: "", phone: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
+  const [form, setForm] = useState({ fullName: "", stationId: "", phone: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
   const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string | string[]>>({});
+  /** Active, publicly-listed stations — the same set the header's location picker offers. */
+  const [venues, setVenues] = useState<Array<{ id: string; name: string; nameFr?: string | null; nameAr?: string | null; wilayaFr?: string; wilayaAr?: string }>>([]);
 
   useEffect(() => {
     fetch("/api/public/landing")
@@ -48,7 +50,26 @@ function ApplyFormInner() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+    fetch("/api/public/venues")
+      .then((r) => r.json())
+      .then((d) => Array.isArray(d) && setVenues(d))
+      .catch(() => {});
   }, []);
+
+  /** Same ar -> fr -> base resolution used across the public site (see WebsiteHeader). */
+  function venueName(v: (typeof venues)[number]): string {
+    if (locale === "ar") return v.nameAr || v.nameFr || v.name;
+    if (locale === "fr") return v.nameFr || v.name;
+    return v.name;
+  }
+  function venueWilaya(v: (typeof venues)[number]): string {
+    if (locale === "ar") return v.wilayaAr || v.wilayaFr || "";
+    return v.wilayaFr || "";
+  }
+
+  /** Digit count only — ignores spaces, dashes and the leading "+" of a country code. */
+  const phoneDigits = (v: string) => v.replace(/\D/g, "").length;
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
   const survey = data?.survey;
   const hasSurvey = Boolean(survey?.questions?.length);
@@ -72,7 +93,17 @@ function ApplyFormInner() {
     }
     if (current === "info") {
       if (!form.fullName.trim()) { toast.error(tErr("participantNameRequired")); return false; }
+      if (!form.stationId) { toast.error(tErr("stationRequired")); return false; }
       if (!form.phone.trim()) { toast.error(tErr("guardianPhoneRequired")); return false; }
+      if (phoneDigits(form.phone) < 10) { toast.error(tErr("phoneTooShort")); return false; }
+      if (!form.email.trim()) { toast.error(tErr("emailRequired")); return false; }
+      if (!isValidEmail(form.email)) { toast.error(tErr("emailInvalid")); return false; }
+      if (!form.dateOfBirth) { toast.error(tErr("dateOfBirthRequired")); return false; }
+      if (!form.categoryInterest) { toast.error(tErr("categoryRequired")); return false; }
+      if (!form.parentName.trim()) { toast.error(tErr("guardianNameRequired")); return false; }
+      if (!form.parentPhone.trim()) { toast.error(tErr("parentPhoneRequired")); return false; }
+      if (phoneDigits(form.parentPhone) < 10) { toast.error(tErr("parentPhoneTooShort")); return false; }
+      if (!form.address.trim()) { toast.error(tErr("addressRequired")); return false; }
     }
     return true;
   }
@@ -128,6 +159,7 @@ function ApplyFormInner() {
     try {
       const body: any = {
         fullName: form.fullName,
+        stationId: form.stationId,
         phone: form.phone || undefined,
         email: form.email || undefined,
         dateOfBirth: form.dateOfBirth || undefined,
@@ -282,35 +314,44 @@ function ApplyFormInner() {
                       <label className={labelClass}>{t("fullName")} <span className="text-red-500">*</span></label>
                       <input type="text" className={inputClass} value={form.fullName} onChange={(e) => setField("fullName", e.target.value)} placeholder={t("fullNamePlaceholder")} />
                     </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>{t("station")} <span className="text-red-500">*</span></label>
+                      <select className={inputClass} value={form.stationId} onChange={(e) => setField("stationId", e.target.value)}>
+                        <option value="">{t("stationPlaceholder")}</option>
+                        {venues.map((v) => (
+                          <option key={v.id} value={v.id}>{venueName(v)}{venueWilaya(v) ? ` — ${venueWilaya(v)}` : ""}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className={labelClass}>{t("phone")} <span className="text-red-500">*</span></label>
                       <input type="tel" className={inputClass} value={form.phone} onChange={(e) => setField("phone", e.target.value)} placeholder="+213 000 000 000" />
                     </div>
                     <div>
-                      <label className={labelClass}>{t("email")}</label>
+                      <label className={labelClass}>{t("email")} <span className="text-red-500">*</span></label>
                       <input type="email" className={inputClass} value={form.email} onChange={(e) => setField("email", e.target.value)} placeholder={t("emailPlaceholder")} />
                     </div>
                     <div>
-                      <label className={labelClass}>{t("dateOfBirth")}</label>
+                      <label className={labelClass}>{t("dateOfBirth")} <span className="text-red-500">*</span></label>
                       <input type="date" className={inputClass} value={form.dateOfBirth} onChange={(e) => setField("dateOfBirth", e.target.value)} />
                     </div>
                     <div>
-                      <label className={labelClass}>{t("category")}</label>
+                      <label className={labelClass}>{t("category")} <span className="text-red-500">*</span></label>
                       <select className={inputClass} value={form.categoryInterest} onChange={(e) => setField("categoryInterest", e.target.value)}>
                         <option value="">{t("categoryPlaceholder")}</option>
                         {["U8", "U10", "U12", "U14", "U16", "U18", "Senior"].map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className={labelClass}>{t("parentName")}</label>
+                      <label className={labelClass}>{t("parentName")} <span className="text-red-500">*</span></label>
                       <input type="text" className={inputClass} value={form.parentName} onChange={(e) => setField("parentName", e.target.value)} placeholder={t("parentNamePlaceholder")} />
                     </div>
                     <div>
-                      <label className={labelClass}>{t("parentPhone")}</label>
+                      <label className={labelClass}>{t("parentPhone")} <span className="text-red-500">*</span></label>
                       <input type="tel" className={inputClass} value={form.parentPhone} onChange={(e) => setField("parentPhone", e.target.value)} placeholder="+213 000 000 000" />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className={labelClass}>{t("address")}</label>
+                      <label className={labelClass}>{t("address")} <span className="text-red-500">*</span></label>
                       <input type="text" className={inputClass} value={form.address} onChange={(e) => setField("address", e.target.value)} placeholder={t("addressPlaceholder")} />
                     </div>
                   </div>
@@ -329,7 +370,7 @@ function ApplyFormInner() {
                   <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> {t("yourInformation")}</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      {([["reviewName", form.fullName], ["reviewPhone", form.phone], ["reviewEmail", form.email || "—"], ["reviewCategory", form.categoryInterest || "—"]] as const).map(([k, v]) => (
+                      {([["reviewName", form.fullName], ["reviewStation", venues.find((v) => v.id === form.stationId) ? venueName(venues.find((v) => v.id === form.stationId)!) : "—"], ["reviewPhone", form.phone], ["reviewEmail", form.email || "—"], ["reviewCategory", form.categoryInterest || "—"]] as const).map(([k, v]) => (
                         <div key={k}><span className="text-gray-400 dark:text-gray-500">{t(k)}:</span> <span className="text-gray-700 dark:text-gray-300 font-medium">{v}</span></div>
                       ))}
                     </div>

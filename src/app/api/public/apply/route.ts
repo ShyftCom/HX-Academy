@@ -3,15 +3,18 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { screenSurveyAnswers } from "@/lib/survey-screening";
 
+const tenPlusDigits = (v: string) => v.replace(/\D/g, "").length >= 10;
+
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
-  phone: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  dateOfBirth: z.string().optional(),
-  parentName: z.string().optional(),
-  parentPhone: z.string().optional(),
-  address: z.string().optional(),
-  categoryInterest: z.string().optional(),
+  stationId: z.string().min(1, "Station is required"),
+  phone: z.string().min(1, "Phone is required").refine(tenPlusDigits, "Phone must have at least 10 digits"),
+  email: z.string().min(1, "Email is required").email("Invalid email"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  parentName: z.string().min(1, "Parent name is required"),
+  parentPhone: z.string().min(1, "Parent phone is required").refine(tenPlusDigits, "Parent phone must have at least 10 digits"),
+  address: z.string().min(1, "Address is required"),
+  categoryInterest: z.string().min(1, "Category is required"),
   selectedPlanId: z.string().optional(),
   surveyAnswers: z.array(z.object({ questionId: z.string(), surveyId: z.string().optional(), answer: z.string() })).optional(),
 });
@@ -39,15 +42,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!data.phone && !data.email) {
-      return NextResponse.json({ error: "Phone or email is required" }, { status: 400 });
-    }
-
-    const orConditions: any[] = [];
-    if (data.phone) orConditions.push({ phone: data.phone });
-    if (data.email) orConditions.push({ email: data.email });
-
-    const existing = await db.lead.findFirst({ where: { OR: orConditions, isConverted: false } });
+    const existing = await db.lead.findFirst({
+      where: { OR: [{ phone: data.phone }, { email: data.email }], isConverted: false },
+    });
     if (existing) {
       return NextResponse.json({ error: "duplicate", message: "An application already exists with this contact info" }, { status: 409 });
     }
@@ -76,6 +73,7 @@ export async function POST(req: NextRequest) {
           categoryInterest: data.categoryInterest ?? null,
           source: "website",
           statusId: defaultStatus?.id ?? null,
+          stationId: data.stationId,
           selectedPlanId: data.selectedPlanId ?? null,
         },
       });
