@@ -24,15 +24,9 @@
  *       flipping to approved and the subscription going active. The temporary
  *       player is deleted afterwards. Use a PAID invoice id.
  */
-import { db } from "@/lib/db";
-import {
-  getSlickPayConfig,
-  isSlickPayUsable,
-  testConnection,
-  createInvoice,
-  getInvoice,
-} from "@/lib/slickpay";
-import { settleSlickPayPayment } from "@/lib/slickpay-settle";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const ok = (s: string) => `  \x1b[32m✓\x1b[0m ${s}`;
 const bad = (s: string) => `  \x1b[31m✗\x1b[0m ${s}`;
@@ -42,6 +36,18 @@ const json = (v: unknown) =>
   JSON.stringify(v, null, 2).split("\n").map((l) => "    " + l).join("\n");
 
 async function main() {
+  // Dynamic, and after dotenv.config() above: @/lib/db reads DATABASE_URL at
+  // module-import time (see src/lib/db.ts), so a static import here would
+  // evaluate that module — and read an empty DATABASE_URL — before this
+  // file's own dotenv.config() call ever ran. Every other standalone script
+  // in this repo (prisma/seed.ts, scripts/apply-schedule-migration.ts, ...)
+  // works around the same thing by calling dotenv.config() before anything
+  // that touches @/lib/db.
+  const { db } = await import("@/lib/db");
+  const { getSlickPayConfig, isSlickPayUsable, testConnection, createInvoice, getInvoice } =
+    await import("@/lib/slickpay");
+  const { settleSlickPayPayment } = await import("@/lib/slickpay-settle");
+
   const args = process.argv.slice(2);
   const flag = (name: string) => args.indexOf(name);
 
