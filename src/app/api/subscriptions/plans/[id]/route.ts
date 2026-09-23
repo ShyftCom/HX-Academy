@@ -39,7 +39,15 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   try {
     await db.subscriptionPlan.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });
-  } catch {
+  } catch (error: any) {
+    // Existing subscriptions reference this plan (planId is ON DELETE RESTRICT),
+    // so it can't be removed without breaking their history. Deactivate it
+    // instead — it then drops off the player portal and public pricing section,
+    // which both already filter on isActive.
+    if (error?.code === "P2003") {
+      await db.subscriptionPlan.update({ where: { id }, data: { isActive: false } });
+      return NextResponse.json({ message: "Deactivated" });
+    }
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }

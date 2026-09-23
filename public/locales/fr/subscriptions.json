@@ -43,6 +43,7 @@
     "color": "Couleur",
     "delete_title": "Supprimer la formule",
     "delete_body": "Voulez-vous vraiment supprimer cette formule ? Les abonnements existants ne seront pas affectés.",
-    "deleted": "Formule supprimée"
+    "deleted": "Formule supprimée",
+    "deactivated": "Cette formule a des abonnements existants, elle a donc été désactivée plutôt que supprimée. Elle est désormais masquée pour les joueurs et sur le site, mais reste dans votre liste."
   }
 }

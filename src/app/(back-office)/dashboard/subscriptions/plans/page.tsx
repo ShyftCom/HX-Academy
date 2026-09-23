@@ -77,8 +77,17 @@ export default function PlansPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/subscriptions/plans/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success(t("plans.deleted")); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setDeleteId(null); },
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/subscriptions/plans/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message === "Deactivated" ? t("plans.deactivated") : t("plans.deleted"));
+      qc.invalidateQueries({ queryKey: ["subscription-plans"] });
+      setDeleteId(null);
+    },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
