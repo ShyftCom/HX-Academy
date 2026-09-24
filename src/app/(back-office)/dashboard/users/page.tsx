@@ -71,17 +71,8 @@ export default function UsersPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
-      return data;
-    },
-    onSuccess: (data) => {
-      toast.success(data?.message === "Deactivated" ? t("users.deactivated") : t("users.deleted"));
-      qc.invalidateQueries({ queryKey: ["users"] });
-      setDeleteId(null);
-    },
+    mutationFn: (id: string) => fetch(`/api/users/${id}`, { method: "DELETE" }),
+    onSuccess: () => { toast.success(t("users.deleted")); qc.invalidateQueries({ queryKey: ["users"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 

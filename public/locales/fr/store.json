@@ -23,7 +23,6 @@
     "delete_title": "Supprimer le produit",
     "delete_body": "Êtes-vous sûr ? Cette action est irréversible.",
     "deleted": "Produit supprimé",
-    "deactivated": "Ce produit a des commandes existantes, il a donc été désactivé plutôt que supprimé. Il est désormais masqué sur la boutique, mais reste dans votre liste.",
     "image_uploaded": "Image téléversée"
   },
   "categories": {

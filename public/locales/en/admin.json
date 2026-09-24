@@ -13,8 +13,7 @@
     "email": "Email *",
     "delete": "Delete User",
     "delete_body": "This will permanently delete the user account.",
-    "deleted": "User deleted",
-    "deactivated": "This user has a staff profile, so the account was deactivated instead of deleted. They can no longer sign in."
+    "deleted": "User deleted"
   },
   "roles": {
     "title": "Roles & Permissions",

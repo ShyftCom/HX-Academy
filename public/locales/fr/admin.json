@@ -13,8 +13,7 @@
     "email": "Email *",
     "delete": "Supprimer l'utilisateur",
     "delete_body": "Ce compte utilisateur sera définitivement supprimé.",
-    "deleted": "Utilisateur supprimé",
-    "deactivated": "Cet utilisateur a un profil employé, le compte a donc été désactivé plutôt que supprimé. Il ne peut plus se connecter."
+    "deleted": "Utilisateur supprimé"
   },
   "roles": {
     "title": "Rôles et permissions",

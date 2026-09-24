@@ -60,16 +60,5 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   try {
     await db.product.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });
-  } catch (error: any) {
-    // Existing orders reference this product (productId is ON DELETE RESTRICT
-    // on both OrderItem and WebsiteOrderItem), so it can't be removed without
-    // breaking order history. Deactivate it instead — the storefront and
-    // portal listings already filter on status === "active" (see
-    // src/app/api/products/route.ts).
-    if (error?.code === "P2003") {
-      await db.product.update({ where: { id }, data: { status: "inactive" } });
-      return NextResponse.json({ message: "Deactivated" });
-    }
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
-  }
+  } catch { return NextResponse.json({ error: "Delete failed" }, { status: 500 }); }
 }

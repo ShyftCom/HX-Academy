@@ -119,7 +119,6 @@
   "toast": {
     "status_updated": "Statut du joueur mis à jour",
     "deleted": "Joueur supprimé",
-    "suspended": "Ce joueur a un historique de parrainage affilié, son compte a donc été suspendu plutôt que supprimé. Il ne peut plus se connecter.",
     "password_updated": "Mot de passe mis à jour",
     "update_failed": "Échec de la mise à jour"
   }
