@@ -129,8 +129,17 @@ export default function PlayersPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["players"] }); setDeleteId(null); },
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/players/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message === "Suspended" ? t("toast.suspended") : t("toast.deleted"));
+      qc.invalidateQueries({ queryKey: ["players"] });
+      setDeleteId(null);
+    },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 

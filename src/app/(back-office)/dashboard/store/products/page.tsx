@@ -97,8 +97,17 @@ export default function ProductsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/products/${id}`, { method: "DELETE" }),
-    onSuccess: () => { toast.success(t("products.deleted")); qc.invalidateQueries({ queryKey: ["products"] }); setDeleteId(null); },
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message === "Deactivated" ? t("products.deactivated") : t("products.deleted"));
+      qc.invalidateQueries({ queryKey: ["products"] });
+      setDeleteId(null);
+    },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 

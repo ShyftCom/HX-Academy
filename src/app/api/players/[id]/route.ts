@@ -166,13 +166,26 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+
+  const player = await db.player.findUnique({ where: { id } });
+  if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+
   try {
-    const player = await db.player.findUnique({ where: { id } });
-    if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
     await db.user.delete({ where: { id: player.userId } });
     await logActivity({ userId: session.user.id, action: "delete", module: "players", description: `Deleted player: ${player.fullName}` });
     return NextResponse.json({ message: "Deleted" });
-  } catch (error) {
+  } catch (error: any) {
+    // An affiliate referral can reference this player (playerId is ON DELETE
+    // RESTRICT on AffiliateReferral), which blocks the cascade that deleting
+    // the User row would otherwise trigger via Player's own onDelete: Cascade.
+    // Suspend instead — the same effect the existing suspend action above
+    // already has: status flips and isActive: false blocks sign-in.
+    if (error?.code === "P2003") {
+      await db.player.update({ where: { id }, data: { status: "suspended" } });
+      await db.user.update({ where: { id: player.userId }, data: { isActive: false } });
+      await logActivity({ userId: session.user.id, action: "update", module: "players", description: `Suspended player (has affiliate history, cannot delete): ${player.fullName}` });
+      return NextResponse.json({ message: "Suspended" });
+    }
     console.error(error);
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }

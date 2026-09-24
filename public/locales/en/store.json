@@ -23,6 +23,7 @@
     "delete_title": "Delete Product",
     "delete_body": "Are you sure? This cannot be undone.",
     "deleted": "Product deleted",
+    "deactivated": "This product has existing orders, so it was deactivated instead of deleted. It's now hidden from the storefront, but stays in your list.",
     "image_uploaded": "Image uploaded"
   },
   "categories": {
