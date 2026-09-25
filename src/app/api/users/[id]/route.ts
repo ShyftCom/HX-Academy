@@ -67,5 +67,14 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   try {
     await db.user.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });
-  } catch { return NextResponse.json({ error: "Delete failed" }, { status: 500 }); }
+  } catch (error: any) {
+    // A staff profile can reference this user (userId is ON DELETE RESTRICT
+    // on StaffProfile), so it can't be removed outright. Deactivate instead —
+    // isActive: false already blocks sign-in (src/lib/auth.ts).
+    if (error?.code === "P2003") {
+      await db.user.update({ where: { id }, data: { isActive: false } });
+      return NextResponse.json({ message: "Deactivated" });
+    }
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
 }
