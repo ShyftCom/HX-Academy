@@ -232,14 +232,18 @@ export default function LeadDetailPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stationId }),
-      }).then((r) => r.json()),
+      }).then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(json.error ?? tc("toast.update_failed"));
+        return json;
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
       qc.invalidateQueries({ queryKey: ["lead-activity", id] });
       setTransferOpen(false);
       toast.success(tc("toast.updated"));
     },
-    onError: () => toast.error(tc("toast.update_failed")),
+    onError: (e: Error) => toast.error(e.message || tc("toast.update_failed")),
   });
 
   function openConvertDialog() {

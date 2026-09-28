@@ -122,6 +122,7 @@
     "status_updated": "Player status updated",
     "station_updated": "Player station updated",
     "deleted": "Player deleted",
+    "suspended": "This player has affiliate referral history, so their account was suspended instead of deleted. They can no longer sign in.",
     "password_updated": "Password updated",
     "update_failed": "Update failed"
   }

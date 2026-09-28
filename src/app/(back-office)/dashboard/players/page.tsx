@@ -133,19 +133,32 @@ export default function PlayersPage() {
 
   const transferStationMutation = useMutation({
     mutationFn: ({ id, stationId }: { id: string; stationId: string }) =>
-      fetch(`/api/players/${id}/station`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId }) }).then((r) => r.json()),
+      fetch(`/api/players/${id}/station`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId }) }).then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(json.error ?? t("toast.update_failed"));
+        return json;
+      }),
     onSuccess: () => {
       toast.success(t("toast.station_updated"));
       qc.invalidateQueries({ queryKey: ["players"] });
       qc.invalidateQueries({ queryKey: ["player", transferPlayer?.id] });
       setTransferPlayer(null);
     },
-    onError: () => toast.error(t("toast.update_failed")),
+    onError: (e: Error) => toast.error(e.message || t("toast.update_failed")),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["players"] }); setDeleteId(null); },
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/players/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message === "Suspended" ? t("toast.suspended") : t("toast.deleted"));
+      qc.invalidateQueries({ queryKey: ["players"] });
+      setDeleteId(null);
+    },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
