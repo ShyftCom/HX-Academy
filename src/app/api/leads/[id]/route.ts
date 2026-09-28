@@ -14,6 +14,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       status: true,
       assignedStaff: { select: { id: true, name: true, email: true } },
       surveyAnswers: { include: { question: true } },
+      station: { select: { id: true, name: true } },
     },
   });
   if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });

@@ -107,6 +107,7 @@
     "created_at": "Créé le",
     "updated_at": "Modifié le",
     "assigned_to": "Assigné à",
+    "station": "Station",
     "created_by": "Créé par",
     "duration": "Durée",
     "amount": "Montant",
@@ -247,6 +248,8 @@
     "priority": "Priorité",
     "assigned_to": "Assigné à",
     "unassigned": "Non assigné",
+    "transfer_station": "Transférer la station",
+    "transfer": "Transférer",
     "description_optional": "Description (optionnel)"
   },
   "toast": {

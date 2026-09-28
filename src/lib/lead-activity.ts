@@ -6,6 +6,7 @@ export type LeadActionType =
   | "lead_assigned"
   | "lead_reassigned"
   | "status_change"
+  | "station_changed"
   | "note_added"
   | "field_edited"
   | "file_attached"

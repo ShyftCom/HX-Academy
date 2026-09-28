@@ -107,6 +107,7 @@
     "created_at": "تاريخ الإنشاء",
     "updated_at": "تاريخ التعديل",
     "assigned_to": "مُسنَد إلى",
+    "station": "الفرع",
     "created_by": "أُنشئ بواسطة",
     "duration": "المدة",
     "amount": "المبلغ",
@@ -247,6 +248,8 @@
     "priority": "الأولوية",
     "assigned_to": "مُسند إلى",
     "unassigned": "غير مسند",
+    "transfer_station": "نقل الفرع",
+    "transfer": "نقل",
     "description_optional": "الوصف (اختياري)"
   },
   "toast": {

@@ -14,6 +14,7 @@ import {
 import { formatDate, timeAgo } from "@/lib/utils";
 import { StatusBadge, type LeadStatus } from "@/components/leads/status-badge";
 import { BookingModal } from "@/components/calendar/booking-modal";
+import { TransferStationDialog } from "@/components/shared/transfer-station-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ interface Lead {
   address?: string; categoryInterest?: string; notes?: string; source?: string;
   statusId?: string; status?: LeadStatus; assignedStaffId?: string;
   assignedStaff?: { id: string; name: string; email: string };
+  stationId?: string | null; station?: { id: string; name: string } | null;
   isConverted: boolean; convertedAt?: string; createdAt: string; updatedAt: string;
 }
 
@@ -50,6 +52,7 @@ function getActionIcon(type: string) {
   const cls = "w-4 h-4";
   switch (type) {
     case "status_change":   return <ArrowRight className={cls} />;
+    case "station_changed": return <MapPin className={cls} />;
     case "lead_created":    return <Plus className={cls} />;
     case "lead_assigned":   return <UserCheck className={cls} />;
     case "lead_reassigned": return <RefreshCw className={cls} />;
@@ -69,6 +72,7 @@ function getActionIcon(type: string) {
 function getActionColor(type: string): string {
   switch (type) {
     case "status_change":   return "#3B82F6";
+    case "station_changed": return "#14B8A6";
     case "lead_created":    return "#10B981";
     case "lead_assigned":
     case "lead_reassigned": return "#8B5CF6";
@@ -118,6 +122,7 @@ export default function LeadDetailPage() {
   const [addingNote, setAddingNote] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [convertForm, setConvertForm] = useState({ email: "", password: "" });
   /** Set once the account exists; the password is never retrievable again. */
   const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
@@ -218,6 +223,22 @@ export default function LeadDetailPage() {
       toast.success(tl("convert.success"));
     },
     onError: (e: Error) => toast.error(e.message || tl("convert.failed")),
+  });
+
+  const transferStationMutation = useMutation({
+    mutationFn: (stationId: string) =>
+      fetch(`/api/leads/${id}/station`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stationId }),
+      }).then((r) => r.json()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["lead", id] });
+      qc.invalidateQueries({ queryKey: ["lead-activity", id] });
+      setTransferOpen(false);
+      toast.success(tc("toast.updated"));
+    },
+    onError: () => toast.error(tc("toast.update_failed")),
   });
 
   function openConvertDialog() {
@@ -377,6 +398,15 @@ export default function LeadDetailPage() {
                   />
                 </div>
               )}
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{tc("labels.station")}</p>
+                  <button onClick={() => setTransferOpen(true)} className="text-xs font-semibold hover:underline" style={{ color: "#14B8A6" }}>
+                    {tc("ui.transfer")}
+                  </button>
+                </div>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{lead.station?.name ?? "—"}</p>
+              </div>
               {lead.assignedStaff && (
                 <div>
                   <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{tc("labels.assigned_to")}</p>
@@ -575,6 +605,15 @@ export default function LeadDetailPage() {
           qc.invalidateQueries({ queryKey: ["lead", id] });
           qc.invalidateQueries({ queryKey: ["lead-activity", id] });
         }}
+      />
+
+      <TransferStationDialog
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        currentStationId={lead.stationId}
+        subjectName={lead.fullName}
+        onConfirm={(stationId) => transferStationMutation.mutate(stationId)}
+        loading={transferStationMutation.isPending}
       />
 
       {/* Closing the lead = opening the player's account. */}

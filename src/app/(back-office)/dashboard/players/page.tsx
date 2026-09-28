@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { TransferStationDialog } from "@/components/shared/transfer-station-dialog";
 import { DataTable } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
@@ -22,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { generatePassword } from "@/lib/generate-password";
-import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
@@ -76,6 +77,7 @@ export default function PlayersPage() {
   const [resetPwdPlayer, setResetPwdPlayer] = useState<any>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [transferPlayer, setTransferPlayer] = useState<any>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["players", page, search, statusFilter, categoryFilter, activeStationId],
@@ -128,18 +130,21 @@ export default function PlayersPage() {
     onError: () => toast.error(t("toast.update_failed")),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/players/${id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
-      return data;
-    },
-    onSuccess: (data) => {
-      toast.success(data?.message === "Suspended" ? t("toast.suspended") : t("toast.deleted"));
+  const transferStationMutation = useMutation({
+    mutationFn: ({ id, stationId }: { id: string; stationId: string }) =>
+      fetch(`/api/players/${id}/station`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId }) }).then((r) => r.json()),
+    onSuccess: () => {
+      toast.success(t("toast.station_updated"));
       qc.invalidateQueries({ queryKey: ["players"] });
-      setDeleteId(null);
+      qc.invalidateQueries({ queryKey: ["player", transferPlayer?.id] });
+      setTransferPlayer(null);
     },
+    onError: () => toast.error(t("toast.update_failed")),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => fetch(`/api/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["players"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
 
@@ -194,6 +199,7 @@ export default function PlayersPage() {
             : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />{t("actions.activate")}</DropdownMenuItem>
           )}
           {canEdit && <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>}
+          {canEdit && <DropdownMenuItem onClick={() => setTransferPlayer(r)}><MapPin className="me-2 h-4 w-4" />{t("common:ui.transfer_station")}</DropdownMenuItem>}
           {canDelete && <DropdownMenuSeparator />}
           {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
         </DropdownMenuContent>
@@ -313,7 +319,7 @@ export default function PlayersPage() {
                 </TabsList>
                 <TabsContent value="info">
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    {[["Email", playerDetail.email],["Phone",playerDetail.phone],["Category",playerDetail.category],["Team",playerDetail.team],["Position",playerDetail.position],["Parent",playerDetail.parentName],["Parent Phone",playerDetail.parentPhone],["Address",playerDetail.address],["Emergency",playerDetail.emergencyContact],["Medical",playerDetail.medicalNotes],["Notes",playerDetail.notes]].map(([k,v]) => v ? (
+                    {[["Email", playerDetail.email],["Phone",playerDetail.phone],["Station",playerDetail.station?.name],["Category",playerDetail.category],["Team",playerDetail.team],["Position",playerDetail.position],["Parent",playerDetail.parentName],["Parent Phone",playerDetail.parentPhone],["Address",playerDetail.address],["Emergency",playerDetail.emergencyContact],["Medical",playerDetail.medicalNotes],["Notes",playerDetail.notes]].map(([k,v]) => v ? (
                       <div key={k}><p className="text-xs text-gray-400">{k}</p><p className="font-medium">{v}</p></div>
                     ) : null)}
                   </div>
@@ -402,6 +408,15 @@ export default function PlayersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <TransferStationDialog
+        open={!!transferPlayer}
+        onOpenChange={(o) => !o && setTransferPlayer(null)}
+        currentStationId={transferPlayer?.stationId}
+        subjectName={transferPlayer?.fullName}
+        onConfirm={(stationId) => transferPlayer && transferStationMutation.mutate({ id: transferPlayer.id, stationId })}
+        loading={transferStationMutation.isPending}
+      />
 
       {/* Credentials Dialog — shown once, right after creating a player account */}
       <Dialog open={!!credentials} onOpenChange={(o) => !o && setCredentials(null)}>
