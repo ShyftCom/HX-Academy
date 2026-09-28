@@ -9,7 +9,7 @@ import {
   ChevronRight, ArrowRight, User, Phone, Mail, MapPin, Calendar,
   Tag, UserCheck, CheckCircle2, Circle, FileText, PhoneCall,
   MailOpen, ClipboardList, Paperclip, Archive, RefreshCw,
-  Loader2, AlertTriangle, Plus, X, Copy, KeyRound,
+  Loader2, AlertTriangle, Plus, X, Copy, KeyRound, Eye, EyeOff,
 } from "lucide-react";
 import { formatDate, timeAgo } from "@/lib/utils";
 import { StatusBadge, type LeadStatus } from "@/components/leads/status-badge";
@@ -124,6 +124,7 @@ export default function LeadDetailPage() {
   const [convertOpen, setConvertOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [convertForm, setConvertForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   /** Set once the account exists; the password is never retrievable again. */
   const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
 
@@ -244,6 +245,7 @@ export default function LeadDetailPage() {
   function openConvertDialog() {
     setCredentials(null);
     setConvertForm({ email: lead?.email ?? "", password: generatePassword() });
+    setShowPassword(false);
     setConvertOpen(true);
   }
 
@@ -660,15 +662,32 @@ export default function LeadDetailPage() {
                     {tl("convert.password_label")} <span style={{ color: "#EF4444" }}>*</span>
                   </label>
                   <div className="flex items-center gap-2">
-                    <Input
-                      value={convertForm.password}
-                      onChange={(e) => setConvertForm((f) => ({ ...f, password: e.target.value }))}
-                      placeholder={tl("convert.password_placeholder")}
-                    />
+                    <div className="relative w-full">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={convertForm.password}
+                        onChange={(e) => setConvertForm((f) => ({ ...f, password: e.target.value }))}
+                        placeholder={tl("convert.password_placeholder")}
+                        autoComplete="new-password"
+                        className="pe-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? tl("convert.hide_password") : tl("convert.show_password")}
+                        aria-pressed={showPassword}
+                        className="absolute inset-y-0 end-2.5 my-auto h-fit rounded-[2px] p-1 text-[var(--ob-text-muted)] transition-colors hover:text-[var(--ob-text)]"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setConvertForm((f) => ({ ...f, password: generatePassword() }))}
+                      onClick={() => {
+                        setConvertForm((f) => ({ ...f, password: generatePassword() }));
+                        setShowPassword(true);
+                      }}
                     >
                       <KeyRound className="me-2 h-4 w-4" />{tl("convert.generate")}
                     </Button>

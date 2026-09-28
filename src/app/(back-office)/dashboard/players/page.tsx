@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { generatePassword } from "@/lib/generate-password";
-import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy, MapPin } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy, MapPin, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
@@ -77,6 +77,7 @@ export default function PlayersPage() {
   const [resetPwdPlayer, setResetPwdPlayer] = useState<any>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [transferPlayer, setTransferPlayer] = useState<any>(null);
 
   const { data, isLoading } = useQuery({
@@ -198,7 +199,7 @@ export default function PlayersPage() {
             ? <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "suspended" })}><UserX className="me-2 h-4 w-4" />{t("actions.suspend")}</DropdownMenuItem>
             : <DropdownMenuItem onClick={() => statusMutation.mutate({ id: r.id, status: "active" })}><UserCheck className="me-2 h-4 w-4" />{t("actions.activate")}</DropdownMenuItem>
           )}
-          {canEdit && <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>}
+          {canEdit && <DropdownMenuItem onClick={() => { setResetPwdPlayer(r); setNewPassword(""); setConfirmPassword(""); setShowNewPassword(false); }}><KeyRound className="me-2 h-4 w-4" />{t("actions.reset_password")}</DropdownMenuItem>}
           {canEdit && <DropdownMenuItem onClick={() => setTransferPlayer(r)}><MapPin className="me-2 h-4 w-4" />{t("common:ui.transfer_station")}</DropdownMenuItem>}
           {canDelete && <DropdownMenuSeparator />}
           {canDelete && <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>}
@@ -381,16 +382,32 @@ export default function PlayersPage() {
         <DialogContent size="sm">
           <DialogHeader><DialogTitle>Reset Password — {resetPwdPlayer?.fullName}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input
-              label={t("password.new")}
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={t("password.min")}
-            />
+            <div className="relative">
+              <Input
+                label={t("password.new")}
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t("password.min")}
+                autoComplete="new-password"
+                className="pe-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword((v) => !v)}
+                aria-label={showNewPassword ? t("password.hide") : t("password.show")}
+                aria-pressed={showNewPassword}
+                className="absolute end-2.5 top-[30px] rounded-[2px] p-1 text-[var(--ob-text-muted)] transition-colors hover:text-[var(--ob-text)]"
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             <Input
               label={t("password.confirm")}
+              // Deliberately always masked: the confirm field exists to catch a
+              // typo in the first one, which revealing it would defeat.
               type="password"
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder={t("password.repeat")}

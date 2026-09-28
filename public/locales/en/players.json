@@ -105,7 +105,9 @@
     "new": "New Password",
     "min": "Min. 6 characters",
     "confirm": "Confirm Password",
-    "repeat": "Repeat new password"
+    "repeat": "Repeat new password",
+    "show": "Show password",
+    "hide": "Hide password"
   },
   "credentials": {
     "title": "Player Account Created",

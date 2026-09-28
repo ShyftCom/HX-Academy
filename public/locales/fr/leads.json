@@ -103,6 +103,8 @@
     "password_placeholder": "8 caractères minimum",
     "password_hint": "Généré automatiquement — modifiez-le si vous préférez le choisir. Demandez au joueur de le changer après sa première connexion.",
     "generate": "Générer",
+    "show_password": "Afficher le mot de passe",
+    "hide_password": "Masquer le mot de passe",
     "submit": "Créer le compte",
     "credentials_title": "Compte créé",
     "credentials_hint": "Transmettez ces identifiants au joueur. Le mot de passe n’est affiché qu’une seule fois.",
