@@ -14,6 +14,8 @@ export interface UploadOptions {
   folder: string;
   /** Size ceiling for this particular upload, from the file requirement. */
   maxSizeMb?: number;
+  /** Overrides file.type, e.g. when the browser reports none for a HEIC photo. */
+  contentType?: string;
   onProgress?: (percentage: number) => void;
   signal?: AbortSignal;
 }
@@ -38,6 +40,7 @@ function safeName(name: string) {
  */
 export async function uploadFile(file: File, options: UploadOptions): Promise<UploadedBlob> {
   const { folder, maxSizeMb, onProgress, signal } = options;
+  const contentType = options.contentType || file.type || undefined;
 
   if (maxSizeMb && file.size > maxSizeMb * 1024 * 1024) {
     throw new Error(`File is too large (max ${maxSizeMb} MB)`);
@@ -47,7 +50,7 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
     access: "public",
     handleUploadUrl: "/api/upload/token",
     clientPayload: JSON.stringify({ folder, maxSizeMb }),
-    contentType: file.type || undefined,
+    contentType,
     multipart: file.size > MULTIPART_THRESHOLD,
     abortSignal: signal,
     onUploadProgress: onProgress ? ({ percentage }) => onProgress(percentage) : undefined,
@@ -56,7 +59,7 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
   return {
     url: blob.url,
     fileName: file.name,
-    mimeType: file.type || "application/octet-stream",
+    mimeType: contentType || "application/octet-stream",
     size: file.size,
   };
 }

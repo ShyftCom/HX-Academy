@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { auth } from "@/lib/auth";
+import { PROOF_CONTENT_TYPES } from "@/lib/upload-types";
 
 /**
  * Token issuer for browser → Blob uploads.
@@ -31,8 +32,7 @@ const ALLOWED_FOLDERS = new Set([
 ]);
 
 const ALLOWED_CONTENT_TYPES = [
-  "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif",
-  "application/pdf",
+  ...PROOF_CONTENT_TYPES,
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.ms-excel",
@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
         }
 
         return {
-          allowedContentTypes: ALLOWED_CONTENT_TYPES,
+          // Payment proofs are images or PDFs only — they get opened by
+          // admins, so nothing document-shaped or scriptable goes in there.
+          allowedContentTypes: folder === "payments" ? PROOF_CONTENT_TYPES : ALLOWED_CONTENT_TYPES,
           maximumSizeInBytes: Math.min(requested, MAX_BYTES),
           // Two players uploading "cni.jpg" must not overwrite each other.
           addRandomSuffix: true,

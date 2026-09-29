@@ -19,6 +19,8 @@ import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { uploadFile } from "@/lib/upload-client";
+import { PROOF_ACCEPT, proofContentType } from "@/lib/upload-types";
 
 type Status = "all" | "pending" | "approved" | "rejected";
 
@@ -145,18 +147,25 @@ export default function PaymentsPage() {
     onError: () => toast.error(t("toast.create_failed")),
   });
 
+  // Straight to Blob storage, like the player portal. Posting to /api/upload
+  // hit the 4.5MB serverless body cap on a phone photo, and the non-JSON 413
+  // made res.json() throw, leaving the button on "Uploading..." forever.
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    const contentType = proofContentType(file);
+    if (!contentType) { toast.error("Only images or PDF files are accepted"); return; }
     setUploadingAdd(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "payments");
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const d = await res.json();
-    if (res.ok) { setProofUrl(d.url); toast.success(t("toast.proof_uploaded")); }
-    else toast.error(d.error ?? "Upload failed");
-    setUploadingAdd(false);
+    try {
+      const blob = await uploadFile(file, { folder: "payments", maxSizeMb: 25, contentType });
+      setProofUrl(blob.url);
+      toast.success(t("toast.proof_uploaded"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploadingAdd(false);
+    }
   };
 
   const STATUS_VARIANT: Record<string, string> = { pending: "warning", approved: "success", rejected: "destructive" };
@@ -322,7 +331,7 @@ export default function PaymentsPage() {
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("proof.label")}</label>
               <div className="flex items-center gap-2">
-                <input ref={proofInputRef} type="file" className="hidden" accept="image/*,.pdf" onChange={handleProofUpload} />
+                <input ref={proofInputRef} type="file" className="hidden" accept={PROOF_ACCEPT} onChange={handleProofUpload} />
                 <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()} loading={uploadingAdd}>
                   <Upload className="me-1.5 h-4 w-4" />{uploadingAdd ? "Uploading..." : "Upload Proof"}
                 </Button>

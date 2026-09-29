@@ -15,6 +15,7 @@ import { differenceInDays, parseISO } from "date-fns";
 import { CreditCard, Upload, Clock, CheckCircle, Landmark, ShieldCheck } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { uploadFile } from "@/lib/upload-client";
+import { PROOF_ACCEPT, proofContentType } from "@/lib/upload-types";
 
 export default function PlayerSubscriptionsPage() {
   const { data: session } = useSession();
@@ -115,9 +116,11 @@ export default function PlayerSubscriptionsPage() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    const contentType = proofContentType(file);
+    if (!contentType) { toast.error("Only images or PDF files are accepted"); return; }
     setUploading(true);
     try {
-      const blob = await uploadFile(file, { folder: "payments", maxSizeMb: 25 });
+      const blob = await uploadFile(file, { folder: "payments", maxSizeMb: 25, contentType });
       setProofUrl(blob.url);
       toast.success("Proof uploaded");
     } catch (error) {
@@ -280,7 +283,7 @@ export default function PlayerSubscriptionsPage() {
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Proof</label>
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer flex-1">
-                    <input type="file" className="hidden" accept="image/*,.pdf" onChange={uploadProof} />
+                    <input type="file" className="hidden" accept={PROOF_ACCEPT} onChange={uploadProof} />
                     <div className="flex h-9 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-sm text-gray-400 hover:border-blue-400 hover:text-blue-500 dark:border-gray-600 transition-colors">
                       {uploading ? "Uploading..." : proofUrl ? "✓ Proof uploaded" : <span className="flex items-center gap-2"><Upload className="h-4 w-4" />Upload receipt/screenshot</span>}
                     </div>
