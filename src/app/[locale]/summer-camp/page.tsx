@@ -36,17 +36,34 @@ export default function SummerCampLandingPage() {
   const [selectedPlan, setSelectedPlan] = useState<SCPlan | null>(null);
   const [form, setForm] = useState({
     fullName: "", dateOfBirth: "", age: "", gender: "", healthNotes: "", notes: "",
-    guardianName: "", guardianPhone: "", guardianEmail: "", guardianRelation: "parent", sessionId: "",
+    guardianName: "", guardianPhone: "", guardianEmail: "", guardianRelation: "parent", sessionId: "", stationId: "",
   });
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, { fileName: string; fileUrl: string; mimeType?: string; size?: number }>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const setField = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  /** Active, publicly-listed stations — the same set the /apply form offers. */
+  const [venues, setVenues] = useState<Array<{ id: string; name: string; nameFr?: string | null; nameAr?: string | null; wilayaFr?: string; wilayaAr?: string }>>([]);
+
+  /** Same ar -> fr -> base resolution used across the public site (see WebsiteHeader). */
+  function venueName(v: (typeof venues)[number]): string {
+    if (locale === "ar") return v.nameAr || v.nameFr || v.name;
+    if (locale === "fr") return v.nameFr || v.name;
+    return v.name;
+  }
+  function venueWilaya(v: (typeof venues)[number]): string {
+    if (locale === "ar") return v.wilayaAr || v.wilayaFr || "";
+    return v.wilayaFr || "";
+  }
 
   useEffect(() => {
     fetch("/api/public/summer-camp")
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));
+    fetch("/api/public/venues")
+      .then((r) => r.json())
+      .then((d) => Array.isArray(d) && setVenues(d))
+      .catch(() => {});
   }, []);
 
   /** Matches the real cap on a public upload: Vercel drops a request body over 4.5MB. */
@@ -85,6 +102,7 @@ export default function SummerCampLandingPage() {
     if (step === 0 && !selectedPlan) { toast.error(tErr("planRequired")); return false; }
     if (step === 1) {
       if (!form.fullName.trim()) { toast.error(tErr("participantNameRequired")); return false; }
+      if (!form.stationId) { toast.error(tErr("stationRequired")); return false; }
       if (!form.guardianName.trim()) { toast.error(tErr("guardianNameRequired")); return false; }
       if (!form.guardianPhone.trim()) { toast.error(tErr("guardianPhoneRequired")); return false; }
     }
@@ -102,7 +120,7 @@ export default function SummerCampLandingPage() {
       const res = await fetch("/api/public/summer-camp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, age: form.age ? parseInt(form.age) : undefined, stationId: undefined, selectedPlanId: selectedPlan?.id, files }),
+        body: JSON.stringify({ ...form, age: form.age ? parseInt(form.age) : undefined, selectedPlanId: selectedPlan?.id, files }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -243,7 +261,7 @@ export default function SummerCampLandingPage() {
                   <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{tf("doneTitle")}</h3>
                   <p className="text-gray-500 dark:text-gray-400 mb-6">{tf("doneBody")}</p>
-                  <button onClick={() => { setShowForm(false); setSubmitted(false); setStep(0); setSelectedPlan(null); setForm({ fullName: "", dateOfBirth: "", age: "", gender: "", healthNotes: "", notes: "", guardianName: "", guardianPhone: "", guardianEmail: "", guardianRelation: "parent", sessionId: "" }); setUploadedFiles({}); }} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors">
+                  <button onClick={() => { setShowForm(false); setSubmitted(false); setStep(0); setSelectedPlan(null); setForm({ fullName: "", dateOfBirth: "", age: "", gender: "", healthNotes: "", notes: "", guardianName: "", guardianPhone: "", guardianEmail: "", guardianRelation: "parent", sessionId: "", stationId: "" }); setUploadedFiles({}); }} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl font-semibold transition-colors">
                     {tc("done")}
                   </button>
                 </div>
@@ -291,6 +309,13 @@ export default function SummerCampLandingPage() {
                         <div className="col-span-2">
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("fullName")} *</label>
                           <input className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.fullName} onChange={(e) => setField("fullName", e.target.value)} placeholder={tf("fullNamePlaceholder")} />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("station")} *</label>
+                          <select className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value={form.stationId} onChange={(e) => setField("stationId", e.target.value)}>
+                            <option value="">{tf("stationPlaceholder")}</option>
+                            {venues.map((v) => <option key={v.id} value={v.id}>{venueName(v)}{venueWilaya(v) ? ` — ${venueWilaya(v)}` : ""}</option>)}
+                          </select>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{tf("dateOfBirth")}</label>
@@ -389,6 +414,7 @@ export default function SummerCampLandingPage() {
                       <h3 className="font-semibold text-gray-800 dark:text-gray-200">{tf("reviewHeading")}</h3>
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2 text-sm">
                         <div className="flex justify-between"><span className="text-gray-500">{tf("reviewPlan")}</span><span className="font-medium">{selectedPlan?.name} — {formatPrice(Number(selectedPlan?.price ?? 0), locale, currency)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">{tf("reviewStation")}</span><span className="font-medium">{(() => { const v = venues.find((x) => x.id === form.stationId); return v ? venueName(v) : "—"; })()}</span></div>
                         <div className="flex justify-between"><span className="text-gray-500">{tf("reviewParticipant")}</span><span className="font-medium">{form.fullName}</span></div>
                         {form.age && <div className="flex justify-between"><span className="text-gray-500">{tf("reviewAge")}</span><span className="font-medium">{form.age}</span></div>}
                         <div className="flex justify-between"><span className="text-gray-500">{tf("reviewGuardian")}</span><span className="font-medium">{form.guardianName}</span></div>

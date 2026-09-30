@@ -13,7 +13,7 @@ const schema = z.object({
   playerDateOfBirth: z.string().optional(),
   ageGroup: z.string().optional(),
   gender: z.string().optional(),
-  preferredStationId: z.string().optional(),
+  preferredStationId: z.string().min(1, "Station is required"),
   currentPlayingLevel: z.string().optional(),
   currentClub: z.string().optional(),
   medicalNotes: z.string().optional(),
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         notes: data.message ?? null,
         source: "website_squad_registration",
         leadType: "squad_registration",
-        stationId: data.preferredStationId || null,
+        stationId: data.preferredStationId,
         statusId: defaultStatus?.id ?? null,
         extraData: JSON.stringify({
           gender: data.gender ?? null,

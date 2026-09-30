@@ -394,7 +394,8 @@
       "submit": "Envoyer l'inscription",
       "submitting": "Envoi…",
       "doneTitle": "Inscription reçue",
-      "doneBody": "Merci — un membre de notre équipe vous contactera prochainement pour organiser la suite."
+      "doneBody": "Merci — un membre de notre équipe vous contactera prochainement pour organiser la suite.",
+      "preferredLocationPlaceholder": "Sélectionner un site"
     }
   },
   "store": {
@@ -555,7 +556,10 @@
       "submit": "Envoyer l'inscription",
       "submitting": "Envoi…",
       "doneTitle": "Inscription envoyée !",
-      "doneBody": "Nous avons bien reçu votre inscription. Notre équipe vous contactera prochainement pour la confirmer."
+      "doneBody": "Nous avons bien reçu votre inscription. Notre équipe vous contactera prochainement pour la confirmer.",
+      "station": "Site",
+      "stationPlaceholder": "Sélectionner un site",
+      "reviewStation": "Site"
     }
   },
   "venues": {

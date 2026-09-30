@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
   const [data, total] = await Promise.all([
     db.lead.findMany({
       where,
-      include: { status: true, assignedStaff: { select: { id: true, name: true } } },
+      include: { status: true, assignedStaff: { select: { id: true, name: true } }, station: { select: { id: true, name: true } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,

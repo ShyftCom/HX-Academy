@@ -38,6 +38,7 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.preferredStationId) { setErrorMsg(tErr("stationRequired")); return; }
     if (!form.privacyConsent) { setErrorMsg(tErr("privacyRequired")); return; }
     setStatus("loading");
     setErrorMsg("");
@@ -103,9 +104,9 @@ export function SquadRegistrationForm({ venues }: { venues: Venue[] }) {
               <option value="female">{tc("female")}</option>
             </select>
           </Field>
-          <Field label={t("preferredLocation")}>
-            <select value={form.preferredStationId} onChange={(e) => set({ preferredStationId: e.target.value })} className={inputClass}>
-              <option value="">{tc("noPreference")}</option>
+          <Field label={t("preferredLocation")} required>
+            <select required value={form.preferredStationId} onChange={(e) => set({ preferredStationId: e.target.value })} className={inputClass}>
+              <option value="">{t("preferredLocationPlaceholder")}</option>
               {venues.map((v) => <option key={v.id} value={v.id}>{v.name} — {v.wilaya}</option>)}
             </select>
           </Field>

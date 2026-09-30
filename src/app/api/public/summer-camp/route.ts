@@ -16,7 +16,7 @@ const schema = z.object({
   guardianRelation: z.string().optional(),
   // Camp
   sessionId: z.string().optional(),
-  stationId: z.string().optional(),
+  stationId: z.string().min(1, "Station is required"),
   notes: z.string().optional(),
   // Files
   files: z.array(z.object({
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         source: "website",
         leadType: "summer_camp",
         summerCampData,
-        stationId: data.stationId ?? null,
+        stationId: data.stationId,
         statusId: defaultStatus?.id ?? null,
       },
     });
