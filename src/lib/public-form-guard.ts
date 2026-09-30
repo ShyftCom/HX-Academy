@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 /**
  * Lightweight, dependency-free spam guard for public forms (contact, squad
- * registration, newsletter). No external CAPTCHA/reCAPTCHA is configured in
+ * registration). No external CAPTCHA/reCAPTCHA is configured in
  * this environment, so this is the baseline: a honeypot field bots tend to
  * fill in, plus a DB-backed submission-frequency check per phone/email —
  * generalizes the duplicate-phone check already used by
