@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { resolveOwnPlayer } from "@/lib/active-player";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
 import { hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
@@ -26,7 +27,8 @@ export async function GET(req: NextRequest) {
   const where: Record<string, unknown> = {};
   const playerFilter: Record<string, unknown> = {};
   if (q) playerFilter.fullName = { contains: q };
-  if (stationId) playerFilter.stationId = stationId;
+  // "none" finds payments from players that were never assigned a station.
+  if (stationId) playerFilter.stationId = stationId === "none" ? null : stationId;
   if (Object.keys(playerFilter).length > 0) where.player = playerFilter;
   if (status) where.status = status;
   if (playerId) where.playerId = playerId;
@@ -34,7 +36,7 @@ export async function GET(req: NextRequest) {
   const [data, total] = await Promise.all([
     db.payment.findMany({
       where,
-      include: { player: true, plan: true, paymentMethod: true, subscription: true },
+      include: { player: { include: { station: { select: { id: true, name: true } } } }, plan: true, paymentMethod: true, subscription: true },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,
@@ -92,12 +94,9 @@ export async function POST(req: NextRequest) {
       status = body.status ?? "pending";
       adminNotes = body.adminNotes ?? null;
     } else {
-      // Self-service. Bind the payment to the caller's own player record and
-      // ignore any playerId they sent.
-      const own = await db.player.findUnique({
-        where: { userId: session.user.id },
-        select: { id: true },
-      });
+      // Self-service. Bind the payment to one of the caller's own children —
+      // the one named, if it is theirs, else the one selected in the portal.
+      const own = await resolveOwnPlayer(session, body.playerId);
       if (!own) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }

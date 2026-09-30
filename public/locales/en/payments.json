@@ -54,5 +54,9 @@
     "verified_mismatch": "SlickPay reports a different amount — held for review",
     "needs_review": "Needs review",
     "approve_mismatch": "Approve despite the amount difference"
+  },
+  "filters": {
+    "all_stations": "All stations",
+    "no_station": "No station"
   }
 }

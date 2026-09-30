@@ -71,11 +71,13 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
 export default function PaymentsPage() {
   const { t } = useTranslation("payments");
   const qc = useQueryClient();
-  const { activeStationId } = useStation();
+  const { activeStationId, isGlobalView } = useStation();
   const proofInputRef = useRef<HTMLInputElement>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<Status>("all");
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
   const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -96,18 +98,20 @@ export default function PaymentsPage() {
   const canCreate = can(PERMISSIONS.PAYMENTS_CREATE);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["payments", page, search, status, activeStationId],
+    queryKey: ["payments", page, search, status, activeStationId, stationFilter],
     queryFn: () => {
       const p = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) p.set("q", search);
       if (status !== "all") p.set("status", status);
       if (activeStationId) p.set("stationId", activeStationId);
+      else if (stationFilter !== "all") p.set("stationId", stationFilter);
       return fetch(`/api/payments?${p}`).then((r) => r.json());
     },
   });
 
   const { data: plans } = useQuery({ queryKey: ["subscription-plans"], queryFn: () => fetch("/api/subscriptions/plans").then((r) => r.json()) });
   const { data: players } = useQuery({ queryKey: ["players-list"], queryFn: () => fetch("/api/players?perPage=200").then((r) => r.json()) });
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({ queryKey: ["stations"], queryFn: () => fetch("/api/stations").then((r) => r.json()), staleTime: 5 * 60_000 });
   const { data: methods } = useQuery({ queryKey: ["payment-methods"], queryFn: () => fetch("/api/payments/methods").then((r) => r.json()) });
 
   const approveMutation = useMutation({
@@ -168,6 +172,7 @@ export default function PaymentsPage() {
 
   const columns = [
     { key: "player", header: "Player", cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone}</p></div> },
+    { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
     { key: "plan", header: "Plan", cell: (r: any) => <span className="text-sm">{r.plan?.name ?? "—"}</span> },
     { key: "amount", header: "Amount", cell: (r: any) => <span className="font-medium">{formatCurrency(r.amount)}</span> },
     {
@@ -260,6 +265,16 @@ export default function PaymentsPage() {
         {(["all", "pending", "approved", "rejected"] as Status[]).map((s) => (
           <Button key={s} variant={status === s ? "default" : "outline"} size="sm" onClick={() => { setStatus(s); setPage(1); }} className="capitalize">{s}</Button>
         ))}
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48 h-9"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<CreditCard className="h-8 w-8" />} />
