@@ -51,11 +51,11 @@ export async function requirePermission(permission: string) {
 export async function requirePermissionResponse(permission: string): Promise<NextResponse | null> {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
   }
   const allowed = await hasPermission(session.user.id, permission);
   if (!allowed) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 });
   }
   return null;
 }
@@ -99,10 +99,10 @@ export async function requireStationAccessResponse(
 ): Promise<{ denied: NextResponse; session: null } | { denied: null; session: Session }> {
   const session = await auth();
   if (!session?.user?.id) {
-    return { denied: NextResponse.json({ error: "Unauthorized" }, { status: 401 }), session: null };
+    return { denied: NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 }), session: null };
   }
   if (!(await hasPermission(session.user.id, permission))) {
-    return { denied: NextResponse.json({ error: "Forbidden" }, { status: 403 }), session: null };
+    return { denied: NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 }), session: null };
   }
   if (!(await canAccessStation(session.user.id, stationId))) {
     return { denied: NextResponse.json({ error: "Not found" }, { status: 404 }), session: null };

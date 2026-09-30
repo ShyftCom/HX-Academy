@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { generatePassword } from "@/lib/generate-password";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 import { Plus, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Users, KeyRound, Copy, MapPin, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStation } from "@/context/StationContext";
@@ -133,33 +134,27 @@ export default function PlayersPage() {
 
   const transferStationMutation = useMutation({
     mutationFn: ({ id, stationId }: { id: string; stationId: string }) =>
-      fetch(`/api/players/${id}/station`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId }) }).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(json.error ?? t("toast.update_failed"));
-        return json;
-      }),
+      fetch(`/api/players/${id}/station`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stationId }) }).then(readJsonOrThrow),
     onSuccess: () => {
       toast.success(t("toast.station_updated"));
       qc.invalidateQueries({ queryKey: ["players"] });
       qc.invalidateQueries({ queryKey: ["player", transferPlayer?.id] });
       setTransferPlayer(null);
     },
-    onError: (e: Error) => toast.error(e.message || t("toast.update_failed")),
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("toast.update_failed"))),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/players/${id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
-      return data;
+      return readJsonOrThrow<{ message?: string }>(res);
     },
     onSuccess: (data) => {
       toast.success(data?.message === "Suspended" ? t("toast.suspended") : t("toast.deleted"));
       qc.invalidateQueries({ queryKey: ["players"] });
       setDeleteId(null);
     },
-    onError: () => toast.error(t("common:toast.delete_failed")),
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   const resetPwdMutation = useMutation({

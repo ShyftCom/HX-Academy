@@ -14,7 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (denied) return denied;
 
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
 
   const { id } = await params;
   const body = await req.json().catch(() => ({}));
@@ -26,8 +26,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       stationId ? db.station.findUnique({ where: { id: stationId } }) : Promise.resolve(null),
     ]);
 
-    if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
-    if (stationId && !toStation) return NextResponse.json({ error: "Station not found" }, { status: 404 });
+    if (!player) return NextResponse.json({ error: "Player not found", code: "player_not_found" }, { status: 404 });
+    if (stationId && !toStation) return NextResponse.json({ error: "Station not found", code: "station_not_found" }, { status: 404 });
     if (player.stationId === stationId) return NextResponse.json(player);
 
     const fromStation = player.station;
@@ -44,6 +44,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Station transfer failed" }, { status: 500 });
+    return NextResponse.json({ error: "Station transfer failed", code: "station_transfer_failed" }, { status: 500 });
   }
 }

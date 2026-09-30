@@ -7,7 +7,7 @@ import { generatePassword } from "@/lib/generate-password";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
   const { id } = await params;
 
   // Read once: the summer-camp branch below reads its own fields off the same body.
@@ -18,8 +18,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   try {
     const lead = await db.lead.findUnique({ where: { id }, include: { status: true } });
-    if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    if (lead.isConverted) return NextResponse.json({ error: "Lead already converted" }, { status: 400 });
+    if (!lead) return NextResponse.json({ error: "Lead not found", code: "lead_not_found" }, { status: 404 });
+    if (lead.isConverted) return NextResponse.json({ error: "Lead already converted", code: "lead_already_converted" }, { status: 400 });
 
     const actor = session.user as { id: string; name?: string | null; role?: string };
 
@@ -97,12 +97,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // knew the phone number could log in as them.
     const email = (body.email ?? lead.email ?? "").trim().toLowerCase();
     if (!email) {
-      return NextResponse.json({ error: "An email address is required to create the player's account" }, { status: 400 });
+      return NextResponse.json({ error: "An email address is required to create the player's account", code: "email_required" }, { status: 400 });
     }
 
     const plainPassword = body.password?.trim() || generatePassword();
     if (plainPassword.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+      return NextResponse.json({ error: "Password must be at least 8 characters", code: "password_too_short" }, { status: 400 });
     }
 
     const playerRole = await db.role.findFirst({ where: { name: "Player" } });
@@ -112,12 +112,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (user) {
       if (user.player) {
-        return NextResponse.json({ error: "That email already belongs to a player account" }, { status: 400 });
+        return NextResponse.json({ error: "That email already belongs to a player account", code: "email_taken_player" }, { status: 400 });
       }
       // A staff or admin login must not be quietly repurposed — and its
       // password certainly must not be reset by converting a lead.
       if (user.role && user.role.name !== "Player") {
-        return NextResponse.json({ error: "That email already belongs to a staff account" }, { status: 400 });
+        return NextResponse.json({ error: "That email already belongs to a staff account", code: "email_taken_staff" }, { status: 400 });
       }
       user = await db.user.update({
         where: { id: user.id },
@@ -212,6 +212,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Conversion failed" }, { status: 500 });
+    return NextResponse.json({ error: "Conversion failed", code: "conversion_failed" }, { status: 500 });
   }
 }

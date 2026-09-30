@@ -142,7 +142,22 @@
     "failed_to_load": "Failed to load",
     "failed_to_save": "Failed to save",
     "failed_to_delete": "Failed to delete",
-    "network_error": "Network error. Please try again."
+    "network_error": "Network error. Please try again.",
+    "api": {
+      "unauthorized": "Your session has expired. Please sign in again.",
+      "forbidden": "You don't have permission to do this.",
+      "lead_not_found": "This lead no longer exists.",
+      "player_not_found": "This player no longer exists.",
+      "station_not_found": "This station no longer exists. Refresh the page and choose another one.",
+      "station_transfer_failed": "The station transfer failed. Please try again.",
+      "lead_already_converted": "This lead has already been converted to a player.",
+      "email_required": "An email address is required to create the player's account.",
+      "password_too_short": "The password must be at least 8 characters.",
+      "email_taken_player": "That email already belongs to a player account.",
+      "email_taken_staff": "That email already belongs to a staff account.",
+      "conversion_failed": "The conversion failed. Please try again.",
+      "delete_failed": "The deletion failed. Please try again."
+    }
   },
   "empty": {
     "no_data": "No data",

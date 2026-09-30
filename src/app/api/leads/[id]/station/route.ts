@@ -5,7 +5,7 @@ import { logActivity } from "@/lib/activity";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
 
   const { id } = await params;
   const body = await req.json().catch(() => ({}));
@@ -17,8 +17,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       stationId ? db.station.findUnique({ where: { id: stationId } }) : Promise.resolve(null),
     ]);
 
-    if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    if (stationId && !toStation) return NextResponse.json({ error: "Station not found" }, { status: 404 });
+    if (!lead) return NextResponse.json({ error: "Lead not found", code: "lead_not_found" }, { status: 404 });
+    if (stationId && !toStation) return NextResponse.json({ error: "Station not found", code: "station_not_found" }, { status: 404 });
     if (lead.stationId === stationId) return NextResponse.json({ lead_id: id, station_id: stationId, updated_at: lead.updatedAt });
 
     const fromStation = lead.station;
@@ -66,6 +66,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ lead_id: updatedLead.id, station_id: updatedLead.stationId, updated_at: updatedLead.updatedAt });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Station transfer failed" }, { status: 500 });
+    return NextResponse.json({ error: "Station transfer failed", code: "station_transfer_failed" }, { status: 500 });
   }
 }

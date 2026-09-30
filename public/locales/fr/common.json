@@ -142,7 +142,22 @@
     "failed_to_load": "Échec du chargement",
     "failed_to_save": "Échec de l'enregistrement",
     "failed_to_delete": "Échec de la suppression",
-    "network_error": "Erreur réseau. Veuillez réessayer."
+    "network_error": "Erreur réseau. Veuillez réessayer.",
+    "api": {
+      "unauthorized": "Votre session a expiré. Veuillez vous reconnecter.",
+      "forbidden": "Vous n'avez pas l'autorisation d'effectuer cette action.",
+      "lead_not_found": "Ce lead n'existe plus.",
+      "player_not_found": "Ce joueur n'existe plus.",
+      "station_not_found": "Cette station n'existe plus. Actualisez la page et choisissez-en une autre.",
+      "station_transfer_failed": "Le transfert de station a échoué. Veuillez réessayer.",
+      "lead_already_converted": "Ce lead a déjà été converti en joueur.",
+      "email_required": "Une adresse e-mail est requise pour créer le compte du joueur.",
+      "password_too_short": "Le mot de passe doit contenir au moins 8 caractères.",
+      "email_taken_player": "Cet e-mail appartient déjà à un compte joueur.",
+      "email_taken_staff": "Cet e-mail appartient déjà à un compte du personnel.",
+      "conversion_failed": "La conversion a échoué. Veuillez réessayer.",
+      "delete_failed": "La suppression a échoué. Veuillez réessayer."
+    }
   },
   "empty": {
     "no_data": "Aucune donnée",

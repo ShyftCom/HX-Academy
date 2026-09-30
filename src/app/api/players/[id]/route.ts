@@ -165,11 +165,11 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   if (denied) return denied;
 
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
   const { id } = await params;
 
   const player = await db.player.findUnique({ where: { id } });
-  if (!player) return NextResponse.json({ error: "Player not found" }, { status: 404 });
+  if (!player) return NextResponse.json({ error: "Player not found", code: "player_not_found" }, { status: 404 });
 
   try {
     await db.user.delete({ where: { id: player.userId } });
@@ -188,6 +188,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ message: "Suspended" });
     }
     console.error(error);
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+    return NextResponse.json({ error: "Delete failed", code: "delete_failed" }, { status: 500 });
   }
 }

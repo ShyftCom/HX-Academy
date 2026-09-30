@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter, DialogTi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generatePassword } from "@/lib/generate-password";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 import { useTranslation } from "react-i18next";
 
 interface Lead {
@@ -211,9 +212,7 @@ export default function LeadDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: convertForm.email.trim(), password: convertForm.password }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? tl("convert.failed"));
-      return json as { credentials: { email: string; password: string } };
+      return readJsonOrThrow<{ credentials: { email: string; password: string } }>(res);
     },
     onSuccess: (json) => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
@@ -223,7 +222,7 @@ export default function LeadDetailPage() {
       setCredentials(json.credentials);
       toast.success(tl("convert.success"));
     },
-    onError: (e: Error) => toast.error(e.message || tl("convert.failed")),
+    onError: (e) => toast.error(apiErrorMessage(e, tl, tl("convert.failed"))),
   });
 
   const transferStationMutation = useMutation({
@@ -232,18 +231,14 @@ export default function LeadDetailPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stationId }),
-      }).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(json.error ?? tc("toast.update_failed"));
-        return json;
-      }),
+      }).then(readJsonOrThrow),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
       qc.invalidateQueries({ queryKey: ["lead-activity", id] });
       setTransferOpen(false);
       toast.success(tc("toast.updated"));
     },
-    onError: (e: Error) => toast.error(e.message || tc("toast.update_failed")),
+    onError: (e) => toast.error(apiErrorMessage(e, tc, tc("toast.update_failed"))),
   });
 
   function openConvertDialog() {
