@@ -8,7 +8,6 @@ const tenPlusDigits = (v: string) => v.replace(/\D/g, "").length >= 10;
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   stationId: z.string().min(1, "Station is required"),
-  phone: z.string().min(1, "Phone is required").refine(tenPlusDigits, "Phone must have at least 10 digits"),
   email: z.string().min(1, "Email is required").email("Invalid email"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   parentName: z.string().min(1, "Parent name is required"),
@@ -42,8 +41,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Siblings share a parent's email and phone, so neither alone marks a
+    // duplicate — only the same child resubmitted under the same parent phone.
     const existing = await db.lead.findFirst({
-      where: { OR: [{ phone: data.phone }, { email: data.email }], isConverted: false },
+      where: {
+        fullName: { equals: data.fullName.trim(), mode: "insensitive" },
+        parentPhone: data.parentPhone,
+        isConverted: false,
+      },
     });
     if (existing) {
       return NextResponse.json({ error: "duplicate", message: "An application already exists with this contact info" }, { status: 409 });
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
       const created = await tx.lead.create({
         data: {
           fullName: data.fullName,
-          phone: data.phone ?? null,
+          phone: null,
           email: data.email || null,
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
           age: data.dateOfBirth ? Math.floor((Date.now() - new Date(data.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365)) : null,

@@ -170,7 +170,7 @@ function KanbanCard({
       />
 
       <div className="flex items-center gap-2 flex-wrap">
-        {lead.phone && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{lead.phone}</span>}
+        {(lead.phone || lead.parentPhone) && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{lead.phone || lead.parentPhone}</span>}
         {lead.station?.name && (
           <span className="text-xs inline-flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
             <MapPin className="w-3 h-3" />{lead.station.name}
@@ -301,7 +301,7 @@ export default function LeadsPage() {
         </div>
       </Link>
     )},
-    { key: "phone", header: t("table.phone"), cell: (r: any) => r.phone ?? "—" },
+    { key: "phone", header: t("table.phone"), cell: (r: any) => r.phone || r.parentPhone || "—" },
     { key: "station", header: tc("labels.station"), cell: (r: any) => r.station?.name ?? "—" },
     { key: "email", header: t("table.email"), cell: (r: any) => r.email ? <span className="text-xs">{r.email}</span> : "—" },
     { key: "categoryInterest", header: t("table.category"), cell: (r: any) => r.categoryInterest ? <Badge variant="outline">{r.categoryInterest}</Badge> : "—" },

@@ -37,7 +37,7 @@ function ApplyFormInner() {
   const [submitting, setSubmitting] = useState(false);
   /** True while the survey answers are being screened server-side. */
   const [screening, setScreening] = useState(false);
-  const [form, setForm] = useState({ fullName: "", stationId: "", phone: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
+  const [form, setForm] = useState({ fullName: "", stationId: "", email: "", dateOfBirth: "", parentName: "", parentPhone: "", address: "", categoryInterest: "" });
   const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string | string[]>>({});
   /** Active, publicly-listed stations — the same set the header's location picker offers. */
   const [venues, setVenues] = useState<Array<{ id: string; name: string; nameFr?: string | null; nameAr?: string | null; wilayaFr?: string; wilayaAr?: string }>>([]);
@@ -94,8 +94,6 @@ function ApplyFormInner() {
     if (current === "info") {
       if (!form.fullName.trim()) { toast.error(tErr("participantNameRequired")); return false; }
       if (!form.stationId) { toast.error(tErr("stationRequired")); return false; }
-      if (!form.phone.trim()) { toast.error(tErr("guardianPhoneRequired")); return false; }
-      if (phoneDigits(form.phone) < 10) { toast.error(tErr("phoneTooShort")); return false; }
       if (!form.email.trim()) { toast.error(tErr("emailRequired")); return false; }
       if (!isValidEmail(form.email)) { toast.error(tErr("emailInvalid")); return false; }
       if (!form.dateOfBirth) { toast.error(tErr("dateOfBirthRequired")); return false; }
@@ -160,7 +158,6 @@ function ApplyFormInner() {
       const body: any = {
         fullName: form.fullName,
         stationId: form.stationId,
-        phone: form.phone || undefined,
         email: form.email || undefined,
         dateOfBirth: form.dateOfBirth || undefined,
         parentName: form.parentName || undefined,
@@ -324,10 +321,6 @@ function ApplyFormInner() {
                       </select>
                     </div>
                     <div>
-                      <label className={labelClass}>{t("phone")} <span className="text-red-500">*</span></label>
-                      <input type="tel" className={inputClass} value={form.phone} onChange={(e) => setField("phone", e.target.value)} placeholder="+213 000 000 000" />
-                    </div>
-                    <div>
                       <label className={labelClass}>{t("email")} <span className="text-red-500">*</span></label>
                       <input type="email" className={inputClass} value={form.email} onChange={(e) => setField("email", e.target.value)} placeholder={t("emailPlaceholder")} />
                     </div>
@@ -370,7 +363,7 @@ function ApplyFormInner() {
                   <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> {t("yourInformation")}</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      {([["reviewName", form.fullName], ["reviewStation", venues.find((v) => v.id === form.stationId) ? venueName(venues.find((v) => v.id === form.stationId)!) : "—"], ["reviewPhone", form.phone], ["reviewEmail", form.email || "—"], ["reviewCategory", form.categoryInterest || "—"]] as const).map(([k, v]) => (
+                      {([["reviewName", form.fullName], ["reviewStation", venues.find((v) => v.id === form.stationId) ? venueName(venues.find((v) => v.id === form.stationId)!) : "—"], ["reviewPhone", form.parentPhone], ["reviewEmail", form.email || "—"], ["reviewCategory", form.categoryInterest || "—"]] as const).map(([k, v]) => (
                         <div key={k}><span className="text-gray-400 dark:text-gray-500">{t(k)}:</span> <span className="text-gray-700 dark:text-gray-300 font-medium">{v}</span></div>
                       ))}
                     </div>

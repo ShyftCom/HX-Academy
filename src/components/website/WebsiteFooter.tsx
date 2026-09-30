@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUp, Star, CheckCircle2 } from "lucide-react";
+import { ArrowUp, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { FsaButton } from "./buttons/FsaButton";
 import { localeHref } from "./localeHref";
 
 interface FooterLink { id: string; label: string; labelFr: string | null; labelAr: string | null; url: string; openInNewTab: boolean }
@@ -59,55 +58,6 @@ function getTagline(config: FooterConfig, locale: string): string | null {
    back to English) is gone. Footer strings are in messages/site/*.json under
    the "footer" namespace like every other public string. */
 
-function NewsletterForm({ textColor }: { textColor: string }) {
-  const t = useTranslations("footer");
-  const [email, setEmail] = useState("");
-  const [website, setWebsite] = useState(""); // honeypot
-  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-    setStatus("loading");
-    try {
-      const res = await fetch("/api/public/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, website }),
-      });
-      setStatus(res.ok ? "done" : "error");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  if (status === "done") {
-    return (
-      <div className="flex items-center gap-2 rounded-fsa-pill bg-white/10 px-4 py-3 text-sm font-medium" style={{ color: textColor }}>
-        <CheckCircle2 className="h-4 w-4 text-fsa-heading-blue" /> {t("subscribed")}
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-2 sm:flex-row">
-      {/* Honeypot — hidden from real users, bots tend to fill every field */}
-      <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-      <input
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={t("emailPlaceholder")}
-        className="h-11 min-w-0 flex-1 rounded-fsa-pill border border-white/20 bg-white/10 px-4 text-sm text-white placeholder:text-white/50 focus:border-fsa-heading-blue focus:outline-none"
-      />
-      <FsaButton type="submit" variant="sky" size="sm" icon={false} loading={status === "loading"} disabled={status === "loading"}>
-        {t("subscribe")}
-      </FsaButton>
-    </form>
-  );
-}
-
 export function WebsiteFooter({ locale, stationId }: { locale: string; stationId?: string }) {
   const t = useTranslations();
   const [config, setConfig] = useState<FooterConfig | null>(null);
@@ -130,20 +80,6 @@ export function WebsiteFooter({ locale, stationId }: { locale: string; stationId
 
   return (
     <footer style={{ backgroundColor: bg, color: text }}>
-      {/* Newsletter band */}
-      <div className="border-b border-white/10">
-        <div className="mx-auto flex flex-col items-start justify-between gap-6 px-[var(--fsa-container-pad)] py-10 lg:flex-row lg:items-center" style={{ maxWidth: "var(--fsa-container-max)" }}>
-          <div>
-            {/* text-current is required, not cosmetic: globals.css sets a colour
-                on h1-h6 directly, which beats the colour inherited from <footer>.
-                Without it this heading renders in the admin text colour. */}
-            <h3 className="font-fsa-display text-2xl font-bold uppercase tracking-tight text-current">{t("footer.newsletterTitle")}</h3>
-            <p className="mt-1 max-w-md text-sm" style={{ color: text, opacity: 0.75 }}>{t("footer.newsletterBody")}</p>
-          </div>
-          <NewsletterForm textColor={text} />
-        </div>
-      </div>
-
       <div className="mx-auto px-[var(--fsa-container-pad)] py-12" style={{ maxWidth: "var(--fsa-container-max)" }}>
         {/* Top: logo + tagline + socials */}
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
