@@ -68,7 +68,7 @@ export default function PlayersPage() {
   const [viewPlayer, setViewPlayer] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   /** Set once the account exists; the password is never retrievable again. */
-  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string | null } | null>(null);
 
   // Mirrors the gates the player routes now enforce. Staff reach this page on
   // players:view alone, so without this every action below is a 403 — the
@@ -130,7 +130,7 @@ export default function PlayersPage() {
 
   const copyCredentials = async () => {
     if (!credentials) return;
-    await navigator.clipboard.writeText(`${credentials.email} / ${credentials.password}`);
+    await navigator.clipboard.writeText(credentials.password ? `${credentials.email} / ${credentials.password}` : credentials.email);
     toast.success(t("credentials.copied"));
   };
 
@@ -466,12 +466,15 @@ export default function PlayersPage() {
       {/* Credentials Dialog — shown once, right after creating a player account */}
       <Dialog open={!!credentials} onOpenChange={(o) => !o && setCredentials(null)}>
         <DialogContent size="sm">
-          <DialogHeader><DialogTitle>{t("credentials.title")}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{credentials?.password === null ? t("credentials.joined_title") : t("credentials.title")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-3">
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("credentials.hint")}</p>
+            {/* No password means the player joined an existing family login. */}
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{credentials?.password === null ? t("credentials.joined_hint") : t("credentials.hint")}</p>
             <div className="rounded-lg border p-3 text-sm space-y-1 dark:border-gray-700">
               <div><span className="text-gray-400">{t("credentials.email_label")}: </span>{credentials?.email}</div>
-              <div><span className="text-gray-400">{t("credentials.password_label")}: </span>{credentials?.password}</div>
+              {credentials?.password && (
+                <div><span className="text-gray-400">{t("credentials.password_label")}: </span>{credentials.password}</div>
+              )}
             </div>
           </DialogBody>
           <DialogFooter>

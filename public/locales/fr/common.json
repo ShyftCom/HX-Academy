@@ -156,7 +156,8 @@
       "email_taken_player": "Cet e-mail appartient déjà à un compte joueur.",
       "email_taken_staff": "Cet e-mail appartient déjà à un compte du personnel.",
       "conversion_failed": "La conversion a échoué. Veuillez réessayer.",
-      "delete_failed": "La suppression a échoué. Veuillez réessayer."
+      "delete_failed": "La suppression a échoué. Veuillez réessayer.",
+      "player_already_on_account": "Ce joueur est déjà inscrit sur ce compte famille."
     }
   },
   "empty": {

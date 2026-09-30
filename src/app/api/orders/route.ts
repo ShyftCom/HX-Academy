@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getActivePlayer } from "@/lib/active-player";
 import { db } from "@/lib/db";
 import { generateOrderNumber } from "@/lib/utils";
 import { logActivity as log, createNotification } from "@/lib/activity";
@@ -61,12 +62,10 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Whoever is signed in owns the order. A back-office user has no player
-  // record, which yields null — exactly what the column held for them before.
-  const own = await db.player.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  // Whoever is signed in owns the order — for a parent, the child selected in
+  // the portal. A back-office user has no player record, which yields null —
+  // exactly what the column held for them before.
+  const own = await getActivePlayer(session);
   const playerId = own?.id ?? null;
 
   try {

@@ -281,7 +281,8 @@
     "membership_card": "بطاقة العضوية",
     "no_subscription": "لا يوجد اشتراك نشط",
     "no_orders": "لا توجد طلبات بعد",
-    "welcome": "مرحباً، {{name}}"
+    "welcome": "مرحباً، {{name}}",
+    "switch_child": "تبديل الطفل"
   },
   "language": {
     "fr": "Français",

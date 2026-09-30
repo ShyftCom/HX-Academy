@@ -25,7 +25,8 @@ model User {
 
   sessions          Session[]
   accounts          Account[]
-  player            Player?
+  // A parent's login owns every sibling's player record.
+  players           Player[]
   assignedLeads     Lead[]             @relation("AssignedStaff")
   activityLogs      ActivityLog[]
   notifications     Notification[]     @relation("UserNotifications")
@@ -247,7 +248,8 @@ model LeadActivity {
 
 model Player {
   id               String    @id @default(cuid())
-  userId           String    @unique
+  // Not unique: siblings share their parent's login.
+  userId           String
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   photo            String?
   fullName         String
@@ -279,6 +281,7 @@ model Player {
   affiliateReferrals AffiliateReferral[]
   documents          ApplicationFile[]
 
+  @@index([userId])
   @@map("players")
 }
 

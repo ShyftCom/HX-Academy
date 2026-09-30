@@ -66,20 +66,32 @@ export async function POST(req: NextRequest) {
     if (!body.fullName) return NextResponse.json({ error: "Full name is required" }, { status: 400 });
     if (!body.email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
 
-    const existing = await db.user.findUnique({ where: { email: body.email } });
-    if (existing) return NextResponse.json({ error: "Email already in use" }, { status: 400 });
-
-    const plainPassword = (body.password ?? "").trim() || generatePassword();
-    if (plainPassword.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
-    }
-
-    const playerRole = await db.role.findFirst({ where: { name: "Player" } });
-    const password = await hashPassword(plainPassword);
-
-    const user = await db.user.create({
-      data: { name: body.fullName, email: body.email, password, roleId: playerRole?.id ?? null, isActive: true },
+    const existing = await db.user.findUnique({
+      where: { email: body.email },
+      include: { role: true, _count: { select: { players: true } } },
     });
+    // An email that already has children on it is a parent's login: the new
+    // player is a sibling and joins that account, keeping its password. Any
+    // other existing login — staff, or a bare account — is still refused.
+    const joiningFamily = !!existing && existing._count.players > 0 && (!existing.role || existing.role.name === "Player");
+    if (existing && !joiningFamily) return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+
+    let plainPassword: string | null = null;
+    let user;
+    if (joiningFamily) {
+      user = existing!;
+    } else {
+      const chosen: string = (body.password ?? "").trim() || generatePassword();
+      if (chosen.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+      }
+      plainPassword = chosen;
+      const playerRole = await db.role.findFirst({ where: { name: "Player" } });
+      const password = await hashPassword(chosen);
+      user = await db.user.create({
+        data: { name: body.fullName, email: body.email, password, roleId: playerRole?.id ?? null, isActive: true },
+      });
+    }
 
     const player = await db.player.create({
       data: {
@@ -107,7 +119,12 @@ export async function POST(req: NextRequest) {
     await logActivity({ userId: session.user.id, action: "create", module: "players", description: `Created player: ${player.fullName}` });
     // The plaintext password is returned exactly once, to the admin who just
     // set it, so they can pass it to the player. It is never stored or logged.
-    return NextResponse.json({ ...player, credentials: { email: body.email, password: plainPassword } }, { status: 201 });
+    // A sibling added to a family account gets no password back — the family
+    // already signs in with theirs.
+    return NextResponse.json(
+      { ...player, credentials: { email: body.email, password: plainPassword }, joinedExistingAccount: joiningFamily },
+      { status: 201 },
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Create failed" }, { status: 500 });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getActivePlayer } from "@/lib/active-player";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
@@ -12,11 +13,11 @@ import { z } from "zod";
  * attached to a known player.
  */
 
-/** Resolved from the user id rather than the JWT's playerId, which predates conversion. */
+/** The child selected in the portal, checked against the login that owns it. */
 async function currentPlayer() {
   const session = await auth();
   if (!session?.user?.id) return null;
-  return db.player.findUnique({ where: { userId: session.user.id }, select: { id: true } });
+  return getActivePlayer(session);
 }
 
 export async function GET() {

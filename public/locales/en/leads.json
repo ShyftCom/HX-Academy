@@ -113,7 +113,10 @@
     "next_steps": "They can now sign in, choose a plan, pay by card or upload a receipt, and finish uploading their documents.",
     "copy": "Copy",
     "copied": "Credentials copied",
-    "close": "Done"
+    "close": "Done",
+    "family_note": "If this email already has a child on it, this player is added to that family account and keeps its existing password.",
+    "joined_title": "Added to family account",
+    "joined_hint": "This email already had a child on it, so the player was added to that account. The family signs in with the password they already use and switches between children from their portal."
   },
   "empty": {
     "no_leads": "No leads found",

@@ -127,7 +127,7 @@ export default function LeadDetailPage() {
   const [convertForm, setConvertForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   /** Set once the account exists; the password is never retrievable again. */
-  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string | null } | null>(null);
 
   // Auto-open booking modal when status changes to "Meeting booked" on this lead
   useEffect(() => {
@@ -212,7 +212,7 @@ export default function LeadDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: convertForm.email.trim(), password: convertForm.password }),
       });
-      return readJsonOrThrow<{ credentials: { email: string; password: string } }>(res);
+      return readJsonOrThrow<{ credentials: { email: string; password: string | null } }>(res);
     },
     onSuccess: (json) => {
       qc.invalidateQueries({ queryKey: ["lead", id] });
@@ -250,7 +250,7 @@ export default function LeadDetailPage() {
 
   async function copyCredentials() {
     if (!credentials) return;
-    await navigator.clipboard.writeText(`${credentials.email} / ${credentials.password}`);
+    await navigator.clipboard.writeText(credentials.password ? `${credentials.email} / ${credentials.password}` : credentials.email);
     toast.success(tl("convert.copied"));
   }
 
@@ -621,16 +621,20 @@ export default function LeadDetailPage() {
       <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
         <DialogContent size="md">
           <DialogHeader>
-            <DialogTitle>{credentials ? tl("convert.credentials_title") : tl("convert.title")}</DialogTitle>
+            <DialogTitle>{credentials ? (credentials.password ? tl("convert.credentials_title") : tl("convert.joined_title")) : tl("convert.title")}</DialogTitle>
           </DialogHeader>
 
           {credentials ? (
             <>
               <DialogBody className="space-y-4">
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.credentials_hint")}</p>
+                {/* No password means the child joined an existing family login,
+                    which keeps the password the family already uses. */}
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{credentials.password ? tl("convert.credentials_hint") : tl("convert.joined_hint")}</p>
                 <div className="rounded-xl p-4 space-y-2 font-mono text-sm" style={{ background: "var(--muted-bg)" }}>
                   <div><span style={{ color: "var(--text-muted)" }}>{tl("convert.email_label")}: </span>{credentials.email}</div>
-                  <div><span style={{ color: "var(--text-muted)" }}>{tl("convert.password_label")}: </span>{credentials.password}</div>
+                  {credentials.password && (
+                    <div><span style={{ color: "var(--text-muted)" }}>{tl("convert.password_label")}: </span>{credentials.password}</div>
+                  )}
                 </div>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.next_steps")}</p>
               </DialogBody>
@@ -645,6 +649,7 @@ export default function LeadDetailPage() {
             <>
               <DialogBody className="space-y-4">
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.intro")}</p>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{tl("convert.family_note")}</p>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                     {tl("convert.email_label")} <span style={{ color: "#EF4444" }}>*</span>

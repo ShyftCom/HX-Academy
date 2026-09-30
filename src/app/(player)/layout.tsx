@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useHydrated } from "@/hooks/use-hydrated";
 import Link from "next/link";
 import { Bell, CreditCard, FileText, Home, LogOut, Moon, ShoppingBag, Sun, User } from "lucide-react";
@@ -34,7 +34,7 @@ export default function PlayerLayout({ children }: { children: React.ReactNode }
 /** Separated so the shell can use useTranslation under the provider above it. */
 function PlayerShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation("common");
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
@@ -46,6 +46,30 @@ function PlayerShell({ children }: { children: React.ReactNode }) {
       router.push("/dashboard");
     }
   }, [status, session, router]);
+
+  // A parent's login can hold several children. The list comes from the
+  // server; the active one is the session's playerId.
+  const [children_, setChildren] = useState<{ id: string; fullName: string }[]>([]);
+  const [switching, setSwitching] = useState(false);
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((me) => { if (me?.players) setChildren(me.players); })
+      .catch(() => {});
+  }, [status]);
+
+  const activeId = (session?.user as { playerId?: string | null } | undefined)?.playerId ?? children_[0]?.id;
+  const activeChild = children_.find((c) => c.id === activeId);
+
+  async function switchChild(playerId: string) {
+    if (playerId === activeId) return;
+    setSwitching(true);
+    await update({ playerId });
+    // A full reload, not a router refresh: several portal queries are cached
+    // without the child's id in their key and would keep showing the sibling.
+    window.location.assign("/player");
+  }
 
   if (status === "loading") return <FullPageLoader />;
   if (status === "unauthenticated") return null;
@@ -66,6 +90,20 @@ function PlayerShell({ children }: { children: React.ReactNode }) {
         </Link>
 
         <div className="flex items-center gap-1">
+          {children_.length > 1 && (
+            <select
+              value={activeId ?? ""}
+              onChange={(e) => switchChild(e.target.value)}
+              disabled={switching}
+              aria-label={t("player.switch_child")}
+              title={t("player.switch_child")}
+              className="h-9 max-w-[9rem] truncate rounded-[var(--ob-radius-control)] border border-[var(--ob-line)] bg-[var(--ob-surface-lowest)] px-2 text-sm text-[var(--ob-text)] focus:border-[var(--ob-primary)] focus:outline-none disabled:opacity-60"
+            >
+              {children_.map((c) => (
+                <option key={c.id} value={c.id}>{c.fullName}</option>
+              ))}
+            </select>
+          )}
           <LanguageSwitcher variant="admin" />
           <button
             type="button"
@@ -82,7 +120,7 @@ function PlayerShell({ children }: { children: React.ReactNode }) {
             className="rounded-full"
           >
             <Avatar className="h-8 w-8">
-              <AvatarFallback>{getInitials(session?.user?.name ?? "P")}</AvatarFallback>
+              <AvatarFallback>{getInitials(activeChild?.fullName ?? session?.user?.name ?? "P")}</AvatarFallback>
             </Avatar>
           </button>
           <button

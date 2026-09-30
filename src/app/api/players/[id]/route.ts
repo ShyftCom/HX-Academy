@@ -18,9 +18,10 @@ import { hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/per
  * Ownership is decided by the record's `userId`, not by the `playerId` carried
  * in the session token. The token is signed and trustworthy, but it is minted
  * at sign-in and would keep asserting a stale player id if the record were
- * ever relinked; the row is the authority on who owns it. The lookup is on an
- * indexed unique column and, for GET, replaces no query that was not already
- * being made.
+ * ever relinked; the row is the authority on who owns it. A parent's login
+ * owns every sibling on it, so "your own record" covers each of their
+ * children. The lookup is by primary key and, for GET, replaces no query that
+ * was not already being made.
  */
 async function authorizePlayer(playerId: string, permission: string) {
   const session = await auth();
@@ -37,6 +38,21 @@ async function authorizePlayer(playerId: string, permission: string) {
     return { denied: NextResponse.json({ error: "Forbidden" }, { status: 403 }) } as const;
   }
   return { denied: null, callerId, isSelf } as const;
+}
+
+/** Whether another child shares this player's (family) login. */
+async function hasSiblings(userId: string, playerId: string) {
+  return (await db.player.count({ where: { userId, id: { not: playerId } } })) > 0;
+}
+
+/**
+ * A family login stays usable while any child on it is active. Suspending one
+ * sibling must not lock the parent out of the other children's accounts; the
+ * login closes only once none of them is active.
+ */
+async function syncLoginActive(userId: string) {
+  const anyActive = (await db.player.count({ where: { userId, status: "active" } })) > 0;
+  await db.user.update({ where: { id: userId }, data: { isActive: anyActive } });
 }
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -106,8 +122,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const player = await db.player.update({ where: { id }, data });
 
     // Renaming the linked user account stays a back-office act, in step with
-    // fullName above.
-    if (!isSelf && body.fullName) {
+    // fullName above — and only when the login is this child's alone. A family
+    // login shared by siblings is not renamed after whichever child was edited.
+    if (!isSelf && body.fullName && !(await hasSiblings(player.userId, player.id))) {
       await db.user.update({ where: { id: player.userId }, data: { name: body.fullName } });
     }
     await logActivity({ userId: callerId, action: "update", module: "players", description: `Updated player: ${player.fullName}` });
@@ -150,7 +167,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       where: { id },
       data: { status: body.status },
     });
-    await db.user.update({ where: { id: player.userId }, data: { isActive: body.status === "active" } });
+    await syncLoginActive(player.userId);
     await logActivity({ userId: session.user.id, action: "status_change", module: "players", description: `Set player ${player.fullName} to ${body.status}` });
     return NextResponse.json(player);
   } catch {
@@ -172,7 +189,14 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   if (!player) return NextResponse.json({ error: "Player not found", code: "player_not_found" }, { status: 404 });
 
   try {
-    await db.user.delete({ where: { id: player.userId } });
+    // Deleting the login cascades to every player on it, so with siblings on
+    // a shared family login only this child's record goes; the login stays
+    // for the others. A child alone on their login takes it with them.
+    if (await hasSiblings(player.userId, player.id)) {
+      await db.player.delete({ where: { id } });
+    } else {
+      await db.user.delete({ where: { id: player.userId } });
+    }
     await logActivity({ userId: session.user.id, action: "delete", module: "players", description: `Deleted player: ${player.fullName}` });
     return NextResponse.json({ message: "Deleted" });
   } catch (error: any) {
@@ -183,7 +207,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
     // already has: status flips and isActive: false blocks sign-in.
     if (error?.code === "P2003") {
       await db.player.update({ where: { id }, data: { status: "suspended" } });
-      await db.user.update({ where: { id: player.userId }, data: { isActive: false } });
+      await syncLoginActive(player.userId);
       await logActivity({ userId: session.user.id, action: "update", module: "players", description: `Suspended player (has affiliate history, cannot delete): ${player.fullName}` });
       return NextResponse.json({ message: "Suspended" });
     }

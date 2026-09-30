@@ -100,40 +100,51 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "An email address is required to create the player's account", code: "email_required" }, { status: 400 });
     }
 
-    const plainPassword = body.password?.trim() || generatePassword();
-    if (plainPassword.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters", code: "password_too_short" }, { status: 400 });
+    const playerRole = await db.role.findFirst({ where: { name: "Player" } });
+
+    let user = await db.user.findUnique({ where: { email }, include: { players: { select: { id: true, fullName: true } }, role: true } });
+
+    // A staff or admin login must not be quietly repurposed — and its
+    // password certainly must not be reset by converting a lead.
+    if (user?.role && user.role.name !== "Player") {
+      return NextResponse.json({ error: "That email already belongs to a staff account", code: "email_taken_staff" }, { status: 400 });
     }
 
-    const playerRole = await db.role.findFirst({ where: { name: "Player" } });
-    const password = await hashPassword(plainPassword);
+    // Siblings share their parent's login: when the email already has
+    // children on it, this child is added alongside them. The family already
+    // has a password, so it is left as is — resetting it here would lock the
+    // parent out of the account they are already using for the other child.
+    const joiningFamily = !!user && user.players.length > 0;
+    if (joiningFamily && user!.players.some((p) => p.fullName.trim().toLowerCase() === lead.fullName.trim().toLowerCase())) {
+      return NextResponse.json({ error: "This player already exists on that account", code: "player_already_on_account" }, { status: 400 });
+    }
 
-    let user = await db.user.findUnique({ where: { email }, include: { player: true, role: true } });
+    let plainPassword: string | null = null;
+    if (!joiningFamily) {
+      plainPassword = body.password?.trim() || generatePassword();
+      if (plainPassword.length < 8) {
+        return NextResponse.json({ error: "Password must be at least 8 characters", code: "password_too_short" }, { status: 400 });
+      }
+    }
 
-    if (user) {
-      if (user.player) {
-        return NextResponse.json({ error: "That email already belongs to a player account", code: "email_taken_player" }, { status: 400 });
-      }
-      // A staff or admin login must not be quietly repurposed — and its
-      // password certainly must not be reset by converting a lead.
-      if (user.role && user.role.name !== "Player") {
-        return NextResponse.json({ error: "That email already belongs to a staff account", code: "email_taken_staff" }, { status: 400 });
-      }
+    if (user && joiningFamily) {
+      // Nothing to change on the login itself.
+    } else if (user) {
       user = await db.user.update({
         where: { id: user.id },
-        data: { name: lead.fullName, password, roleId: playerRole?.id ?? user.roleId, isActive: true },
-        include: { player: true, role: true },
+        data: { name: lead.fullName, password: await hashPassword(plainPassword!), roleId: playerRole?.id ?? user.roleId, isActive: true },
+        include: { players: { select: { id: true, fullName: true } }, role: true },
       });
     } else {
       user = await db.user.create({
         data: {
           name: lead.fullName,
           email,
-          password,
+          password: await hashPassword(plainPassword!),
           roleId: playerRole?.id ?? null,
           isActive: true,
         },
-        include: { player: true, role: true },
+        include: { players: { select: { id: true, fullName: true } }, role: true },
       });
     }
 
@@ -181,7 +192,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await logLeadActivity({
       leadId: id,
       actionType: "lead_converted",
-      description: `Lead converted to player account (${user.email})`,
+      description: joiningFamily ? `Lead converted and added to existing family account (${user.email})` : `Lead converted to player account (${user.email})`,
       performedById: session.user.id,
       performedByName: actor.name ?? "Admin",
       performedByRole: actor.role ?? "admin",
@@ -206,8 +217,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // The plaintext password is returned exactly once, to the admin who just
     // set it, so they can pass it to the player. It is never stored or logged.
+    // A child added to an existing family account gets no password back: the
+    // family signs in with the one they already have.
     return NextResponse.json(
-      { player, user: { id: user.id, email: user.email }, credentials: { email, password: plainPassword } },
+      {
+        player,
+        user: { id: user.id, email: user.email },
+        credentials: { email, password: plainPassword },
+        joinedExistingAccount: joiningFamily,
+      },
       { status: 201 },
     );
   } catch (error) {

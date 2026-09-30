@@ -118,7 +118,9 @@
     "password_label": "Mot de passe",
     "copy": "Copier",
     "copied": "Copié dans le presse-papiers",
-    "close": "Fermer"
+    "close": "Fermer",
+    "joined_title": "Ajouté au compte famille",
+    "joined_hint": "Cet e-mail avait déjà un enfant inscrit : le joueur a été ajouté à ce compte. La famille conserve son mot de passe actuel."
   },
   "toast": {
     "status_updated": "Statut du joueur mis à jour",

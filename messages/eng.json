@@ -281,7 +281,8 @@
     "membership_card": "Membership card",
     "no_subscription": "No active subscription",
     "no_orders": "No orders yet",
-    "welcome": "Hello, {{name}}"
+    "welcome": "Hello, {{name}}",
+    "switch_child": "Switch child"
   },
   "language": {
     "fr": "Français",

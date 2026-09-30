@@ -156,7 +156,8 @@
       "email_taken_player": "That email already belongs to a player account.",
       "email_taken_staff": "That email already belongs to a staff account.",
       "conversion_failed": "The conversion failed. Please try again.",
-      "delete_failed": "The deletion failed. Please try again."
+      "delete_failed": "The deletion failed. Please try again.",
+      "player_already_on_account": "This player is already on that family account."
     }
   },
   "empty": {

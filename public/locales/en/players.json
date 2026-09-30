@@ -118,7 +118,9 @@
     "password_label": "Password",
     "copy": "Copy",
     "copied": "Copied to clipboard",
-    "close": "Close"
+    "close": "Close",
+    "joined_title": "Added to family account",
+    "joined_hint": "This email already had a child on it, so the player was added to that account. The family keeps their existing password."
   },
   "toast": {
     "status_updated": "Player status updated",

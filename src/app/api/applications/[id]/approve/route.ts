@@ -21,7 +21,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     let player = null;
 
     if (createAccount && lead.email) {
-      const existing = await db.user.findUnique({ where: { email: lead.email } });
+      const existing = await db.user.findUnique({ where: { email: lead.email }, include: { role: true } });
+      if (existing?.role && existing.role.name !== "Player") {
+        return NextResponse.json({ error: "That email already belongs to a staff account" }, { status: 400 });
+      }
+
       if (!existing) {
         const hashedPw = await bcrypt.hash(password || uuid(), 12);
         user = await db.user.create({
@@ -32,7 +36,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             isActive: true,
           },
         });
+      } else {
+        // A parent's login already exists — this is a sibling. The child gets
+        // their own player record on that login; the password is untouched.
+        user = existing;
+      }
 
+      // Re-approving the same child must not create them twice.
+      player = await db.player.findFirst({
+        where: { userId: user.id, fullName: { equals: lead.fullName, mode: "insensitive" } },
+      });
+
+      if (!player) {
         player = await db.player.create({
           data: {
             userId: user.id,
@@ -49,7 +64,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           },
         });
 
-        if (lead.selectedPlanId && player) {
+        if (lead.selectedPlanId) {
           await db.subscription.create({
             data: {
               playerId: player.id,
@@ -60,9 +75,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             },
           });
         }
-      } else {
-        user = existing;
-        player = await db.player.findUnique({ where: { userId: existing.id } });
       }
     }
 

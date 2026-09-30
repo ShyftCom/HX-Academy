@@ -11,13 +11,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
         token.roleName = (user as any).roleName;
         token.isPlayer = (user as any).isPlayer;
         token.playerId = (user as any).playerId;
+      }
+      // A parent's login can hold several children; the portal switches the
+      // active one with useSession().update({ playerId }). The id comes from
+      // the browser, so it is only accepted when that child is on this login.
+      if (trigger === "update" && typeof session?.playerId === "string" && token.id) {
+        const owned = await db.player.findFirst({
+          where: { id: session.playerId, userId: token.id as string },
+          select: { id: true },
+        });
+        if (owned) token.playerId = owned.id;
       }
       return token;
     },
@@ -44,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
-          include: { role: true, player: true },
+          include: { role: true, players: { orderBy: { createdAt: "asc" }, select: { id: true } } },
         });
 
         if (!user || !user.password) return null;
@@ -69,8 +79,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: user.image,
           role: user.role?.name ?? null,
           roleName: user.role?.name ?? null,
-          isPlayer: !!user.player,
-          playerId: user.player?.id ?? null,
+          isPlayer: user.players.length > 0,
+          // The first child is active after sign-in; siblings are a switch away.
+          playerId: user.players[0]?.id ?? null,
         } as User & { role: string; roleName: string; isPlayer: boolean; playerId: string | null };
       },
     }),

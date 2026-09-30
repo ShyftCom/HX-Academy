@@ -113,7 +113,10 @@
     "next_steps": "Il peut maintenant se connecter, choisir sa formule, payer par carte ou déposer un justificatif, puis téléverser ses documents.",
     "copy": "Copier",
     "copied": "Identifiants copiés",
-    "close": "Terminé"
+    "close": "Terminé",
+    "family_note": "Si cet e-mail a déjà un enfant inscrit, ce joueur est ajouté à ce compte famille et le mot de passe existant est conservé.",
+    "joined_title": "Ajouté au compte famille",
+    "joined_hint": "Cet e-mail avait déjà un enfant inscrit : le joueur a été ajouté à ce compte. La famille se connecte avec son mot de passe habituel et passe d'un enfant à l'autre depuis son portail."
   },
   "empty": {
     "no_leads": "Aucun lead trouvé",

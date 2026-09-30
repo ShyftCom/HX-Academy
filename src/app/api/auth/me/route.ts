@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getUserPermissions } from "@/lib/permissions";
+import { getActivePlayer, listPlayersForUser } from "@/lib/active-player";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    include: { role: true, player: true },
+    include: { role: true },
   });
 
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -23,6 +24,8 @@ export async function GET() {
   // requirePermissionResponse() server-side — hiding a button is not the same
   // as authorising the endpoint behind it, and this changes neither.
   const permissions = await getUserPermissions(user.id);
+  // A parent's login lists every child; playerId is the one currently selected.
+  const [players, active] = await Promise.all([listPlayersForUser(user.id), getActivePlayer(session)]);
 
   return NextResponse.json({
     id: user.id,
@@ -30,8 +33,9 @@ export async function GET() {
     email: user.email,
     image: user.image,
     role: user.role?.name,
-    isPlayer: !!user.player,
-    playerId: user.player?.id,
+    isPlayer: players.length > 0,
+    playerId: active?.id,
+    players,
     isActive: user.isActive,
     permissions,
   });

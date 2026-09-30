@@ -10,6 +10,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { resolveOwnPlayer } from "@/lib/active-player";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { hasPermission, PERMISSIONS } from "@/lib/permissions";
@@ -122,12 +123,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ---- Who is paying ----
-    // A player may only ever pay for themselves. Staff can start a checkout on
-    // someone's behalf, but only with payments:create.
-    const sessionPlayerId = (session.user as { playerId?: string | null }).playerId ?? null;
-    let playerId = sessionPlayerId;
+    // A login may pay for its own children — a parent's account holds every
+    // sibling. Staff can start a checkout on anyone's behalf, but only with
+    // payments:create.
+    const own = await resolveOwnPlayer(session, body.playerId);
+    let playerId = own?.id ?? null;
 
-    if (body.playerId && body.playerId !== sessionPlayerId) {
+    if (body.playerId && !own) {
       const allowed = await hasPermission(session.user.id, PERMISSIONS.PAYMENTS_CREATE);
       if (!allowed) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
