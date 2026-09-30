@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { resolveOwnPlayer } from "@/lib/active-player";
 import { db } from "@/lib/db";
 import { logActivity, createNotification } from "@/lib/activity";
 import { hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
@@ -94,9 +93,12 @@ export async function POST(req: NextRequest) {
       status = body.status ?? "pending";
       adminNotes = body.adminNotes ?? null;
     } else {
-      // Self-service. Bind the payment to one of the caller's own children —
-      // the one named, if it is theirs, else the one selected in the portal.
-      const own = await resolveOwnPlayer(session, body.playerId);
+      // Self-service. Bind the payment to the caller's own player record and
+      // ignore any playerId they sent.
+      const own = await db.player.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
       if (!own) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
