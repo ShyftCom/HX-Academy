@@ -720,6 +720,23 @@ model MediaFile {
   @@map("media_files")
 }
 
+// Payment receipts, stored in Postgres rather than Blob storage so a proof
+// upload depends on nothing but the database. Images are re-encoded to JPEG
+// in the browser first, which keeps them well under the serverless body cap.
+// Served only through /api/payments/proof/[id], behind auth.
+model PaymentProofFile {
+  id         String   @id @default(cuid())
+  data       Bytes
+  mimeType   String
+  fileName   String
+  size       Int
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  @@index([uploadedBy])
+  @@map("payment_proof_files")
+}
+
 // ==================== WEBSITE / APPLICATIONS ====================
 
 model FileRequirement {

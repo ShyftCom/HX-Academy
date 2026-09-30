@@ -19,15 +19,16 @@ import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
-import { uploadFile } from "@/lib/upload-client";
-import { PROOF_ACCEPT, proofContentType } from "@/lib/upload-types";
+import { PROOF_ACCEPT } from "@/lib/upload-types";
+import { uploadPaymentProof } from "@/lib/proof-upload-client";
 
 type Status = "all" | "pending" | "approved" | "rejected";
 
 function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
   const { t } = useTranslation("payments");
   const isPdf = url.toLowerCase().includes(".pdf") || url.includes("application/pdf");
-  const filename = url.split("/").pop() ?? "proof";
+  // Database-stored proofs carry their name in ?name=; older Blob ones end in it.
+  const filename = new URL(url, window.location.origin).searchParams.get("name") ?? url.split("/").pop() ?? "proof";
 
   function handleDownload() {
     const a = document.createElement("a");
@@ -147,19 +148,14 @@ export default function PaymentsPage() {
     onError: () => toast.error(t("toast.create_failed")),
   });
 
-  // Straight to Blob storage, like the player portal. Posting to /api/upload
-  // hit the 4.5MB serverless body cap on a phone photo, and the non-JSON 413
-  // made res.json() throw, leaving the button on "Uploading..." forever.
+  // Stored in the database via /api/payments/proof, like the player portal.
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const contentType = proofContentType(file);
-    if (!contentType) { toast.error("Only images or PDF files are accepted"); return; }
     setUploadingAdd(true);
     try {
-      const blob = await uploadFile(file, { folder: "payments", maxSizeMb: 25, contentType });
-      setProofUrl(blob.url);
+      setProofUrl(await uploadPaymentProof(file));
       toast.success(t("toast.proof_uploaded"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");

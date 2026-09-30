@@ -14,8 +14,8 @@ import { formatDate, formatCurrency } from "@/lib/utils";
 import { differenceInDays, parseISO } from "date-fns";
 import { CreditCard, Upload, Clock, CheckCircle, Landmark, ShieldCheck } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
-import { uploadFile } from "@/lib/upload-client";
-import { PROOF_ACCEPT, proofContentType } from "@/lib/upload-types";
+import { PROOF_ACCEPT } from "@/lib/upload-types";
+import { uploadPaymentProof } from "@/lib/proof-upload-client";
 
 export default function PlayerSubscriptionsPage() {
   const { data: session } = useSession();
@@ -108,20 +108,15 @@ export default function PlayerSubscriptionsPage() {
     onError: (e: Error) => toast.error(e.message || "Failed"),
   });
 
-  // Straight to Blob storage. Going through /api/upload capped the receipt at
-  // the 4.5MB serverless body limit, and a photo of a bank slip regularly
-  // clears that — the request died with no response and the box read
-  // "Uploading..." forever.
+  // Stored in the database via /api/payments/proof; large photos are shrunk
+  // to JPEG in the browser first to stay under the serverless body limit.
   const uploadProof = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const contentType = proofContentType(file);
-    if (!contentType) { toast.error("Only images or PDF files are accepted"); return; }
     setUploading(true);
     try {
-      const blob = await uploadFile(file, { folder: "payments", maxSizeMb: 25, contentType });
-      setProofUrl(blob.url);
+      setProofUrl(await uploadPaymentProof(file));
       toast.success("Proof uploaded");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");

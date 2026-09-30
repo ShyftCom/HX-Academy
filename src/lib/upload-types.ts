@@ -60,3 +60,29 @@ export function proofContentType(file: { name: string; type: string }): string |
   if (type && type !== "application/octet-stream") return null;
   return PROOF_MIME_BY_EXT[ext] ?? null;
 }
+
+/**
+ * The real type of a proof, read from its first bytes rather than trusting
+ * the name or the declared type — so an HTML or SVG file renamed to
+ * "receipt.jpg" is still refused. Null when it is not an image/PDF we accept.
+ */
+export function sniffProofType(bytes: Uint8Array): string | null {
+  const b = bytes;
+  const ascii = (start: number, len: number) => String.fromCharCode(...b.subarray(start, start + len));
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (b[0] === 0x89 && ascii(1, 3) === "PNG") return "image/png";
+  if (ascii(0, 4) === "GIF8") return "image/gif";
+  if (ascii(0, 4) === "RIFF" && ascii(8, 4) === "WEBP") return "image/webp";
+  if (ascii(0, 5) === "%PDF-") return "application/pdf";
+  if (ascii(0, 2) === "BM") return "image/bmp";
+  if (ascii(0, 4) === "II*\0" || ascii(0, 4) === "MM\0*") return "image/tiff";
+  if (b[0] === 0 && b[1] === 0 && b[2] === 1 && b[3] === 0) return "image/x-icon";
+  if (ascii(4, 4) === "ftyp") {
+    const brand = ascii(8, 4);
+    if (brand === "avif" || brand === "avis") return "image/avif";
+    if (["heic", "heix", "hevc", "hevx", "heim", "heis"].includes(brand)) return "image/heic";
+    if (["mif1", "msf1"].includes(brand)) return "image/heif";
+  }
+  if ((b[0] === 0xff && b[1] === 0x0a) || ascii(4, 8) === "JXL \r\n\x87\n") return "image/jxl";
+  return null;
+}
