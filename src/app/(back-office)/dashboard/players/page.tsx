@@ -56,11 +56,13 @@ type FormData = z.infer<typeof schema>;
 export default function PlayersPage() {
   const { t } = useTranslation("players");
   const qc = useQueryClient();
-  const { activeStationId } = useStation();
+  const { activeStationId, isGlobalView } = useStation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editPlayer, setEditPlayer] = useState<any>(null);
   const [viewPlayer, setViewPlayer] = useState<any>(null);
@@ -82,15 +84,22 @@ export default function PlayersPage() {
   const [transferPlayer, setTransferPlayer] = useState<any>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["players", page, search, statusFilter, categoryFilter, activeStationId],
+    queryKey: ["players", page, search, statusFilter, categoryFilter, activeStationId, stationFilter],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) params.set("q", search);
       if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
       if (categoryFilter && categoryFilter !== "all") params.set("category", categoryFilter);
       if (activeStationId) params.set("stationId", activeStationId);
+      else if (stationFilter !== "all") params.set("stationId", stationFilter);
       return fetch(`/api/players?${params}`).then((r) => r.json());
     },
+  });
+
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["stations"],
+    queryFn: () => fetch("/api/stations").then((r) => r.json()),
+    staleTime: 5 * 60_000,
   });
 
   const { data: playerDetail } = useQuery({
@@ -190,6 +199,7 @@ export default function PlayersPage() {
       </div>
     )},
     { key: "phone", header: "Phone", cell: (r: any) => r.phone ?? "—" },
+    { key: "station", header: t("common:labels.station"), cell: (r: any) => r.station?.name ?? "—" },
     { key: "category", header: "Category", cell: (r: any) => r.category ? <Badge variant="outline">{r.category}</Badge> : "—" },
     { key: "team", header: "Team", cell: (r: any) => r.team ?? "—" },
     { key: "subscription", header: "Subscription", cell: (r: any) => getSubStatus(r) },
@@ -239,6 +249,16 @@ export default function PlayersPage() {
             {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("page.empty")} emptyIcon={<Users className="h-8 w-8" />} />

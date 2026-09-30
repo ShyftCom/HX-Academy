@@ -13,7 +13,9 @@
   "filters": {
     "search_placeholder": "البحث في اللاعبين...",
     "all_categories": "جميع الفئات",
-    "all_teams": "جميع الفرق"
+    "all_teams": "جميع الفرق",
+    "all_stations": "جميع الفروع",
+    "no_station": "بدون فرع"
   },
   "actions": {
     "add_player": "إضافة لاعب",

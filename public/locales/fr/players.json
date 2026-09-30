@@ -13,7 +13,9 @@
   "filters": {
     "search_placeholder": "Rechercher des joueurs...",
     "all_categories": "Toutes les catégories",
-    "all_teams": "Toutes les équipes"
+    "all_teams": "Toutes les équipes",
+    "all_stations": "Toutes les stations",
+    "no_station": "Sans station"
   },
   "actions": {
     "add_player": "Ajouter un joueur",

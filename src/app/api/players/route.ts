@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
   }
   if (status) where.status = status;
   if (category) where.category = category;
-  if (stationId) where.stationId = stationId;
+  // "none" finds players that were never assigned a station.
+  if (stationId) where.stationId = stationId === "none" ? null : stationId;
 
   const [data, total] = await Promise.all([
     db.player.findMany({
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
       include: {
         user: { select: { id: true, email: true, lastLogin: true } },
         subscriptions: { where: { status: "active" }, include: { plan: true }, take: 1 },
+        station: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
