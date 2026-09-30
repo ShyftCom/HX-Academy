@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
   if (statusId) where.statusId = statusId;
   if (source) where.source = source;
   if (leadType) where.leadType = leadType;
-  if (stationId) where.stationId = stationId;
+  // "none" finds leads that were never assigned a station.
+  if (stationId) where.stationId = stationId === "none" ? null : stationId;
   if (isConverted !== null && isConverted !== undefined && isConverted !== "") {
     where.isConverted = isConverted === "true";
   }

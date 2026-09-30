@@ -30,7 +30,9 @@
     "search_placeholder": "Search leads...",
     "all_statuses": "All statuses",
     "all_agents": "All agents",
-    "filter_by_source": "Filter by source"
+    "filter_by_source": "Filter by source",
+    "all_stations": "All stations",
+    "no_station": "No station"
   },
   "actions": {
     "add_lead": "Add Lead",

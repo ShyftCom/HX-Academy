@@ -195,13 +195,15 @@ export default function LeadsPage() {
   const { t } = useTranslation("leads");
   const { t: tc } = useTranslation("common");
   const qc = useQueryClient();
-  const { activeStationId } = useStation();
+  const { activeStationId, isGlobalView } = useStation();
   const [view, setView] = useState<"table" | "kanban">("table");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
   const [leadTypeFilter, setLeadTypeFilter] = useState("all");
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editLead, setEditLead] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -210,7 +212,7 @@ export default function LeadsPage() {
   const [campConvertSessionId, setCampConvertSessionId] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["leads", page, search, statusFilter, sourceFilter, leadTypeFilter, activeStationId],
+    queryKey: ["leads", page, search, statusFilter, sourceFilter, leadTypeFilter, activeStationId, stationFilter],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: view === "kanban" ? "200" : "20" });
       if (search) params.set("q", search);
@@ -218,6 +220,7 @@ export default function LeadsPage() {
       if (sourceFilter && sourceFilter !== "all") params.set("source", sourceFilter);
       if (leadTypeFilter && leadTypeFilter !== "all") params.set("leadType", leadTypeFilter);
       if (activeStationId) params.set("stationId", activeStationId);
+      else if (stationFilter !== "all") params.set("stationId", stationFilter);
       return fetch(`/api/leads?${params}`).then((r) => r.json());
     },
   });
@@ -225,6 +228,12 @@ export default function LeadsPage() {
   const { data: statuses } = useQuery<LeadStatus[]>({
     queryKey: ["lead-statuses"],
     queryFn: () => fetch("/api/lead-statuses").then((r) => r.json()),
+  });
+
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["stations"],
+    queryFn: () => fetch("/api/stations").then((r) => r.json()),
+    staleTime: 5 * 60_000,
   });
 
   const { data: staff } = useQuery({
@@ -358,6 +367,16 @@ export default function LeadsPage() {
             <SelectItem value="summer_camp">{t("page.summer_camp")}</SelectItem>
           </SelectContent>
         </Select>
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
 
         {/* View toggle */}
         <div className="ms-auto flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--muted-bg)" }}>

@@ -30,7 +30,9 @@
     "search_placeholder": "البحث في العملاء...",
     "all_statuses": "جميع الحالات",
     "all_agents": "جميع الوكلاء",
-    "filter_by_source": "تصفية حسب المصدر"
+    "filter_by_source": "تصفية حسب المصدر",
+    "all_stations": "جميع الفروع",
+    "no_station": "بدون فرع"
   },
   "actions": {
     "add_lead": "إضافة عميل",
