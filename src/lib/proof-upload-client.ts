@@ -12,14 +12,43 @@ function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob 
   return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
 }
 
-/** Re-encodes an image as JPEG under TARGET_BYTES, or returns null if the browser can't decode it. */
-async function toJpeg(file: File): Promise<File | null> {
-  let bitmap: ImageBitmap;
+/**
+ * Decodes an image the browser may not read natively. Chrome and Firefox
+ * can't decode HEIC or TIFF, so those fall back to bundled decoders — loaded
+ * on demand, since heic2any alone is ~1.3MB and most proofs are JPEGs.
+ */
+async function decode(file: File, type: string): Promise<ImageBitmap | null> {
   try {
-    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    return await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
-    return null; // e.g. HEIC in Chrome/Firefox
+    /* fall through to a bundled decoder */
   }
+  try {
+    if (type === "image/heic" || type === "image/heif") {
+      const { default: heic2any } = await import("heic2any");
+      const out = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+      // A multi-image HEIC (burst/live photo) yields several; the first is the photo.
+      return await createImageBitmap(Array.isArray(out) ? out[0] : out);
+    }
+    if (type === "image/tiff") {
+      const UTIF = (await import("utif")).default;
+      const buffer = await file.arrayBuffer();
+      const [ifd] = UTIF.decode(buffer);
+      if (!ifd) return null;
+      UTIF.decodeImage(buffer, ifd);
+      const rgba = new Uint8ClampedArray(UTIF.toRGBA8(ifd));
+      return await createImageBitmap(new ImageData(rgba, ifd.width, ifd.height));
+    }
+  } catch (error) {
+    console.warn("proof image could not be decoded", error);
+  }
+  return null;
+}
+
+/** Re-encodes an image as JPEG under TARGET_BYTES, or returns null if it can't be decoded. */
+async function toJpeg(file: File, type: string): Promise<File | null> {
+  const bitmap = await decode(file, type);
+  if (!bitmap) return null;
 
   let scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
   const name = file.name.replace(/\.[^.]*$/, "") + ".jpg";
@@ -54,7 +83,7 @@ export async function uploadPaymentProof(file: File): Promise<string> {
 
   let toSend: File = file;
   if (type !== "application/pdf" && (file.size > TARGET_BYTES || CONVERT_TYPES.has(type))) {
-    const jpeg = await toJpeg(file);
+    const jpeg = await toJpeg(file, type);
     if (jpeg) toSend = jpeg;
     else if (file.size > TARGET_BYTES) {
       throw new Error("This photo is too large and couldn't be compressed. Please upload a JPEG or a screenshot instead.");
