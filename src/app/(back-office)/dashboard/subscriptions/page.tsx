@@ -17,6 +17,7 @@ import { formatDate } from "@/lib/utils";
 import { differenceInDays, parseISO } from "date-fns";
 import { Plus, MoreHorizontal, Trash2, CreditCard, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useStation } from "@/context/StationContext";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
 
@@ -30,6 +31,9 @@ export default function SubscriptionsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const { activeStationId, isGlobalView } = useStation();
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ playerId: "", planId: "", status: "pending", notes: "" });
@@ -41,14 +45,17 @@ export default function SubscriptionsPage() {
   const canDelete = can(PERMISSIONS.SUBS_DELETE);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["subscriptions", page, statusFilter],
+    queryKey: ["subscriptions", page, statusFilter, activeStationId, stationFilter],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: "20" });
       if (statusFilter && statusFilter !== "all") params.set("status", statusFilter);
+      if (activeStationId) params.set("stationId", activeStationId);
+      else if (stationFilter !== "all") params.set("stationId", stationFilter);
       return fetch(`/api/subscriptions?${params}`).then((r) => r.json());
     },
   });
 
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({ queryKey: ["stations"], queryFn: () => fetch("/api/stations").then((r) => r.json()), staleTime: 5 * 60_000 });
   const { data: plans } = useQuery({ queryKey: ["subscription-plans"], queryFn: () => fetch("/api/subscriptions/plans").then((r) => r.json()) });
   const { data: players } = useQuery({ queryKey: ["players-list"], queryFn: () => fetch("/api/players?perPage=200").then((r) => r.json()) });
 
@@ -84,6 +91,7 @@ export default function SubscriptionsPage() {
 
   const columns = [
     { key: "player", header: "Player", cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone ?? "—"}</p></div> },
+    { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
     { key: "plan", header: "Plan", cell: (r: any) => (
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded-full" style={{ backgroundColor: r.plan?.color ?? "#6B7280" }} />
@@ -128,6 +136,16 @@ export default function SubscriptionsPage() {
             <SelectItem value="suspended">{t("common:ui.suspended")}</SelectItem>
           </SelectContent>
         </Select>
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<CreditCard className="h-8 w-8" />} />

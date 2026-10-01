@@ -17,15 +17,18 @@ export async function GET(req: NextRequest) {
   const perPage = parseInt(searchParams.get("perPage") ?? "20");
   const playerId = searchParams.get("playerId") ?? "";
   const status = searchParams.get("status") ?? "";
+  const stationId = searchParams.get("stationId") ?? "";
 
   const where: Record<string, unknown> = {};
   if (playerId) where.playerId = playerId;
   if (status) where.status = status;
+  // A subscription's station is its player's; "none" finds players never assigned one.
+  if (stationId) where.player = { stationId: stationId === "none" ? null : stationId };
 
   const [data, total] = await Promise.all([
     db.subscription.findMany({
       where,
-      include: { player: true, plan: true },
+      include: { player: { include: { station: { select: { id: true, name: true } } } }, plan: true },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,
