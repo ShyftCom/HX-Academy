@@ -19,17 +19,26 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") ?? "";
   const statusId = searchParams.get("statusId") ?? "";
   const playerId = searchParams.get("playerId") ?? "";
+  const stationId = searchParams.get("stationId") ?? "";
 
   const where: Record<string, unknown> = {};
   if (q) where.OR = [{ orderNumber: { contains: q } }, { player: { fullName: { contains: q } } }];
   if (statusId) where.statusId = statusId;
   if (playerId) where.playerId = playerId;
+  // Order.stationId is never set at checkout, so an order's station is its
+  // buyer's. "none" covers guest orders and buyers never assigned a station.
+  // Kept under AND so it can't collide with the search's OR.
+  if (stationId) {
+    where.AND = [stationId === "none"
+      ? { OR: [{ playerId: null }, { player: { stationId: null } }] }
+      : { player: { stationId } }];
+  }
 
   const [data, total] = await Promise.all([
     db.order.findMany({
       where,
       include: {
-        player: true,
+        player: { include: { station: { select: { id: true, name: true } } } },
         status: true,
         items: { include: { product: true } },
       },

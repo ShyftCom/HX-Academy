@@ -17,6 +17,7 @@ import { Eye, Trash2, ClipboardList, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { useStation } from "@/context/StationContext";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
 import { readJsonOrThrow } from "@/lib/api-error";
@@ -27,6 +28,9 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const { activeStationId, isGlobalView } = useStation();
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
   const [viewOrder, setViewOrder] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -37,15 +41,18 @@ export default function OrdersPage() {
   const canDelete = can(PERMISSIONS.ORDERS_DELETE);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, search, statusFilter],
+    queryKey: ["orders", page, search, statusFilter, activeStationId, stationFilter],
     queryFn: () => {
       const p = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) p.set("q", search);
       if (statusFilter && statusFilter !== "all") p.set("statusId", statusFilter);
+      if (activeStationId) p.set("stationId", activeStationId);
+      else if (stationFilter !== "all") p.set("stationId", stationFilter);
       return fetch(`/api/orders?${p}`).then((r) => r.json());
     },
   });
 
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({ queryKey: ["stations"], queryFn: () => fetch("/api/stations").then((r) => r.json()), staleTime: 5 * 60_000 });
   const { data: statuses } = useQuery({ queryKey: ["order-statuses"], queryFn: () => fetch("/api/orders/statuses").then((r) => r.json()) });
 
   const statusMutation = useMutation({
@@ -71,6 +78,7 @@ export default function OrdersPage() {
       const cod = parseJsonSafe<any>(r.codData, {});
       return <div><p className="font-medium text-sm">{r.player?.fullName ?? cod["fullName"] ?? cod["Full Name"] ?? "Guest"}</p><p className="text-xs text-gray-400">{r.player?.phone ?? cod["phone"] ?? "—"}</p></div>;
     }},
+    { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
     { key: "items", header: "Items", cell: (r: any) => <span className="text-sm">{r.items?.length ?? 0} item(s)</span> },
     { key: "total", header: "Total", cell: (r: any) => <span className="font-medium">{formatCurrency(r.totalAmount)}</span> },
     { key: "status", header: "Status", cell: (r: any) => getStatusBadge(r.status) },
@@ -100,6 +108,16 @@ export default function OrdersPage() {
             {statuses?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <DataTable columns={columns} data={data?.data ?? []} loading={isLoading} emptyMessage={t("empty")} emptyIcon={<ClipboardList className="h-8 w-8" />} />
