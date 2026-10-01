@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface CampSession {
   id: string; name: string; startDate: string; endDate: string; capacity: number | null;
@@ -58,7 +59,7 @@ export default function SummerCampSessionsPage() {
   });
 
   const { mutate: deleteSession, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/summer-camp/sessions/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/summer-camp/sessions/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-sessions"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.failed")),
   });

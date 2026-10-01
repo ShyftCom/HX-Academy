@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useStation } from "@/context/StationContext";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const schema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -263,8 +264,8 @@ export default function LeadsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/leads/${id}`, { method: "DELETE" }).then((r) => r.json()),
-    onSuccess: () => { toast.success(tc("errors.failed_to_delete")); qc.invalidateQueries({ queryKey: ["leads"] }); setDeleteId(null); },
+    mutationFn: (id: string) => fetch(`/api/leads/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
+    onSuccess: () => { toast.success(tc("toast.deleted")); qc.invalidateQueries({ queryKey: ["leads"] }); setDeleteId(null); },
     onError: () => toast.error(tc("errors.failed_to_delete")),
   });
 

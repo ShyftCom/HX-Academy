@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface LeadStatus {
   id: string;
@@ -79,7 +80,7 @@ export default function PipelinePage() {
 
   const deleteMutation = useMutation({
     mutationFn: ({ id, fallbackStatusId }: { id: string; fallbackStatusId?: string }) =>
-      fetch(`/api/lead-statuses/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fallbackStatusId }) }).then((r) => r.json()),
+      fetch(`/api/lead-statuses/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fallbackStatusId }) }).then(readJsonOrThrow),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["lead-statuses"] }); toast.success(t("pipeline.deleted")); setDeleteTarget(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

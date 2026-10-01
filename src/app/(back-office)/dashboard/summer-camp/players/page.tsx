@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -94,7 +95,7 @@ export default function SummerCampPlayersPage() {
   });
 
   const { mutate: deletePlayer, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/summer-camp/players/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/summer-camp/players/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-players"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.failed")),
   });

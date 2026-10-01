@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface ProgrammeRow {
   id: string; slug: string; name: string; isPubliclyListed: boolean; isFeatured: boolean;
@@ -48,8 +49,9 @@ export default function ProgrammesListPage() {
   });
 
   const { mutate: deleteProgramme, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/programmes/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/programmes/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("programmes.deleted")); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   return (

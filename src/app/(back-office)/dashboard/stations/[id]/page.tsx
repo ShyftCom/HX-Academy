@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
 import { LocaleTextInput } from "@/components/website/admin/LocaleTextInput";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 function formatDA(n: number) { return n.toLocaleString("fr-DZ") + " DA"; }
 
@@ -61,8 +62,9 @@ export default function StationDetailPage() {
   });
 
   const deleteMut = useMutation({
-    mutationFn: () => fetch(`/api/stations/${id}`, { method: "DELETE" }),
+    mutationFn: () => fetch(`/api/stations/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("detail.deleted")); router.push("/dashboard/stations"); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   useEffect(() => { if (station && !station.error) setMarketing(station); }, [station]);

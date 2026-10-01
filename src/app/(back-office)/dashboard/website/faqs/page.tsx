@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface Faq { id: string; question: string; answer: string; category: string | null; isPublished: boolean }
 
@@ -34,8 +35,9 @@ export default function FaqsAdminPage() {
     onSuccess: () => invalidate(),
   });
   const { mutate: remove, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/faqs/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/faqs/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   const groups = list.reduce<Record<string, Faq[]>>((acc, f) => {

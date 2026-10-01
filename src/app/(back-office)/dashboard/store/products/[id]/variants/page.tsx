@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, Zap, Save, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 type Attribute = { id: string; groupId: string; value: string; colorHex?: string | null };
 type AttributeGroup = { id: string; name: string; attributes: Attribute[] };
@@ -72,7 +73,7 @@ export default function VariantsPage() {
 
   const deleteGroupMutation = useMutation({
     mutationFn: (groupId: string) =>
-      fetch(`/api/attribute-groups/${groupId}`, { method: "DELETE" }),
+      fetch(`/api/attribute-groups/${groupId}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => {
       toast.success(t("variants.group_deleted"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });
@@ -99,7 +100,7 @@ export default function VariantsPage() {
 
   const deleteAttributeMutation = useMutation({
     mutationFn: (attrId: string) =>
-      fetch(`/api/attributes/${attrId}`, { method: "DELETE" }),
+      fetch(`/api/attributes/${attrId}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => {
       toast.success(t("variants.value_deleted"));
       qc.invalidateQueries({ queryKey: ["attribute-groups", productId] });

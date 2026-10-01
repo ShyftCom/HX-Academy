@@ -19,6 +19,7 @@ import { formatDate } from "@/lib/utils";
 import { Plus, Edit, Trash2, FileText, X, ClipboardList, AlertTriangle, Ban, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { APPLICATION_SURVEY_SETTING, APPLY_OUTCOME_SETTINGS, APPLY_OUTCOME_SETTING_KEYS, APPLY_OUTCOME_DEFAULTS } from "@/lib/setting-keys";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const QTYPES = ["text", "number", "select", "radio", "checkbox", "textarea"];
 
@@ -136,7 +137,7 @@ export default function SurveysPage() {
   });
 
   const deleteSurveyMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/surveys/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/surveys/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["surveys"] }); setDeleteSurveyId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });
@@ -162,7 +163,7 @@ export default function SurveysPage() {
   });
 
   const deleteQMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/surveys/questions/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/surveys/questions/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("question_deleted")); qc.invalidateQueries({ queryKey: ["survey", selectedSurvey?.id] }); setDeleteQId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

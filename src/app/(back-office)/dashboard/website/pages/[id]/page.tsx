@@ -19,6 +19,7 @@ import { SECTION_TYPES, SECTION_TYPE_KEYS, type SectionType } from "@/components
 import { SECTION_FIELD_SCHEMAS } from "@/components/website/sections/sectionFieldSchemas";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface SectionRow {
   id: string;
@@ -152,8 +153,9 @@ export default function PageBuilderPage() {
   });
 
   const { mutate: deleteSection, isPending: deletingSection } = useMutation({
-    mutationFn: (sectionId: string) => fetch(`/api/pages/${id}/sections/${sectionId}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (sectionId: string) => fetch(`/api/pages/${id}/sections/${sectionId}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("pages.section_removed")); invalidate(); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   const { mutate: persistOrder } = useMutation({

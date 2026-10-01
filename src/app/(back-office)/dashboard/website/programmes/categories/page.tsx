@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface Category { id: string; name: string; colorTag: string; isActive: boolean; _count: { programmes: number } }
 
@@ -36,8 +37,9 @@ export default function ProgrammeCategoriesPage() {
     onSuccess: () => invalidate(),
   });
   const { mutate: remove } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/programmes/categories/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/programmes/categories/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   function handleReorder(next: Category[]) {

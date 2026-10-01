@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 export default function OrdersPage() {
   const { t } = useTranslation("orders");
@@ -55,7 +56,7 @@ export default function OrdersPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/orders/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/orders/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("toast.deleted")); qc.invalidateQueries({ queryKey: ["orders"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface Slide {
   id: string; imageUrl: string; title: string | null; titleFr: string | null; titleAr: string | null;
@@ -121,7 +122,7 @@ export default function SlidesPage() {
   });
 
   const { mutate: deleteSlide, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/website/slides/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/website/slides/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-slides"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.failed")),
   });

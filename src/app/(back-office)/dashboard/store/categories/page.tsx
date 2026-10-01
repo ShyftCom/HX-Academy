@@ -16,6 +16,7 @@ import { Plus, Edit, Trash2, Folder } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 export default function CategoriesPage() {
   const { t } = useTranslation("store");
@@ -51,7 +52,7 @@ export default function CategoriesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/products/categories/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/products/categories/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["product-categories"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

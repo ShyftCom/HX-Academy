@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface SCPlan {
   id: string; name: string; nameFr: string | null; nameAr: string | null;
@@ -63,7 +64,7 @@ export default function SummerCampPlansPage() {
   });
 
   const { mutate: deletePlan, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/summer-camp/plans/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/summer-camp/plans/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["sc-plans"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:errors.failed_to_delete")),
   });

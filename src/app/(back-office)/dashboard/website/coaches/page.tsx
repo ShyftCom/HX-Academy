@@ -16,6 +16,7 @@ import { SortableList } from "@/components/website/admin/SortableList";
 import { ImageUrlInput } from "@/components/website/admin/ImageUrlInput";
 import { useTranslation } from "react-i18next";
 import { useStation } from "@/context/StationContext";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface Coach { id: string; fullName: string; role: string | null; bio: string | null; photoUrl: string | null; isActive: boolean; stationId: string | null }
 
@@ -47,8 +48,9 @@ export default function CoachesAdminPage() {
     onSuccess: () => invalidate(),
   });
   const { mutate: remove, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/coaches/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/coaches/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   // Mirror the change locally too: once reordered, `rows` shadows the query data.

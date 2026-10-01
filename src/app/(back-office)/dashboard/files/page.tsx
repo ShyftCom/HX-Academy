@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatDate } from "@/lib/utils";
 import { Upload, Trash2, Folder, FileText, Image } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const FOLDERS = ["general", "products", "payments", "players", "videos", "documents"];
 
@@ -40,7 +41,7 @@ export default function FilesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/files?id=${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/files?id=${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("files.deleted")); qc.invalidateQueries({ queryKey: ["files"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

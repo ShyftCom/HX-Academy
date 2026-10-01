@@ -18,6 +18,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate, timeAgo } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
@@ -75,7 +76,7 @@ export default function ReviewsPage() {
   });
 
   const { mutate: deleteReview, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/website/reviews/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/website/reviews/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["reviews-admin"] }); setDeleteId(null); },
     onError: () => toast.error(t("reviews.delete_failed")),
   });

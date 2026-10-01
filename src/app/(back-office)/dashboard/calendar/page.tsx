@@ -12,6 +12,7 @@ import { format, startOfWeek, addDays, addWeeks, subWeeks, addMonths, subMonths,
 import { toast } from "sonner";
 import { BookingModal } from "@/components/calendar/booking-modal";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface Meeting {
   id: string;
@@ -121,7 +122,7 @@ export default function CalendarPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/meetings/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/meetings/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
       toast.success(t("meeting.deleted"));

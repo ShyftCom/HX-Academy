@@ -19,6 +19,7 @@ import { SlickPaySettings } from "@/components/settings/slickpay-settings";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 export default function SettingsPage() {
   const { t } = useTranslation("admin");
@@ -57,7 +58,7 @@ export default function SettingsPage() {
   });
 
   const deleteMethodMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/payments/methods/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/payments/methods/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["payment-methods"] }); setDeleteMethodId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

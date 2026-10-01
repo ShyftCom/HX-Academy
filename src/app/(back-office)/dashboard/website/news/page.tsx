@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface NewsRow { id: string; slug: string; title: string; isPublished: boolean; isFeatured: boolean; category: { name: string } | null; publishedAt: string | null }
 
@@ -40,8 +41,9 @@ export default function NewsListPage() {
   });
 
   const { mutate: remove, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/news/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/news/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-news"] }); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   return (

@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 interface Sponsor {
   id: string; name: string; logoUrl: string; websiteUrl: string | null; position: number; isActive: boolean;
@@ -113,7 +114,7 @@ export default function SponsorsPage() {
   });
 
   const { mutate: deleteSponsor, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/website/sponsors/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/website/sponsors/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["admin-sponsors"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.failed")),
   });

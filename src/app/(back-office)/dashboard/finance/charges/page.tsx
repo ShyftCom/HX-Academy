@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Receipt } from "lucide-react";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
@@ -44,8 +45,9 @@ export default function ChargesPage() {
   });
 
   const deleteCharge = useMutation({
-    mutationFn: (id: string) => fetch(`/api/charges/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/charges/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["charges"] }); toast.success(t("charges.deleted")); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   const createCategory = useMutation({
@@ -54,8 +56,9 @@ export default function ChargesPage() {
   });
 
   const deleteCategory = useMutation({
-    mutationFn: (id: string) => fetch(`/api/charges/categories/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/charges/categories/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["charge-categories"] }),
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   return (

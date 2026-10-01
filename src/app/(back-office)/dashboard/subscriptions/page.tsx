@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { useStation } from "@/context/StationContext";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "success", pending: "warning", expired: "destructive", suspended: "orange",
@@ -73,7 +74,7 @@ export default function SubscriptionsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/subscriptions/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => fetch(`/api/subscriptions/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); qc.invalidateQueries({ queryKey: ["subscriptions"] }); setDeleteId(null); },
     onError: () => toast.error(t("common:toast.delete_failed")),
   });

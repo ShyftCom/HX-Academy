@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SortableList } from "@/components/website/admin/SortableList";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
 
 interface Level { id: string; name: string; ageRangeLabel: string | null; color: string; description: string | null; isActive: boolean }
 
@@ -34,8 +35,9 @@ export default function PathwayAdminPage() {
     onSuccess: () => invalidate(),
   });
   const { mutate: remove, isPending: deleting } = useMutation({
-    mutationFn: (id: string) => fetch(`/api/pathway/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: (id: string) => fetch(`/api/pathway/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("common:toast.deleted")); invalidate(); setDeleteId(null); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.delete_failed"))),
   });
 
   function handleReorder(next: Level[]) {

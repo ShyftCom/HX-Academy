@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { formatDate, timeAgo } from "@/lib/utils";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { readJsonOrThrow } from "@/lib/api-error";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-blue-100 text-blue-700",
@@ -74,7 +75,7 @@ export default function TicketDetailPage() {
   });
 
   const { mutate: deleteTicket, isPending: deleting } = useMutation({
-    mutationFn: () => fetch(`/api/tickets/${id}`, { method: "DELETE" }).then((r) => r.json()),
+    mutationFn: () => fetch(`/api/tickets/${id}`, { method: "DELETE" }).then(readJsonOrThrow),
     onSuccess: () => { toast.success(t("detail.deleted")); router.push("/dashboard/tickets"); },
     onError: () => toast.error(t("common:toast.failed")),
   });
