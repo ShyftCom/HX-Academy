@@ -155,7 +155,7 @@ function KanbanCard({
             <DropdownMenuItem asChild><Link href={`/dashboard/leads/${lead.id}`}><Eye className="me-2 h-4 w-4" />{t("common:ui.view")}</Link></DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(lead)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
             {!lead.isConverted && (
-              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />{lead.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onConvert(lead.id)}><UserCheck className="me-2 h-4 w-4" />{lead.leadType === "summer_camp" ? t("actions.convert_to_camp_participant") : t("actions.convert_to_player")}</DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={() => onDelete(lead.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
           </DropdownMenuContent>
@@ -326,7 +326,7 @@ export default function LeadsPage() {
           <DropdownMenuItem onClick={() => openEdit(r)}><Edit className="me-2 h-4 w-4" />{t("common:ui.edit")}</DropdownMenuItem>
           {!r.isConverted && (
             <DropdownMenuItem onClick={() => { setConvertId(r.id); setConvertLead(r); setCampConvertSessionId(""); }}>
-              <UserCheck className="me-2 h-4 w-4" />{r.leadType === "summer_camp" ? "Convert to Camp Participant" : "Convert to Player"}
+              <UserCheck className="me-2 h-4 w-4" />{r.leadType === "summer_camp" ? t("actions.convert_to_camp_participant") : t("actions.convert_to_player")}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setDeleteId(r.id)} destructive><Trash2 className="me-2 h-4 w-4" />{t("common:ui.delete")}</DropdownMenuItem>
@@ -339,7 +339,7 @@ export default function LeadsPage() {
     <div className="space-y-5">
       <PageHeader title={t("title")} description={t("page.subtitle")}>
         <Button variant="outline" asChild>
-          <Link href="/dashboard/leads/pipeline"><Settings2 className="me-2 h-4 w-4" />{t("pipeline")}</Link>
+          <Link href="/dashboard/leads/pipeline"><Settings2 className="me-2 h-4 w-4" />{t("pipeline.title")}</Link>
         </Button>
         <Button onClick={openAdd}><Plus className="me-2 h-4 w-4" />{t("actions.add_lead")}</Button>
       </PageHeader>

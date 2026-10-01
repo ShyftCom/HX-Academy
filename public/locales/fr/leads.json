@@ -42,7 +42,8 @@
     "book_call": "Réserver un appel",
     "add_note": "Ajouter une note",
     "save_note": "Enregistrer la note",
-    "view_activity": "Voir l'activité"
+    "view_activity": "Voir l'activité",
+    "convert_to_camp_participant": "Convertir en participant au camp"
   },
   "form": {
     "full_name": "Nom complet",

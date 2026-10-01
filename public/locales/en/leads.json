@@ -42,7 +42,8 @@
     "book_call": "Book Call",
     "add_note": "Add Note",
     "save_note": "Save note",
-    "view_activity": "View Activity"
+    "view_activity": "View Activity",
+    "convert_to_camp_participant": "Convert to Camp Participant"
   },
   "form": {
     "full_name": "Full Name",

@@ -42,7 +42,8 @@
     "book_call": "حجز مكالمة",
     "add_note": "إضافة ملاحظة",
     "save_note": "حفظ الملاحظة",
-    "view_activity": "عرض النشاط"
+    "view_activity": "عرض النشاط",
+    "convert_to_camp_participant": "تحويل إلى مشارك في المخيم"
   },
   "form": {
     "full_name": "الاسم الكامل",
