@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { TableSkeleton } from "@/components/shared/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -53,7 +54,7 @@ export function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
   loading,
-  emptyMessage = "No data found",
+  emptyMessage,
   emptyDescription,
   emptyIcon,
   rowKey,
@@ -61,6 +62,7 @@ export function DataTable<T extends Record<string, unknown>>({
   stickyHeader = true,
   className,
 }: DataTableProps<T>) {
+  const { t } = useTranslation("common");
   if (loading) {
     return <TableSkeleton rows={6} columns={Math.min(columns.length, 6)} />;
   }
@@ -70,7 +72,7 @@ export function DataTable<T extends Record<string, unknown>>({
       <div className={cn("rounded-[var(--ob-radius-container)] border border-[var(--ob-line)] bg-[var(--ob-surface-low)]", className)}>
         <EmptyState
           icon={emptyIcon ? undefined : Inbox}
-          title={emptyMessage}
+          title={emptyMessage ?? t("bo.no_data_found")}
           description={emptyDescription}
         />
       </div>

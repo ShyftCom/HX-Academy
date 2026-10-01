@@ -66,7 +66,7 @@ export function SlickPaySettings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled, mode, accountUuid, publicKey, ...extra }),
       });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Save failed");
+      if (!res.ok) throw new Error((await res.json()).error ?? t("common:toast.save_failed"));
       return res.json();
     },
     onSuccess: () => {

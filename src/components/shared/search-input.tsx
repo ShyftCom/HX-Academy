@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,11 +22,13 @@ interface SearchInputProps {
 export function SearchInput({
   value,
   onChange,
-  placeholder = "Search…",
+  placeholder: placeholderProp,
   className,
   debounceMs = 0,
   "aria-label": ariaLabel,
 }: SearchInputProps) {
+  const { t } = useTranslation("common");
+  const placeholder = placeholderProp ?? t("bo.search_placeholder");
   // Local state keeps the field responsive while the debounced value settles.
   // The parent's value is adjusted *during render* rather than synced in an
   // effect, so a reset ("clear filters") shows immediately instead of painting
@@ -81,7 +84,7 @@ export function SearchInput({
             setLocal("");
             onChange("");
           }}
-          aria-label="Clear search"
+          aria-label={t("bo.clear_search")}
           className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded-[2px] p-0.5 text-[var(--ob-text-muted)] transition-colors hover:text-[var(--ob-text)]"
         >
           <X className="h-4 w-4" aria-hidden="true" />

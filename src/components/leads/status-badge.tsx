@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, useId } from "react";
+import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
@@ -60,6 +61,7 @@ export function StatusBadge({
   onStatusChange,
   readOnly = false,
 }: StatusBadgeProps) {
+  const { t } = useTranslation("common");
   const uid = useId();
   const badgeRef = useRef<HTMLSpanElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -153,7 +155,7 @@ export function StatusBadge({
       }
     } catch {
       setOptimisticStatus(prevStatus);
-      toast.error("Failed to update status. Please try again.");
+      toast.error(t("bo.status_badge.update_failed"));
     } finally {
       setLoading(false);
     }
@@ -168,7 +170,7 @@ export function StatusBadge({
     <div
       ref={dropdownRef}
       role="listbox"
-      aria-label="Change lead status"
+      aria-label={t("bo.status_badge.change_lead_status")}
       style={{
         position: "absolute",
         top: dropUp ? undefined : dropTop,
@@ -185,7 +187,7 @@ export function StatusBadge({
       }}
     >
       <div style={{ padding: "8px 12px 4px", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)" }}>
-        Change status
+        {t("bo.status_badge.change_status")}
       </div>
       {sorted.map((s) => {
         const isActive = s.id === status?.id;
@@ -240,10 +242,10 @@ export function StatusBadge({
           opacity: loading ? 0.7 : 1,
           position: "relative",
         }}
-        title={readOnly ? undefined : "Click to change status"}
+        title={readOnly ? undefined : t("bo.status_badge.click_to_change")}
       >
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
-        {status?.name ?? "No status"}
+        {status?.name ?? t("bo.status_badge.no_status")}
       </span>
       {dropdown}
     </>

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 
@@ -25,10 +28,11 @@ interface PageHeaderProps {
  * headings per page did not guarantee that.
  */
 export function PageHeader({ title, description, breadcrumbs, children, className }: PageHeaderProps) {
+  const { t } = useTranslation("common");
   return (
     <div className={cn("mb-6", className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="mb-2.5">
+        <nav aria-label={t("bo.breadcrumb")} className="mb-2.5">
           <ol className="flex flex-wrap items-center gap-1">
             {breadcrumbs.map((crumb, i) => {
               const last = i === breadcrumbs.length - 1;

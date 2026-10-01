@@ -21,7 +21,7 @@ export function Pagination({ page, totalPages, total, perPage, onPageChange }: P
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={t("bo.pagination")}
       className="flex flex-col items-center justify-between gap-3 border-t border-[var(--ob-line)] px-1 py-3 sm:flex-row"
     >
       <p className="ob-mono uppercase text-[var(--ob-text-muted)]">

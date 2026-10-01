@@ -746,6 +746,29 @@
     },
     "branding": {
       "save": "Enregistrer l'identité visuelle"
-    }
+    },
+    "calendar": {
+      "booking_failed": "Échec de la réservation",
+      "no_leads_found": "Aucun prospect trouvé"
+    },
+    "status_badge": {
+      "update_failed": "Échec de la mise à jour du statut. Veuillez réessayer.",
+      "change_lead_status": "Changer le statut du prospect",
+      "change_status": "Changer le statut",
+      "click_to_change": "Cliquez pour changer le statut",
+      "no_status": "Aucun statut"
+    },
+    "no_data": "Aucune donnée",
+    "no_data_found": "Aucune donnée trouvée",
+    "loading_label": "Chargement",
+    "breadcrumb": "Fil d'Ariane",
+    "pagination": "Pagination",
+    "search_placeholder": "Rechercher…",
+    "clear_search": "Effacer la recherche",
+    "close": "Fermer",
+    "upload_image": "Téléverser une image",
+    "clear_image": "Retirer l'image",
+    "drag_to_reorder": "Glisser pour réordonner",
+    "locale_base": "Base"
   }
 }

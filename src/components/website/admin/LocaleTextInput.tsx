@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { UseFormRegister, FieldValues } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +39,7 @@ function TabStrip({
   onSelect: (code: LocaleCode) => void;
   idPrefix: string;
 }) {
+  const { t } = useTranslation("common");
   return (
     <div className="flex gap-0.5 rounded-md bg-gray-100 p-0.5 dark:bg-gray-800" role="tablist">
       {LOCALES.map((l) => (
@@ -55,7 +57,7 @@ function TabStrip({
               : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
           )}
         >
-          {l.tab}
+          {l.code === "base" ? t("bo.locale_base") : l.tab}
         </button>
       ))}
     </div>

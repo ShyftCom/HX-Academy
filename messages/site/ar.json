@@ -486,7 +486,10 @@
     "freeShippingFrom": "توصيل مجاني ابتداءً من {amount}",
     "searchWilaya": "ابحث عن ولاية…",
     "deliveryNotesPlaceholder": "تعليمات خاصة، رمز الدخول…",
-    "noWilayaMatch": "لا توجد ولاية مطابقة"
+    "noWilayaMatch": "لا توجد ولاية مطابقة",
+    "minPrice": "الأدنى",
+    "maxPrice": "الأقصى",
+    "view": "عرض"
   },
   "summerCamp": {
     "badge": "المخيم الصيفي",

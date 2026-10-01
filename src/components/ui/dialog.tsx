@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -41,6 +42,7 @@ const DialogContent = React.forwardRef<
     size?: "sm" | "md" | "lg" | "xl" | "2xl";
   }
 >(({ className, children, size = "md", onOpenAutoFocus, onCloseAutoFocus, ...props }, ref) => {
+  const { t } = useTranslation("common");
   // Radix restores focus to the element its FocusScope recorded on mount.
   // Most pages here open dialogs from a plain <Button onClick={() => setOpen(true)}>
   // rather than a <DialogTrigger>, and the re-render that opens the dialog can
@@ -101,7 +103,7 @@ const DialogContent = React.forwardRef<
         )}
       >
         <X className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">{t("bo.close")}</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>

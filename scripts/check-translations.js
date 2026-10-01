@@ -252,7 +252,10 @@ for (const ns of NAMESPACES) {
 // Matches t("some.key"), t('ns:some.key'), t(`some.key`). Deliberately ignores
 // t(variable) and t(`prefix.${x}`) — those cannot be resolved statically, and
 // src/i18n.ts's parseMissingKeyHandler is the runtime safety net for them.
-const T_CALL = /\bt\(\s*["'`]([A-Za-z0-9_.:]+)["'`]/g;
+// tc/tl are the names this codebase gives a second useTranslation() — e.g.
+// `const { t: tc } = useTranslation("common")` — and their calls were never
+// scanned at all.
+const T_CALL = /\b(?:t|tc|tl)\(\s*["'`]([A-Za-z0-9_.:]+)["'`]/g;
 
 /**
  * Which store a file's t() calls belong to.
@@ -289,7 +292,8 @@ for (const file of walk(SRC_DIR)) {
   while ((m = T_CALL.exec(source)) !== null) {
     const key = m[1];
     // A bare token with no dot is almost always a local helper called `t`,
-    // not a translation lookup — skip to keep the signal clean.
+    // not a translation lookup — skip to keep the signal clean. (Bare tokens
+    // that name a whole section are caught by check 3 below.)
     if (!key.includes(".") && target !== siteUsed) continue;
     if (!target.has(key)) target.set(key, new Set());
     target.get(key).add(rel);
@@ -378,6 +382,83 @@ if (unresolved.length) {
     console.error(`  - ${key}   [missing in: ${absent}]   ${where}`);
   }
   failures += unresolved.length;
+}
+
+// ---- Check 3: no t() call lands on a section ---------------------------------
+//
+// Checks 1-2 merge every namespace into one key set, which cannot see this:
+// leads.json has a `pipeline` section while the flat bundle has a `pipeline`
+// string, so t("pipeline") looked fine — but a page on useTranslation("leads")
+// finds the section first, and i18next renders "key 'pipeline (fr)' returned
+// an object instead of string". So this check resolves each call against the
+// namespace its variable was bound to, the way i18next does: the first
+// namespace where the key exists wins, string or not.
+{
+  /** Per language and namespace: { leaves, sections } as i18next sees them. */
+  const bundles = {};
+  for (const lang of LANGS) {
+    bundles[lang] = {};
+    const flat = readJson(path.join(MESSAGES_DIR, `${FLAT_LOCALES[lang]}.json`));
+    for (const ns of NAMESPACES) {
+      const nsBundle = readJson(path.join(LOCALES_DIR, lang, `${ns}.json`));
+      // src/i18n.ts serves common as the flat bundle with public/locales/common over it.
+      const keys = ns === "common" ? [...flattenKeys(flat), ...flattenKeys(nsBundle)] : flattenKeys(nsBundle);
+      const leaves = withPluralBases(keys);
+      const sects = new Set();
+      for (const k of keys) {
+        const parts = k.split(".");
+        for (let i = 1; i < parts.length; i++) sects.add(parts.slice(0, i).join("."));
+      }
+      bundles[lang][ns] = { leaves, sects };
+    }
+  }
+  /** "string" | "section" | null for a key in one namespace, honouring fallbackNS. */
+  function lookup(lang, ns, key) {
+    for (const n of ns === "common" ? ["common"] : [ns, "common"]) {
+      const b = bundles[lang][n];
+      if (!b) continue;
+      if (b.leaves.has(key)) return "string";
+      if (b.sects.has(key)) return "section";
+    }
+    return null;
+  }
+
+  const BIND = /const\s*\{\s*t(?:\s*:\s*(\w+))?\s*\}\s*=\s*useTranslation\(\s*(?:["'`](\w+)["'`])?/g;
+  const sectionCalls = [];
+  for (const file of walk(SRC_DIR)) {
+    const rel = path.relative(ROOT, file);
+    if (isSiteFile(rel)) continue;
+    const source = fs.readFileSync(file, "utf-8");
+    const bound = new Map(); // variable -> Set(namespace)
+    let b;
+    while ((b = BIND.exec(source)) !== null) {
+      const v = b[1] ?? "t";
+      if (!bound.has(v)) bound.set(v, new Set());
+      bound.get(v).add(b[2] ?? "common");
+    }
+    for (const [v, namespaces] of bound) {
+      const call = new RegExp(`(?<![\\w.])${v}\\(\\s*["'\`]([A-Za-z0-9_.:]+)["'\`]`, "g");
+      let c;
+      while ((c = call.exec(source)) !== null) {
+        const raw = c[1];
+        const targets = raw.includes(":")
+          ? [[raw.split(":")[0], raw.split(":")[1]]]
+          : [...namespaces].map((ns) => [ns, raw]);
+        // Flag only when every namespace the variable could be bound to
+        // resolves to a section, so a file with several components on
+        // different namespaces cannot produce a false alarm.
+        if (targets.every(([ns, key]) => LANGS.every((l) => lookup(l, ns, key) === "section"))) {
+          const line = source.slice(0, c.index).split("\n").length;
+          sectionCalls.push(`${rel}:${line}  ${v}("${raw}")`);
+        }
+      }
+    }
+  }
+  if (sectionCalls.length) {
+    console.error(`\n[section] ${sectionCalls.length} t() call(s) resolve to a whole section instead of a string:`);
+    sectionCalls.forEach((x) => console.error(`  - ${x}`));
+    failures += sectionCalls.length;
+  }
 }
 
 // ---- Result ------------------------------------------------------------------

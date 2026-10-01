@@ -486,7 +486,10 @@
     "freeShippingFrom": "Livraison gratuite à partir de {amount}",
     "searchWilaya": "Rechercher une wilaya…",
     "deliveryNotesPlaceholder": "Instructions spéciales, code d'accès…",
-    "noWilayaMatch": "Aucune wilaya trouvée"
+    "noWilayaMatch": "Aucune wilaya trouvée",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "view": "Voir"
   },
   "summerCamp": {
     "badge": "Stage d'été",

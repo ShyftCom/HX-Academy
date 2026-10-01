@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Upload, Loader2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
  *  ImageUploader/LogoUploader components on slides/sponsors/branding pages
  *  are near-duplicates of each other; new admin UI should use this instead. */
 export function ImageUrlInput({ value, onChange, label }: { value: string; onChange: (url: string) => void; label?: string }) {
+  const { t } = useTranslation("common");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,13 +39,13 @@ export function ImageUrlInput({ value, onChange, label }: { value: string; onCha
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:hover:bg-gray-800"
-          aria-label="Upload image"
+          aria-label={t("bo.upload_image")}
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
         </button>
         <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
         {value && (
-          <button type="button" onClick={() => onChange("")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 dark:hover:bg-gray-800" aria-label="Clear image">
+          <button type="button" onClick={() => onChange("")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 dark:hover:bg-gray-800" aria-label={t("bo.clear_image")}>
             <X className="h-4 w-4" />
           </button>
         )}

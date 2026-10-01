@@ -123,7 +123,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
     }).then(async (r) => {
       if (!r.ok) {
         const err = await r.json();
-        throw new Error(err.error ?? "Booking failed");
+        throw new Error(err.error ?? t("common:bo.calendar.booking_failed"));
       }
       return r.json();
     }),
@@ -202,7 +202,7 @@ export function BookingModal({ open, onClose, prefilledLeadId, prefilledLeadName
                       {searchingLeads ? (
                         <div className="p-3 flex justify-center"><Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--text-muted)" }} /></div>
                       ) : (leadResults ?? []).length === 0 ? (
-                        <div className="p-3 text-sm" style={{ color: "var(--text-muted)" }}>No leads found</div>
+                        <div className="p-3 text-sm" style={{ color: "var(--text-muted)" }}>{t("common:bo.calendar.no_leads_found")}</div>
                       ) : (
                         leadResults?.map((l) => (
                           <button key={l.id} onClick={() => { setLeadId(l.id); setLeadName(l.fullName); setLeadSearch(l.fullName); }}

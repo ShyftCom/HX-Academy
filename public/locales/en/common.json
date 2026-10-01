@@ -741,6 +741,29 @@
     },
     "branding": {
       "save": "Save brand settings"
-    }
+    },
+    "calendar": {
+      "booking_failed": "Booking failed",
+      "no_leads_found": "No leads found"
+    },
+    "status_badge": {
+      "update_failed": "Failed to update status. Please try again.",
+      "change_lead_status": "Change lead status",
+      "change_status": "Change status",
+      "click_to_change": "Click to change status",
+      "no_status": "No status"
+    },
+    "no_data": "No data",
+    "no_data_found": "No data found",
+    "loading_label": "Loading",
+    "breadcrumb": "Breadcrumb",
+    "pagination": "Pagination",
+    "search_placeholder": "Search…",
+    "clear_search": "Clear search",
+    "close": "Close",
+    "upload_image": "Upload image",
+    "clear_image": "Clear image",
+    "drag_to_reorder": "Drag to reorder",
+    "locale_base": "Base"
   }
 }

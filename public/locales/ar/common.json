@@ -761,6 +761,29 @@
     },
     "branding": {
       "save": "حفظ إعدادات الهوية"
-    }
+    },
+    "calendar": {
+      "booking_failed": "فشل الحجز",
+      "no_leads_found": "لم يتم العثور على عملاء محتملين"
+    },
+    "status_badge": {
+      "update_failed": "فشل تحديث الحالة. يرجى المحاولة مرة أخرى.",
+      "change_lead_status": "تغيير حالة العميل المحتمل",
+      "change_status": "تغيير الحالة",
+      "click_to_change": "انقر لتغيير الحالة",
+      "no_status": "بدون حالة"
+    },
+    "no_data": "لا توجد بيانات",
+    "no_data_found": "لم يتم العثور على بيانات",
+    "loading_label": "جارٍ التحميل",
+    "breadcrumb": "مسار التنقل",
+    "pagination": "ترقيم الصفحات",
+    "search_placeholder": "بحث…",
+    "clear_search": "مسح البحث",
+    "close": "إغلاق",
+    "upload_image": "رفع صورة",
+    "clear_image": "إزالة الصورة",
+    "drag_to_reorder": "اسحب لإعادة الترتيب",
+    "locale_base": "الأساس"
   }
 }

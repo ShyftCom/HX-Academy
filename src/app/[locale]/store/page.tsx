@@ -152,8 +152,8 @@ export default function StorePage() {
             <div>
               <p className="text-sm font-medium mb-2">{t("priceRange")}</p>
               <div className="flex gap-2">
-                <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="w-1/2 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent" />
-                <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="w-1/2 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent" />
+                <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder={t("minPrice")} className="w-1/2 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent" />
+                <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder={t("maxPrice")} className="w-1/2 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent" />
               </div>
             </div>
 
@@ -251,7 +251,7 @@ export default function StorePage() {
                         )}
                         {hasVariants && totalStock > 0 && (
                           <Link href={`/${locale}/store/${slug}`} className="text-xs px-2 py-1 rounded-lg font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100">
-                            Voir
+                            {t("view")}
                           </Link>
                         )}
                       </div>

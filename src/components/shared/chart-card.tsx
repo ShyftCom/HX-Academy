@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { chartTheme } from "@/lib/design-tokens";
 import { ChartSkeleton } from "@/components/shared/skeleton";
@@ -31,6 +32,7 @@ export function ChartCard({
   title, description, actions, loading, isEmpty, emptyMessage,
   height = 260, summary, children, className,
 }: ChartCardProps) {
+  const { t } = useTranslation("common");
   return (
     <Card className={cn("flex flex-col", className)}>
       <CardHeader className="flex-row items-start justify-between gap-3">
@@ -50,7 +52,7 @@ export function ChartCard({
             style={{ height }}
           >
             <BarChart3 className="h-6 w-6 text-[var(--ob-text-muted)] opacity-50" aria-hidden="true" />
-            <p className="text-[13px] text-[var(--ob-text-muted)]">{emptyMessage ?? "No data"}</p>
+            <p className="text-[13px] text-[var(--ob-text-muted)]">{emptyMessage ?? t("bo.no_data")}</p>
           </div>
         ) : (
           <>
