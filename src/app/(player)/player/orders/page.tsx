@@ -8,8 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate, formatCurrency, parseJsonSafe } from "@/lib/utils";
 import { ShoppingBag } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
+import { useTranslation } from "react-i18next";
+import { lf } from "@/components/website/sections/localeField";
 
 export default function PlayerOrdersPage() {
+  const { t } = useTranslation("common");
+  const { i18n } = useTranslation();
   const { data: session } = useSession();
   const playerId = (session?.user as any)?.playerId;
 
@@ -25,12 +29,12 @@ export default function PlayerOrdersPage() {
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Orders</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("portal.orders.title")}</h1>
 
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
           <ShoppingBag className="h-12 w-12 text-gray-300 mb-3" />
-          <p className="text-gray-400">No orders yet</p>
+          <p className="text-gray-400">{t("portal.orders.empty")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -54,7 +58,7 @@ export default function PlayerOrdersPage() {
                 <div className="space-y-1.5">
                   {order.items?.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">{item.product?.name} ×{item.quantity}</span>
+                      <span className="text-gray-600 dark:text-gray-400">{lf(item.product, "name", i18n.language)} ×{item.quantity}</span>
                       <span>{formatCurrency(item.price * item.quantity)}</span>
                     </div>
                   ))}

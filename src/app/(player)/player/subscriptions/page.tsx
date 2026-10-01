@@ -16,8 +16,15 @@ import { CreditCard, Upload, Clock, CheckCircle, Landmark, ShieldCheck } from "l
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { PROOF_ACCEPT } from "@/lib/upload-types";
 import { uploadPaymentProof } from "@/lib/proof-upload-client";
+import { useTranslation } from "react-i18next";
+import { lf } from "@/components/website/sections/localeField";
 
 export default function PlayerSubscriptionsPage() {
+  const { t } = useTranslation("common");
+  const { t: tc, i18n } = useTranslation("common");
+  const lang = i18n.language;
+  /** "3 months", "1 an", "سنتان" — the unit follows the language's plural rules. */
+  const period = (plan: any) => `${plan?.duration} ${t(`portal.duration.${plan?.durationType}`, { count: Number(plan?.duration), defaultValue: plan?.durationType })}`;
   const { data: session } = useSession();
   const playerId = (session?.user as any)?.playerId;
   const qc = useQueryClient();
@@ -63,29 +70,29 @@ export default function PlayerSubscriptionsPage() {
     const result = params.get("payment");
     if (!result) return;
 
-    if (result === "success") toast.success("Payment confirmed — your subscription is now active.");
-    else if (result === "review") toast.warning("Your payment came through for a different amount than expected, so we've put it in front of our team. They'll be in touch shortly.");
-    else if (result === "pending") toast.info("Payment received. We're confirming it with SlickPay — this page will update shortly.");
-    else if (result === "failed") toast.error("The payment did not go through. Nothing was charged twice — you can try again.");
-    else toast.error("We couldn't confirm that payment. Please check your payment history below.");
+    if (result === "success") toast.success(t("portal.subs.toast_success"));
+    else if (result === "review") toast.warning(t("portal.subs.toast_review"));
+    else if (result === "pending") toast.info(t("portal.subs.toast_pending"));
+    else if (result === "failed") toast.error(t("portal.subs.toast_failed"));
+    else toast.error(t("portal.subs.toast_unknown"));
 
     qc.invalidateQueries({ queryKey: ["player-profile"] });
     window.history.replaceState({}, "", window.location.pathname);
-  }, [qc]);
+  }, [qc, t]);
 
   const renewMutation = useMutation({
     mutationFn: async () => {
-      if (!playerId || !selectedPlanId) throw new Error("Required fields missing");
+      if (!playerId || !selectedPlanId) throw new Error(t("portal.common.failed"));
       const res = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId, planId: selectedPlanId, amount: plans?.find((p: any) => p.id === selectedPlanId)?.price ?? 0, paymentMethodId: selectedMethodId || null, proof: proofUrl || null, status: "pending" }),
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Failed"); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? t("portal.common.failed")); }
       return res.json();
     },
-    onSuccess: () => { toast.success("Payment submitted! Awaiting admin approval."); qc.invalidateQueries({ queryKey: ["player-profile"] }); setRenewOpen(false); setProofUrl(""); setSelectedPlanId(""); },
-    onError: (e: any) => toast.error(e.message ?? "Failed"),
+    onSuccess: () => { toast.success(t("portal.subs.toast_submitted")); qc.invalidateQueries({ queryKey: ["player-profile"] }); setRenewOpen(false); setProofUrl(""); setSelectedPlanId(""); },
+    onError: (e: any) => toast.error(e.message || t("portal.common.failed")),
   });
 
   // Card checkout. The amount is deliberately not sent — the server charges the
@@ -100,12 +107,12 @@ export default function PlayerSubscriptionsPage() {
         body: JSON.stringify({ planId: selectedPlanId }),
       });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.error ?? "Could not start the payment");
+      if (!res.ok) throw new Error(d.error ?? t("portal.subs.toast_checkout_failed"));
       return d as { url: string };
     },
     // Hand the browser over to SATIM. No state reset — we are leaving the page.
     onSuccess: (d) => { window.location.href = d.url; },
-    onError: (e: Error) => toast.error(e.message || "Failed"),
+    onError: (e: Error) => toast.error(e.message || t("portal.common.failed")),
   });
 
   // Stored in the database via /api/payments/proof; large photos are shrunk
@@ -117,9 +124,9 @@ export default function PlayerSubscriptionsPage() {
     setUploading(true);
     try {
       setProofUrl(await uploadPaymentProof(file));
-      toast.success("Proof uploaded");
+      toast.success(t("portal.subs.toast_proof_uploaded"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
+      toast.error(error instanceof Error ? error.message : t("portal.common.upload_failed"));
     } finally {
       setUploading(false);
     }
@@ -133,7 +140,7 @@ export default function PlayerSubscriptionsPage() {
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Subscriptions</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("portal.subs.title")}</h1>
 
       {/* Active Subscription */}
       {activeSub ? (
@@ -141,56 +148,56 @@ export default function PlayerSubscriptionsPage() {
           <CardContent className="p-5">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-xs text-gray-400">Current Plan</p>
-                <p className="text-lg font-bold">{activeSub.plan?.name}</p>
-                <p className="text-sm text-gray-500">{formatCurrency(activeSub.plan?.price)} / {activeSub.plan?.duration} {activeSub.plan?.durationType}</p>
+                <p className="text-xs text-gray-400">{t("portal.subs.current_plan")}</p>
+                <p className="text-lg font-bold">{lf(activeSub.plan, "name", lang)}</p>
+                <p className="text-sm text-gray-500">{formatCurrency(activeSub.plan?.price)} / {period(activeSub.plan)}</p>
               </div>
-              <Badge variant="success">Active</Badge>
+              <Badge variant="success">{tc("status.active")}</Badge>
             </div>
             <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-3 grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-400">Start Date</p><p className="text-sm font-medium">{formatDate(activeSub.startDate)}</p></div>
-              <div><p className="text-xs text-gray-400">Expiry Date</p><p className="text-sm font-medium">{formatDate(activeSub.endDate)}</p></div>
+              <div><p className="text-xs text-gray-400">{t("portal.subs.start_date")}</p><p className="text-sm font-medium">{formatDate(activeSub.startDate)}</p></div>
+              <div><p className="text-xs text-gray-400">{t("portal.subs.expiry_date")}</p><p className="text-sm font-medium">{formatDate(activeSub.endDate)}</p></div>
             </div>
             {activeSub.endDate && (
               <div className="mt-3">
                 {(() => {
                   const days = differenceInDays(parseISO(activeSub.endDate), new Date());
-                  if (days <= 7) return <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400"><Clock className="h-4 w-4" />{days <= 0 ? "Subscription expired" : `${days} days left — renew now!`}</div>;
-                  return <div className="flex items-center gap-2 rounded-lg bg-green-50 p-2.5 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400"><CheckCircle className="h-4 w-4" />{days} days remaining</div>;
+                  if (days <= 7) return <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400"><Clock className="h-4 w-4" />{days <= 0 ? t("portal.subscription_expired") : `${t("portal.days_remaining", { count: days })} — ${t("portal.subs.renew_now")}`}</div>;
+                  return <div className="flex items-center gap-2 rounded-lg bg-green-50 p-2.5 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400"><CheckCircle className="h-4 w-4" />{t("portal.days_remaining", { count: days })}</div>;
                 })()}
               </div>
             )}
-            <Button className="w-full mt-4" onClick={() => setRenewOpen(true)}>Renew Subscription</Button>
+            <Button className="w-full mt-4" onClick={() => setRenewOpen(true)}>{t("portal.subs.renew")}</Button>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="p-5 text-center">
             <CreditCard className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 mb-4">No active subscription</p>
-            <Button onClick={() => setRenewOpen(true)}>Choose a Plan</Button>
+            <p className="text-gray-500 mb-4">{t("portal.no_subscription")}</p>
+            <Button onClick={() => setRenewOpen(true)}>{t("portal.subs.choose_plan")}</Button>
           </CardContent>
         </Card>
       )}
 
       {/* Payment History */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Payment History</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">{t("portal.subs.history")}</CardTitle></CardHeader>
         <CardContent>
           {player?.payments?.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">No payments yet</p>
+            <p className="text-sm text-gray-400 text-center py-4">{t("portal.subs.no_payments")}</p>
           ) : (
             <div className="space-y-2">
               {player?.payments?.map((p: any) => (
                 <div key={p.id} className="flex items-center justify-between rounded-lg border dark:border-gray-700 p-3">
                   <div>
-                    <p className="text-sm font-medium">{p.plan?.name}</p>
+                    <p className="text-sm font-medium">{lf(p.plan, "name", lang)}</p>
                     <p className="text-xs text-gray-400">{formatDate(p.createdAt)}</p>
-                    {p.status === "rejected" && p.rejectionReason && <p className="text-xs text-red-500 mt-0.5">Reason: {p.rejectionReason}</p>}
+                    {p.status === "rejected" && p.rejectionReason && <p className="text-xs text-red-500 mt-0.5">{t("portal.subs.reason", { reason: p.rejectionReason })}</p>}
                   </div>
                   <div className="text-end">
                     <p className="text-sm font-medium">{formatCurrency(p.amount)}</p>
-                    <Badge variant={p.status === "approved" ? "success" : p.status === "rejected" ? "destructive" : "warning"} className="text-[10px]">{p.status}</Badge>
+                    <Badge variant={p.status === "approved" ? "success" : p.status === "rejected" ? "destructive" : "warning"} className="text-[10px]">{tc(`status.${p.status}`, { defaultValue: p.status })}</Badge>
                   </div>
                 </div>
               ))}
@@ -202,22 +209,22 @@ export default function PlayerSubscriptionsPage() {
       {/* Renew Dialog */}
       <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>Subscribe / Renew</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("portal.subs.dialog_title")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Select Plan *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("portal.subs.select_plan")}</label>
               <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
-                <SelectTrigger><SelectValue placeholder="Choose a plan" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("portal.subs.choose_plan")} /></SelectTrigger>
                 <SelectContent>
                   {plans?.filter((p: any) => p.isActive).map((p: any) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name} — {formatCurrency(p.price)} / {p.duration} {p.durationType}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>{lf(p, "name", lang)} — {formatCurrency(p.price)} / {period(p)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             {onlineAvailable && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">How would you like to pay?</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("portal.subs.how_to_pay")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -225,27 +232,27 @@ export default function PlayerSubscriptionsPage() {
                     onClick={() => setPayMode("online")}
                     className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-start transition-colors ${missingPhone ? "cursor-not-allowed border-gray-200 opacity-50 dark:border-gray-700" : mode === "online" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 hover:border-gray-300 dark:border-gray-700"}`}
                   >
-                    <span className="flex items-center gap-1.5 text-sm font-medium"><CreditCard className="h-4 w-4" />Card</span>
-                    <span className="text-xs text-gray-500">CIB / Edahabia — activates instantly</span>
+                    <span className="flex items-center gap-1.5 text-sm font-medium"><CreditCard className="h-4 w-4" />{t("portal.subs.card")}</span>
+                    <span className="text-xs text-gray-500">{t("portal.subs.card_hint")}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setPayMode("manual")}
                     className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-start transition-colors ${mode === "manual" ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 hover:border-gray-300 dark:border-gray-700"}`}
                   >
-                    <span className="flex items-center gap-1.5 text-sm font-medium"><Landmark className="h-4 w-4" />Transfer</span>
-                    <span className="text-xs text-gray-500">Upload a receipt — admin approves</span>
+                    <span className="flex items-center gap-1.5 text-sm font-medium"><Landmark className="h-4 w-4" />{t("portal.subs.transfer")}</span>
+                    <span className="text-xs text-gray-500">{t("portal.subs.transfer_hint")}</span>
                   </button>
                 </div>
                 {missingPhone && (
                   <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                    Card payment needs a phone number on your profile.{" "}
-                    <Link href="/player/profile" className="font-medium underline">Add it here</Link>, then come back.
+                    {t("portal.subs.needs_phone")}{" "}
+                    <Link href="/player/profile" className="font-medium underline">{t("portal.subs.add_it_here")}</Link>{t("portal.subs.then_come_back")}
                   </p>
                 )}
                 {gateway?.sandbox && mode === "online" && (
                   <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                    Test mode — no real money will be taken.
+                    {t("portal.subs.test_mode")}
                   </p>
                 )}
               </div>
@@ -253,9 +260,9 @@ export default function PlayerSubscriptionsPage() {
 
             {mode === "manual" && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("portal.subs.payment_method")}</label>
               <Select value={selectedMethodId} onValueChange={setSelectedMethodId}>
-                <SelectTrigger><SelectValue placeholder="Select method" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("portal.subs.select_method")} /></SelectTrigger>
                 <SelectContent>{methods?.filter((m: any) => m.isActive).map((m: any) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -269,18 +276,18 @@ export default function PlayerSubscriptionsPage() {
             )}
             {selectedPlan && (
               <div className="flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Amount to pay:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t("portal.subs.amount_to_pay")}</span>
                 <span className="text-lg font-bold">{formatCurrency(selectedPlan.price)}</span>
               </div>
             )}
             {mode === "manual" ? (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Proof</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("portal.subs.proof")}</label>
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer flex-1">
                     <input type="file" className="hidden" accept={PROOF_ACCEPT} onChange={uploadProof} />
                     <div className="flex h-9 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-sm text-gray-400 hover:border-blue-400 hover:text-blue-500 dark:border-gray-600 transition-colors">
-                      {uploading ? "Uploading..." : proofUrl ? "✓ Proof uploaded" : <span className="flex items-center gap-2"><Upload className="h-4 w-4" />Upload receipt/screenshot</span>}
+                      {uploading ? t("portal.common.uploading") : proofUrl ? t("portal.subs.proof_uploaded_label") : <span className="flex items-center gap-2"><Upload className="h-4 w-4" />{t("portal.subs.upload_receipt")}</span>}
                     </div>
                   </label>
                 </div>
@@ -288,19 +295,19 @@ export default function PlayerSubscriptionsPage() {
             ) : (
               <p className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                You&apos;ll be taken to SlickPay&apos;s secure page to enter your card details. We never see your card number. Your subscription activates as soon as the payment clears.
+                {t("portal.subs.card_secure")}
               </p>
             )}
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenewOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setRenewOpen(false)}>{t("portal.common.cancel")}</Button>
             {mode === "online" ? (
               <Button onClick={() => checkoutMutation.mutate()} loading={checkoutMutation.isPending} disabled={!selectedPlanId}>
                 <CreditCard className="me-2 h-4 w-4" />
-                {selectedPlan ? `Pay ${formatCurrency(selectedPlan.price)}` : "Pay by card"}
+                {selectedPlan ? t("portal.subs.pay_amount", { amount: formatCurrency(selectedPlan.price) }) : t("portal.subs.pay_by_card")}
               </Button>
             ) : (
-              <Button onClick={() => renewMutation.mutate()} loading={renewMutation.isPending} disabled={!selectedPlanId}>Submit Payment</Button>
+              <Button onClick={() => renewMutation.mutate()} loading={renewMutation.isPending} disabled={!selectedPlanId}>{t("portal.subs.submit_payment")}</Button>
             )}
           </DialogFooter>
         </DialogContent>

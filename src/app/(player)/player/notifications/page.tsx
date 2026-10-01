@@ -8,11 +8,13 @@ import { timeAgo } from "@/lib/utils";
 import { Bell, CheckCheck, Info, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/shared/pagination";
+import { useTranslation } from "react-i18next";
 
 const TYPE_ICONS: Record<string, any> = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle };
 const TYPE_COLORS: Record<string, string> = { info: "text-blue-500", success: "text-green-500", warning: "text-amber-500", error: "text-red-500" };
 
 export default function PlayerNotificationsPage() {
+  const { t } = useTranslation("common");
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
 
@@ -28,22 +30,22 @@ export default function PlayerNotificationsPage() {
 
   const readAllMutation = useMutation({
     mutationFn: () => fetch("/api/notifications/read-all", { method: "POST" }),
-    onSuccess: () => { toast.success("All marked as read"); qc.invalidateQueries({ queryKey: ["notifications"] }); },
+    onSuccess: () => { toast.success(t("portal.notifications.toast_all_read")); qc.invalidateQueries({ queryKey: ["notifications"] }); },
   });
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("portal.notifications.title")}</h1>
         <Button variant="outline" size="sm" onClick={() => readAllMutation.mutate()} loading={readAllMutation.isPending}>
-          <CheckCheck className="me-1.5 h-4 w-4" />Mark All Read
+          <CheckCheck className="me-1.5 h-4 w-4" />{t("portal.notifications.mark_all_read")}
         </Button>
       </div>
 
       {isLoading ? (
         <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />)}</div>
       ) : data?.data?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16"><Bell className="h-12 w-12 text-gray-300 mb-3" /><p className="text-gray-400">No notifications</p></div>
+        <div className="flex flex-col items-center justify-center py-16"><Bell className="h-12 w-12 text-gray-300 mb-3" /><p className="text-gray-400">{t("portal.notifications.empty")}</p></div>
       ) : (
         <div className="space-y-2">
           {data?.data?.map((n: any) => {

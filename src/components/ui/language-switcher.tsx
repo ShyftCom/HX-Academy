@@ -92,7 +92,8 @@ interface LanguageSwitcherProps {
 
 export function LanguageSwitcher({ variant = "admin", onDark = true }: LanguageSwitcherProps) {
   const [open, setOpen] = useState(false);
-  const [storedLocale, setStoredLocale] = useState<LocaleCode>("fr");
+  // null until read from localStorage after hydration — see the apply effect.
+  const [storedLocale, setStoredLocale] = useState<LocaleCode | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -105,7 +106,7 @@ export function LanguageSwitcher({ variant = "admin", onDark = true }: LanguageS
   // carry no locale, falls back to the stored preference — and reading
   // localStorage can only happen after hydration.
   const urlLocale = localeFromPathname(pathname);
-  const current = urlLocale ?? storedLocale;
+  const current = urlLocale ?? storedLocale ?? "fr";
 
   useEffect(() => {
     if (urlLocale) return;
@@ -119,9 +120,15 @@ export function LanguageSwitcher({ variant = "admin", onDark = true }: LanguageS
   // whose content is French. Tailwind's rtl: variant matches any descendant
   // of [dir="rtl"], so the layout's own dir="ltr" wrapper could not undo it
   // and French pages laid themselves out right-to-left.
+  //
+  // On admin routes it also waits for the stored preference to be read.
+  // Applying the "fr" placeholder first wrote it straight back to
+  // localStorage, so a remount (React's dev double-run, or any reload) read
+  // "fr" and the portal snapped back to French after every page load.
   useEffect(() => {
+    if (!urlLocale && storedLocale === null) return;
     applyLocale(current);
-  }, [current]);
+  }, [current, urlLocale, storedLocale]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {

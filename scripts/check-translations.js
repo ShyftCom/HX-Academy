@@ -66,6 +66,37 @@ function flattenKeys(obj, prefix = "") {
   return keys;
 }
 
+/**
+ * Plural forms. i18next resolves t("x", { count }) to x_zero/_one/_two/_few/
+ * _many/_other by the language's CLDR rules, so the set of forms legitimately
+ * differs per language — Arabic uses all six, English only _one/_other. A key
+ * counts as a plural form only when its `_other` sibling exists, so a real key
+ * that merely ends in "_other" (e.g. schedule.day_other, "Other day") is left
+ * alone.
+ */
+const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+
+/** Collapses each plural group to its base key, for comparing languages. */
+function pluralParityKeys(keys) {
+  const set = new Set(keys);
+  return new Set(
+    [...set].map((k) => {
+      if (!PLURAL_SUFFIX.test(k)) return k;
+      const base = k.replace(PLURAL_SUFFIX, "");
+      return set.has(`${base}_other`) ? base : k;
+    })
+  );
+}
+
+/** Adds each plural group's base key, so t("x", { count }) resolves. */
+function withPluralBases(keys) {
+  const set = new Set(keys);
+  for (const k of [...set]) {
+    if (PLURAL_SUFFIX.test(k) && k.endsWith("_other")) set.add(k.replace(PLURAL_SUFFIX, ""));
+  }
+  return set;
+}
+
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -108,10 +139,10 @@ for (const lang of LANGS) {
   for (const ns of NAMESPACES) {
     const bundle = readJson(path.join(LOCALES_DIR, lang, `${ns}.json`));
     const keys = flattenKeys(bundle);
-    nsKeys[lang][ns] = new Set(keys);
+    nsKeys[lang][ns] = pluralParityKeys(keys);
     keys.forEach((k) => all.add(k));
   }
-  resolvable[lang] = all;
+  resolvable[lang] = withPluralBases(all);
 }
 
 // ---- Check 1: parity across languages ---------------------------------------
@@ -119,7 +150,7 @@ for (const lang of LANGS) {
 // messages/*.json — the flat bundle.
 {
   const sets = Object.fromEntries(
-    LANGS.map((l) => [l, new Set(flattenKeys(readJson(path.join(MESSAGES_DIR, `${FLAT_LOCALES[l]}.json`))))])
+    LANGS.map((l) => [l, pluralParityKeys(flattenKeys(readJson(path.join(MESSAGES_DIR, `${FLAT_LOCALES[l]}.json`))))])
   );
   const union = new Set(LANGS.flatMap((l) => [...sets[l]]));
   for (const lang of LANGS) {
@@ -185,7 +216,10 @@ for (const lang of LANGS) {
           if (BRAND_ALLOWLIST.some((re) => re.test(stripped))) continue;
           // Two or more Latin words in a row, with no Arabic anywhere in the
           // value, is untranslated copy rather than an embedded brand name.
-          const hasArabic = /[\u0600-\u06FF]/.test(stripped);
+          // Tested on the raw value: in ICU plural syntax ("{count, plural, one
+          // {شهر} …}") every Arabic word sits inside braces, so the stripped text
+          // is only the English keywords "count, plural, one".
+          const hasArabic = /[\u0600-\u06FF]/.test(v);
           const latinWords = (stripped.match(/[A-Za-z]{2,}/g) ?? []).length;
           if (!hasArabic && latinWords >= 2) suspects.push(`${full} = ${JSON.stringify(v)}`);
         }

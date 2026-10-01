@@ -13,8 +13,10 @@ import { formatDate, getInitials } from "@/lib/utils";
 import { Upload, Save, Lock } from "lucide-react";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { uploadFile } from "@/lib/upload-client";
+import { useTranslation } from "react-i18next";
 
 export default function PlayerProfilePage() {
+  const { t } = useTranslation("common");
   const { data: session } = useSession();
   const playerId = (session?.user as any)?.playerId;
   const qc = useQueryClient();
@@ -37,15 +39,15 @@ export default function PlayerProfilePage() {
   }, [player]);
 
   const updateMutation = useMutation({
-    mutationFn: () => fetch(`/api/players/${playerId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...player, phone: form.phone, address: form.address, parentPhone: form.parentPhone, photo }) }).then(async (r) => { if (!r.ok) throw new Error("Failed"); return r.json(); }),
-    onSuccess: () => { toast.success("Profile updated"); qc.invalidateQueries({ queryKey: ["player-profile"] }); },
-    onError: () => toast.error("Update failed"),
+    mutationFn: () => fetch(`/api/players/${playerId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...player, phone: form.phone, address: form.address, parentPhone: form.parentPhone, photo }) }).then(async (r) => { if (!r.ok) throw new Error(t("portal.profile.toast_update_failed")); return r.json(); }),
+    onSuccess: () => { toast.success(t("portal.profile.toast_updated")); qc.invalidateQueries({ queryKey: ["player-profile"] }); },
+    onError: () => toast.error(t("portal.profile.toast_update_failed")),
   });
 
   const pwMutation = useMutation({
     mutationFn: () => fetch("/api/auth/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }) }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; }),
-    onSuccess: () => { toast.success("Password changed"); setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); },
-    onError: (e: any) => toast.error(e.message ?? "Failed"),
+    onSuccess: () => { toast.success(t("portal.profile.toast_password_changed")); setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); },
+    onError: (e: any) => toast.error(e.message || t("portal.common.failed")),
   });
 
   const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,9 +58,9 @@ export default function PlayerProfilePage() {
     try {
       const blob = await uploadFile(file, { folder: "players", maxSizeMb: 25 });
       setPhoto(blob.url);
-      toast.success("Photo uploaded");
+      toast.success(t("portal.profile.toast_photo_uploaded"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
+      toast.error(error instanceof Error ? error.message : t("portal.common.upload_failed"));
     } finally {
       setUploading(false);
     }
@@ -68,7 +70,7 @@ export default function PlayerProfilePage() {
 
   return (
     <div className="space-y-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Profile</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("portal.profile.title")}</h1>
 
       {/* Profile Card */}
       <Card>
@@ -87,39 +89,39 @@ export default function PlayerProfilePage() {
             <div>
               <h2 className="text-lg font-bold">{player?.fullName}</h2>
               <p className="text-sm text-gray-500">{player?.email}</p>
-              <p className="text-xs text-gray-400">{player?.category ?? "Player"} {player?.team ? `· ${player.team}` : ""}</p>
+              <p className="text-xs text-gray-400">{player?.category ?? t("portal.common.player")} {player?.team ? `· ${player.team}` : ""}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-            {[["Date of Birth", formatDate(player?.dateOfBirth)], ["Gender", player?.gender], ["Position", player?.position], ["Category", player?.category]].map(([k, v]) => v ? (
+            {[[t("portal.profile.date_of_birth"), formatDate(player?.dateOfBirth)], [t("portal.profile.gender"), player?.gender], [t("portal.profile.position"), player?.position], [t("portal.profile.category"), player?.category]].map(([k, v]) => v ? (
               <div key={k}><p className="text-xs text-gray-400">{k}</p><p className="font-medium">{v}</p></div>
             ) : null)}
           </div>
 
           <Separator className="my-4" />
-          <p className="text-sm font-semibold mb-3">Update Info</p>
+          <p className="text-sm font-semibold mb-3">{t("portal.profile.update_info")}</p>
           <div className="space-y-3">
-            <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+213 ..." />
-            <Input label="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="City, Region" />
-            <Input label="Parent Phone" value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} placeholder="+213 ..." />
+            <Input label={t("portal.profile.phone")} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+213 ..." />
+            <Input label={t("portal.profile.address")} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t("portal.profile.address_placeholder")} />
+            <Input label={t("portal.profile.parent_phone")} value={form.parentPhone} onChange={(e) => setForm({ ...form, parentPhone: e.target.value })} placeholder="+213 ..." />
           </div>
-          <Button className="mt-4 w-full" onClick={() => updateMutation.mutate()} loading={updateMutation.isPending}><Save className="me-2 h-4 w-4" />Save Changes</Button>
+          <Button className="mt-4 w-full" onClick={() => updateMutation.mutate()} loading={updateMutation.isPending}><Save className="me-2 h-4 w-4" />{t("portal.profile.save")}</Button>
         </CardContent>
       </Card>
 
       {/* Change Password */}
       <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Lock className="h-4 w-4" />Change Password</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Lock className="h-4 w-4" />{t("portal.profile.change_password")}</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <Input label="Current Password" type="password" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} placeholder="••••••••" />
-          <Input label="New Password" type="password" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder="Min 8 characters" />
-          <Input label="Confirm Password" type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} placeholder="Repeat new password" />
+          <Input label={t("portal.profile.current_password")} type="password" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} placeholder="••••••••" />
+          <Input label={t("portal.profile.new_password")} type="password" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder={t("portal.profile.new_password_placeholder")} />
+          <Input label={t("portal.profile.confirm_password")} type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} placeholder={t("portal.profile.confirm_password_placeholder")} />
           <Button className="w-full" onClick={() => {
-            if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error("Passwords don't match"); return; }
-            if (pwForm.newPassword.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+            if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error(t("portal.profile.toast_passwords_mismatch")); return; }
+            if (pwForm.newPassword.length < 8) { toast.error(t("portal.profile.toast_password_too_short")); return; }
             pwMutation.mutate();
-          }} loading={pwMutation.isPending}>Change Password</Button>
+          }} loading={pwMutation.isPending}>{t("portal.profile.change_password")}</Button>
         </CardContent>
       </Card>
     </div>

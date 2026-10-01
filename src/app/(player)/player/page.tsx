@@ -10,6 +10,8 @@ import { differenceInDays, parseISO } from "date-fns";
 import { CreditCard, ShoppingBag, Bell, AlertTriangle, CheckCircle, Info, Circle, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
+import { useTranslation } from "react-i18next";
+import { lf } from "@/components/website/sections/localeField";
 
 /** One line of the "finish your registration" checklist. */
 function OnboardingStep({ done, title, hint, href, cta, icon: Icon }: { done: boolean; title: string; hint: string; href: string; cta: string; icon: React.ElementType }) {
@@ -32,6 +34,8 @@ function OnboardingStep({ done, title, hint, href, cta, icon: Icon }: { done: bo
 }
 
 export default function PlayerHomePage() {
+  const { t } = useTranslation("common");
+  const { t: tc, i18n } = useTranslation("common");
   const { data: session } = useSession();
   const playerId = (session?.user as any)?.playerId;
 
@@ -79,8 +83,8 @@ export default function PlayerHomePage() {
             </Avatar>
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{player?.fullName}</h2>
-              <p className="text-sm text-gray-500">{player?.category ?? "Player"} {player?.team ? `· ${player.team}` : ""}</p>
-              <Badge variant={player?.status === "active" ? "success" : "destructive"} className="mt-1">{player?.status}</Badge>
+              <p className="text-sm text-gray-500">{player?.category ?? t("portal.common.player")} {player?.team ? `· ${player.team}` : ""}</p>
+              <Badge variant={player?.status === "active" ? "success" : "destructive"} className="mt-1">{tc(`status.${player?.status}`, { defaultValue: player?.status })}</Badge>
             </div>
           </div>
         </CardContent>
@@ -89,22 +93,22 @@ export default function PlayerHomePage() {
       {/* Finish registration — hidden once there is nothing left to do */}
       {!onboardingComplete && (
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Finish your registration</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">{t("portal.home.finish_title")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <OnboardingStep
               done={Boolean(activeSub)}
-              title="Choose your plan and pay"
-              hint={paymentPending ? "Your payment is with the team for approval." : "Pay by card, or upload a transfer receipt for approval."}
+              title={t("portal.home.step_plan_title")}
+              hint={paymentPending ? t("portal.home.step_plan_hint_pending") : t("portal.home.step_plan_hint")}
               href="/player/subscriptions"
-              cta="Choose a plan"
+              cta={t("portal.home.step_plan_cta")}
               icon={CreditCard}
             />
             <OnboardingStep
               done={requiredDocs.length === 0 || docsDone}
-              title="Upload your documents"
-              hint={`${requiredDocs.filter((r: any) => uploadedRequirementIds.has(r.id)).length} of ${requiredDocs.length} uploaded`}
+              title={t("portal.home.step_docs_title")}
+              hint={t("portal.home.step_docs_hint", { done: requiredDocs.filter((r: any) => uploadedRequirementIds.has(r.id)).length, total: requiredDocs.length })}
               href="/player/documents"
-              cta="Upload documents"
+              cta={t("portal.home.step_docs_cta")}
               icon={FileText}
             />
           </CardContent>
@@ -113,29 +117,29 @@ export default function PlayerHomePage() {
 
       {/* Subscription Status */}
       <Card>
-        <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><CreditCard className="h-4 w-4" />Subscription</CardTitle></CardHeader>
+        <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><CreditCard className="h-4 w-4" />{t("portal.home.subscription")}</CardTitle></CardHeader>
         <CardContent>
           {activeSub ? (
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="font-semibold">{activeSub.plan?.name}</p>
-                  <p className="text-xs text-gray-400">Expires: {formatDate(activeSub.endDate)}</p>
+                  <p className="font-semibold">{lf(activeSub.plan, "name", i18n.language)}</p>
+                  <p className="text-xs text-gray-400">{t("portal.home.expires", { date: formatDate(activeSub.endDate) })}</p>
                 </div>
-                <Badge variant="success">Active</Badge>
+                <Badge variant="success">{tc("status.active")}</Badge>
               </div>
               {daysLeft !== null && (
                 <div className={`flex items-center gap-2 rounded-lg p-2 text-sm ${daysLeft <= 7 ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400" : "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"}`}>
                   {daysLeft <= 7 ? <AlertTriangle className="h-4 w-4 shrink-0" /> : <CheckCircle className="h-4 w-4 shrink-0" />}
-                  <span>{daysLeft <= 0 ? "Subscription expired" : daysLeft <= 7 ? `${daysLeft} days remaining — renew soon!` : `${daysLeft} days remaining`}</span>
+                  <span>{daysLeft <= 0 ? t("portal.subscription_expired") : daysLeft <= 7 ? `${t("portal.days_remaining", { count: daysLeft })} — ${t("portal.renew_soon")}` : t("portal.days_remaining", { count: daysLeft })}</span>
                 </div>
               )}
-              <Link href="/player/subscriptions" className="mt-3 block text-center text-sm text-blue-600 hover:underline">Manage Subscription →</Link>
+              <Link href="/player/subscriptions" className="mt-3 block text-center text-sm text-blue-600 hover:underline">{t("portal.home.manage_subscription")}</Link>
             </div>
           ) : (
             <div className="text-center py-2">
-              <p className="text-sm text-gray-500 mb-3">No active subscription</p>
-              <Link href="/player/subscriptions" className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Subscribe Now</Link>
+              <p className="text-sm text-gray-500 mb-3">{t("portal.no_subscription")}</p>
+              <Link href="/player/subscriptions" className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">{t("portal.home.subscribe_now")}</Link>
             </div>
           )}
         </CardContent>
@@ -144,7 +148,7 @@ export default function PlayerHomePage() {
       {/* Recent Notifications */}
       {notifications?.data?.filter((n: any) => !n.isRead).length > 0 && (
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><Bell className="h-4 w-4" />Notifications</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><Bell className="h-4 w-4" />{t("portal.home.notifications")}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {notifications.data.filter((n: any) => !n.isRead).slice(0, 3).map((n: any) => (
@@ -154,7 +158,7 @@ export default function PlayerHomePage() {
                 </div>
               ))}
             </div>
-            <Link href="/player/notifications" className="mt-3 block text-center text-sm text-blue-600 hover:underline">View all →</Link>
+            <Link href="/player/notifications" className="mt-3 block text-center text-sm text-blue-600 hover:underline">{t("portal.common.view_all")}</Link>
           </CardContent>
         </Card>
       )}
@@ -162,17 +166,17 @@ export default function PlayerHomePage() {
       {/* Recent Orders */}
       {recentOrders.length > 0 && (
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><ShoppingBag className="h-4 w-4" />Recent Orders</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><ShoppingBag className="h-4 w-4" />{t("portal.home.recent_orders")}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {recentOrders.map((o: any) => (
                 <div key={o.id} className="flex items-center justify-between text-sm">
                   <div><p className="font-medium">#{o.orderNumber}</p><p className="text-xs text-gray-400">{formatDate(o.createdAt)}</p></div>
-                  <div className="text-end"><p className="font-medium">{formatCurrency(o.totalAmount)}</p><p className="text-xs text-gray-400">{o.status?.name ?? "Processing"}</p></div>
+                  <div className="text-end"><p className="font-medium">{formatCurrency(o.totalAmount)}</p><p className="text-xs text-gray-400">{o.status?.name ?? t("portal.home.processing")}</p></div>
                 </div>
               ))}
             </div>
-            <Link href="/player/orders" className="mt-3 block text-center text-sm text-blue-600 hover:underline">View all orders →</Link>
+            <Link href="/player/orders" className="mt-3 block text-center text-sm text-blue-600 hover:underline">{t("portal.home.view_all_orders")}</Link>
           </CardContent>
         </Card>
       )}
