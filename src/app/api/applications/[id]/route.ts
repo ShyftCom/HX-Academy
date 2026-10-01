@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // The full application — contact details, survey answers, uploaded files —
+  // so it needs the same permission as the applications list, not just a login.
+  const denied = await requirePermissionResponse(PERMISSIONS.APPLICATIONS_VIEW);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -23,6 +29,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requirePermissionResponse(PERMISSIONS.APPLICATIONS_MANAGE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

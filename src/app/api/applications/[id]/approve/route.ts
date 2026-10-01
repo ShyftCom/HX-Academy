@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Approving creates a login (with a password the caller may choose) and a
+  // subscription. On auth() alone, any signed-in player could mint accounts.
+  const denied = await requirePermissionResponse(PERMISSIONS.APPLICATIONS_MANAGE);
+  if (denied) return denied;
+
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
