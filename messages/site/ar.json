@@ -487,6 +487,8 @@
     "searchWilaya": "ابحث عن ولاية…",
     "deliveryNotesPlaceholder": "تعليمات خاصة، رمز الدخول…",
     "noWilayaMatch": "لا توجد ولاية مطابقة",
+    "station": "الموقع",
+    "stationPlaceholder": "اختر موقعاً",
     "minPrice": "الأدنى",
     "maxPrice": "الأقصى",
     "view": "عرض"

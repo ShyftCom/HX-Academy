@@ -487,6 +487,8 @@
     "searchWilaya": "Rechercher une wilaya…",
     "deliveryNotesPlaceholder": "Instructions spéciales, code d'accès…",
     "noWilayaMatch": "Aucune wilaya trouvée",
+    "station": "Site",
+    "stationPlaceholder": "Sélectionner un site",
     "minPrice": "Min",
     "maxPrice": "Max",
     "view": "Voir"

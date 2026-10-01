@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { useStation } from "@/context/StationContext";
 
 const ORDER_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "returned"];
 
@@ -33,7 +34,7 @@ interface WebsiteOrder {
   id: string; orderNumber: string; customerName: string; customerPhone: string;
   customerEmail: string | null; wilaya: string | null; city: string | null; address: string | null;
   deliveryNotes: string | null; subtotal: number; shippingFee: number; total: number;
-  status: string; createdAt: string; items: OrderItem[];
+  status: string; createdAt: string; items: OrderItem[]; station: { id: string; name: string } | null;
 }
 
 export default function StoreOrdersPage() {
@@ -42,15 +43,21 @@ export default function StoreOrdersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { activeStationId, isGlobalView } = useStation();
+  /** Only offered in the all-stations view; the header switcher wins otherwise. */
+  const [stationFilter, setStationFilter] = useState("all");
+  const { data: stations } = useQuery<{ id: string; name: string }[]>({ queryKey: ["stations"], queryFn: () => fetch("/api/stations").then((r) => r.json()), staleTime: 5 * 60_000 });
   const [selectedOrder, setSelectedOrder] = useState<WebsiteOrder | null>(null);
   const [newStatus, setNewStatus] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["website-orders", page, search, statusFilter],
+    queryKey: ["website-orders", page, search, statusFilter, activeStationId, stationFilter],
     queryFn: () => {
       const p = new URLSearchParams({ page: String(page), perPage: "20" });
       if (search) p.set("q", search);
       if (statusFilter && statusFilter !== "all") p.set("status", statusFilter);
+      if (activeStationId) p.set("stationId", activeStationId);
+      else if (stationFilter !== "all") p.set("stationId", stationFilter);
       return fetch(`/api/website/store/orders?${p}`).then((r) => r.json());
     },
   });
@@ -89,6 +96,16 @@ export default function StoreOrdersPage() {
             ))}
           </SelectContent>
         </Select>
+        {isGlobalView && (
+          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
+              <SelectItem value="none">{t("filters.no_station")}</SelectItem>
+              {stations?.map((st) => <SelectItem key={st.id} value={st.id}>{st.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {isLoading ? (
@@ -101,7 +118,7 @@ export default function StoreOrdersPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  {["Order #", "Customer", "Wilaya", "Items", "Total", "Status", "Date", ""].map((h) => (
+                  {["Order #", "Customer", t("common:labels.station"), "Wilaya", "Items", "Total", "Status", "Date", ""].map((h) => (
                     <th key={h} className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -114,6 +131,7 @@ export default function StoreOrdersPage() {
                       <p className="font-medium">{o.customerName}</p>
                       <p className="text-xs text-gray-500">{o.customerPhone}</p>
                     </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{o.station?.name ?? "—"}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{o.wilaya ?? "—"}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{o.items?.length ?? 0}</td>
                     <td className="px-4 py-3 font-semibold">{Number(o.total).toLocaleString()} DA</td>

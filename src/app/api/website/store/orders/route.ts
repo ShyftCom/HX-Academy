@@ -23,12 +23,13 @@ export async function GET(req: NextRequest) {
   const where: Record<string, unknown> = {};
   if (q) where.OR = [{ orderNumber: { contains: q } }, { customerName: { contains: q } }, { customerPhone: { contains: q } }];
   if (status) where.status = status;
-  if (stationId) where.stationId = stationId;
+  // "none" finds orders placed before checkout asked for a station.
+  if (stationId) where.stationId = stationId === "none" ? null : stationId;
 
   const [data, total] = await Promise.all([
     db.websiteOrder.findMany({
       where,
-      include: { items: { include: { product: { select: { name: true } } } } },
+      include: { items: { include: { product: { select: { name: true } } } }, station: { select: { id: true, name: true } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,
@@ -45,6 +46,12 @@ export async function POST(req: NextRequest) {
 
   if (!customerName || !customerPhone || !items?.length) {
     return NextResponse.json({ error: "Name, phone, and items are required" }, { status: 400 });
+  }
+  // Every order belongs to a station so the back office can filter by it.
+  // Checked against active stations rather than trusted, so a bad id is a 400
+  // instead of a foreign-key 500.
+  if (!stationId || !(await db.station.findFirst({ where: { id: stationId, status: "active" }, select: { id: true } }))) {
+    return NextResponse.json({ error: "A valid station is required" }, { status: 400 });
   }
 
   const shippingFeeSetting = await db.setting.findFirst({ where: { key: "store_shipping_fee" } });

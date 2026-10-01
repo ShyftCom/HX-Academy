@@ -35,8 +35,10 @@ export default function CheckoutPage() {
 
   const [form, setForm] = useState({
     customerName: "", customerPhone: "", customerEmail: "",
-    wilaya: "", city: "", address: "", deliveryNotes: "",
+    wilaya: "", city: "", address: "", deliveryNotes: "", stationId: "",
   });
+  /** Active, publicly-listed stations — the same set the /apply form offers. */
+  const [venues, setVenues] = useState<Array<{ id: string; name: string; nameFr?: string | null; nameAr?: string | null; wilayaFr?: string; wilayaAr?: string }>>([]);
 
   useEffect(() => {
     try { setCart(JSON.parse(localStorage.getItem("hx_cart") ?? "[]")); } catch {}
@@ -50,6 +52,11 @@ export default function CheckoutPage() {
     // Wilaya table instead, which has carried nameFr and nameAr all along (the
     // admin's station form already reads it the same way). The rows are seeded
     // unconditionally as system reference data, not behind SEED_DEMO_CONTENT.
+    fetch("/api/public/venues")
+      .then((r) => r.json())
+      .then((d) => Array.isArray(d) && setVenues(d))
+      .catch(() => {});
+
     fetch("/api/wilayas")
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setWilayas(d); })
@@ -78,10 +85,15 @@ export default function CheckoutPage() {
   // customer happened to order in. Only the label shown here is localised.
   const selectedWilaya = wilayas.find((w) => w.nameFr === form.wilaya) ?? null;
 
+  /** Same ar -> fr -> base resolution used across the public site (see WebsiteHeader). */
+  const venueName = (v: (typeof venues)[number]) => (locale === "ar" ? v.nameAr || v.nameFr || v.name : locale === "fr" ? v.nameFr || v.name : v.name);
+  const venueWilaya = (v: (typeof venues)[number]) => (locale === "ar" ? v.wilayaAr || v.wilayaFr || "" : v.wilayaFr || "");
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.customerName.trim()) e.customerName = t("requiredField");
     if (!form.customerPhone.trim()) e.customerPhone = t("requiredField");
+    if (!form.stationId) e.stationId = t("requiredField");
     if (!form.wilaya) e.wilaya = t("requiredField");
     if (!form.address.trim()) e.address = t("requiredField");
     setErrors(e);
@@ -169,6 +181,21 @@ export default function CheckoutPage() {
                   type="email"
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">{t("station")} <span className="text-red-500">*</span></label>
+                <select
+                  value={form.stationId}
+                  onChange={(e) => setForm((p) => ({ ...p, stationId: e.target.value }))}
+                  className={`w-full px-3 py-2 text-sm border rounded-lg bg-transparent ${errors.stationId ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+                >
+                  <option value="">{t("stationPlaceholder")}</option>
+                  {venues.map((v) => (
+                    <option key={v.id} value={v.id}>{venueName(v)}{venueWilaya(v) ? ` — ${venueWilaya(v)}` : ""}</option>
+                  ))}
+                </select>
+                {errors.stationId && <p className="text-xs text-red-500 mt-1">{errors.stationId}</p>}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
