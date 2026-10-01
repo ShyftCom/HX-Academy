@@ -16,7 +16,11 @@
     "bio": "Short bio",
     "delete": "Delete coach",
     "delete_body": "This permanently removes the coach profile.",
-    "added": "Coach added"
+    "added": "Coach added",
+    "all_stations": "All stations",
+    "no_station": "No station",
+    "reorder_hint": "Clear the station filter to reorder coaches.",
+    "none_for_station": "No coaches for this station."
   },
   "contact": {
     "title": "Contact Submissions",

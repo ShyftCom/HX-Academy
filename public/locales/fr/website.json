@@ -16,7 +16,11 @@
     "bio": "Courte biographie",
     "delete": "Supprimer l'entraîneur",
     "delete_body": "Le profil de l'entraîneur sera définitivement supprimé.",
-    "added": "Entraîneur ajouté"
+    "added": "Entraîneur ajouté",
+    "all_stations": "Toutes les stations",
+    "no_station": "Sans station",
+    "reorder_hint": "Retirez le filtre de station pour réordonner les entraîneurs.",
+    "none_for_station": "Aucun entraîneur pour cette station."
   },
   "contact": {
     "title": "Messages de contact",
