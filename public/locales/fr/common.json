@@ -447,5 +447,305 @@
       "empty": "Aucune notification",
       "toast_all_read": "Tout a été marqué comme lu"
     }
+  },
+  "bo": {
+    "save_changes": "Enregistrer",
+    "saving": "Enregistrement…",
+    "creating": "Création…",
+    "adding": "Ajout…",
+    "uploading": "Téléversement…",
+    "submitting": "Envoi…",
+    "generating": "Génération…",
+    "loading": "Chargement…",
+    "all": "Tous",
+    "system": "Système",
+    "activity": {
+      "user": "Utilisateur",
+      "action": "Action",
+      "module": "Module",
+      "description": "Description",
+      "time": "Heure"
+    },
+    "affiliates": {
+      "submit_request": "Envoyer la demande",
+      "create": "Créer un affilié"
+    },
+    "finance": {
+      "add_charge": "Ajouter une charge",
+      "delete_charge_confirm": "Supprimer cette charge ?",
+      "gross_revenue": "Chiffre d'affaires brut",
+      "total_charges": "Total des charges",
+      "gross_profit": "Bénéfice brut",
+      "salary_charges": "Charges salariales",
+      "no_data": "Aucune donnée pour la période sélectionnée",
+      "is_salary": "Charge salariale"
+    },
+    "hrm": {
+      "total_staff": "Effectif total",
+      "present_today": "Présents aujourd'hui",
+      "absent_today": "Absents aujourd'hui",
+      "on_leave": "En congé",
+      "monthly_salary_cost": "Masse salariale mensuelle",
+      "attendance_rate": "Taux de présence",
+      "manage_staff": "Gérer le personnel",
+      "attendance": "Présences",
+      "leave_requests": "Demandes de congé",
+      "payroll": "Paie",
+      "create_request": "Créer la demande",
+      "generate_payroll": "Générer la paie",
+      "add_staff": "Ajouter un employé"
+    },
+    "validation": {
+      "full_name_required": "Le nom complet est requis",
+      "name_required": "Le nom est requis",
+      "price_required": "Le prix est requis",
+      "duration_required": "La durée est requise"
+    },
+    "leads": {
+      "conversion_failed": "Échec de la conversion",
+      "convert_confirm": "Convertir {{name}} en joueur de l'académie ?",
+      "this_lead": "ce prospect"
+    },
+    "pipeline": {
+      "intro": "Faites glisser pour réordonner les étapes. Les étapes par défaut peuvent être renommées ou recolorées, mais pas supprimées.",
+      "save_stage": "Enregistrer l'étape",
+      "delete_title": "Supprimer « {{name}} » ?",
+      "delete_body": "Tous les prospects de cette étape seront déplacés vers l'étape de repli sélectionnée.",
+      "delete_stage": "Supprimer l'étape"
+    },
+    "orders": {
+      "order_number": "N° de commande",
+      "customer": "Client",
+      "guest": "Invité",
+      "item_count_one": "{{count}} article",
+      "item_count_many": "{{count}} articles",
+      "item_count_other": "{{count}} articles"
+    },
+    "payments": {
+      "approval_failed": "Échec de la validation",
+      "verification_failed": "Échec de la vérification",
+      "method": "Moyen",
+      "upload_proof": "Téléverser le justificatif",
+      "plan": "Formule"
+    },
+    "players": {
+      "updated": "Joueur mis à jour",
+      "created": "Joueur créé",
+      "password_update_failed": "Échec de la mise à jour du mot de passe",
+      "create": "Créer le joueur",
+      "parent": "Parent",
+      "emergency": "Urgence",
+      "medical": "Médical",
+      "save_password": "Enregistrer le mot de passe"
+    },
+    "profile": {
+      "password_change_failed": "Échec du changement de mot de passe",
+      "staff": "Personnel"
+    },
+    "reports": {
+      "today": "Aujourd'hui",
+      "this_week": "Cette semaine",
+      "this_month": "Ce mois-ci",
+      "this_year": "Cette année",
+      "custom": "Personnalisé"
+    },
+    "roles": {
+      "updated": "Rôle mis à jour",
+      "created": "Rôle créé",
+      "edit": "Modifier le rôle",
+      "create": "Créer le rôle"
+    },
+    "settings": {
+      "method_updated": "Moyen de paiement mis à jour",
+      "method_created": "Moyen de paiement créé",
+      "instructions": "Instructions",
+      "active": "Actif",
+      "edit_method": "Modifier le moyen de paiement",
+      "add_method": "Ajouter un moyen de paiement",
+      "address_placeholder": "Alger, Algérie"
+    },
+    "inactive": "Inactif",
+    "stations": {
+      "new": "Nouvelle station",
+      "comparison": "Comparaison des stations",
+      "delete_confirm": "Supprimer cette station ?",
+      "save_public_page": "Enregistrer la page publique",
+      "create": "Créer la station"
+    },
+    "store": {
+      "category_updated": "Catégorie mise à jour",
+      "category_created": "Catégorie créée",
+      "edit_category": "Modifier la catégorie",
+      "add_category": "Ajouter une catégorie",
+      "field_updated": "Champ mis à jour",
+      "field_added": "Champ ajouté",
+      "edit_field": "Modifier le champ",
+      "add_form_field": "Ajouter un champ",
+      "add_field": "Ajouter le champ",
+      "add_group": "Ajouter un groupe",
+      "generate_variants": "Générer les variantes",
+      "save_all_variants": "Enregistrer toutes les variantes",
+      "product_updated": "Produit mis à jour",
+      "product_created": "Produit créé",
+      "product": "Produit",
+      "category": "Catégorie",
+      "stock": "Stock",
+      "featured": "En vedette",
+      "edit_product": "Modifier le produit",
+      "add_product": "Ajouter un produit"
+    },
+    "subs": {
+      "start": "Début",
+      "end": "Fin",
+      "remaining": "Restant",
+      "plan_updated": "Formule mise à jour",
+      "plan_created": "Formule créée",
+      "edit_plan": "Modifier la formule",
+      "new_plan": "Nouvelle formule d'abonnement",
+      "create_plan": "Créer la formule"
+    },
+    "hide": "Masquer",
+    "questions": "Questions",
+    "published": "Publié",
+    "unpublished": "Dépublié",
+    "draft": "Brouillon",
+    "live": "En ligne",
+    "publish": "Publier",
+    "unpublish": "Dépublier",
+    "public": "Public",
+    "hidden": "Masqué",
+    "replace": "Remplacer",
+    "save_settings": "Enregistrer les paramètres",
+    "camp": {
+      "new_plan": "Nouvelle formule",
+      "edit_plan": "Modifier la formule",
+      "new_session": "Nouvelle session",
+      "edit_session": "Modifier la session",
+      "gender": "Genre : {{gender}}",
+      "male": "Garçon",
+      "female": "Fille"
+    },
+    "surveys": {
+      "edit": "Modifier le questionnaire",
+      "new": "Nouveau questionnaire",
+      "edit_question": "Modifier la question",
+      "add_question": "Ajouter une question"
+    },
+    "tickets": {
+      "create": "Créer le ticket"
+    },
+    "users": {
+      "updated": "Utilisateur mis à jour",
+      "created": "Utilisateur créé",
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "active": "Actif",
+      "last_login": "Dernière connexion",
+      "never": "Jamais",
+      "created_at": "Créé le",
+      "edit": "Modifier l'utilisateur",
+      "add": "Ajouter un utilisateur",
+      "new_password_keep": "Nouveau mot de passe (laisser vide pour conserver)",
+      "password_req": "Mot de passe *",
+      "create": "Créer l'utilisateur"
+    },
+    "applications": {
+      "approval_failed": "Échec de la validation",
+      "full_name": "Nom complet",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "date_of_birth": "Date de naissance",
+      "category": "Catégorie",
+      "address": "Adresse",
+      "parent_name": "Nom du parent",
+      "parent_phone": "Téléphone du parent",
+      "question": "Question"
+    },
+    "files": {
+      "academy": "Académie",
+      "summer_camp": "Camp d'été",
+      "both": "Les deux",
+      "delete_confirm": "Supprimer cette exigence ?"
+    },
+    "footer": {
+      "save": "Enregistrer le pied de page"
+    },
+    "header": {
+      "background_color": "Couleur de fond",
+      "text_color": "Couleur du texte / des liens",
+      "accent_color": "Couleur d'accent / du bouton",
+      "save": "Enregistrer l'en-tête"
+    },
+    "pages": {
+      "create": "Créer la page",
+      "no_sections": "Aucune section pour le moment. Ajoutez votre première section pour construire cette page."
+    },
+    "reviews": {
+      "feature": "Mettre en avant",
+      "unfeature": "Retirer de la une",
+      "verify": "Vérifier",
+      "unverify": "Retirer la vérification",
+      "save_reply": "Enregistrer la réponse"
+    },
+    "slides": {
+      "click_to_upload": "Cliquez pour téléverser une image",
+      "replace_image": "Remplacer l'image",
+      "slide": "Diapositive",
+      "add": "Ajouter une diapositive",
+      "edit": "Modifier la diapositive",
+      "save": "Enregistrer la diapositive"
+    },
+    "sponsors": {
+      "add": "Ajouter un sponsor",
+      "edit": "Modifier le sponsor",
+      "save": "Enregistrer le sponsor"
+    },
+    "hub": {
+      "title": "Site web & candidatures",
+      "pages": "Pages",
+      "pages_desc": "Construisez la page d'accueil et chaque page du site vitrine à partir de sections réutilisables par glisser-déposer.",
+      "programmes": "Programmes",
+      "programmes_desc": "Gérez les programmes, catégories, horaires et tarifs affichés sur le site public.",
+      "schedules": "Horaires",
+      "schedules_desc": "Le planning d'entraînement de chaque site — choisissez un site et modifiez uniquement ses créneaux.",
+      "venues": "Sites",
+      "venues_desc": "Choisissez les stations affichées sur la page publique des sites et leur ordre.",
+      "squads": "Inscriptions aux équipes",
+      "squads_desc": "Consultez les demandes d'inscription aux équipes de développement envoyées depuis le site public.",
+      "contact": "Messages de contact",
+      "contact_desc": "Messages envoyés depuis la page Contact du site public.",
+      "coaches": "Entraîneurs",
+      "coaches_desc": "Profils publics des entraîneurs affichés sur les pages Programmes et Qui sommes-nous.",
+      "pathway": "Parcours",
+      "pathway_desc": "Étapes affichées sur la frise publique du parcours.",
+      "faqs": "FAQ",
+      "faqs_desc": "Gérez les questions fréquentes affichées sur le site public.",
+      "news": "Actualités",
+      "news_desc": "Publiez des articles affichés sur la page Actualités.",
+      "redirects": "Redirections",
+      "redirects_desc": "Enregistrez les anciennes URL à rediriger vers une nouvelle page.",
+      "header": "Éditeur d'en-tête",
+      "header_desc": "Configurez la navigation, le logo, le bouton d'action et le menu mobile.",
+      "footer": "Éditeur de pied de page",
+      "footer_desc": "Personnalisez les liens, icônes sociales, couleurs et mentions du pied de page.",
+      "store": "Paramètres de la boutique",
+      "store_desc": "Activez la boutique, configurez les frais de livraison et le contenu de la page.",
+      "reviews": "Avis",
+      "reviews_desc": "Modérez les avis, répondez aux retours et mettez en avant les meilleurs.",
+      "summer_camp": "Page du camp d'été",
+      "summer_camp_desc": "Configurez le titre, l'image, la description et le bouton de la page du camp d'été.",
+      "file_requirements": "Documents requis",
+      "file_requirements_desc": "Gérez les documents que les candidats doivent fournir (pièce d'identité, acte de naissance, photo, etc.).",
+      "applications": "Candidatures",
+      "applications_desc": "Consultez, filtrez et gérez toutes les candidatures envoyées depuis le site public.",
+      "surveys": "Questionnaires",
+      "surveys_desc": "Créez le questionnaire présenté aux candidats lors de l'inscription.",
+      "total_applications": "Total des candidatures",
+      "pending_review": "En attente d'examen",
+      "converted": "Converties"
+    },
+    "branding": {
+      "save": "Enregistrer l'identité visuelle"
+    }
   }
 }

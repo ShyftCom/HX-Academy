@@ -19,40 +19,40 @@ export default function WebsiteHubPage() {
   }, []);
 
   const cards = [
-    { href: "/dashboard/website/pages", icon: PanelsTopLeft, title: "Pages", desc: "Build the homepage and every Showcase Website page from reusable, drag-and-drop sections.", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30" },
-    { href: "/dashboard/website/programmes", icon: Trophy, title: "Programmes", desc: "Manage programmes, categories, schedules and pricing shown on the public site.", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" },
-    { href: "/dashboard/website/schedule", icon: CalendarClock, title: "Schedules", desc: "Each location's training timetable — pick a location and edit only its slots.", color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
-    { href: "/dashboard/website/venues", icon: MapPin, title: "Venues", desc: "Control which stations appear on the public Venues page and their order.", color: "text-rose-600 bg-rose-50 dark:bg-rose-900/30" },
-    { href: "/dashboard/website/squads", icon: Users2, title: "Squad Registrations", desc: "Review Development Squad interest registrations submitted from the public site.", color: "text-violet-600 bg-violet-50 dark:bg-violet-900/30" },
-    { href: "/dashboard/website/contact", icon: Mail, title: "Contact Submissions", desc: "Messages submitted from the public Contact Us page.", color: "text-sky-600 bg-sky-50 dark:bg-sky-900/30" },
-    { href: "/dashboard/website/coaches", icon: UserCheck, title: "Coaches", desc: "Public-facing coach profiles shown on programme and Who We Are pages.", color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
-    { href: "/dashboard/website/pathway", icon: TrendingUp, title: "Pathway", desc: "Stages shown on the public Pathway timeline.", color: "text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/30" },
-    { href: "/dashboard/website/faqs", icon: HelpCircle, title: "FAQs", desc: "Manage frequently asked questions shown across the public site.", color: "text-amber-600 bg-amber-50 dark:bg-amber-900/30" },
-    { href: "/dashboard/website/news", icon: Newspaper, title: "News", desc: "Publish news articles shown on the public News page.", color: "text-lime-600 bg-lime-50 dark:bg-lime-900/30" },
-    { href: "/dashboard/website/redirects", icon: ArrowRightLeft, title: "Redirects", desc: "Record legacy URLs that should redirect to a new page.", color: "text-slate-600 bg-slate-50 dark:bg-slate-900/30" },
-    { href: "/dashboard/website/header", icon: Navigation, title: "Header Editor", desc: "Configure navigation, logo, CTA button, and mobile menu.", color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
-    { href: "/dashboard/website/footer", icon: Layers, title: "Footer Editor", desc: "Customize footer links, social icons, colors, and copyright text.", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-900/30" },
-    { href: "/dashboard/website/store", icon: Store, title: "Store Settings", desc: "Enable the product store, configure shipping fees and page content.", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
-    { href: "/dashboard/website/reviews", icon: Star, title: "Reviews", desc: "Moderate customer reviews, reply to feedback, and feature top reviews.", color: "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30" },
-    { href: "/dashboard/website/summer-camp", icon: Sun, title: "Summer Camp Page", desc: "Configure the Summer Camp landing page title, hero image, description, and CTA button.", color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
-    { href: "/dashboard/website/file-requirements", icon: UploadCloud, title: "File Requirements", desc: "Manage documents applicants must upload (ID, birth certificate, photo, etc.).", color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
-    { href: "/dashboard/website/applications", icon: Inbox, title: "Applications", desc: "View, filter, and manage all applications submitted through the public website.", color: "text-green-600 bg-green-50 dark:bg-green-900/30" },
-    { href: "/dashboard/surveys", icon: Globe, title: "Survey Builder", desc: "Build the questionnaire shown to applicants during the application process.", color: "text-purple-600 bg-purple-50 dark:bg-purple-900/30" },
+    { href: "/dashboard/website/pages", icon: PanelsTopLeft, title: t("common:bo.hub.pages"), desc: t("common:bo.hub.pages_desc"), color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30" },
+    { href: "/dashboard/website/programmes", icon: Trophy, title: t("common:bo.hub.programmes"), desc: t("common:bo.hub.programmes_desc"), color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30" },
+    { href: "/dashboard/website/schedule", icon: CalendarClock, title: t("common:bo.hub.schedules"), desc: t("common:bo.hub.schedules_desc"), color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
+    { href: "/dashboard/website/venues", icon: MapPin, title: t("common:bo.hub.venues"), desc: t("common:bo.hub.venues_desc"), color: "text-rose-600 bg-rose-50 dark:bg-rose-900/30" },
+    { href: "/dashboard/website/squads", icon: Users2, title: t("common:bo.hub.squads"), desc: t("common:bo.hub.squads_desc"), color: "text-violet-600 bg-violet-50 dark:bg-violet-900/30" },
+    { href: "/dashboard/website/contact", icon: Mail, title: t("common:bo.hub.contact"), desc: t("common:bo.hub.contact_desc"), color: "text-sky-600 bg-sky-50 dark:bg-sky-900/30" },
+    { href: "/dashboard/website/coaches", icon: UserCheck, title: t("common:bo.hub.coaches"), desc: t("common:bo.hub.coaches_desc"), color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
+    { href: "/dashboard/website/pathway", icon: TrendingUp, title: t("common:bo.hub.pathway"), desc: t("common:bo.hub.pathway_desc"), color: "text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/30" },
+    { href: "/dashboard/website/faqs", icon: HelpCircle, title: t("common:bo.hub.faqs"), desc: t("common:bo.hub.faqs_desc"), color: "text-amber-600 bg-amber-50 dark:bg-amber-900/30" },
+    { href: "/dashboard/website/news", icon: Newspaper, title: t("common:bo.hub.news"), desc: t("common:bo.hub.news_desc"), color: "text-lime-600 bg-lime-50 dark:bg-lime-900/30" },
+    { href: "/dashboard/website/redirects", icon: ArrowRightLeft, title: t("common:bo.hub.redirects"), desc: t("common:bo.hub.redirects_desc"), color: "text-slate-600 bg-slate-50 dark:bg-slate-900/30" },
+    { href: "/dashboard/website/header", icon: Navigation, title: t("common:bo.hub.header"), desc: t("common:bo.hub.header_desc"), color: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30" },
+    { href: "/dashboard/website/footer", icon: Layers, title: t("common:bo.hub.footer"), desc: t("common:bo.hub.footer_desc"), color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-900/30" },
+    { href: "/dashboard/website/store", icon: Store, title: t("common:bo.hub.store"), desc: t("common:bo.hub.store_desc"), color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
+    { href: "/dashboard/website/reviews", icon: Star, title: t("common:bo.hub.reviews"), desc: t("common:bo.hub.reviews_desc"), color: "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30" },
+    { href: "/dashboard/website/summer-camp", icon: Sun, title: t("common:bo.hub.summer_camp"), desc: t("common:bo.hub.summer_camp_desc"), color: "text-orange-600 bg-orange-50 dark:bg-orange-900/30" },
+    { href: "/dashboard/website/file-requirements", icon: UploadCloud, title: t("common:bo.hub.file_requirements"), desc: t("common:bo.hub.file_requirements_desc"), color: "text-teal-600 bg-teal-50 dark:bg-teal-900/30" },
+    { href: "/dashboard/website/applications", icon: Inbox, title: t("common:bo.hub.applications"), desc: t("common:bo.hub.applications_desc"), color: "text-green-600 bg-green-50 dark:bg-green-900/30" },
+    { href: "/dashboard/surveys", icon: Globe, title: t("common:bo.hub.surveys"), desc: t("common:bo.hub.surveys_desc"), color: "text-purple-600 bg-purple-50 dark:bg-purple-900/30" },
   ];
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Website &amp; Applications</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("common:bo.hub.title")}</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">{t("hub.subtitle")}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Applications", value: stats.total, icon: Inbox, color: "text-blue-600" },
-          { label: "Pending Review", value: stats.pending, icon: Clock, color: "text-yellow-600" },
-          { label: "Converted", value: stats.converted, icon: Users, color: "text-green-600" },
+          { label: t("common:bo.hub.total_applications"), value: stats.total, icon: Inbox, color: "text-blue-600" },
+          { label: t("common:bo.hub.pending_review"), value: stats.pending, icon: Clock, color: "text-yellow-600" },
+          { label: t("common:bo.hub.converted"), value: stats.converted, icon: Users, color: "text-green-600" },
         ].map((s) => (
           <div key={s.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center gap-4">
             <div className={`${s.color} bg-gray-50 dark:bg-gray-700 rounded-lg p-3`}><s.icon className="w-5 h-5" /></div>

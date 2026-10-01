@@ -149,7 +149,7 @@ export default function PipelinePage() {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{t("pipeline.title")}</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Drag to reorder stages. Default stages can be renamed or recolored but not deleted.
+          {t("common:bo.pipeline.intro")}
         </p>
       </div>
 
@@ -264,7 +264,7 @@ export default function PipelinePage() {
               className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold text-white rounded-lg disabled:opacity-60"
               style={{ background: "#A02020" }}>
               {createMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-              Save Stage
+              {t("common:bo.pipeline.save_stage")}
             </button>
           </div>
         </div>
@@ -285,9 +285,9 @@ export default function PipelinePage() {
                 <AlertTriangle className="w-5 h-5" style={{ color: "#A02020" }} />
               </div>
               <div>
-                <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Delete &quot;{deleteTarget.name}&quot;?</p>
+                <p className="font-semibold" style={{ color: "var(--text-primary)" }}>{t("common:bo.pipeline.delete_title", { name: deleteTarget.name })}</p>
                 <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                  All leads currently in this stage will be moved to the selected fallback stage.
+                  {t("common:bo.pipeline.delete_body")}
                 </p>
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function PipelinePage() {
                 style={{ background: "#A02020" }}
               >
                 {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                Delete Stage
+                {t("common:bo.pipeline.delete_stage")}
               </button>
             </div>
           </div>

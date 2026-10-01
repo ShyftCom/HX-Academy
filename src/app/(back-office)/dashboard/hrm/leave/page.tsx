@@ -59,7 +59,7 @@ export default function LeavePage() {
           <div className="flex rounded-lg border overflow-hidden">
             {["pending", "approved", "rejected", ""].map((s) => (
               <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 text-sm ${filter === s ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"}`}>
-                {s || "All"}
+                {s ? t(`common:status.${s}`, { defaultValue: s }) : t("common:bo.all")}
               </button>
             ))}
           </div>
@@ -87,7 +87,7 @@ export default function LeavePage() {
                 </div>
                 <div className="space-y-1"><Label>{t("leave.reason")}</Label><Input value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} /></div>
                 <Button className="w-full" disabled={!form.staffId || !form.startDate || !form.endDate || createMut.isPending} onClick={() => createMut.mutate(form)}>
-                  {createMut.isPending ? "Creating..." : "Create Request"}
+                  {createMut.isPending ? t("common:bo.creating") : t("common:bo.hrm.create_request")}
                 </Button>
               </div>
             </DialogContent>

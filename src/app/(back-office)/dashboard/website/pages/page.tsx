@@ -39,7 +39,7 @@ export default function WebsitePagesPage() {
     mutationFn: () =>
       fetch("/api/pages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: newTitle, slug: newSlug }) }).then(async (r) => {
         const data = await r.json();
-        if (!r.ok) throw new Error(data.error ?? "Failed");
+        if (!r.ok) throw new Error(data.error ?? t("common:toast.failed"));
         return data;
       }),
     onSuccess: () => { toast.success(t("pages.created")); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setCreating(false); setNewTitle(""); setNewSlug(""); },
@@ -55,7 +55,7 @@ export default function WebsitePagesPage() {
   const { mutate: deletePage, isPending: deleting } = useMutation({
     mutationFn: (id: string) => fetch(`/api/pages/${id}`, { method: "DELETE" }).then(async (r) => {
       const data = await r.json();
-      if (!r.ok) throw new Error(data.error ?? "Failed");
+      if (!r.ok) throw new Error(data.error ?? t("common:toast.failed"));
       return data;
     }),
     onSuccess: () => { toast.success(t("pages.deleted")); qc.invalidateQueries({ queryKey: ["admin-pages"] }); setDeleteId(null); },
@@ -104,7 +104,7 @@ export default function WebsitePagesPage() {
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${p.isPublished ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}
                     >
                       {p.isPublished ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                      {p.isPublished ? "Published" : "Draft"}
+                      {p.isPublished ? t("common:bo.published") : t("common:bo.draft")}
                     </button>
                   </td>
                   <td className="px-4 py-3 text-end">
@@ -145,7 +145,7 @@ export default function WebsitePagesPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => createPage()} disabled={isPending || !newSlug}>{isPending ? "Creating…" : "Create Page"}</Button>
+            <Button onClick={() => createPage()} disabled={isPending || !newSlug}>{isPending ? t("common:bo.creating") : t("common:bo.pages.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

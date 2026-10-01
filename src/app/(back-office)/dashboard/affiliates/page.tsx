@@ -85,7 +85,7 @@ export default function AffiliatesPage() {
                 <Input type="number" min="0" max="100" step="0.5" value={rate} onChange={(e) => setRate(e.target.value)} />
               </div>
               <Button className="w-full" disabled={!userId || createMut.isPending} onClick={() => createMut.mutate({ userId, commissionRate: Number(rate) })}>
-                {createMut.isPending ? "Creating..." : "Create Affiliate"}
+                {createMut.isPending ? t("common:bo.creating") : t("common:bo.affiliates.create")}
               </Button>
             </div>
           </DialogContent>

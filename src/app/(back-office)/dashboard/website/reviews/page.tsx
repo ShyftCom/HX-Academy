@@ -187,10 +187,10 @@ export default function ReviewsPage() {
                       <MessageSquare className="w-3 h-3 mr-1" /> {t("reviews.reply")}
                     </Button>
                     <Button size="sm" variant="ghost" className={`text-xs h-7 px-2 ${review.isFeatured ? "text-orange-500" : "text-gray-400"}`} onClick={() => updateReview({ id: review.id, isFeatured: !review.isFeatured })}>
-                      <Bookmark className="w-3 h-3 mr-1" /> {review.isFeatured ? "Unfeature" : "Feature"}
+                      <Bookmark className="w-3 h-3 mr-1" /> {review.isFeatured ? t("common:bo.reviews.unfeature") : t("common:bo.reviews.feature")}
                     </Button>
                     <Button size="sm" variant="ghost" className={`text-xs h-7 px-2 ${review.isVerified ? "text-blue-500" : "text-gray-400"}`} onClick={() => updateReview({ id: review.id, isVerified: !review.isVerified })}>
-                      <Shield className="w-3 h-3 mr-1" /> {review.isVerified ? "Unverify" : "Verify"}
+                      <Shield className="w-3 h-3 mr-1" /> {review.isVerified ? t("common:bo.reviews.unverify") : t("common:bo.reviews.verify")}
                     </Button>
                     <Button size="sm" variant="ghost" className="text-red-500 text-xs h-7 px-2" onClick={() => setDeleteId(review.id)}>
                       <Trash2 className="w-3 h-3" />
@@ -226,7 +226,7 @@ export default function ReviewsPage() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setReplyModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={() => saveReply({ id: replyModal.id, reply: replyText })} disabled={savingReply || !replyText.trim()}>
-                {savingReply ? "Saving..." : "Save Reply"}
+                {savingReply ? t("common:bo.saving") : t("common:bo.reviews.save_reply")}
               </Button>
             </DialogFooter>
           </DialogContent>

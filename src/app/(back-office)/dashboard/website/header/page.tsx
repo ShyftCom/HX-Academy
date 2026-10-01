@@ -102,9 +102,9 @@ export default function HeaderEditorPage() {
         </div>
         <div className="grid grid-cols-3 gap-4">
           {[
-            { key: "backgroundColor", label: "Background Color" },
-            { key: "textColor", label: "Text / Link Color" },
-            { key: "accentColor", label: "Accent / CTA Color" },
+            { key: "backgroundColor", label: t("common:bo.header.background_color") },
+            { key: "textColor", label: t("common:bo.header.text_color") },
+            { key: "accentColor", label: t("common:bo.header.accent_color") },
           ].map(({ key, label }) => (
             <div key={key}>
               <label className="text-sm font-medium block mb-1">{label}</label>
@@ -225,7 +225,7 @@ export default function HeaderEditorPage() {
 
       <div className="flex justify-end pt-4">
         <Button onClick={() => save()} disabled={isPending} className="min-w-32">
-          {isPending ? "Saving..." : "Save Header"}
+          {isPending ? t("common:bo.saving") : t("common:bo.header.save")}
         </Button>
       </div>
     </div>

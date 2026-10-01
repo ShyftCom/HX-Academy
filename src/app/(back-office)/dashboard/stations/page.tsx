@@ -30,7 +30,7 @@ export default function StationsPage() {
         <Button asChild>
           <Link href="/dashboard/stations/new">
             <Plus className="me-2 h-4 w-4" />
-            New Station
+            {t("common:bo.stations.new")}
           </Link>
         </Button>
       </div>
@@ -68,7 +68,7 @@ export default function StationsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Station Comparison
+            {t("common:bo.stations.comparison")}
           </CardTitle>
         </CardHeader>
         <CardContent>

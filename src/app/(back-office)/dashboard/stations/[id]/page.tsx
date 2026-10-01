@@ -89,7 +89,7 @@ export default function StationDetailPage() {
         </div>
         <Badge variant={station.status === "active" ? "default" : "secondary"}>{station.status}</Badge>
         <Button variant="outline" onClick={startEdit}>{t("common:ui.edit")}</Button>
-        <Button variant="destructive" onClick={() => { if (confirm("Delete this station?")) deleteMut.mutate(); }}>{t("common:ui.delete")}</Button>
+        <Button variant="destructive" onClick={() => { if (confirm(t("common:bo.stations.delete_confirm"))) deleteMut.mutate(); }}>{t("common:ui.delete")}</Button>
       </div>
 
       <Tabs defaultValue="overview">
@@ -195,7 +195,7 @@ export default function StationDetailPage() {
                 <div className="space-y-1"><Label>{t("detail.transport")}</Label><Textarea value={(marketing.transportInfo as string) ?? ""} onChange={(e) => setMarketingField({ transportInfo: e.target.value })} rows={2} /></div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => saveMarketingMut.mutate(marketing)} disabled={saveMarketingMut.isPending}>{saveMarketingMut.isPending ? "Saving…" : "Save Public Page"}</Button>
+                <Button onClick={() => saveMarketingMut.mutate(marketing)} disabled={saveMarketingMut.isPending}>{saveMarketingMut.isPending ? t("common:bo.saving") : t("common:bo.stations.save_public_page")}</Button>
               </div>
             </CardContent>
           </Card>

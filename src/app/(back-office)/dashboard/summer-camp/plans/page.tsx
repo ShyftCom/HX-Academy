@@ -115,7 +115,7 @@ export default function SummerCampPlansPage() {
                     className="cursor-pointer text-xs"
                     onClick={() => toggleActive({ id: plan.id, isActive: !plan.isActive })}
                   >
-                    {plan.isActive ? "Active" : "Inactive"}
+                    {plan.isActive ? t("common:status.active") : t("common:bo.inactive")}
                   </Badge>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(plan)}><Edit2 className="w-3.5 h-3.5" /></Button>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500" onClick={() => setDeleteId(plan.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
@@ -133,7 +133,7 @@ export default function SummerCampPlansPage() {
       {modal !== null && (
         <Dialog open onOpenChange={() => setModal(null)}>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{modal === "new" ? "New Plan" : "Edit Plan"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{modal === "new" ? t("common:bo.camp.new_plan") : t("common:bo.camp.edit_plan")}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
               <div>
                 <Label>{t("plans.name")}</Label>
@@ -154,7 +154,7 @@ export default function SummerCampPlansPage() {
             </DialogBody>
             <DialogFooter>
               <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
-              <Button onClick={save} disabled={creating || updating}>{creating || updating ? "Saving..." : "Save"}</Button>
+              <Button onClick={save} disabled={creating || updating}>{creating || updating ? t("common:bo.saving") : t("common:actions.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

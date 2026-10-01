@@ -192,7 +192,7 @@ export default function SummerCampPlayersPage() {
                   <p className="font-medium">{detail.fullName}</p>
                   {detail.dateOfBirth && <p className="text-gray-600">DOB: {new Date(detail.dateOfBirth).toLocaleDateString()}</p>}
                   {detail.age && <p className="text-gray-600">Age: {detail.age}</p>}
-                  {detail.gender && <p className="text-gray-600">Gender: {detail.gender === "M" ? "Male" : "Female"}</p>}
+                  {detail.gender && <p className="text-gray-600">{t("common:bo.camp.gender", { gender: detail.gender === "M" ? t("common:bo.camp.male") : t("common:bo.camp.female") })}</p>}
                   {detail.healthNotes && <p className="text-gray-600 mt-1 text-xs">Health: {detail.healthNotes}</p>}
                 </div>
                 <div>

@@ -130,7 +130,7 @@ export default function SummerCampSessionsPage() {
       {modal !== null && (
         <Dialog open onOpenChange={() => setModal(null)}>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{modal === "new" ? "New Session" : "Edit Session"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{modal === "new" ? t("common:bo.camp.new_session") : t("common:bo.camp.edit_session")}</DialogTitle></DialogHeader>
             <DialogBody className="space-y-4">
               <div><Label>{t("sessions.name")}</Label><LocaleTextInput baseKey="name" values={form} onChange={(next) => setForm(next as typeof form)} /></div>
               <div className="grid grid-cols-2 gap-3">
@@ -145,7 +145,7 @@ export default function SummerCampSessionsPage() {
             </DialogBody>
             <DialogFooter>
               <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
-              <Button onClick={save} disabled={creating || updating}>{creating || updating ? "Saving..." : "Save"}</Button>
+              <Button onClick={save} disabled={creating || updating}>{creating || updating ? t("common:bo.saving") : t("common:actions.save")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

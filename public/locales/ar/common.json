@@ -459,5 +459,308 @@
       "empty": "لا توجد إشعارات",
       "toast_all_read": "تم تعليم الكل كمقروء"
     }
+  },
+  "bo": {
+    "save_changes": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ…",
+    "creating": "جارٍ الإنشاء…",
+    "adding": "جارٍ الإضافة…",
+    "uploading": "جارٍ الرفع…",
+    "submitting": "جارٍ الإرسال…",
+    "generating": "جارٍ الإنشاء…",
+    "loading": "جارٍ التحميل…",
+    "all": "الكل",
+    "system": "النظام",
+    "activity": {
+      "user": "المستخدم",
+      "action": "الإجراء",
+      "module": "الوحدة",
+      "description": "الوصف",
+      "time": "الوقت"
+    },
+    "affiliates": {
+      "submit_request": "إرسال الطلب",
+      "create": "إنشاء مسوّق"
+    },
+    "finance": {
+      "add_charge": "إضافة مصروف",
+      "delete_charge_confirm": "حذف هذا المصروف؟",
+      "gross_revenue": "الإيرادات الإجمالية",
+      "total_charges": "إجمالي المصروفات",
+      "gross_profit": "الربح الإجمالي",
+      "salary_charges": "مصروفات الرواتب",
+      "no_data": "لا توجد بيانات للفترة المحددة",
+      "is_salary": "مصروف رواتب"
+    },
+    "hrm": {
+      "total_staff": "إجمالي الموظفين",
+      "present_today": "الحاضرون اليوم",
+      "absent_today": "الغائبون اليوم",
+      "on_leave": "في إجازة",
+      "monthly_salary_cost": "تكلفة الرواتب الشهرية",
+      "attendance_rate": "نسبة الحضور",
+      "manage_staff": "إدارة الموظفين",
+      "attendance": "الحضور",
+      "leave_requests": "طلبات الإجازة",
+      "payroll": "الرواتب",
+      "create_request": "إنشاء الطلب",
+      "generate_payroll": "إنشاء كشف الرواتب",
+      "add_staff": "إضافة موظف"
+    },
+    "validation": {
+      "full_name_required": "الاسم الكامل مطلوب",
+      "name_required": "الاسم مطلوب",
+      "price_required": "السعر مطلوب",
+      "duration_required": "المدة مطلوبة"
+    },
+    "leads": {
+      "conversion_failed": "فشل التحويل",
+      "convert_confirm": "تحويل {{name}} إلى لاعب في الأكاديمية؟",
+      "this_lead": "هذا العميل المحتمل"
+    },
+    "pipeline": {
+      "intro": "اسحب لإعادة ترتيب المراحل. يمكن إعادة تسمية المراحل الافتراضية أو تغيير لونها، لكن لا يمكن حذفها.",
+      "save_stage": "حفظ المرحلة",
+      "delete_title": "حذف «{{name}}»؟",
+      "delete_body": "سيتم نقل جميع العملاء المحتملين في هذه المرحلة إلى المرحلة البديلة المحددة.",
+      "delete_stage": "حذف المرحلة"
+    },
+    "orders": {
+      "order_number": "رقم الطلب",
+      "customer": "العميل",
+      "guest": "زائر",
+      "item_count_zero": "لا منتجات",
+      "item_count_one": "منتج واحد",
+      "item_count_two": "منتجان",
+      "item_count_few": "{{count}} منتجات",
+      "item_count_many": "{{count}} منتجًا",
+      "item_count_other": "{{count}} منتج"
+    },
+    "payments": {
+      "approval_failed": "فشلت الموافقة",
+      "verification_failed": "فشل التحقق",
+      "method": "الطريقة",
+      "upload_proof": "رفع الإثبات",
+      "plan": "الباقة"
+    },
+    "players": {
+      "updated": "تم تحديث اللاعب",
+      "created": "تم إنشاء اللاعب",
+      "password_update_failed": "فشل تحديث كلمة المرور",
+      "create": "إنشاء اللاعب",
+      "parent": "ولي الأمر",
+      "emergency": "الطوارئ",
+      "medical": "طبي",
+      "save_password": "حفظ كلمة المرور"
+    },
+    "profile": {
+      "password_change_failed": "فشل تغيير كلمة المرور",
+      "staff": "موظف"
+    },
+    "reports": {
+      "today": "اليوم",
+      "this_week": "هذا الأسبوع",
+      "this_month": "هذا الشهر",
+      "this_year": "هذه السنة",
+      "custom": "مخصص"
+    },
+    "roles": {
+      "updated": "تم تحديث الدور",
+      "created": "تم إنشاء الدور",
+      "edit": "تعديل الدور",
+      "create": "إنشاء دور"
+    },
+    "settings": {
+      "method_updated": "تم تحديث طريقة الدفع",
+      "method_created": "تم إنشاء طريقة الدفع",
+      "instructions": "التعليمات",
+      "active": "نشط",
+      "edit_method": "تعديل طريقة الدفع",
+      "add_method": "إضافة طريقة دفع",
+      "address_placeholder": "الجزائر العاصمة، الجزائر"
+    },
+    "inactive": "غير نشط",
+    "stations": {
+      "new": "محطة جديدة",
+      "comparison": "مقارنة المحطات",
+      "delete_confirm": "حذف هذه المحطة؟",
+      "save_public_page": "حفظ الصفحة العامة",
+      "create": "إنشاء المحطة"
+    },
+    "store": {
+      "category_updated": "تم تحديث الفئة",
+      "category_created": "تم إنشاء الفئة",
+      "edit_category": "تعديل الفئة",
+      "add_category": "إضافة فئة",
+      "field_updated": "تم تحديث الحقل",
+      "field_added": "تمت إضافة الحقل",
+      "edit_field": "تعديل الحقل",
+      "add_form_field": "إضافة حقل",
+      "add_field": "إضافة الحقل",
+      "add_group": "إضافة مجموعة",
+      "generate_variants": "إنشاء المتغيرات",
+      "save_all_variants": "حفظ كل المتغيرات",
+      "product_updated": "تم تحديث المنتج",
+      "product_created": "تم إنشاء المنتج",
+      "product": "المنتج",
+      "category": "الفئة",
+      "stock": "المخزون",
+      "featured": "مميز",
+      "edit_product": "تعديل المنتج",
+      "add_product": "إضافة منتج"
+    },
+    "subs": {
+      "start": "البداية",
+      "end": "النهاية",
+      "remaining": "المتبقي",
+      "plan_updated": "تم تحديث الباقة",
+      "plan_created": "تم إنشاء الباقة",
+      "edit_plan": "تعديل الباقة",
+      "new_plan": "باقة اشتراك جديدة",
+      "create_plan": "إنشاء الباقة"
+    },
+    "hide": "إخفاء",
+    "questions": "الأسئلة",
+    "published": "منشور",
+    "unpublished": "غير منشور",
+    "draft": "مسودة",
+    "live": "مباشر",
+    "publish": "نشر",
+    "unpublish": "إلغاء النشر",
+    "public": "عام",
+    "hidden": "مخفي",
+    "replace": "استبدال",
+    "save_settings": "حفظ الإعدادات",
+    "camp": {
+      "new_plan": "باقة جديدة",
+      "edit_plan": "تعديل الباقة",
+      "new_session": "جلسة جديدة",
+      "edit_session": "تعديل الجلسة",
+      "gender": "الجنس: {{gender}}",
+      "male": "ذكر",
+      "female": "أنثى"
+    },
+    "surveys": {
+      "edit": "تعديل الاستبيان",
+      "new": "استبيان جديد",
+      "edit_question": "تعديل السؤال",
+      "add_question": "إضافة سؤال"
+    },
+    "tickets": {
+      "create": "إنشاء تذكرة"
+    },
+    "users": {
+      "updated": "تم تحديث المستخدم",
+      "created": "تم إنشاء المستخدم",
+      "user": "المستخدم",
+      "role": "الدور",
+      "active": "نشط",
+      "last_login": "آخر تسجيل دخول",
+      "never": "أبدًا",
+      "created_at": "تاريخ الإنشاء",
+      "edit": "تعديل المستخدم",
+      "add": "إضافة مستخدم",
+      "new_password_keep": "كلمة مرور جديدة (اتركها فارغة للإبقاء على الحالية)",
+      "password_req": "كلمة المرور *",
+      "create": "إنشاء المستخدم"
+    },
+    "applications": {
+      "approval_failed": "فشلت الموافقة",
+      "full_name": "الاسم الكامل",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "date_of_birth": "تاريخ الميلاد",
+      "category": "الفئة",
+      "address": "العنوان",
+      "parent_name": "اسم ولي الأمر",
+      "parent_phone": "هاتف ولي الأمر",
+      "question": "سؤال"
+    },
+    "files": {
+      "academy": "الأكاديمية",
+      "summer_camp": "المخيم الصيفي",
+      "both": "كلاهما",
+      "delete_confirm": "حذف هذا المتطلب؟"
+    },
+    "footer": {
+      "save": "حفظ التذييل"
+    },
+    "header": {
+      "background_color": "لون الخلفية",
+      "text_color": "لون النص / الروابط",
+      "accent_color": "لون التمييز / الزر",
+      "save": "حفظ الترويسة"
+    },
+    "pages": {
+      "create": "إنشاء الصفحة",
+      "no_sections": "لا توجد أقسام بعد. أضف القسم الأول لبدء بناء هذه الصفحة."
+    },
+    "reviews": {
+      "feature": "تمييز",
+      "unfeature": "إلغاء التمييز",
+      "verify": "توثيق",
+      "unverify": "إلغاء التوثيق",
+      "save_reply": "حفظ الرد"
+    },
+    "slides": {
+      "click_to_upload": "انقر لرفع صورة",
+      "replace_image": "استبدال الصورة",
+      "slide": "شريحة",
+      "add": "إضافة شريحة",
+      "edit": "تعديل الشريحة",
+      "save": "حفظ الشريحة"
+    },
+    "sponsors": {
+      "add": "إضافة راعٍ",
+      "edit": "تعديل الراعي",
+      "save": "حفظ الراعي"
+    },
+    "hub": {
+      "title": "الموقع والطلبات",
+      "pages": "الصفحات",
+      "pages_desc": "أنشئ الصفحة الرئيسية وكل صفحات الموقع التعريفي من أقسام قابلة لإعادة الاستخدام بالسحب والإفلات.",
+      "programmes": "البرامج",
+      "programmes_desc": "أدر البرامج والفئات والمواعيد والأسعار المعروضة على الموقع العام.",
+      "schedules": "المواعيد",
+      "schedules_desc": "جدول تدريب كل موقع — اختر موقعًا وعدّل حصصه فقط.",
+      "venues": "المواقع",
+      "venues_desc": "تحكم في المحطات الظاهرة على صفحة المواقع العامة وترتيبها.",
+      "squads": "تسجيلات الفرق",
+      "squads_desc": "راجع طلبات الاهتمام بفرق التطوير المرسلة من الموقع العام.",
+      "contact": "رسائل التواصل",
+      "contact_desc": "الرسائل المرسلة من صفحة اتصل بنا العامة.",
+      "coaches": "المدربون",
+      "coaches_desc": "الملفات العامة للمدربين المعروضة على صفحات البرامج ومن نحن.",
+      "pathway": "المسار",
+      "pathway_desc": "المراحل المعروضة على الخط الزمني العام للمسار.",
+      "faqs": "الأسئلة الشائعة",
+      "faqs_desc": "أدر الأسئلة الشائعة المعروضة على الموقع العام.",
+      "news": "الأخبار",
+      "news_desc": "انشر المقالات المعروضة على صفحة الأخبار العامة.",
+      "redirects": "إعادات التوجيه",
+      "redirects_desc": "سجّل الروابط القديمة التي يجب توجيهها إلى صفحة جديدة.",
+      "header": "محرر الترويسة",
+      "header_desc": "اضبط التنقل والشعار وزر الدعوة وقائمة الجوال.",
+      "footer": "محرر التذييل",
+      "footer_desc": "خصّص روابط التذييل وأيقونات التواصل والألوان ونص الحقوق.",
+      "store": "إعدادات المتجر",
+      "store_desc": "فعّل المتجر واضبط رسوم الشحن ومحتوى الصفحة.",
+      "reviews": "التقييمات",
+      "reviews_desc": "راجع تقييمات العملاء وردّ عليها وميّز أفضلها.",
+      "summer_camp": "صفحة المخيم الصيفي",
+      "summer_camp_desc": "اضبط عنوان صفحة المخيم الصيفي وصورتها ووصفها وزر الدعوة.",
+      "file_requirements": "المستندات المطلوبة",
+      "file_requirements_desc": "أدر المستندات التي يجب على المتقدمين رفعها (الهوية، شهادة الميلاد، الصورة، إلخ).",
+      "applications": "الطلبات",
+      "applications_desc": "اعرض وصفِّ وأدر كل الطلبات المرسلة عبر الموقع العام.",
+      "surveys": "منشئ الاستبيانات",
+      "surveys_desc": "أنشئ الاستبيان الذي يظهر للمتقدمين أثناء التسجيل.",
+      "total_applications": "إجمالي الطلبات",
+      "pending_review": "بانتظار المراجعة",
+      "converted": "المحوّلة"
+    },
+    "branding": {
+      "save": "حفظ إعدادات الهوية"
+    }
   }
 }

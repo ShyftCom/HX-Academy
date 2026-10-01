@@ -29,7 +29,7 @@ export default function RedirectsAdminPage() {
 
   const { mutate: create, isPending } = useMutation({
     mutationFn: () => fetch("/api/redirects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fromPath, toPath }) }).then(async (r) => {
-      const d = await r.json(); if (!r.ok) throw new Error(d.error ?? "Failed"); return d;
+      const d = await r.json(); if (!r.ok) throw new Error(d.error ?? t("common:toast.failed")); return d;
     }),
     onSuccess: () => { toast.success(t("redirects.created")); qc.invalidateQueries({ queryKey: ["admin-redirects"] }); setCreating(false); setFromPath(""); setToPath(""); },
     onError: (e: Error) => toast.error(e.message),
@@ -85,7 +85,7 @@ export default function RedirectsAdminPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => create()} disabled={isPending || !fromPath || !toPath}>{isPending ? "Creating…" : "Create"}</Button>
+            <Button onClick={() => create()} disabled={isPending || !fromPath || !toPath}>{isPending ? t("common:bo.creating") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

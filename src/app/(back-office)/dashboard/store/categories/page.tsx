@@ -47,7 +47,7 @@ export default function CategoriesPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editCat ? "Category updated" : "Category created"); qc.invalidateQueries({ queryKey: ["product-categories"] }); setModalOpen(false); setForm({ name: "", description: "" }); setEditCat(null); },
+    onSuccess: () => { toast.success(editCat ? t("common:bo.store.category_updated") : t("common:bo.store.category_created")); qc.invalidateQueries({ queryKey: ["product-categories"] }); setModalOpen(false); setForm({ name: "", description: "" }); setEditCat(null); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
@@ -61,9 +61,9 @@ export default function CategoriesPage() {
   const openEdit = (c: any) => { setEditCat(c); setForm({ name: c.name, description: c.description ?? "" }); setModalOpen(true); };
 
   const columns = [
-    { key: "name", header: "Name", cell: (r: any) => <span className="font-medium">{r.name}</span> },
-    { key: "description", header: "Description", cell: (r: any) => r.description ?? "—" },
-    { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.isActive ? "success" : "secondary"}>{r.isActive ? "Active" : "Inactive"}</Badge> },
+    { key: "name", header: t("common:labels.name"), cell: (r: any) => <span className="font-medium">{r.name}</span> },
+    { key: "description", header: t("common:labels.description"), cell: (r: any) => r.description ?? "—" },
+    { key: "status", header: t("common:labels.status"), cell: (r: any) => <Badge variant={r.isActive ? "success" : "secondary"}>{r.isActive ? t("common:status.active") : t("common:bo.inactive")}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
         {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(r)}><Edit className="h-3.5 w-3.5 me-1" />{t("common:ui.edit")}</Button>}
@@ -86,14 +86,14 @@ export default function CategoriesPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="sm">
-          <DialogHeader><DialogTitle>{editCat ? "Edit Category" : "Add Category"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editCat ? t("common:bo.store.edit_category") : t("common:bo.store.add_category")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("categories.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("categories.name_ph")} />
             <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("categories.description_ph")} rows={2} />
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editCat ? "Save" : "Create"}</Button>
+            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editCat ? t("common:actions.save") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

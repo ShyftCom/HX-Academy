@@ -53,7 +53,7 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editMethod ? "Method updated" : "Method created"); qc.invalidateQueries({ queryKey: ["payment-methods"] }); setMethodModal(false); setEditMethod(null); setMethodForm({ name: "", instructions: "", accountDetails: "", isActive: true }); },
+    onSuccess: () => { toast.success(editMethod ? t("common:bo.settings.method_updated") : t("common:bo.settings.method_created")); qc.invalidateQueries({ queryKey: ["payment-methods"] }); setMethodModal(false); setEditMethod(null); setMethodForm({ name: "", instructions: "", accountDetails: "", isActive: true }); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
@@ -71,9 +71,9 @@ export default function SettingsPage() {
   if (isLoading) return <FullPageLoader />;
 
   const methodColumns = [
-    { key: "name", header: "Method", cell: (r: any) => <p className="font-medium text-sm">{r.name}</p> },
-    { key: "instructions", header: "Instructions", cell: (r: any) => <p className="text-xs text-gray-500 truncate max-w-xs">{r.instructions ?? "—"}</p> },
-    { key: "status", header: "Active", cell: (r: any) => <Switch disabled={!canEditSettings} checked={r.isActive} onCheckedChange={(v) => fetch(`/api/payments/methods/${r.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...r, isActive: v }) }).then(() => qc.invalidateQueries({ queryKey: ["payment-methods"] }))} /> },
+    { key: "name", header: t("common:bo.payments.method"), cell: (r: any) => <p className="font-medium text-sm">{r.name}</p> },
+    { key: "instructions", header: t("common:bo.settings.instructions"), cell: (r: any) => <p className="text-xs text-gray-500 truncate max-w-xs">{r.instructions ?? "—"}</p> },
+    { key: "status", header: t("common:bo.settings.active"), cell: (r: any) => <Switch disabled={!canEditSettings} checked={r.isActive} onCheckedChange={(v) => fetch(`/api/payments/methods/${r.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...r, isActive: v }) }).then(() => qc.invalidateQueries({ queryKey: ["payment-methods"] }))} /> },
     { key: "actions", header: "", cell: (r: any) => (
       <div className="flex gap-2">
         {canEditSettings && <Button variant="outline" size="sm" onClick={() => openEditMethod(r)}><Edit className="h-3.5 w-3.5" /></Button>}
@@ -103,7 +103,7 @@ export default function SettingsPage() {
             <Input label={t("common:ui.email")} type="email" value={settings.academy_email ?? ""} onChange={(e) => upd("academy_email", e.target.value)} placeholder="contact@hxacademy.com" />
             <Input label={t("common:ui.phone")} value={settings.academy_phone ?? ""} onChange={(e) => upd("academy_phone", e.target.value)} placeholder="+213 ..." />
             <Input label={t("settings.whatsapp")} value={settings.academy_whatsapp ?? ""} onChange={(e) => upd("academy_whatsapp", e.target.value)} placeholder="+213 ..." />
-            <Textarea label={t("common:ui.address")} value={settings.academy_address ?? ""} onChange={(e) => upd("academy_address", e.target.value)} placeholder="Algiers, Algeria" rows={2} />
+            <Textarea label={t("common:ui.address")} value={settings.academy_address ?? ""} onChange={(e) => upd("academy_address", e.target.value)} placeholder={t("common:bo.settings.address_placeholder")} rows={2} />
             <Input label={t("settings.currency_symbol")} value={settings.currency_symbol ?? ""} onChange={(e) => upd("currency_symbol", e.target.value)} placeholder="DA" />
             <Button onClick={() => saveMutation.mutate(settings)} loading={saveMutation.isPending}><Save className="me-2 h-4 w-4" />{t("settings.save_general")}</Button>
           </CardContent></Card>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
 
       <Dialog open={methodModal} onOpenChange={setMethodModal}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>{editMethod ? "Edit Payment Method" : "Add Payment Method"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editMethod ? t("common:bo.settings.edit_method") : t("common:bo.settings.add_method")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("settings.method_name")} value={methodForm.name} onChange={(e) => setMethodForm({ ...methodForm, name: e.target.value })} placeholder={t("settings.method_ph")} />
             <Textarea label={t("settings.instructions")} value={methodForm.instructions} onChange={(e) => setMethodForm({ ...methodForm, instructions: e.target.value })} placeholder={t("settings.instructions_ph")} rows={3} />
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setMethodModal(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveMethodMutation.mutate()} loading={saveMethodMutation.isPending} disabled={!methodForm.name}>{editMethod ? "Save" : "Create"}</Button>
+            <Button onClick={() => saveMethodMutation.mutate()} loading={saveMethodMutation.isPending} disabled={!methodForm.name}>{editMethod ? t("common:actions.save") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

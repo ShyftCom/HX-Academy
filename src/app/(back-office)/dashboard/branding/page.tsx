@@ -210,7 +210,7 @@ export default function BrandingPage() {
         setLogos((p) => ({ ...p, [key]: d.url }));
         toast.success(t("branding.logo_uploaded"));
       } else {
-        toast.error(d.error ?? "Upload failed");
+        toast.error(d.error ?? t("common:toast.upload_failed"));
       }
     } catch {
       toast.error(t("common:toast.upload_failed"));
@@ -339,7 +339,7 @@ export default function BrandingPage() {
             onMouseLeave={e => (e.currentTarget.style.background = "#A02020")}
           >
             {savingColors ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Brand Settings
+            {t("common:bo.branding.save")}
           </button>
         </div>
       </section>

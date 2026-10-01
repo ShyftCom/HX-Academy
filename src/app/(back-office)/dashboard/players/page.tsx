@@ -35,8 +35,8 @@ const CATEGORIES = ["U8", "U10", "U12", "U14", "U16", "U18", "Adult"];
 const POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward", "Winger"];
 
 const schema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
-  email: z.string().email("Invalid email"),
+  fullName: z.string().min(1, "common:bo.validation.full_name_required"),
+  email: z.string().email("common:errors.invalid_email"),
   password: z.string().optional(),
   phone: z.string().optional(),
   dateOfBirth: z.string().optional(),
@@ -118,14 +118,14 @@ export default function PlayersPage() {
       return res.json();
     },
     onSuccess: (data: any) => {
-      toast.success(editPlayer ? "Player updated" : "Player created");
+      toast.success(editPlayer ? t("common:bo.players.updated") : t("common:bo.players.created"));
       qc.invalidateQueries({ queryKey: ["players"] });
       setModalOpen(false);
       reset();
       setEditPlayer(null);
       if (data?.credentials) setCredentials(data.credentials);
     },
-    onError: (e: any) => toast.error(e.message ?? "Save failed"),
+    onError: (e: any) => toast.error(e.message || t("common:toast.save_failed")),
   });
 
   const copyCredentials = async () => {
@@ -173,7 +173,7 @@ export default function PlayersPage() {
       return res.json();
     },
     onSuccess: () => { toast.success(t("toast.password_updated")); setResetPwdPlayer(null); setNewPassword(""); setConfirmPassword(""); },
-    onError: (e: any) => toast.error(e.message ?? "Failed to update password"),
+    onError: (e: any) => toast.error(e.message || t("common:bo.players.password_update_failed")),
   });
 
   const openAdd = () => { setEditPlayer(null); reset({ fullName: "", email: "", phone: "", password: generatePassword() }); setModalOpen(true); };
@@ -192,18 +192,18 @@ export default function PlayersPage() {
   };
 
   const columns = [
-    { key: "name", header: "Player", cell: (r: any) => (
+    { key: "name", header: t("table.player"), cell: (r: any) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-8 w-8"><AvatarImage src={r.photo ?? ""} /><AvatarFallback>{getInitials(r.fullName)}</AvatarFallback></Avatar>
         <div><p className="font-medium text-sm">{r.fullName}</p><p className="text-xs text-gray-400">{r.email ?? "—"}</p></div>
       </div>
     )},
-    { key: "phone", header: "Phone", cell: (r: any) => r.phone ?? "—" },
+    { key: "phone", header: t("form.phone"), cell: (r: any) => r.phone ?? "—" },
     { key: "station", header: t("common:labels.station"), cell: (r: any) => r.station?.name ?? "—" },
-    { key: "category", header: "Category", cell: (r: any) => r.category ? <Badge variant="outline">{r.category}</Badge> : "—" },
-    { key: "team", header: "Team", cell: (r: any) => r.team ?? "—" },
-    { key: "subscription", header: "Subscription", cell: (r: any) => getSubStatus(r) },
-    { key: "status", header: "Status", cell: (r: any) => (
+    { key: "category", header: t("table.category"), cell: (r: any) => r.category ? <Badge variant="outline">{r.category}</Badge> : "—" },
+    { key: "team", header: t("table.team"), cell: (r: any) => r.team ?? "—" },
+    { key: "subscription", header: t("table.subscription"), cell: (r: any) => getSubStatus(r) },
+    { key: "status", header: t("table.status"), cell: (r: any) => (
       <Badge variant={r.status === "active" ? "success" : "destructive"}>{r.status}</Badge>
     )},
     { key: "actions", header: "", cell: (r: any) => (
@@ -267,7 +267,7 @@ export default function PlayersPage() {
       {/* Add/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="2xl">
-          <DialogHeader><DialogTitle>{editPlayer ? "Edit Player" : "Add New Player"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editPlayer ? t("actions.edit_player") : t("actions.add_player")}</DialogTitle></DialogHeader>
           <form
             onSubmit={handleSubmit((d) => {
               if (!editPlayer && (!d.password || d.password.trim().length < 8)) {
@@ -278,8 +278,8 @@ export default function PlayersPage() {
             })}
           >
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("fullName")} label={t("form.full_name_req")} placeholder={t("form.full_name_ph")} error={errors.fullName?.message} />
-              <Input {...register("email")} label={t("form.email_req")} placeholder={t("form.email_ph")} error={errors.email?.message} />
+              <Input {...register("fullName")} label={t("form.full_name_req")} placeholder={t("form.full_name_ph")} error={errors.fullName?.message && t(errors.fullName.message)} />
+              <Input {...register("email")} label={t("form.email_req")} placeholder={t("form.email_ph")} error={errors.email?.message && t(errors.email.message)} />
               {!editPlayer && (
                 <div className="col-span-2">
                   <div className="flex items-end gap-2">
@@ -324,7 +324,7 @@ export default function PlayersPage() {
             </DialogBody>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-              <Button type="submit" loading={saveMutation.isPending}>{editPlayer ? "Save Changes" : "Create Player"}</Button>
+              <Button type="submit" loading={saveMutation.isPending}>{editPlayer ? t("common:bo.save_changes") : t("common:bo.players.create")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -348,7 +348,7 @@ export default function PlayersPage() {
                 </TabsList>
                 <TabsContent value="info">
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    {[["Email", playerDetail.email],["Phone",playerDetail.phone],["Station",playerDetail.station?.name],["Category",playerDetail.category],["Team",playerDetail.team],["Position",playerDetail.position],["Parent",playerDetail.parentName],["Parent Phone",playerDetail.parentPhone],["Address",playerDetail.address],["Emergency",playerDetail.emergencyContact],["Medical",playerDetail.medicalNotes],["Notes",playerDetail.notes]].map(([k,v]) => v ? (
+                    {[[t("form.email"), playerDetail.email],[t("form.phone"),playerDetail.phone],[t("common:labels.station"),playerDetail.station?.name],[t("form.category"),playerDetail.category],[t("form.team"),playerDetail.team],[t("form.position"),playerDetail.position],[t("common:bo.players.parent"),playerDetail.parentName],[t("form.parent_phone"),playerDetail.parentPhone],[t("form.address"),playerDetail.address],[t("common:bo.players.emergency"),playerDetail.emergencyContact],[t("common:bo.players.medical"),playerDetail.medicalNotes],[t("form.notes"),playerDetail.notes]].map(([k,v]) => v ? (
                       <div key={k}><p className="text-xs text-gray-400">{k}</p><p className="font-medium">{v}</p></div>
                     ) : null)}
                   </div>
@@ -448,7 +448,7 @@ export default function PlayersPage() {
               disabled={!newPassword || newPassword !== confirmPassword || newPassword.length < 6}
               onClick={() => resetPwdPlayer && resetPwdMutation.mutate({ id: resetPwdPlayer.id, password: newPassword })}
             >
-              Save Password
+              {t("common:bo.players.save_password")}
             </Button>
           </DialogFooter>
         </DialogContent>

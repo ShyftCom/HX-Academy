@@ -176,7 +176,7 @@ export default function VariantsPage() {
           {!addingGroup && (
             <Button size="sm" variant="outline" onClick={() => setAddingGroup(true)}>
               <Plus className="me-1.5 h-4 w-4" />
-              Add Group
+              {t("common:bo.store.add_group")}
             </Button>
           )}
         </div>
@@ -277,7 +277,7 @@ export default function VariantsPage() {
       <div className="flex items-center gap-3">
         <Button onClick={generateVariants} variant="outline">
           <Zap className="me-2 h-4 w-4" />
-          Generate Variants
+          {t("common:bo.store.generate_variants")}
         </Button>
         {generated && (
           <span className="text-sm text-gray-500">{variantRows.length} combination{variantRows.length !== 1 ? "s" : ""}</span>
@@ -355,7 +355,7 @@ export default function VariantsPage() {
               loading={saveVariantsMutation.isPending}
             >
               <Save className="me-2 h-4 w-4" />
-              Save All Variants
+              {t("common:bo.store.save_all_variants")}
             </Button>
           </div>
         </Card>
@@ -378,7 +378,7 @@ export default function VariantsPage() {
                 {v.sku && <span className="text-xs text-gray-400">SKU: {v.sku}</span>}
                 {v.price != null && <span className="text-sm font-medium">{Number(v.price).toLocaleString()} DA</span>}
                 <Badge variant={v.stock > 0 ? "success" : "destructive"}>{v.stock} in stock</Badge>
-                <Badge variant={v.isActive ? "default" : "secondary"}>{v.isActive ? "Active" : "Inactive"}</Badge>
+                <Badge variant={v.isActive ? "default" : "secondary"}>{v.isActive ? t("common:status.active") : t("common:bo.inactive")}</Badge>
               </div>
             ))}
           </div>

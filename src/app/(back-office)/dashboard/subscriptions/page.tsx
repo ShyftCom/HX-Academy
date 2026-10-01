@@ -91,18 +91,18 @@ export default function SubscriptionsPage() {
   };
 
   const columns = [
-    { key: "player", header: "Player", cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone ?? "—"}</p></div> },
+    { key: "player", header: t("common:ui.player"), cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone ?? "—"}</p></div> },
     { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
-    { key: "plan", header: "Plan", cell: (r: any) => (
+    { key: "plan", header: t("common:bo.payments.plan"), cell: (r: any) => (
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded-full" style={{ backgroundColor: r.plan?.color ?? "#6B7280" }} />
         <span className="text-sm">{r.plan?.name}</span>
       </div>
     )},
-    { key: "startDate", header: "Start", cell: (r: any) => formatDate(r.startDate) },
-    { key: "endDate", header: "End", cell: (r: any) => formatDate(r.endDate) },
-    { key: "remaining", header: "Remaining", cell: (r: any) => getDaysRemaining(r) },
-    { key: "status", header: "Status", cell: (r: any) => <Badge variant={STATUS_COLORS[r.status] as any}>{r.status}</Badge> },
+    { key: "startDate", header: t("common:bo.subs.start"), cell: (r: any) => formatDate(r.startDate) },
+    { key: "endDate", header: t("common:bo.subs.end"), cell: (r: any) => formatDate(r.endDate) },
+    { key: "remaining", header: t("common:bo.subs.remaining"), cell: (r: any) => getDaysRemaining(r) },
+    { key: "status", header: t("common:labels.status"), cell: (r: any) => <Badge variant={STATUS_COLORS[r.status] as any}>{t(`common:status.${r.status}`, { defaultValue: r.status })}</Badge> },
     { key: "actions", header: "", cell: (r: any) => (
       // Staff reach this page on subscriptions:view alone but hold neither
       // edit nor delete, so the whole menu would be dead for them.

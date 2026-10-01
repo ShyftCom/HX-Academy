@@ -54,7 +54,7 @@ export default function NewsEditPage() {
         </div>
         <div className="flex items-center gap-2">
           <a href={`/fr/news/${article.slug}`} target="_blank" rel="noopener noreferrer"><Button variant="outline" size="sm"><ExternalLink className="h-3.5 w-3.5" /> {t("common:ui.view")}</Button></a>
-          <Button size="sm" onClick={() => save()} disabled={saving}><Save className="h-3.5 w-3.5" /> {saving ? "Saving…" : "Save"}</Button>
+          <Button size="sm" onClick={() => save()} disabled={saving}><Save className="h-3.5 w-3.5" /> {saving ? t("common:bo.saving") : t("common:actions.save")}</Button>
         </div>
       </div>
 

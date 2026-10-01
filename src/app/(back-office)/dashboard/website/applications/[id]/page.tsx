@@ -59,7 +59,7 @@ export default function ApplicationDetailPage() {
       const r = await fetch(`/api/applications/${id}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(approveForm) });
       const d = await r.json();
       if (r.ok) { toast.success(t("applications.approved_toast")); setShowApproveDialog(false); setApp((p) => p ? { ...p, isConverted: true } : p); }
-      else toast.error(d.error ?? "Approval failed");
+      else toast.error(d.error ?? t("common:bo.applications.approval_failed"));
     } catch { toast.error(t("applications.approval_failed")); }
     setApproving(false);
   }
@@ -100,14 +100,14 @@ export default function ApplicationDetailPage() {
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><User className="w-4 h-4 text-gray-400" /> {t("applications.personal_info")}</h2>
             <div className="divide-y divide-gray-50 dark:divide-gray-700">
-              {detailRow("Full Name", app.fullName)}
-              {detailRow("Phone", app.phone)}
-              {detailRow("Email", app.email)}
-              {detailRow("Date of Birth", app.dateOfBirth ? new Date(app.dateOfBirth).toLocaleDateString() : null)}
-              {detailRow("Category", app.categoryInterest)}
-              {detailRow("Address", app.address)}
-              {detailRow("Parent Name", app.parentName)}
-              {detailRow("Parent Phone", app.parentPhone)}
+              {detailRow(t("common:bo.applications.full_name"), app.fullName)}
+              {detailRow(t("common:bo.applications.phone"), app.phone)}
+              {detailRow(t("common:bo.applications.email"), app.email)}
+              {detailRow(t("common:bo.applications.date_of_birth"), app.dateOfBirth ? new Date(app.dateOfBirth).toLocaleDateString() : null)}
+              {detailRow(t("common:bo.applications.category"), app.categoryInterest)}
+              {detailRow(t("common:bo.applications.address"), app.address)}
+              {detailRow(t("common:bo.applications.parent_name"), app.parentName)}
+              {detailRow(t("common:bo.applications.parent_phone"), app.parentPhone)}
             </div>
           </div>
 
@@ -129,7 +129,7 @@ export default function ApplicationDetailPage() {
               <div className="space-y-4">
                 {app.surveyAnswers.map((a) => (
                   <div key={a.id}>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">{a.question?.question ?? "Question"}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">{a.question?.question ?? t("common:bo.applications.question")}</p>
                     <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5">{(() => { try { const p = JSON.parse(a.answer); return Array.isArray(p) ? p.join(", ") : a.answer; } catch { return a.answer; } })()}</p>
                   </div>
                 ))}

@@ -26,15 +26,15 @@ import { PERMISSIONS } from "@/lib/permission-names";
 
 const COLORS = ["#3B82F6","#10B981","#8B5CF6","#F59E0B","#EF4444","#EC4899","#14B8A6","#F97316"];
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "common:bo.validation.name_required"),
   nameFr: z.string().optional(),
   nameAr: z.string().optional(),
   description: z.string().optional(),
   descriptionFr: z.string().optional(),
   descriptionAr: z.string().optional(),
-  duration: z.string().min(1, "Duration is required"),
+  duration: z.string().min(1, "common:bo.validation.duration_required"),
   durationType: z.string(),
-  price: z.string().min(1, "Price is required"),
+  price: z.string().min(1, "common:bo.validation.price_required"),
   color: z.string(),
   isActive: z.boolean(),
 });
@@ -72,7 +72,7 @@ export default function PlansPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editPlan ? "Plan updated" : "Plan created"); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setModalOpen(false); reset(); setEditPlan(null); },
+    onSuccess: () => { toast.success(editPlan ? t("common:bo.subs.plan_updated") : t("common:bo.subs.plan_created")); qc.invalidateQueries({ queryKey: ["subscription-plans"] }); setModalOpen(false); reset(); setEditPlan(null); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
@@ -80,7 +80,7 @@ export default function PlansPage() {
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/subscriptions/plans/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok) throw new Error(data.error || t("common:toast.delete_failed"));
       return data;
     },
     onSuccess: (data) => {
@@ -124,7 +124,7 @@ export default function PlansPage() {
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">{plan.name}</h3>
                     {plan.description && <p className="text-sm text-gray-500 mt-0.5">{plan.description}</p>}
                   </div>
-                  <Badge variant={plan.isActive ? "success" : "secondary"}>{plan.isActive ? "Active" : "Inactive"}</Badge>
+                  <Badge variant={plan.isActive ? "success" : "secondary"}>{plan.isActive ? t("common:status.active") : t("common:bo.inactive")}</Badge>
                 </div>
                 <div className="mt-4">
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatCurrency(plan.price)}</p>
@@ -142,14 +142,14 @@ export default function PlansPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>{editPlan ? "Edit Plan" : "New Subscription Plan"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editPlan ? t("common:bo.subs.edit_plan") : t("common:bo.subs.new_plan")}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="space-y-4">
               <LocaleFields register={register as never} baseKey="name" label={t("plans.name")} placeholder={t("plans.name_ph")} />
-              {errors.name?.message && <p className="text-xs text-red-500">{errors.name.message}</p>}
+              {errors.name?.message && <p className="text-xs text-red-500">{t(errors.name.message)}</p>}
               <LocaleFields register={register as never} baseKey="description" label={t("common:ui.description")} placeholder={t("plans.description_ph")} multiline rows={2} />
               <div className="grid grid-cols-2 gap-3">
-                <Input {...register("duration")} label={t("plans.duration")} type="number" min="1" placeholder="1" error={errors.duration?.message} />
+                <Input {...register("duration")} label={t("plans.duration")} type="number" min="1" placeholder="1" error={errors.duration?.message && t(errors.duration.message)} />
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("plans.unit")}</label>
                   <Select onValueChange={(v) => setValue("durationType", v)} defaultValue={editPlan?.durationType ?? "month"}>
@@ -158,7 +158,7 @@ export default function PlansPage() {
                   </Select>
                 </div>
               </div>
-              <Input {...register("price")} label={t("plans.price")} type="number" min="0" placeholder="5000" error={errors.price?.message} />
+              <Input {...register("price")} label={t("plans.price")} type="number" min="0" placeholder="5000" error={errors.price?.message && t(errors.price.message)} />
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("plans.color")}</label>
                 <div className="flex gap-2">
@@ -174,7 +174,7 @@ export default function PlansPage() {
             </DialogBody>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-              <Button type="submit" loading={saveMutation.isPending}>{editPlan ? "Save Changes" : "Create Plan"}</Button>
+              <Button type="submit" loading={saveMutation.isPending}>{editPlan ? t("common:bo.save_changes") : t("common:bo.subs.create_plan")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

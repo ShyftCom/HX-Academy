@@ -120,7 +120,7 @@ export default function StoreSettingsPage() {
 
       <div className="flex justify-end">
         <Button onClick={() => save()} disabled={isPending} className="min-w-32">
-          {isPending ? "Saving..." : "Save Settings"}
+          {isPending ? t("common:bo.saving") : t("common:bo.save_settings")}
         </Button>
       </div>
     </div>

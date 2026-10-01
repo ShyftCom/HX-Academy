@@ -56,11 +56,11 @@ export default function UsersPage() {
       const body = editUser ? { name: form.name, roleId: form.roleId || null, isActive: form.isActive, ...(form.password && { password: form.password }) } : form;
       const res = await fetch(url, { method: editUser ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Failed");
+      if (!res.ok) throw new Error(json.error ?? t("common:toast.failed"));
       return json;
     },
-    onSuccess: () => { toast.success(editUser ? "User updated" : "User created"); qc.invalidateQueries({ queryKey: ["users"] }); setModalOpen(false); setEditUser(null); setForm({ name: "", email: "", password: "", roleId: "", isActive: true }); },
-    onError: (e: any) => toast.error(e.message ?? "Save failed"),
+    onSuccess: () => { toast.success(editUser ? t("common:bo.users.updated") : t("common:bo.users.created")); qc.invalidateQueries({ queryKey: ["users"] }); setModalOpen(false); setEditUser(null); setForm({ name: "", email: "", password: "", roleId: "", isActive: true }); },
+    onError: (e: any) => toast.error(e.message || t("common:toast.save_failed")),
   });
 
   const toggleMutation = useMutation({
@@ -74,7 +74,7 @@ export default function UsersPage() {
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok) throw new Error(data.error || t("common:toast.delete_failed"));
       return data;
     },
     onSuccess: (data) => {
@@ -89,16 +89,16 @@ export default function UsersPage() {
   const openEdit = (u: any) => { setEditUser(u); setForm({ name: u.name ?? "", email: u.email, password: "", roleId: u.roleId ?? "", isActive: u.isActive }); setModalOpen(true); };
 
   const columns = [
-    { key: "user", header: "User", cell: (r: any) => (
+    { key: "user", header: t("common:bo.users.user"), cell: (r: any) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-8 w-8"><AvatarFallback>{getInitials(r.name ?? r.email)}</AvatarFallback></Avatar>
         <div><p className="font-medium text-sm">{r.name ?? "—"}</p><p className="text-xs text-gray-400">{r.email}</p></div>
       </div>
     )},
-    { key: "role", header: "Role", cell: (r: any) => r.role ? <Badge variant="default">{r.role.name}</Badge> : <Badge variant="secondary">{t("users.no_role")}</Badge> },
-    { key: "isActive", header: "Active", cell: (r: any) => <Switch checked={r.isActive} onCheckedChange={(v) => toggleMutation.mutate({ id: r.id, isActive: v })} /> },
-    { key: "lastLogin", header: "Last Login", cell: (r: any) => r.lastLogin ? timeAgo(r.lastLogin) : "Never" },
-    { key: "createdAt", header: "Created", cell: (r: any) => formatDate(r.createdAt) },
+    { key: "role", header: t("common:bo.users.role"), cell: (r: any) => r.role ? <Badge variant="default">{r.role.name}</Badge> : <Badge variant="secondary">{t("users.no_role")}</Badge> },
+    { key: "isActive", header: t("common:bo.users.active"), cell: (r: any) => <Switch checked={r.isActive} onCheckedChange={(v) => toggleMutation.mutate({ id: r.id, isActive: v })} /> },
+    { key: "lastLogin", header: t("common:bo.users.last_login"), cell: (r: any) => r.lastLogin ? timeAgo(r.lastLogin) : t("common:bo.users.never") },
+    { key: "createdAt", header: t("common:bo.users.created_at"), cell: (r: any) => formatDate(r.createdAt) },
     { key: "actions", header: "", cell: (r: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -123,11 +123,11 @@ export default function UsersPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>{editUser ? "Edit User" : "Add User"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editUser ? t("common:bo.users.edit") : t("common:bo.users.add")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("users.full_name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="John Doe" />
             {!editUser && <Input label={t("users.email")} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@hxacademy.com" />}
-            <Input label={editUser ? "New Password (leave blank to keep)" : "Password *"} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
+            <Input label={editUser ? t("common:bo.users.new_password_keep") : t("common:bo.users.password_req")} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("users.role")}</label>
               <Select value={form.roleId} onValueChange={(v) => setForm({ ...form, roleId: v })}>
@@ -142,7 +142,7 @@ export default function UsersPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name || (!editUser && (!form.email || !form.password))}>{editUser ? "Save Changes" : "Create User"}</Button>
+            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name || (!editUser && (!form.email || !form.password))}>{editUser ? t("common:bo.save_changes") : t("common:bo.users.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

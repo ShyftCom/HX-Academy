@@ -191,7 +191,7 @@ export default function TicketsPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewOpen(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => createTicket(form)} disabled={creating}>{creating ? "Creating..." : "Create Ticket"}</Button>
+            <Button onClick={() => createTicket(form)} disabled={creating}>{creating ? t("common:bo.creating") : t("common:bo.tickets.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

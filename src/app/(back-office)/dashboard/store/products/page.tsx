@@ -29,13 +29,13 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
 
 const schema = z.object({
-  name: z.string().min(1, "Name required"),
+  name: z.string().min(1, "common:bo.validation.name_required"),
   nameFr: z.string().optional(),
   nameAr: z.string().optional(),
   description: z.string().optional(),
   descriptionFr: z.string().optional(),
   descriptionAr: z.string().optional(),
-  price: z.string().min(1, "Price required"),
+  price: z.string().min(1, "common:bo.validation.price_required"),
   discountPrice: z.string().optional(),
   stock: z.string(),
   sku: z.string().optional(),
@@ -92,7 +92,7 @@ export default function ProductsPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editProduct ? "Product updated" : "Product created"); qc.invalidateQueries({ queryKey: ["products"] }); setModalOpen(false); reset(); setImages([]); setEditProduct(null); },
+    onSuccess: () => { toast.success(editProduct ? t("common:bo.store.product_updated") : t("common:bo.store.product_created")); qc.invalidateQueries({ queryKey: ["products"] }); setModalOpen(false); reset(); setImages([]); setEditProduct(null); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
@@ -100,7 +100,7 @@ export default function ProductsPage() {
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok) throw new Error(data.error || t("common:toast.delete_failed"));
       return data;
     },
     onSuccess: (data) => {
@@ -132,7 +132,7 @@ export default function ProductsPage() {
   };
 
   const columns = [
-    { key: "name", header: "Product", cell: (r: any) => {
+    { key: "name", header: t("common:bo.store.product"), cell: (r: any) => {
       const imgs = parseJsonSafe<string[]>(r.images, []);
       return (
         <div className="flex items-center gap-3">
@@ -141,15 +141,15 @@ export default function ProductsPage() {
         </div>
       );
     }},
-    { key: "category", header: "Category", cell: (r: any) => r.category?.name ?? "—" },
-    { key: "price", header: "Price", cell: (r: any) => (
+    { key: "category", header: t("common:bo.store.category"), cell: (r: any) => r.category?.name ?? "—" },
+    { key: "price", header: t("common:labels.price"), cell: (r: any) => (
       <div>
         {r.discountPrice ? <><p className="font-medium text-sm">{formatCurrency(r.discountPrice)}</p><p className="text-xs line-through text-gray-400">{formatCurrency(r.price)}</p></> : <p className="font-medium text-sm">{formatCurrency(r.price)}</p>}
       </div>
     )},
-    { key: "stock", header: "Stock", cell: (r: any) => getStockBadge(r.stock) },
-    { key: "status", header: "Status", cell: (r: any) => <Badge variant={r.status === "active" ? "success" : "secondary"}>{r.status}</Badge> },
-    { key: "featured", header: "Featured", cell: (r: any) => r.isFeatured ? <Badge variant="default">{t("products.featured")}</Badge> : null },
+    { key: "stock", header: t("common:bo.store.stock"), cell: (r: any) => getStockBadge(r.stock) },
+    { key: "status", header: t("common:labels.status"), cell: (r: any) => <Badge variant={r.status === "active" ? "success" : "secondary"}>{t(`common:status.${r.status}`, { defaultValue: r.status })}</Badge> },
+    { key: "featured", header: t("common:bo.store.featured"), cell: (r: any) => r.isFeatured ? <Badge variant="default">{t("products.featured")}</Badge> : null },
     { key: "actions", header: "", cell: (r: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -184,12 +184,12 @@ export default function ProductsPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="2xl">
-          <DialogHeader><DialogTitle>{editProduct ? "Edit Product" : "Add Product"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editProduct ? t("common:bo.store.edit_product") : t("common:bo.store.add_product")}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <div className="col-span-2"><LocaleFields register={register as never} baseKey="name" label={t("products.name")} placeholder={t("products.name_ph")} />{errors.name?.message && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}</div>
+              <div className="col-span-2"><LocaleFields register={register as never} baseKey="name" label={t("products.name")} placeholder={t("products.name_ph")} />{errors.name?.message && <p className="mt-1 text-xs text-red-500">{t(errors.name.message)}</p>}</div>
               <div className="col-span-2"><LocaleFields register={register as never} baseKey="description" label={t("common:ui.description")} placeholder={t("products.description_ph")} multiline rows={2} /></div>
-              <Input {...register("price")} label={t("products.price")} type="number" min="0" placeholder="2500" error={errors.price?.message} />
+              <Input {...register("price")} label={t("products.price")} type="number" min="0" placeholder="2500" error={errors.price?.message && t(errors.price.message)} />
               <Input {...register("discountPrice")} label={t("products.discount_price")} type="number" min="0" placeholder={t("products.optional")} />
               <Input {...register("stock")} label={t("products.stock")} type="number" min="0" placeholder="0" />
               <Input {...register("sku")} label={t("common:ui.sku")} placeholder={t("products.sku_ph")} />
@@ -226,7 +226,7 @@ export default function ProductsPage() {
             </DialogBody>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-              <Button type="submit" loading={saveMutation.isPending}>{editProduct ? "Save Changes" : "Add Product"}</Button>
+              <Button type="submit" loading={saveMutation.isPending}>{editProduct ? t("common:bo.save_changes") : t("common:bo.store.add_product")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

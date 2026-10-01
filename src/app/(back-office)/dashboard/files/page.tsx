@@ -53,7 +53,7 @@ export default function FilesPage() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const d = await res.json();
     if (res.ok) { toast.success(t("files.uploaded")); qc.invalidateQueries({ queryKey: ["files"] }); }
-    else toast.error(d.error ?? "Upload failed");
+    else toast.error(d.error ?? t("common:toast.upload_failed"));
     setUploading(false);
     e.target.value = "";
   };

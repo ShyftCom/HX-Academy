@@ -35,7 +35,7 @@ export default function ProgrammesListPage() {
   const { mutate: createProgramme, isPending } = useMutation({
     mutationFn: () => fetch("/api/programmes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) }).then(async (r) => {
       const d = await r.json();
-      if (!r.ok) throw new Error(d.error ?? "Failed");
+      if (!r.ok) throw new Error(d.error ?? t("common:toast.failed"));
       return d;
     }),
     onSuccess: () => { toast.success(t("programmes.created")); qc.invalidateQueries({ queryKey: ["admin-programmes"] }); setCreating(false); setName(""); },
@@ -96,7 +96,7 @@ export default function ProgrammesListPage() {
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${p.isPubliclyListed ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}
                     >
                       {p.isPubliclyListed ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                      {p.isPubliclyListed ? "Live" : "Draft"}
+                      {p.isPubliclyListed ? t("common:bo.live") : t("common:bo.draft")}
                     </button>
                   </td>
                   <td className="px-4 py-3 text-end">
@@ -125,7 +125,7 @@ export default function ProgrammesListPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => createProgramme()} disabled={isPending || !name}>{isPending ? "Creating…" : "Create"}</Button>
+            <Button onClick={() => createProgramme()} disabled={isPending || !name}>{isPending ? t("common:bo.creating") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

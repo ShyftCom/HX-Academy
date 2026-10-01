@@ -50,14 +50,14 @@ export default function FormBuilderPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => { toast.success(editField ? "Field updated" : "Field added"); qc.invalidateQueries({ queryKey: ["form-fields"] }); setModalOpen(false); setEditField(null); setForm({ label: "", labelFr: "", labelAr: "", fieldType: "text", placeholder: "", placeholderFr: "", placeholderAr: "", isRequired: false, options: [] }); },
+    onSuccess: () => { toast.success(editField ? t("common:bo.store.field_updated") : t("common:bo.store.field_added")); qc.invalidateQueries({ queryKey: ["form-fields"] }); setModalOpen(false); setEditField(null); setForm({ label: "", labelFr: "", labelAr: "", fieldType: "text", placeholder: "", placeholderFr: "", placeholderAr: "", isRequired: false, options: [] }); },
     onError: () => toast.error(t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/form-fields/${id}`, { method: "DELETE" }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); }),
     onSuccess: () => { toast.success(t("form.field_deleted")); qc.invalidateQueries({ queryKey: ["form-fields"] }); setDeleteId(null); },
-    onError: (e: any) => toast.error(e.message ?? "Delete failed"),
+    onError: (e: any) => toast.error(e.message || t("common:toast.delete_failed")),
   });
 
   const moveMutation = useMutation({
@@ -150,7 +150,7 @@ export default function FormBuilderPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>{editField ? "Edit Field" : "Add Form Field"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editField ? t("common:bo.store.edit_field") : t("common:bo.store.add_form_field")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <LocaleTextInput baseKey="label" label={t("form.label")} values={form} onChange={(next) => setForm(next as typeof form)} />
             <div>
@@ -185,7 +185,7 @@ export default function FormBuilderPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.label}>{editField ? "Save" : "Add Field"}</Button>
+            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.label}>{editField ? t("common:actions.save") : t("common:bo.store.add_field")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -69,7 +69,7 @@ export default function StaffPage() {
               </div>
               <Button className="w-full" disabled={!form.userId || !form.fullName || createMut.isPending}
                 onClick={() => createMut.mutate({ ...form, baseSalary: form.baseSalary ? Number(form.baseSalary) : null, stationId: activeStationId })}>
-                {createMut.isPending ? "Adding..." : "Add Staff Member"}
+                {createMut.isPending ? t("common:bo.adding") : t("common:bo.hrm.add_staff")}
               </Button>
             </div>
           </DialogContent>

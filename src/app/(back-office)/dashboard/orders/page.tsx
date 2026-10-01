@@ -73,16 +73,16 @@ export default function OrdersPage() {
   ) : <Badge variant="secondary">{t("unknown")}</Badge>;
 
   const columns = [
-    { key: "orderNumber", header: "Order #", cell: (r: any) => <span className="font-mono text-sm font-medium">#{r.orderNumber}</span> },
-    { key: "customer", header: "Customer", cell: (r: any) => {
+    { key: "orderNumber", header: t("common:bo.orders.order_number"), cell: (r: any) => <span className="font-mono text-sm font-medium">#{r.orderNumber}</span> },
+    { key: "customer", header: t("common:bo.orders.customer"), cell: (r: any) => {
       const cod = parseJsonSafe<any>(r.codData, {});
-      return <div><p className="font-medium text-sm">{r.player?.fullName ?? cod["fullName"] ?? cod["Full Name"] ?? "Guest"}</p><p className="text-xs text-gray-400">{r.player?.phone ?? cod["phone"] ?? "—"}</p></div>;
+      return <div><p className="font-medium text-sm">{r.player?.fullName ?? cod["fullName"] ?? cod["Full Name"] ?? t("common:bo.orders.guest")}</p><p className="text-xs text-gray-400">{r.player?.phone ?? cod["phone"] ?? "—"}</p></div>;
     }},
     { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
-    { key: "items", header: "Items", cell: (r: any) => <span className="text-sm">{r.items?.length ?? 0} item(s)</span> },
-    { key: "total", header: "Total", cell: (r: any) => <span className="font-medium">{formatCurrency(r.totalAmount)}</span> },
-    { key: "status", header: "Status", cell: (r: any) => getStatusBadge(r.status) },
-    { key: "date", header: "Date", cell: (r: any) => formatDate(r.createdAt) },
+    { key: "items", header: t("items"), cell: (r: any) => <span className="text-sm">{t("common:bo.orders.item_count", { count: r.items?.length ?? 0 })}</span> },
+    { key: "total", header: t("total"), cell: (r: any) => <span className="font-medium">{formatCurrency(r.totalAmount)}</span> },
+    { key: "status", header: t("common:labels.status"), cell: (r: any) => getStatusBadge(r.status) },
+    { key: "date", header: t("common:labels.date"), cell: (r: any) => formatDate(r.createdAt) },
     { key: "actions", header: "", cell: (r: any) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon-sm"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>

@@ -44,7 +44,7 @@ function ProofViewer({ url, onClose }: { url: string; onClose: () => void }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isPdf ? <FileText className="h-5 w-5 text-red-500" /> : <ZoomIn className="h-5 w-5 text-blue-500" />}
-            Payment Proof
+            {t("proof.label")}
           </DialogTitle>
         </DialogHeader>
         <DialogBody className="p-0 overflow-hidden">
@@ -117,7 +117,7 @@ export default function PaymentsPage() {
   const approveMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/payments/${id}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminNotes: approveNote }) }).then(async (r) => { if (!r.ok) throw await r.json(); }),
     onSuccess: () => { toast.success(t("toast.approved")); qc.invalidateQueries({ queryKey: ["payments"] }); setApproveId(null); setApproveNote(""); },
-    onError: (e: any) => toast.error(e.error ?? "Approval failed"),
+    onError: (e: any) => toast.error(e.error ?? t("common:bo.payments.approval_failed")),
   });
 
   const rejectMutation = useMutation({
@@ -132,7 +132,7 @@ export default function PaymentsPage() {
       setVerifyingId(id);
       const res = await fetch(`/api/payments/slickpay/${id}/verify`, { method: "POST" });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.error ?? "Verification failed");
+      if (!res.ok) throw new Error(d.error ?? t("common:bo.payments.verification_failed"));
       return d as { result: string; alreadyActive?: boolean };
     },
     onSuccess: (d) => {
@@ -162,7 +162,7 @@ export default function PaymentsPage() {
       setProofUrl(await uploadPaymentProof(file));
       toast.success(t("toast.proof_uploaded"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
+      toast.error(error instanceof Error ? error.message : t("common:toast.upload_failed"));
     } finally {
       setUploadingAdd(false);
     }
@@ -171,12 +171,12 @@ export default function PaymentsPage() {
   const STATUS_VARIANT: Record<string, string> = { pending: "warning", approved: "success", rejected: "destructive" };
 
   const columns = [
-    { key: "player", header: "Player", cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone}</p></div> },
+    { key: "player", header: t("common:ui.player"), cell: (r: any) => <div><p className="font-medium text-sm">{r.player?.fullName}</p><p className="text-xs text-gray-400">{r.player?.phone}</p></div> },
     { key: "station", header: t("common:labels.station"), cell: (r: any) => r.player?.station?.name ?? "—" },
-    { key: "plan", header: "Plan", cell: (r: any) => <span className="text-sm">{r.plan?.name ?? "—"}</span> },
-    { key: "amount", header: "Amount", cell: (r: any) => <span className="font-medium">{formatCurrency(r.amount)}</span> },
+    { key: "plan", header: t("common:bo.payments.plan"), cell: (r: any) => <span className="text-sm">{r.plan?.name ?? "—"}</span> },
+    { key: "amount", header: t("common:labels.amount"), cell: (r: any) => <span className="font-medium">{formatCurrency(r.amount)}</span> },
     {
-      key: "method", header: "Method", cell: (r: any) => r.provider === "slickpay" ? (
+      key: "method", header: t("common:bo.payments.method"), cell: (r: any) => r.provider === "slickpay" ? (
         <div>
           <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
             <CreditCard className="h-3 w-3" />{t("method_online")}
@@ -186,7 +186,7 @@ export default function PaymentsPage() {
       ) : (r.paymentMethod?.name ?? "—")
     },
     {
-      key: "status", header: "Status", cell: (r: any) => (
+      key: "status", header: t("common:labels.status"), cell: (r: any) => (
         <div className="space-y-1">
           <Badge variant={STATUS_VARIANT[r.status] as any}>{r.status}</Badge>
           {/* A held underpayment is still "pending", which on its own reads as
@@ -200,7 +200,7 @@ export default function PaymentsPage() {
       )
     },
     {
-      key: "proof", header: "Proof", cell: (r: any) => r.proof ? (
+      key: "proof", header: t("proof.label"), cell: (r: any) => r.proof ? (
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setPreviewUrl(r.proof)}
@@ -220,7 +220,7 @@ export default function PaymentsPage() {
         </div>
       ) : <span className="text-xs text-gray-400">{t("proof.none")}</span>
     },
-    { key: "date", header: "Date", cell: (r: any) => formatDate(r.createdAt) },
+    { key: "date", header: t("common:labels.date"), cell: (r: any) => formatDate(r.createdAt) },
     {
       key: "actions", header: "", cell: (r: any) => (
         <div className="flex gap-1">
@@ -344,7 +344,7 @@ export default function PaymentsPage() {
               <div className="flex items-center gap-2">
                 <input ref={proofInputRef} type="file" className="hidden" accept={PROOF_ACCEPT} onChange={handleProofUpload} />
                 <Button type="button" variant="outline" size="sm" onClick={() => proofInputRef.current?.click()} loading={uploadingAdd}>
-                  <Upload className="me-1.5 h-4 w-4" />{uploadingAdd ? "Uploading..." : "Upload Proof"}
+                  <Upload className="me-1.5 h-4 w-4" />{uploadingAdd ? t("common:bo.uploading") : t("common:bo.payments.upload_proof")}
                 </Button>
                 {proofUrl && (
                   <button onClick={() => setPreviewUrl(proofUrl)} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">

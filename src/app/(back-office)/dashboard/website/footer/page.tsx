@@ -282,7 +282,7 @@ export default function FooterEditorPage() {
       {/* Save */}
       <div className="flex justify-end pt-4">
         <Button onClick={() => save()} disabled={isPending} className="min-w-32">
-          {isPending ? "Saving..." : "Save Footer"}
+          {isPending ? t("common:bo.saving") : t("common:bo.footer.save")}
         </Button>
       </div>
     </div>

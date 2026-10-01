@@ -11,7 +11,7 @@ type FormState = Omit<Req, "id">;
 
 const blank: FormState = { title: "", titleFr: "", titleAr: "", description: "", descriptionFr: "", descriptionAr: "", isRequired: true, allowedTypes: "image/*,.pdf,.docx,.xlsx", maxSizeMb: 10, isActive: true, order: 0, appliesTo: "academy" };
 
-const APPLIES_LABELS: Record<string, string> = { academy: "Academy", summer_camp: "Summer Camp", both: "Both" };
+const APPLIES_LABELS: Record<string, string> = { academy: "common:bo.files.academy", summer_camp: "common:bo.files.summer_camp", both: "common:bo.files.both" };
 const APPLIES_COLORS: Record<string, string> = { academy: "bg-green-100 text-green-700", summer_camp: "bg-orange-100 text-orange-700", both: "bg-blue-100 text-blue-700" };
 
 function RequirementForm({ initial, onSave, onCancel, saving }: { initial: FormState; onSave: (v: FormState) => void; onCancel: () => void; saving: boolean }) {
@@ -94,7 +94,7 @@ export default function FileRequirementsPage() {
     try {
       const r = await fetch("/api/file-requirements", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, order: reqs.length }) });
       if (r.ok) { toast.success(t("common:labels.created_at")); setCreating(false); await load(); }
-      else { const d = await r.json(); toast.error(d.error || "Failed to create"); }
+      else { const d = await r.json(); toast.error(d.error || t("common:toast.create_failed_alt")); }
     } catch { toast.error(t("common:toast.create_failed_alt")); }
     setSaving(false);
   }
@@ -104,19 +104,19 @@ export default function FileRequirementsPage() {
     try {
       const r = await fetch(`/api/file-requirements/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
       if (r.ok) { toast.success(t("common:toast.updated")); setEditId(null); await load(); }
-      else { const d = await r.json(); toast.error(d.error || "Failed to update"); }
+      else { const d = await r.json(); toast.error(d.error || t("common:toast.update_failed_alt")); }
     } catch { toast.error(t("common:toast.update_failed_alt")); }
     setSaving(false);
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this requirement?")) return;
+    if (!confirm(t("common:bo.files.delete_confirm"))) return;
     setDeletingId(id);
     try {
       const r = await fetch(`/api/file-requirements/${id}`, { method: "DELETE" });
       const d = await r.json();
       if (r.ok) { toast.success(t("common:toast.deleted")); setReqs((p) => p.filter((x) => x.id !== id)); }
-      else toast.error(d.error || "Failed to delete");
+      else toast.error(d.error || t("common:errors.failed_to_delete"));
     } catch { toast.error(t("reviews.delete_failed")); }
     setDeletingId(null);
   }
@@ -155,7 +155,7 @@ export default function FileRequirementsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-gray-900 dark:text-white">{req.title}</span>
                       {req.isRequired && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">{t("common:misc.required")}</span>}
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPLIES_COLORS[req.appliesTo ?? "academy"] ?? ""}`}>{APPLIES_LABELS[req.appliesTo ?? "academy"] ?? req.appliesTo}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${APPLIES_COLORS[req.appliesTo ?? "academy"] ?? ""}`}>{APPLIES_LABELS[req.appliesTo ?? "academy"] ? t(APPLIES_LABELS[req.appliesTo ?? "academy"]) : req.appliesTo}</span>
                       {!req.isActive && <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">{t("filereq.inactive")}</span>}
                     </div>
                     {req.description && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{req.description}</p>}

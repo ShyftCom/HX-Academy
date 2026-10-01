@@ -30,9 +30,9 @@ import { useStation } from "@/context/StationContext";
 import { readJsonOrThrow } from "@/lib/api-error";
 
 const schema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
+  fullName: z.string().min(1, "common:bo.validation.full_name_required"),
   phone: z.string().optional(),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  email: z.string().email("common:errors.invalid_email").optional().or(z.literal("")),
   dateOfBirth: z.string().optional(),
   parentName: z.string().optional(),
   parentPhone: z.string().optional(),
@@ -272,7 +272,7 @@ export default function LeadsPage() {
   const convertMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/leads/${id}/convert`, { method: "POST" }).then(async (r) => {
       const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? "Conversion failed");
+      if (!r.ok) throw new Error(json.error ?? t("common:bo.leads.conversion_failed"));
       return json;
     }),
     onSuccess: () => { toast.success(t("convert.success")); qc.invalidateQueries({ queryKey: ["leads"] }); setConvertId(null); },
@@ -419,9 +419,9 @@ export default function LeadsPage() {
           <DialogHeader><DialogTitle>{editLead ? t("actions.edit_lead") : t("actions.add_lead")}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit((d) => saveMutation.mutate(d))}>
             <DialogBody className="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <Input {...register("fullName")} label={t("form.full_name")} placeholder={t("form.full_name_placeholder")} error={errors.fullName?.message} className="col-span-2 sm:col-span-1" />
+              <Input {...register("fullName")} label={t("form.full_name")} placeholder={t("form.full_name_placeholder")} error={errors.fullName?.message && t(errors.fullName.message)} className="col-span-2 sm:col-span-1" />
               <Input {...register("phone")} label={t("form.phone")} placeholder={t("form.phone_placeholder")} />
-              <Input {...register("email")} label={t("form.email")} placeholder={t("form.email_placeholder")} error={errors.email?.message} />
+              <Input {...register("email")} label={t("form.email")} placeholder={t("form.email_placeholder")} error={errors.email?.message && t(errors.email.message)} />
               <Input {...register("dateOfBirth")} label={t("form.date_of_birth")} type="date" />
               <div className="col-span-2 grid grid-cols-2 gap-4">
                 <Input {...register("parentName")} label={t("form.parent_name")} placeholder={t("form.full_name_placeholder")} />
@@ -474,7 +474,7 @@ export default function LeadsPage() {
           open={!!convertId && convertLead?.leadType !== "summer_camp"}
           onOpenChange={(o) => { if (!o) { setConvertId(null); setConvertLead(null); } }}
           title={t("actions.convert_to_player")}
-          description={`Convert ${convertLead?.fullName ?? "this lead"} to an Academy player?`}
+          description={t("common:bo.leads.convert_confirm", { name: convertLead?.fullName ?? t("common:bo.leads.this_lead") })}
           confirmLabel={t("page.convert")}
           variant="default"
           onConfirm={() => convertId && convertMutation.mutate(convertId)}
@@ -503,7 +503,7 @@ export default function LeadsPage() {
                     body: JSON.stringify({ sessionId: campConvertSessionId || undefined }),
                   }).then(async (r) => {
                     const json = await r.json();
-                    if (!r.ok) { toast.error(json.error ?? "Conversion failed"); return; }
+                    if (!r.ok) { toast.error(json.error ?? t("common:bo.leads.conversion_failed")); return; }
                     toast.success(t("page.converted_camp"));
                     qc.invalidateQueries({ queryKey: ["leads"] });
                     setConvertId(null); setConvertLead(null); setCampConvertSessionId("");

@@ -87,11 +87,11 @@ export default function ChargesPage() {
                 <div className="space-y-1"><Label>{t("common:ui.notes")}</Label><Input value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></div>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="checkbox" checked={form.isSalary} onChange={(e) => setForm((f) => ({ ...f, isSalary: e.target.checked }))} />
-                  Is Salary charge
+                  {t("common:bo.finance.is_salary")}
                 </label>
                 <Button className="w-full" disabled={!form.title || !form.amount || createCharge.isPending}
                   onClick={() => createCharge.mutate({ ...form, amount: Number(form.amount), stationId: activeStationId })}>
-                  {createCharge.isPending ? "Adding..." : "Add Charge"}
+                  {createCharge.isPending ? t("common:bo.adding") : t("common:bo.finance.add_charge")}
                 </Button>
               </div>
             </DialogContent>
@@ -148,7 +148,7 @@ export default function ChargesPage() {
                   <td className="py-3 pe-4 text-end font-medium text-red-500">{formatDA(c.amount)}</td>
                   <td className="py-3 pe-4 text-center">{c.isSalary ? <Badge variant="secondary">{t("charges.salary")}</Badge> : "—"}</td>
                   <td className="py-3 text-end">
-                    <Button variant="ghost" size="icon" onClick={() => { if (confirm("Delete this charge?")) deleteCharge.mutate(c.id); }}>
+                    <Button variant="ghost" size="icon" onClick={() => { if (confirm(t("common:bo.finance.delete_charge_confirm"))) deleteCharge.mutate(c.id); }}>
                       <Trash2 className="h-4 w-4 text-red-400" />
                     </Button>
                   </td>

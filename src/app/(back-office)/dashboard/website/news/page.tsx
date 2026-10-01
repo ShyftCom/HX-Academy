@@ -28,7 +28,7 @@ export default function NewsListPage() {
 
   const { mutate: create, isPending } = useMutation({
     mutationFn: () => fetch("/api/news", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title }) }).then(async (r) => {
-      const d = await r.json(); if (!r.ok) throw new Error(d.error ?? "Failed"); return d;
+      const d = await r.json(); if (!r.ok) throw new Error(d.error ?? t("common:toast.failed")); return d;
     }),
     onSuccess: () => { toast.success(t("news.created")); qc.invalidateQueries({ queryKey: ["admin-news"] }); setCreating(false); setTitle(""); },
     onError: (e: Error) => toast.error(e.message),
@@ -80,7 +80,7 @@ export default function NewsListPage() {
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${a.isPublished ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}
                     >
                       {a.isPublished ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                      {a.isPublished ? "Published" : "Draft"}
+                      {a.isPublished ? t("common:bo.published") : t("common:bo.draft")}
                     </button>
                   </td>
                   <td className="px-4 py-3 text-end">
@@ -106,7 +106,7 @@ export default function NewsListPage() {
           <DialogBody><Label>{t("common:ui.title_field")}</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreating(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => create()} disabled={isPending || !title}>{isPending ? "Creating…" : "Create"}</Button>
+            <Button onClick={() => create()} disabled={isPending || !title}>{isPending ? t("common:bo.creating") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -443,5 +443,304 @@
       "empty": "No notifications",
       "toast_all_read": "All marked as read"
     }
+  },
+  "bo": {
+    "save_changes": "Save changes",
+    "saving": "Saving…",
+    "creating": "Creating…",
+    "adding": "Adding…",
+    "uploading": "Uploading…",
+    "submitting": "Submitting…",
+    "generating": "Generating…",
+    "loading": "Loading…",
+    "all": "All",
+    "system": "System",
+    "activity": {
+      "user": "User",
+      "action": "Action",
+      "module": "Module",
+      "description": "Description",
+      "time": "Time"
+    },
+    "affiliates": {
+      "submit_request": "Submit request",
+      "create": "Create affiliate"
+    },
+    "finance": {
+      "add_charge": "Add charge",
+      "delete_charge_confirm": "Delete this charge?",
+      "gross_revenue": "Gross revenue",
+      "total_charges": "Total charges",
+      "gross_profit": "Gross profit",
+      "salary_charges": "Salary charges",
+      "no_data": "No data for the selected period",
+      "is_salary": "Salary charge"
+    },
+    "hrm": {
+      "total_staff": "Total staff",
+      "present_today": "Present today",
+      "absent_today": "Absent today",
+      "on_leave": "On leave",
+      "monthly_salary_cost": "Monthly salary cost",
+      "attendance_rate": "Attendance rate",
+      "manage_staff": "Manage staff",
+      "attendance": "Attendance",
+      "leave_requests": "Leave requests",
+      "payroll": "Payroll",
+      "create_request": "Create request",
+      "generate_payroll": "Generate payroll",
+      "add_staff": "Add staff member"
+    },
+    "validation": {
+      "full_name_required": "Full name is required",
+      "name_required": "Name is required",
+      "price_required": "Price is required",
+      "duration_required": "Duration is required"
+    },
+    "leads": {
+      "conversion_failed": "Conversion failed",
+      "convert_confirm": "Convert {{name}} to an Academy player?",
+      "this_lead": "this lead"
+    },
+    "pipeline": {
+      "intro": "Drag to reorder stages. Default stages can be renamed or recolored but not deleted.",
+      "save_stage": "Save stage",
+      "delete_title": "Delete “{{name}}”?",
+      "delete_body": "All leads currently in this stage will be moved to the selected fallback stage.",
+      "delete_stage": "Delete stage"
+    },
+    "orders": {
+      "order_number": "Order #",
+      "customer": "Customer",
+      "guest": "Guest",
+      "item_count_one": "{{count}} item",
+      "item_count_other": "{{count}} items"
+    },
+    "payments": {
+      "approval_failed": "Approval failed",
+      "verification_failed": "Verification failed",
+      "method": "Method",
+      "upload_proof": "Upload proof",
+      "plan": "Plan"
+    },
+    "players": {
+      "updated": "Player updated",
+      "created": "Player created",
+      "password_update_failed": "Failed to update password",
+      "create": "Create player",
+      "parent": "Parent",
+      "emergency": "Emergency",
+      "medical": "Medical",
+      "save_password": "Save password"
+    },
+    "profile": {
+      "password_change_failed": "Failed to change password",
+      "staff": "Staff"
+    },
+    "reports": {
+      "today": "Today",
+      "this_week": "This week",
+      "this_month": "This month",
+      "this_year": "This year",
+      "custom": "Custom"
+    },
+    "roles": {
+      "updated": "Role updated",
+      "created": "Role created",
+      "edit": "Edit role",
+      "create": "Create role"
+    },
+    "settings": {
+      "method_updated": "Payment method updated",
+      "method_created": "Payment method created",
+      "instructions": "Instructions",
+      "active": "Active",
+      "edit_method": "Edit payment method",
+      "add_method": "Add payment method",
+      "address_placeholder": "Algiers, Algeria"
+    },
+    "inactive": "Inactive",
+    "stations": {
+      "new": "New station",
+      "comparison": "Station comparison",
+      "delete_confirm": "Delete this station?",
+      "save_public_page": "Save public page",
+      "create": "Create station"
+    },
+    "store": {
+      "category_updated": "Category updated",
+      "category_created": "Category created",
+      "edit_category": "Edit category",
+      "add_category": "Add category",
+      "field_updated": "Field updated",
+      "field_added": "Field added",
+      "edit_field": "Edit field",
+      "add_form_field": "Add form field",
+      "add_field": "Add field",
+      "add_group": "Add group",
+      "generate_variants": "Generate variants",
+      "save_all_variants": "Save all variants",
+      "product_updated": "Product updated",
+      "product_created": "Product created",
+      "product": "Product",
+      "category": "Category",
+      "stock": "Stock",
+      "featured": "Featured",
+      "edit_product": "Edit product",
+      "add_product": "Add product"
+    },
+    "subs": {
+      "start": "Start",
+      "end": "End",
+      "remaining": "Remaining",
+      "plan_updated": "Plan updated",
+      "plan_created": "Plan created",
+      "edit_plan": "Edit plan",
+      "new_plan": "New subscription plan",
+      "create_plan": "Create plan"
+    },
+    "hide": "Hide",
+    "questions": "Questions",
+    "published": "Published",
+    "unpublished": "Unpublished",
+    "draft": "Draft",
+    "live": "Live",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "public": "Public",
+    "hidden": "Hidden",
+    "replace": "Replace",
+    "save_settings": "Save settings",
+    "camp": {
+      "new_plan": "New plan",
+      "edit_plan": "Edit plan",
+      "new_session": "New session",
+      "edit_session": "Edit session",
+      "gender": "Gender: {{gender}}",
+      "male": "Male",
+      "female": "Female"
+    },
+    "surveys": {
+      "edit": "Edit survey",
+      "new": "New survey",
+      "edit_question": "Edit question",
+      "add_question": "Add question"
+    },
+    "tickets": {
+      "create": "Create ticket"
+    },
+    "users": {
+      "updated": "User updated",
+      "created": "User created",
+      "user": "User",
+      "role": "Role",
+      "active": "Active",
+      "last_login": "Last login",
+      "never": "Never",
+      "created_at": "Created",
+      "edit": "Edit user",
+      "add": "Add user",
+      "new_password_keep": "New password (leave blank to keep)",
+      "password_req": "Password *",
+      "create": "Create user"
+    },
+    "applications": {
+      "approval_failed": "Approval failed",
+      "full_name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "date_of_birth": "Date of birth",
+      "category": "Category",
+      "address": "Address",
+      "parent_name": "Parent name",
+      "parent_phone": "Parent phone",
+      "question": "Question"
+    },
+    "files": {
+      "academy": "Academy",
+      "summer_camp": "Summer camp",
+      "both": "Both",
+      "delete_confirm": "Delete this requirement?"
+    },
+    "footer": {
+      "save": "Save footer"
+    },
+    "header": {
+      "background_color": "Background color",
+      "text_color": "Text / link color",
+      "accent_color": "Accent / CTA color",
+      "save": "Save header"
+    },
+    "pages": {
+      "create": "Create page",
+      "no_sections": "No sections yet. Add your first section to start building this page."
+    },
+    "reviews": {
+      "feature": "Feature",
+      "unfeature": "Unfeature",
+      "verify": "Verify",
+      "unverify": "Unverify",
+      "save_reply": "Save reply"
+    },
+    "slides": {
+      "click_to_upload": "Click to upload an image",
+      "replace_image": "Replace image",
+      "slide": "Slide",
+      "add": "Add slide",
+      "edit": "Edit slide",
+      "save": "Save slide"
+    },
+    "sponsors": {
+      "add": "Add sponsor",
+      "edit": "Edit sponsor",
+      "save": "Save sponsor"
+    },
+    "hub": {
+      "title": "Website & applications",
+      "pages": "Pages",
+      "pages_desc": "Build the homepage and every Showcase Website page from reusable, drag-and-drop sections.",
+      "programmes": "Programmes",
+      "programmes_desc": "Manage programmes, categories, schedules and pricing shown on the public site.",
+      "schedules": "Schedules",
+      "schedules_desc": "Each location's training timetable — pick a location and edit only its slots.",
+      "venues": "Venues",
+      "venues_desc": "Control which stations appear on the public Venues page and their order.",
+      "squads": "Squad registrations",
+      "squads_desc": "Review Development Squad interest registrations submitted from the public site.",
+      "contact": "Contact submissions",
+      "contact_desc": "Messages submitted from the public Contact Us page.",
+      "coaches": "Coaches",
+      "coaches_desc": "Public-facing coach profiles shown on programme and Who We Are pages.",
+      "pathway": "Pathway",
+      "pathway_desc": "Stages shown on the public Pathway timeline.",
+      "faqs": "FAQs",
+      "faqs_desc": "Manage frequently asked questions shown across the public site.",
+      "news": "News",
+      "news_desc": "Publish news articles shown on the public News page.",
+      "redirects": "Redirects",
+      "redirects_desc": "Record legacy URLs that should redirect to a new page.",
+      "header": "Header editor",
+      "header_desc": "Configure navigation, logo, CTA button, and mobile menu.",
+      "footer": "Footer editor",
+      "footer_desc": "Customize footer links, social icons, colors, and copyright text.",
+      "store": "Store settings",
+      "store_desc": "Enable the product store, configure shipping fees and page content.",
+      "reviews": "Reviews",
+      "reviews_desc": "Moderate customer reviews, reply to feedback, and feature top reviews.",
+      "summer_camp": "Summer camp page",
+      "summer_camp_desc": "Configure the Summer Camp landing page title, hero image, description, and CTA button.",
+      "file_requirements": "File requirements",
+      "file_requirements_desc": "Manage documents applicants must upload (ID, birth certificate, photo, etc.).",
+      "applications": "Applications",
+      "applications_desc": "View, filter, and manage all applications submitted through the public website.",
+      "surveys": "Survey builder",
+      "surveys_desc": "Build the questionnaire shown to applicants during the application process.",
+      "total_applications": "Total applications",
+      "pending_review": "Pending review",
+      "converted": "Converted"
+    },
+    "branding": {
+      "save": "Save brand settings"
+    }
   }
 }

@@ -68,7 +68,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
           className="w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-blue-400 transition-colors text-gray-500"
         >
           <Upload className="w-6 h-6" />
-          <span className="text-sm">{uploading ? "Uploading..." : "Click to upload image"}</span>
+          <span className="text-sm">{uploading ? t("common:bo.uploading") : t("common:bo.slides.click_to_upload")}</span>
           <span className="text-xs text-gray-400">{t("slides.hint")}</span>
         </button>
       )}
@@ -81,7 +81,7 @@ function ImageUploader({ value, onChange }: { value: string; onChange: (url: str
       />
       {value && (
         <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
-          <Upload className="w-3.5 h-3.5 mr-1" /> {uploading ? "Uploading..." : "Replace image"}
+          <Upload className="w-3.5 h-3.5 mr-1" /> {uploading ? t("common:bo.uploading") : t("common:bo.slides.replace_image")}
         </Button>
       )}
     </div>
@@ -158,7 +158,7 @@ export default function SlidesPage() {
           {allSlides.map((slide) => (
             <div key={slide.id} className={`bg-white dark:bg-gray-800 border rounded-xl overflow-hidden transition-opacity ${slide.isActive ? "border-gray-200 dark:border-gray-700" : "border-gray-100 dark:border-gray-800 opacity-60"}`}>
               <div className="relative aspect-video bg-gray-100 dark:bg-gray-700">
-                <img src={slide.imageUrl} alt={slide.title ?? "Slide"} className="w-full h-full object-cover" />
+                <img src={slide.imageUrl} alt={slide.title ?? t("common:bo.slides.slide")} className="w-full h-full object-cover" />
                 {!slide.isActive && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="text-white text-xs font-semibold bg-black/60 px-2 py-1 rounded">{t("reviews.hidden")}</span>
@@ -187,7 +187,7 @@ export default function SlidesPage() {
         <Dialog open onOpenChange={() => setModal(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{modal === "new" ? "Add Slide" : "Edit Slide"}</DialogTitle>
+              <DialogTitle>{modal === "new" ? t("common:bo.slides.add") : t("common:bo.slides.edit")}</DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-4">
               <ImageUploader value={form.imageUrl} onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))} />
@@ -227,7 +227,7 @@ export default function SlidesPage() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>
-                {creating || updating ? "Saving..." : "Save Slide"}
+                {creating || updating ? t("common:bo.saving") : t("common:bo.slides.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

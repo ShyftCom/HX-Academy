@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const pwMutation = useMutation({
     mutationFn: () => fetch("/api/auth/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }) }).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; }),
     onSuccess: () => { toast.success(t("profile.changed")); setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); },
-    onError: (e: any) => toast.error(e.message ?? "Failed to change password"),
+    onError: (e: any) => toast.error(e.message || t("common:bo.profile.password_change_failed")),
   });
 
   return (
@@ -38,7 +38,7 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{session?.user?.name}</h2>
               <p className="text-sm text-gray-500">{session?.user?.email}</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{(session?.user as any)?.roleName ?? "Staff"}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{(session?.user as any)?.roleName ?? t("common:bo.profile.staff")}</p>
             </div>
           </div>
           <Separator />

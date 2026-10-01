@@ -40,7 +40,7 @@ export default function SummerCampPageSettingsPage() {
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const d = await res.json();
       if (res.ok) setSettings((p) => ({ ...p, sc_page_hero_image: d.url }));
-      else toast.error(d.error ?? "Upload failed");
+      else toast.error(d.error ?? t("common:toast.upload_failed"));
     } catch { toast.error(t("common:toast.upload_failed")); }
     setUploading(false);
   }
@@ -65,7 +65,7 @@ export default function SummerCampPageSettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <PageHeader title={t("sc.title")} description={t("sc.subtitle")}>
         <Button onClick={handleSave} disabled={saving}>
-          <Save className="w-4 h-4 mr-1" />{saving ? "Saving..." : "Save Changes"}
+          <Save className="w-4 h-4 mr-1" />{saving ? t("common:bo.saving") : t("common:bo.save_changes")}
         </Button>
       </PageHeader>
 

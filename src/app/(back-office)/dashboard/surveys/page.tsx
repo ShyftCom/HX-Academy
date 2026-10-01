@@ -319,14 +319,14 @@ export default function SurveysPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold">{s.title}</h3>
-                        <Badge variant={s.isActive ? "success" : "secondary"}>{s.isActive ? "Active" : "Inactive"}</Badge>
+                        <Badge variant={s.isActive ? "success" : "secondary"}>{s.isActive ? t("common:status.active") : t("common:bo.inactive")}</Badge>
                         {s.id === savedSurveyId && <Badge variant="outline">{t("form_survey.in_use")}</Badge>}
                       </div>
                       {s.description && <p className="text-sm text-gray-500">{s.description}</p>}
                       <p className="text-xs text-gray-400 mt-1">{s._count?.questions ?? 0} questions · {s._count?.answers ?? 0} responses</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(selectedSurvey?.id === s.id ? null : s)}><FileText className="me-1.5 h-3.5 w-3.5" />{selectedSurvey?.id === s.id ? "Hide" : "Questions"}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(selectedSurvey?.id === s.id ? null : s)}><FileText className="me-1.5 h-3.5 w-3.5" />{selectedSurvey?.id === s.id ? t("common:bo.hide") : t("common:bo.questions")}</Button>
                       <Button variant="outline" size="sm" onClick={() => openEditSurvey(s)}><Edit className="h-3.5 w-3.5" /></Button>
                       <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteSurveyId(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
@@ -373,7 +373,7 @@ export default function SurveysPage() {
       {/* Survey Modal */}
       <Dialog open={surveyModal} onOpenChange={setSurveyModal}>
         <DialogContent size="sm">
-          <DialogHeader><DialogTitle>{editSurvey ? "Edit Survey" : "New Survey"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editSurvey ? t("common:bo.surveys.edit") : t("common:bo.surveys.new")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("title_req")} value={surveyForm.title} onChange={(e) => setSurveyForm({ ...surveyForm, title: e.target.value })} placeholder={t("title_ph")} />
             <Textarea label={t("common:ui.description")} value={surveyForm.description} onChange={(e) => setSurveyForm({ ...surveyForm, description: e.target.value })} placeholder={t("description_ph")} rows={2} />
@@ -381,7 +381,7 @@ export default function SurveysPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSurveyModal(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveSurveyMutation.mutate()} loading={saveSurveyMutation.isPending} disabled={!surveyForm.title}>{editSurvey ? "Save" : "Create"}</Button>
+            <Button onClick={() => saveSurveyMutation.mutate()} loading={saveSurveyMutation.isPending} disabled={!surveyForm.title}>{editSurvey ? t("common:actions.save") : t("common:actions.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -389,7 +389,7 @@ export default function SurveysPage() {
       {/* Question Modal */}
       <Dialog open={qModal} onOpenChange={setQModal}>
         <DialogContent size="md">
-          <DialogHeader><DialogTitle>{editQ ? "Edit Question" : "Add Question"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editQ ? t("common:bo.surveys.edit_question") : t("common:bo.surveys.add_question")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("question_req")} value={qForm.question} onChange={(e) => setQForm({ ...qForm, question: e.target.value })} placeholder={t("question_ph")} />
             <div>
@@ -435,7 +435,7 @@ export default function SurveysPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setQModal(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveQMutation.mutate()} loading={saveQMutation.isPending} disabled={!qForm.question}>{editQ ? "Save" : "Add"}</Button>
+            <Button onClick={() => saveQMutation.mutate()} loading={saveQMutation.isPending} disabled={!qForm.question}>{editQ ? t("common:actions.save") : t("common:actions.add")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

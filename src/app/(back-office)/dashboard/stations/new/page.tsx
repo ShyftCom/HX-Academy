@@ -132,7 +132,7 @@ export default function NewStationPage() {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" type="button" asChild><Link href="/dashboard/stations">{t("common:ui.cancel")}</Link></Button>
-              <Button type="submit" disabled={saving}>{saving ? "Creating..." : "Create Station"}</Button>
+              <Button type="submit" disabled={saving}>{saving ? t("common:bo.creating") : t("common:bo.stations.create")}</Button>
             </div>
           </form>
         </CardContent>

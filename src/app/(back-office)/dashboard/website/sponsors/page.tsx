@@ -62,7 +62,7 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
           className="w-24 h-16 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-blue-400 transition-colors text-gray-500"
         >
           <Upload className="w-4 h-4" />
-          <span className="text-xs">{uploading ? "..." : "Upload"}</span>
+          <span className="text-xs">{uploading ? "…" : t("common:actions.upload")}</span>
         </button>
       )}
       <input
@@ -74,7 +74,7 @@ function LogoUploader({ value, onChange }: { value: string; onChange: (url: stri
       />
       {value && (
         <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
-          <Upload className="w-3 h-3 mr-1" /> {uploading ? "Uploading..." : "Replace"}
+          <Upload className="w-3 h-3 mr-1" /> {uploading ? t("common:bo.uploading") : t("common:bo.replace")}
         </Button>
       )}
     </div>
@@ -184,7 +184,7 @@ export default function SponsorsPage() {
         <Dialog open onOpenChange={() => setModal(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>{modal === "new" ? "Add Sponsor" : "Edit Sponsor"}</DialogTitle>
+              <DialogTitle>{modal === "new" ? t("common:bo.sponsors.add") : t("common:bo.sponsors.edit")}</DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-4">
               <div>
@@ -205,7 +205,7 @@ export default function SponsorsPage() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setModal(null)}>{t("common:ui.cancel")}</Button>
               <Button onClick={save} disabled={creating || updating}>
-                {creating || updating ? "Saving..." : "Save Sponsor"}
+                {creating || updating ? t("common:bo.saving") : t("common:bo.sponsors.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

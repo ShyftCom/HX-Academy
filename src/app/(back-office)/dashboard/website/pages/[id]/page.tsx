@@ -129,7 +129,7 @@ export default function PageBuilderPage() {
 
   const { mutate: togglePublish } = useMutation({
     mutationFn: (isPublished: boolean) => fetch(`/api/pages/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isPublished }) }).then((r) => r.json()),
-    onSuccess: () => { toast.success(page?.isPublished ? "Unpublished" : "Published"); invalidate(); },
+    onSuccess: () => { toast.success(page?.isPublished ? t("common:bo.unpublished") : t("common:bo.published")); invalidate(); },
   });
 
   const { mutate: addSection } = useMutation({
@@ -188,14 +188,14 @@ export default function PageBuilderPage() {
           </Button>
           <Button size="sm" variant={page.isPublished ? "outline" : "default"} onClick={() => togglePublish(!page.isPublished)}>
             {page.isPublished ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {page.isPublished ? "Unpublish" : "Publish"}
+            {page.isPublished ? t("common:bo.unpublish") : t("common:bo.publish")}
           </Button>
         </div>
       </div>
 
       {sections.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center text-gray-500 dark:border-gray-700">
-          No sections yet. Add your first section to start building this page.
+          {t("common:bo.pages.no_sections")}
         </div>
       ) : (
         <SortableList
@@ -250,7 +250,7 @@ export default function PageBuilderPage() {
             <div><Label>{t("pages.breadcrumb")}</Label><LocaleTextInput baseKey="breadcrumbLabel" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} /></div>
             <div><Label>{t("news.seo_title")}</Label><LocaleTextInput baseKey="metaTitle" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} /></div>
             <div><Label>{t("news.seo_description")}</Label><LocaleTextInput baseKey="metaDescription" values={meta as unknown as Record<string, unknown>} onChange={(next) => setMeta(next as unknown as typeof meta)} multiline /></div>
-            <Button onClick={() => savePageMeta()} disabled={savingMeta} className="w-full">{savingMeta ? "Saving…" : "Save Settings"}</Button>
+            <Button onClick={() => savePageMeta()} disabled={savingMeta} className="w-full">{savingMeta ? t("common:bo.saving") : t("common:bo.save_settings")}</Button>
           </DialogBody>
         </DialogContent>
       </Dialog>

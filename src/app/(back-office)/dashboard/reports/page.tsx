@@ -15,11 +15,11 @@ import { DollarSign, Users, CreditCard, ShoppingBag, TrendingUp, UserPlus, Calen
 import { useTranslation } from "react-i18next";
 
 const PERIODS = [
-  { label: "Today", value: "today" },
-  { label: "This Week", value: "week" },
-  { label: "This Month", value: "month" },
-  { label: "This Year", value: "year" },
-  { label: "Custom", value: "custom" },
+  { label: "common:bo.reports.today", value: "today" },
+  { label: "common:bo.reports.this_week", value: "week" },
+  { label: "common:bo.reports.this_month", value: "month" },
+  { label: "common:bo.reports.this_year", value: "year" },
+  { label: "common:bo.reports.custom", value: "custom" },
 ];
 
 const PIE_COLORS = ["#3B82F6", "#10B981", "#EF4444", "#F59E0B"];
@@ -67,7 +67,7 @@ export default function ReportsPage() {
         <div className="flex items-center gap-2">
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-            <SelectContent>{PERIODS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+            <SelectContent>{PERIODS.map((p) => <SelectItem key={p.value} value={p.value}>{t(p.label)}</SelectItem>)}</SelectContent>
           </Select>
           {period === "custom" && (
             <>

@@ -42,17 +42,17 @@ export default function RolesPage() {
     mutationFn: async () => {
       const url = editRole ? `/api/roles/${editRole.id}` : "/api/roles";
       const res = await fetch(url, { method: editRole ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Failed"); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? t("common:toast.failed")); }
       return res.json();
     },
-    onSuccess: () => { toast.success(editRole ? "Role updated" : "Role created"); qc.invalidateQueries({ queryKey: ["roles"] }); setModalOpen(false); setEditRole(null); setForm({ name: "", description: "", permissionIds: [] }); },
-    onError: (e: any) => toast.error(e.message ?? "Save failed"),
+    onSuccess: () => { toast.success(editRole ? t("common:bo.roles.updated") : t("common:bo.roles.created")); qc.invalidateQueries({ queryKey: ["roles"] }); setModalOpen(false); setEditRole(null); setForm({ name: "", description: "", permissionIds: [] }); },
+    onError: (e: any) => toast.error(e.message || t("common:toast.save_failed")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/roles/${id}`, { method: "DELETE" }).then(async (r) => { if (!r.ok) { const e = await r.json(); throw new Error(e.error); } }),
     onSuccess: () => { toast.success(t("roles.deleted")); qc.invalidateQueries({ queryKey: ["roles"] }); setDeleteId(null); },
-    onError: (e: any) => toast.error(e.message ?? "Delete failed"),
+    onError: (e: any) => toast.error(e.message || t("common:toast.delete_failed")),
   });
 
   const openAdd = () => { setEditRole(null); setForm({ name: "", description: "", permissionIds: [] }); setModalOpen(true); };
@@ -110,7 +110,7 @@ export default function RolesPage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent size="lg">
-          <DialogHeader><DialogTitle>{editRole ? "Edit Role" : "Create Role"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editRole ? t("common:bo.roles.edit") : t("common:bo.roles.create")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <Input label={t("roles.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("roles.name_ph")} />
             <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("roles.desc_ph")} rows={2} />
@@ -136,7 +136,7 @@ export default function RolesPage() {
           </DialogBody>
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>{t("common:ui.cancel")}</Button>
-            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editRole ? "Save Changes" : "Create Role"}</Button>
+            <Button onClick={() => saveMutation.mutate()} loading={saveMutation.isPending} disabled={!form.name}>{editRole ? t("common:bo.save_changes") : t("common:bo.roles.create")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

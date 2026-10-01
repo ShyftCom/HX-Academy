@@ -63,7 +63,7 @@ export default function PayrollPage() {
           </select>
           <Input type="number" className="w-24" value={year} onChange={(e) => setYear(Number(e.target.value))} />
           <Button onClick={() => generateMut.mutate()} disabled={generateMut.isPending}>
-            <RefreshCw className="me-2 h-4 w-4" />{generateMut.isPending ? "Generating..." : "Generate Payroll"}
+            <RefreshCw className="me-2 h-4 w-4" />{generateMut.isPending ? t("common:bo.generating") : t("common:bo.hrm.generate_payroll")}
           </Button>
         </div>
       </div>

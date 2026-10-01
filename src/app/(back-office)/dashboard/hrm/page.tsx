@@ -21,19 +21,19 @@ export default function HRMDashboardPage() {
   });
 
   const cards = [
-    { label: "Total Staff", value: stats?.totalStaff ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-900/20" },
-    { label: "Present Today", value: stats?.presentToday ?? 0, icon: UserCheck, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
-    { label: "Absent Today", value: stats?.absentToday ?? 0, icon: UserX, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
-    { label: "On Leave", value: stats?.onLeave ?? 0, icon: Calendar, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
-    { label: "Monthly Salary Cost", value: formatDA(stats?.monthlySalaryCost ?? 0), icon: Banknote, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-900/20" },
-    { label: "Attendance Rate", value: `${stats?.attendanceRate ?? 0}%`, icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
+    { label: t("common:bo.hrm.total_staff"), value: stats?.totalStaff ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-900/20" },
+    { label: t("common:bo.hrm.present_today"), value: stats?.presentToday ?? 0, icon: UserCheck, color: "text-green-600", bg: "bg-green-50 dark:bg-green-900/20" },
+    { label: t("common:bo.hrm.absent_today"), value: stats?.absentToday ?? 0, icon: UserX, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
+    { label: t("common:bo.hrm.on_leave"), value: stats?.onLeave ?? 0, icon: Calendar, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20" },
+    { label: t("common:bo.hrm.monthly_salary_cost"), value: formatDA(stats?.monthlySalaryCost ?? 0), icon: Banknote, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-900/20" },
+    { label: t("common:bo.hrm.attendance_rate"), value: `${stats?.attendanceRate ?? 0}%`, icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
   ];
 
   const links = [
-    { href: "/dashboard/hrm/staff", label: "Manage Staff", icon: Users },
-    { href: "/dashboard/hrm/attendance", label: "Attendance", icon: Calendar },
-    { href: "/dashboard/hrm/leave", label: "Leave Requests", icon: UserX },
-    { href: "/dashboard/hrm/payroll", label: "Payroll", icon: Banknote },
+    { href: "/dashboard/hrm/staff", label: t("common:bo.hrm.manage_staff"), icon: Users },
+    { href: "/dashboard/hrm/attendance", label: t("common:bo.hrm.attendance"), icon: Calendar },
+    { href: "/dashboard/hrm/leave", label: t("common:bo.hrm.leave_requests"), icon: UserX },
+    { href: "/dashboard/hrm/payroll", label: t("common:bo.hrm.payroll"), icon: Banknote },
   ];
 
   return (

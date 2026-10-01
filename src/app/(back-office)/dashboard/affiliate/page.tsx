@@ -92,7 +92,7 @@ export default function MyAffiliatePage() {
               </div>
               <Button className="w-full" disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || withdrawMut.isPending}
                 onClick={() => withdrawMut.mutate(Number(withdrawAmount))}>
-                {withdrawMut.isPending ? "Submitting..." : "Submit Request"}
+                {withdrawMut.isPending ? t("common:bo.submitting") : t("common:bo.affiliates.submit_request")}
               </Button>
             </div>
           </DialogContent>

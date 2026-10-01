@@ -36,16 +36,16 @@ export default function ActivityLogsPage() {
   });
 
   const columns = [
-    { key: "user", header: "User", cell: (r: any) => (
+    { key: "user", header: t("common:bo.activity.user"), cell: (r: any) => (
       <div className="flex items-center gap-2">
         <Avatar className="h-7 w-7"><AvatarFallback className="text-xs">{getInitials(r.user?.name ?? "?")}</AvatarFallback></Avatar>
-        <span className="text-sm">{r.user?.name ?? "System"}</span>
+        <span className="text-sm">{r.user?.name ?? t("common:bo.system")}</span>
       </div>
     )},
-    { key: "action", header: "Action", cell: (r: any) => <Badge variant={ACTION_COLORS[r.action] as any ?? "secondary"}>{r.action}</Badge> },
-    { key: "module", header: "Module", cell: (r: any) => <Badge variant="outline">{r.module}</Badge> },
-    { key: "description", header: "Description", cell: (r: any) => <span className="text-sm text-gray-700 dark:text-gray-300">{r.description}</span> },
-    { key: "time", header: "Time", cell: (r: any) => <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(r.createdAt)}</span> },
+    { key: "action", header: t("common:bo.activity.action"), cell: (r: any) => <Badge variant={ACTION_COLORS[r.action] as any ?? "secondary"}>{r.action}</Badge> },
+    { key: "module", header: t("common:bo.activity.module"), cell: (r: any) => <Badge variant="outline">{r.module}</Badge> },
+    { key: "description", header: t("common:bo.activity.description"), cell: (r: any) => <span className="text-sm text-gray-700 dark:text-gray-300">{r.description}</span> },
+    { key: "time", header: t("common:bo.activity.time"), cell: (r: any) => <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(r.createdAt)}</span> },
   ];
 
   return (

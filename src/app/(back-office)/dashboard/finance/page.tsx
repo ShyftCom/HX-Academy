@@ -30,10 +30,10 @@ export default function FinancePage() {
   });
 
   const metrics = [
-    { label: "Gross Revenue", value: profit?.grossRevenue ?? 0, color: "text-green-600", icon: TrendingUp },
-    { label: "Total Charges", value: profit?.totalCharges ?? 0, color: "text-red-500", icon: TrendingDown },
-    { label: "Gross Profit", value: profit?.grossProfit ?? 0, color: (profit?.grossProfit ?? 0) >= 0 ? "text-blue-600" : "text-red-600", icon: DollarSign },
-    { label: "Salary Charges", value: profit?.salaryCharges ?? 0, color: "text-amber-600", icon: Users },
+    { label: t("common:bo.finance.gross_revenue"), value: profit?.grossRevenue ?? 0, color: "text-green-600", icon: TrendingUp },
+    { label: t("common:bo.finance.total_charges"), value: profit?.totalCharges ?? 0, color: "text-red-500", icon: TrendingDown },
+    { label: t("common:bo.finance.gross_profit"), value: profit?.grossProfit ?? 0, color: (profit?.grossProfit ?? 0) >= 0 ? "text-blue-600" : "text-red-600", icon: DollarSign },
+    { label: t("common:bo.finance.salary_charges"), value: profit?.salaryCharges ?? 0, color: "text-amber-600", icon: Users },
   ];
 
   return (
@@ -86,7 +86,7 @@ export default function FinancePage() {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-64 items-center justify-center text-sm text-gray-400">
-                {isLoading ? "Loading..." : "No data for selected period"}
+                {isLoading ? t("common:bo.loading") : t("common:bo.finance.no_data")}
               </div>
             )}
           </CardContent>
