@@ -61,6 +61,23 @@ export async function requirePermissionResponse(permission: string): Promise<Nex
 }
 
 /**
+ * Whether `callerId` may give someone `roleId`. A caller can hand out only a
+ * role whose permissions they already hold themselves — otherwise anyone who
+ * can create staff could mint a Super Admin account and walk through every
+ * other gate. Super Admin itself is assignable only by a Super Admin.
+ */
+export async function canAssignRole(callerId: string, roleId: string): Promise<boolean> {
+  const [held, role] = await Promise.all([
+    getUserPermissions(callerId),
+    db.role.findUnique({ where: { id: roleId }, include: { permissions: { include: { permission: true } } } }),
+  ]);
+  if (!role) return false;
+  if (held.includes("*")) return true;
+  if (role.name === "Super Admin") return false;
+  return role.permissions.every((rp) => held.includes(rp.permission.name));
+}
+
+/**
  * The stations a user may act on, or "all".
  *
  * Location scoping is *positive*: a user reaches every location only by holding

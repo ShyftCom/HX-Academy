@@ -19,6 +19,15 @@ import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
 
+// Sidebar order, so the matrix reads top-to-bottom like the menu it controls.
+const MODULE_ORDER = [
+  "reports", "calendar", "stations", "players", "leads", "summer_camp", "tickets",
+  "subscriptions", "payments", "finance", "store", "orders", "hrm", "affiliate",
+  "website", "schedule", "contact", "applications", "file_requirements", "surveys",
+  "files", "activity_logs", "users", "roles", "affiliates", "settings",
+];
+const moduleRank = (m: string) => { const i = MODULE_ORDER.indexOf(m); return i === -1 ? MODULE_ORDER.length : i; };
+
 export default function RolesPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
@@ -62,11 +71,23 @@ export default function RolesPage() {
     setForm((f) => ({ ...f, permissionIds: f.permissionIds.includes(id) ? f.permissionIds.filter((p) => p !== id) : [...f.permissionIds, id] }));
   };
 
-  const grouped = permissions?.reduce((acc: Record<string, any[]>, p: any) => {
-    if (!acc[p.module]) acc[p.module] = [];
-    acc[p.module].push(p);
-    return acc;
-  }, {});
+  const toggleModule = (ids: string[]) => {
+    setForm((f) => {
+      const allOn = ids.every((id) => f.permissionIds.includes(id));
+      return { ...f, permissionIds: allOn ? f.permissionIds.filter((p) => !ids.includes(p)) : [...new Set([...f.permissionIds, ...ids])] };
+    });
+  };
+
+  const grouped: [string, any[]][] = Object.entries(
+    (permissions ?? []).reduce((acc: Record<string, any[]>, p: any) => {
+      if (!acc[p.module]) acc[p.module] = [];
+      acc[p.module].push(p);
+      return acc;
+    }, {} as Record<string, any[]>),
+  ).sort(([a], [b]) => moduleRank(a) - moduleRank(b)) as [string, any[]][];
+  // Unknown modules/actions (added later without a label) fall back to their raw name.
+  const moduleLabel = (m: string) => t(`common:bo.perm_modules.${m}`, { defaultValue: m });
+  const actionLabel = (a: string) => t(`common:bo.perm_actions.${a}`, { defaultValue: a });
 
   return (
     <div className="space-y-5">
@@ -88,14 +109,14 @@ export default function RolesPage() {
                         {role.isSystem && <Badge variant="secondary">{t("roles.system")}</Badge>}
                       </div>
                       {role.description && <p className="text-sm text-gray-500 mt-0.5">{role.description}</p>}
-                      <p className="text-xs text-gray-400 mt-1">{role._count?.users ?? 0} user(s)</p>
+                      <p className="text-xs text-gray-400 mt-1">{t("common:bo.roles.users_count", { count: role._count?.users ?? 0 })}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1 mb-4 min-h-[28px]">
                     {role.permissions?.slice(0, 6).map((rp: any) => (
-                      <span key={rp.id} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">{rp.permission?.action}</span>
+                      <span key={rp.id} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">{rp.permission ? `${moduleLabel(rp.permission.module)} · ${actionLabel(rp.permission.action)}` : null}</span>
                     ))}
-                    {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">+{role.permissions.length - 6} more</span>}
+                    {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">{t("common:bo.roles.more", { count: role.permissions.length - 6 })}</span>}
                   </div>
                   <div className="flex gap-2">
                     {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>}
@@ -115,23 +136,34 @@ export default function RolesPage() {
             <Input label={t("roles.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("roles.name_ph")} />
             <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("roles.desc_ph")} rows={2} />
             <div>
-              <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">{t("roles.permissions")}</p>
-              <ScrollArea className="h-64 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-                {Object.entries(grouped ?? {}).map(([module, perms]: [string, any]) => (
-                  <div key={module} className="mb-4">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">{module}</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {perms.map((p: any) => (
-                        <label key={p.id} className="flex cursor-pointer items-center gap-2">
-                          <Checkbox checked={form.permissionIds.includes(p.id)} onCheckedChange={() => togglePermission(p.id)} />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{p.action}</span>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("roles.permissions")}</p>
+              <p className="mb-3 text-xs text-gray-500">{t("common:bo.roles.modules_hint")}</p>
+              <ScrollArea className="h-80 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {grouped.map(([module, perms]) => {
+                    const ids = perms.map((p: any) => p.id);
+                    const allOn = ids.every((id: string) => form.permissionIds.includes(id));
+                    const someOn = !allOn && ids.some((id: string) => form.permissionIds.includes(id));
+                    return (
+                      <div key={module} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5">
+                        <label className="flex w-48 shrink-0 cursor-pointer items-center gap-2">
+                          <Checkbox checked={allOn ? true : someOn ? "indeterminate" : false} onCheckedChange={() => toggleModule(ids)} />
+                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{moduleLabel(module)}</span>
                         </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                          {perms.map((p: any) => (
+                            <label key={p.id} className="flex cursor-pointer items-center gap-1.5" title={p.description ?? undefined}>
+                              <Checkbox checked={form.permissionIds.includes(p.id)} onCheckedChange={() => togglePermission(p.id)} />
+                              <span className="text-sm text-gray-600 dark:text-gray-400">{actionLabel(p.action)}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </ScrollArea>
-              <p className="mt-1.5 text-xs text-gray-400">{form.permissionIds.length} permission(s) selected</p>
+              <p className="mt-1.5 text-xs text-gray-400">{t("common:bo.roles.selected", { count: form.permissionIds.length })}</p>
             </div>
           </DialogBody>
           <DialogFooter>

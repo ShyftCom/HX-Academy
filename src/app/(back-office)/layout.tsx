@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { Sidebar, useSidebarCollapsed } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { ShieldOff } from "lucide-react";
+import { permissionForPath } from "@/components/layout/nav-config";
+import { usePermissions } from "@/hooks/use-permissions";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 import { PixelProvider } from "@/components/providers/pixel-provider";
@@ -84,9 +87,28 @@ function BackOfficeShell({ children }: { children: React.ReactNode }) {
         >
           {/* Capped so dashboards don't stretch to 2560px on an ultrawide,
               where a 12-column grid becomes unreadable end-to-end. */}
-          <div className="mx-auto w-full max-w-[1600px]">{children}</div>
+          <div className="mx-auto w-full max-w-[1600px]"><PageGuard>{children}</PageGuard></div>
         </main>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Refuses a page whose sidebar entry the user's role does not grant, so a URL
+ * typed into the address bar lands on a clear message instead of a page whose
+ * every request fails. Presentation only — the API routes stay the boundary.
+ */
+function PageGuard({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation("common");
+  const pathname = usePathname();
+  const { can } = usePermissions();
+  if (can(permissionForPath(pathname))) return <>{children}</>;
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <ShieldOff className="mb-4 h-10 w-10 text-gray-400" />
+      <h1 className="text-lg font-semibold">{t("bo.access_denied.title")}</h1>
+      <p className="mt-1 max-w-sm text-sm text-gray-500">{t("bo.access_denied.body")}</p>
     </div>
   );
 }

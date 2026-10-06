@@ -60,7 +60,8 @@
     "branding": "الشعار والهوية",
     "settings": "الإعدادات",
     "profile": "الملف الشخصي",
-    "sign_out": "تسجيل الخروج"
+    "sign_out": "تسجيل الخروج",
+    "hrm_roles": "الأدوار والصلاحيات"
   },
   "actions": {
     "save": "حفظ",
@@ -568,7 +569,12 @@
       "updated": "تم تحديث الدور",
       "created": "تم إنشاء الدور",
       "edit": "تعديل الدور",
-      "create": "إنشاء دور"
+      "create": "إنشاء دور",
+      "select_all": "الكل",
+      "users_count": "المستخدمون: {{count}}",
+      "more": "+{{count}} أخرى",
+      "selected": "الصلاحيات المحددة: {{count}}",
+      "modules_hint": "كل وحدة تقابل عنصرًا في القائمة الجانبية. «عرض» يُظهر الوحدة، وباقي الإجراءات تسمح بالتعديل."
     },
     "settings": {
       "method_updated": "تم تحديث طريقة الدفع",
@@ -784,6 +790,50 @@
     "upload_image": "رفع صورة",
     "clear_image": "إزالة الصورة",
     "drag_to_reorder": "اسحب لإعادة الترتيب",
-    "locale_base": "الأساس"
+    "locale_base": "الأساس",
+    "access_denied": {
+      "title": "الوصول مرفوض",
+      "body": "دورك لا يمنحك الوصول إلى هذه الوحدة. اطلب من المسؤول إضافتها إلى دورك."
+    },
+    "perm_modules": {
+      "reports": "التقارير",
+      "calendar": "التقويم",
+      "stations": "الفروع",
+      "players": "اللاعبون",
+      "leads": "إدارة العملاء",
+      "summer_camp": "المخيم الصيفي",
+      "tickets": "التذاكر",
+      "subscriptions": "الاشتراكات",
+      "payments": "المدفوعات",
+      "finance": "المالية",
+      "store": "المتجر",
+      "orders": "الطلبات",
+      "hrm": "إدارة الموارد البشرية",
+      "affiliate": "انتسابي",
+      "website": "الموقع",
+      "schedule": "الجداول",
+      "contact": "رسائل الاتصال",
+      "applications": "الطلبات",
+      "file_requirements": "المستندات المطلوبة",
+      "surveys": "الاستطلاعات",
+      "files": "مدير الملفات",
+      "activity_logs": "سجلات النشاط",
+      "users": "المستخدمون",
+      "roles": "الأدوار والصلاحيات",
+      "affiliates": "الشركاء (إدارة)",
+      "settings": "الإعدادات"
+    },
+    "perm_actions": {
+      "view": "عرض",
+      "create": "إنشاء",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "convert": "تحويل",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "manage": "إدارة",
+      "export": "تصدير",
+      "manage_all": "كل الفروع"
+    }
   }
 }

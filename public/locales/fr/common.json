@@ -60,7 +60,8 @@
     "branding": "Logo & Identité",
     "settings": "Paramètres",
     "profile": "Profil",
-    "sign_out": "Se déconnecter"
+    "sign_out": "Se déconnecter",
+    "hrm_roles": "Rôles & accès"
   },
   "actions": {
     "save": "Enregistrer",
@@ -553,7 +554,12 @@
       "updated": "Rôle mis à jour",
       "created": "Rôle créé",
       "edit": "Modifier le rôle",
-      "create": "Créer le rôle"
+      "create": "Créer le rôle",
+      "select_all": "Tout",
+      "users_count": "Utilisateurs : {{count}}",
+      "more": "+{{count}} de plus",
+      "selected": "Permissions sélectionnées : {{count}}",
+      "modules_hint": "Chaque module correspond à une entrée du menu latéral. « Voir » affiche le module ; les autres actions autorisent les modifications."
     },
     "settings": {
       "method_updated": "Moyen de paiement mis à jour",
@@ -769,6 +775,50 @@
     "upload_image": "Téléverser une image",
     "clear_image": "Retirer l'image",
     "drag_to_reorder": "Glisser pour réordonner",
-    "locale_base": "Base"
+    "locale_base": "Base",
+    "access_denied": {
+      "title": "Accès refusé",
+      "body": "Votre rôle ne donne pas accès à ce module. Demandez à un administrateur de l'ajouter à votre rôle."
+    },
+    "perm_modules": {
+      "reports": "Rapports",
+      "calendar": "Calendrier",
+      "stations": "Stations",
+      "players": "Joueurs",
+      "leads": "Leads CRM",
+      "summer_camp": "Camp d'Été",
+      "tickets": "Tickets",
+      "subscriptions": "Abonnements",
+      "payments": "Paiements",
+      "finance": "Finance",
+      "store": "Boutique",
+      "orders": "Commandes",
+      "hrm": "Gestion RH",
+      "affiliate": "Mon affiliation",
+      "website": "Site web",
+      "schedule": "Plannings",
+      "contact": "Messages de contact",
+      "applications": "Candidatures",
+      "file_requirements": "Documents requis",
+      "surveys": "Sondages",
+      "files": "Gestionnaire de fichiers",
+      "activity_logs": "Journaux d'activité",
+      "users": "Utilisateurs",
+      "roles": "Rôles & Permissions",
+      "affiliates": "Affiliés (gestion)",
+      "settings": "Paramètres"
+    },
+    "perm_actions": {
+      "view": "Voir",
+      "create": "Créer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "convert": "Convertir",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "manage": "Gérer",
+      "export": "Exporter",
+      "manage_all": "Toutes les stations"
+    }
   }
 }

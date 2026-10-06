@@ -87,6 +87,25 @@ export const PERMISSIONS = {
   APPLICATIONS_MANAGE: "applications:manage",
   APPLICATIONS_EXPORT: "applications:export",
   FILE_REQUIREMENTS_MANAGE: "file_requirements:manage",
+  // Sidebar modules that used to be open to every signed-in staff member.
+  // Each one now has its own permission so a role can decide exactly which
+  // modules its holders see. prisma/seed.ts grants every one of these to all
+  // existing back-office roles the first time it creates them, so nobody loses
+  // access on deploy — an admin then takes away what a role should not have.
+  CALENDAR_VIEW: "calendar:view",
+  STATIONS_VIEW: "stations:view",
+  SUMMER_CAMP_VIEW: "summer_camp:view",
+  TICKETS_VIEW: "tickets:view",
+  FINANCE_VIEW: "finance:view",
+  HRM_VIEW: "hrm:view",
+  /** Add/edit staff, record attendance, decide leave, run payroll. */
+  HRM_MANAGE: "hrm:manage",
+  AFFILIATE_VIEW: "affiliate:view",
+  AFFILIATES_MANAGE: "affiliates:manage",
+  CONTACT_VIEW: "contact:view",
+  SURVEYS_VIEW: "surveys:view",
+  FILES_VIEW: "files:view",
+  ACTIVITY_LOGS_VIEW: "activity_logs:view",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

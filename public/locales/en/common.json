@@ -60,7 +60,8 @@
     "branding": "Branding & Logos",
     "settings": "Settings",
     "profile": "Profile",
-    "sign_out": "Sign Out"
+    "sign_out": "Sign Out",
+    "hrm_roles": "Roles & access"
   },
   "actions": {
     "save": "Save",
@@ -548,7 +549,12 @@
       "updated": "Role updated",
       "created": "Role created",
       "edit": "Edit role",
-      "create": "Create role"
+      "create": "Create role",
+      "select_all": "All",
+      "users_count": "Users: {{count}}",
+      "more": "+{{count}} more",
+      "selected": "Permissions selected: {{count}}",
+      "modules_hint": "Each module is a sidebar entry. “View” shows the module; the other actions allow changes."
     },
     "settings": {
       "method_updated": "Payment method updated",
@@ -764,6 +770,50 @@
     "upload_image": "Upload image",
     "clear_image": "Clear image",
     "drag_to_reorder": "Drag to reorder",
-    "locale_base": "Base"
+    "locale_base": "Base",
+    "access_denied": {
+      "title": "Access denied",
+      "body": "Your role does not give access to this module. Ask an administrator to add it to your role."
+    },
+    "perm_modules": {
+      "reports": "Reports",
+      "calendar": "Calendar",
+      "stations": "Stations",
+      "players": "Players",
+      "leads": "Leads CRM",
+      "summer_camp": "Summer Camp",
+      "tickets": "Tickets",
+      "subscriptions": "Subscriptions",
+      "payments": "Payments",
+      "finance": "Finance",
+      "store": "Store",
+      "orders": "Orders",
+      "hrm": "HR Management",
+      "affiliate": "My affiliation",
+      "website": "Website",
+      "schedule": "Schedules",
+      "contact": "Contact submissions",
+      "applications": "Applications",
+      "file_requirements": "File requirements",
+      "surveys": "Surveys",
+      "files": "File manager",
+      "activity_logs": "Activity logs",
+      "users": "Users",
+      "roles": "Roles & Permissions",
+      "affiliates": "Affiliates (admin)",
+      "settings": "Settings"
+    },
+    "perm_actions": {
+      "view": "View",
+      "create": "Create",
+      "edit": "Edit",
+      "delete": "Delete",
+      "convert": "Convert",
+      "approve": "Approve",
+      "reject": "Reject",
+      "manage": "Manage",
+      "export": "Export",
+      "manage_all": "All locations"
+    }
   }
 }

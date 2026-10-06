@@ -14,9 +14,11 @@ export async function GET() {
   // role.
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // HR managers need it too: creating a staff member means choosing their role.
   const allowed =
     (await hasPermission(session.user.id, PERMISSIONS.ROLES_VIEW)) ||
-    (await hasPermission(session.user.id, PERMISSIONS.USERS_VIEW));
+    (await hasPermission(session.user.id, PERMISSIONS.USERS_VIEW)) ||
+    (await hasPermission(session.user.id, PERMISSIONS.HRM_MANAGE));
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const roles = await db.role.findMany({
     include: { permissions: { include: { permission: true } }, _count: { select: { users: true } } },

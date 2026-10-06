@@ -103,7 +103,37 @@ async function main() {
     // Admin and Admin by the loop below, so existing installs keep the reach
     // they had before. Everyone else is confined to their station_staff rows.
     { name: "schedule:manage_all", module: "schedule", action: "manage_all", description: "Read and edit the schedule of every location, not only assigned ones" },
+
+    // Sidebar modules that were open to every signed-in staff member until
+    // roles could control them. See MODULE_PERMISSIONS below for how existing
+    // roles keep their access.
+    { name: "calendar:view", module: "calendar", action: "view", description: "Open the calendar" },
+    { name: "stations:view", module: "stations", action: "view", description: "Open stations" },
+    { name: "summer_camp:view", module: "summer_camp", action: "view", description: "Open the summer camp module" },
+    { name: "tickets:view", module: "tickets", action: "view", description: "Open tickets" },
+    { name: "finance:view", module: "finance", action: "view", description: "Open finance (profit overview, charges)" },
+    { name: "hrm:view", module: "hrm", action: "view", description: "Open HR (staff, attendance, leave, payroll)" },
+    { name: "hrm:manage", module: "hrm", action: "manage", description: "Add staff, record attendance, decide leave, run payroll" },
+    { name: "affiliate:view", module: "affiliate", action: "view", description: "Open My affiliation" },
+    { name: "affiliates:manage", module: "affiliates", action: "manage", description: "Manage affiliates" },
+    { name: "contact:view", module: "contact", action: "view", description: "Open contact submissions" },
+    { name: "surveys:view", module: "surveys", action: "view", description: "Open the survey builder" },
+    { name: "files:view", module: "files", action: "view", description: "Open the file manager" },
+    { name: "activity_logs:view", module: "activity_logs", action: "view", description: "Open activity logs" },
   ];
+
+  // These modules were reachable by every back-office role before they had a
+  // permission. The first time a deploy creates one of them, it is granted to
+  // every existing role except Player, so nobody loses a module overnight.
+  // Only on creation: an admin who later removes it from a role is not
+  // overridden by the next deploy.
+  const MODULE_PERMISSIONS = new Set([
+    "calendar:view", "stations:view", "summer_camp:view", "tickets:view", "finance:view",
+    "hrm:view", "hrm:manage", "affiliate:view", "affiliates:manage", "contact:view",
+    "surveys:view", "files:view", "activity_logs:view",
+  ]);
+  const existingPermissionNames = new Set((await db.permission.findMany({ select: { name: true } })).map((p) => p.name));
+  const newModulePermissions = permissionData.filter((p) => MODULE_PERMISSIONS.has(p.name) && !existingPermissionNames.has(p.name)).map((p) => p.name);
 
   const permissions: Record<string, any> = {};
   for (const p of permissionData) {
@@ -162,6 +192,14 @@ async function main() {
         create: { roleId: staffRole.id, permissionId: permissions[name].id },
       });
     }
+  }
+  if (newModulePermissions.length) {
+    const backOfficeRoles = await db.role.findMany({ where: { name: { not: "Player" } }, select: { id: true } });
+    await db.rolePermission.createMany({
+      data: backOfficeRoles.flatMap((r) => newModulePermissions.map((name) => ({ roleId: r.id, permissionId: permissions[name].id }))),
+      skipDuplicates: true,
+    });
+    console.log(`✅ ${newModulePermissions.length} module permissions granted to ${backOfficeRoles.length} existing roles`);
   }
   console.log("✅ Roles created");
 

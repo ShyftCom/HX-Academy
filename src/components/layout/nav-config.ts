@@ -47,13 +47,13 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { tKey: "dashboard", href: "/dashboard", icon: LayoutDashboard },
       { tKey: "reports", href: "/dashboard/reports", icon: BarChart3, permission: PERMISSIONS.REPORTS_VIEW },
-      { tKey: "calendar", href: "/dashboard/calendar", icon: CalendarDays },
+      { tKey: "calendar", href: "/dashboard/calendar", icon: CalendarDays, permission: PERMISSIONS.CALENDAR_VIEW },
     ],
   },
   {
     tKey: "academy",
     items: [
-      { tKey: "stations", href: "/dashboard/stations", icon: MapPin },
+      { tKey: "stations", href: "/dashboard/stations", icon: MapPin, permission: PERMISSIONS.STATIONS_VIEW },
       { tKey: "players", href: "/dashboard/players", icon: UserCheck, permission: PERMISSIONS.PLAYERS_VIEW },
       {
         tKey: "leads",
@@ -67,13 +67,14 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         tKey: "summer_camp",
         icon: Sun,
+        permission: PERMISSIONS.SUMMER_CAMP_VIEW,
         children: [
           { tKey: "sc_plans", href: "/dashboard/summer-camp/plans", icon: Sun },
           { tKey: "sc_sessions", href: "/dashboard/summer-camp/sessions", icon: CalendarDays },
           { tKey: "sc_players", href: "/dashboard/summer-camp/players", icon: Users },
         ],
       },
-      { tKey: "tickets", href: "/dashboard/tickets", icon: Ticket },
+      { tKey: "tickets", href: "/dashboard/tickets", icon: Ticket, permission: PERMISSIONS.TICKETS_VIEW },
     ],
   },
   {
@@ -92,6 +93,7 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         tKey: "finance",
         icon: TrendingUp,
+        permission: PERMISSIONS.FINANCE_VIEW,
         children: [
           { tKey: "profit_overview", href: "/dashboard/finance", icon: BarChart3 },
           { tKey: "charges", href: "/dashboard/finance/charges", icon: Receipt },
@@ -122,15 +124,17 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         tKey: "hrm",
         icon: Users2,
+        permission: [PERMISSIONS.HRM_VIEW, PERMISSIONS.ROLES_VIEW],
         children: [
-          { tKey: "hrm_dashboard", href: "/dashboard/hrm", icon: LayoutDashboard },
-          { tKey: "staff", href: "/dashboard/hrm/staff", icon: UserCheck },
-          { tKey: "attendance", href: "/dashboard/hrm/attendance", icon: CalendarDays },
-          { tKey: "leave", href: "/dashboard/hrm/leave", icon: CalendarOff },
-          { tKey: "payroll", href: "/dashboard/hrm/payroll", icon: Banknote },
+          { tKey: "hrm_dashboard", href: "/dashboard/hrm", icon: LayoutDashboard, permission: PERMISSIONS.HRM_VIEW },
+          { tKey: "staff", href: "/dashboard/hrm/staff", icon: UserCheck, permission: PERMISSIONS.HRM_VIEW },
+          { tKey: "hrm_roles", href: "/dashboard/hrm/roles", icon: Shield, permission: PERMISSIONS.ROLES_VIEW },
+          { tKey: "attendance", href: "/dashboard/hrm/attendance", icon: CalendarDays, permission: PERMISSIONS.HRM_VIEW },
+          { tKey: "leave", href: "/dashboard/hrm/leave", icon: CalendarOff, permission: PERMISSIONS.HRM_VIEW },
+          { tKey: "payroll", href: "/dashboard/hrm/payroll", icon: Banknote, permission: PERMISSIONS.HRM_VIEW },
         ],
       },
-      { tKey: "affiliate", href: "/dashboard/affiliate", icon: Link2 },
+      { tKey: "affiliate", href: "/dashboard/affiliate", icon: Link2, permission: PERMISSIONS.AFFILIATE_VIEW },
     ],
   },
   {
@@ -160,26 +164,26 @@ export const NAV_SECTIONS: NavSection[] = [
           { tKey: "pixels", href: "/dashboard/settings/pixels", icon: Zap },
         ],
       },
-      { tKey: "contact_website", href: "/dashboard/website/contact", icon: Inbox },
+      { tKey: "contact_website", href: "/dashboard/website/contact", icon: Inbox, permission: PERMISSIONS.CONTACT_VIEW },
       { tKey: "applications", href: "/dashboard/website/applications", icon: Inbox, permission: PERMISSIONS.APPLICATIONS_VIEW },
       { tKey: "file_requirements", href: "/dashboard/website/file-requirements", icon: UploadCloud, permission: PERMISSIONS.FILE_REQUIREMENTS_MANAGE },
-      { tKey: "surveys", href: "/dashboard/surveys", icon: FileText },
+      { tKey: "surveys", href: "/dashboard/surveys", icon: FileText, permission: PERMISSIONS.SURVEYS_VIEW },
     ],
   },
   {
     tKey: "system",
     items: [
       { tKey: "notifications", href: "/dashboard/notifications", icon: Bell },
-      { tKey: "file_manager", href: "/dashboard/files", icon: Folder },
-      { tKey: "activity_logs", href: "/dashboard/activity-logs", icon: Activity },
+      { tKey: "file_manager", href: "/dashboard/files", icon: Folder, permission: PERMISSIONS.FILES_VIEW },
+      { tKey: "activity_logs", href: "/dashboard/activity-logs", icon: Activity, permission: PERMISSIONS.ACTIVITY_LOGS_VIEW },
       {
         tKey: "admin",
         icon: Shield,
-        permission: [PERMISSIONS.USERS_VIEW, PERMISSIONS.ROLES_VIEW],
+        permission: [PERMISSIONS.USERS_VIEW, PERMISSIONS.ROLES_VIEW, PERMISSIONS.AFFILIATES_MANAGE],
         children: [
           { tKey: "users", href: "/dashboard/users", icon: Users, permission: PERMISSIONS.USERS_VIEW },
           { tKey: "roles", href: "/dashboard/roles", icon: Shield, permission: PERMISSIONS.ROLES_VIEW },
-          { tKey: "affiliates", href: "/dashboard/affiliates", icon: Link2 },
+          { tKey: "affiliates", href: "/dashboard/affiliates", icon: Link2, permission: PERMISSIONS.AFFILIATES_MANAGE },
         ],
       },
       { tKey: "branding", href: "/dashboard/branding", icon: Palette, permission: PERMISSIONS.SETTINGS_VIEW },
@@ -187,6 +191,25 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
 ];
+
+/**
+ * The permission guarding a back-office URL, taken from the sidebar entry with
+ * the longest matching href. Lets the shell refuse a page typed into the
+ * address bar that the sidebar would not have offered. A child without its
+ * own permission inherits its parent's.
+ */
+export function permissionForPath(pathname: string): string | string[] | undefined {
+  let best: { href: string; permission?: string | string[] } | undefined;
+  const visit = (item: NavItem, inherited?: string | string[]) => {
+    const permission = item.permission ?? inherited;
+    if (item.href && isItemActive(item.href, pathname) && (!best || item.href.length > best.href.length)) {
+      best = { href: item.href, permission };
+    }
+    item.children?.forEach((c) => visit(c, permission));
+  };
+  NAV_SECTIONS.forEach((s) => s.items.forEach((i) => visit(i)));
+  return best?.permission;
+}
 
 /** Longest-prefix match, so /dashboard/leads/pipeline highlights Pipeline, not Leads. */
 export function isItemActive(href: string, pathname: string): boolean {

@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 interface Attendance {
   id: string;
@@ -54,7 +56,7 @@ interface StaffDetail {
   salaryType: string;
   bankAccount?: string;
   status: string;
-  user?: { email?: string };
+  user?: { email?: string; role?: { id: string; name: string } | null };
   attendances: Attendance[];
   leaveRequests: LeaveRequest[];
   payrolls: Payroll[];
@@ -87,6 +89,25 @@ export default function StaffProfilePage() {
   const { data: staff, isLoading } = useQuery<StaffDetail>({
     queryKey: ["hrm-staff", id],
     queryFn: () => fetch(`/api/hrm/staff/${id}`).then((r) => r.json()),
+  });
+
+  const { can } = usePermissions();
+  const canManage = can(PERMISSIONS.HRM_MANAGE);
+  const { data: roles = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["roles"],
+    queryFn: () => fetch("/api/roles").then((r) => (r.ok ? r.json() : [])),
+    enabled: canManage,
+  });
+
+  const roleMutation = useMutation({
+    mutationFn: async (roleId: string) => {
+      const res = await fetch(`/api/hrm/staff/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ roleId }) });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? t("common:toast.failed"));
+      return d;
+    },
+    onSuccess: () => { toast.success(t("staff.role_updated")); qc.invalidateQueries({ queryKey: ["hrm-staff"] }); },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const leaveActionMutation = useMutation({
@@ -128,8 +149,22 @@ export default function StaffProfilePage() {
           <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
             {staff.fullName}
           </h1>
-          <p style={{ color: "var(--text-muted)" }} className="text-sm">{staff.role}</p>
+          <p style={{ color: "var(--text-muted)" }} className="text-sm">{staff.user?.role?.name ?? staff.role}</p>
         </div>
+        {canManage && roles.filter((r) => r.name !== "Player").length > 0 && (
+          <label className="ms-4 flex items-center gap-2 text-sm">
+            <span className="text-gray-500">{t("staff.access_role")}</span>
+            <select
+              className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm"
+              value={staff.user?.role?.id ?? ""}
+              disabled={roleMutation.isPending}
+              onChange={(e) => e.target.value && roleMutation.mutate(e.target.value)}
+            >
+              <option value="">{t("staff.select_role")}</option>
+              {roles.filter((r) => r.name !== "Player").map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </label>
+        )}
         <div className="ml-auto">
           <Badge className={staff.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}>
             {staff.status}
