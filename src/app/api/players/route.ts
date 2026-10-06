@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { generatePassword } from "@/lib/generate-password";
+import { peopleSearchWhere } from "@/lib/search";
 
 export async function GET(req: NextRequest) {
   // The academy's whole roster — every player's name, phone and email — with
@@ -21,13 +22,12 @@ export async function GET(req: NextRequest) {
   const stationId = searchParams.get("stationId") ?? "";
 
   const where: Record<string, unknown> = {};
-  if (q) {
-    where.OR = [
-      { fullName: { contains: q } },
-      { phone: { contains: q } },
-      { email: { contains: q } },
-    ];
-  }
+  const search = await peopleSearchWhere(q, {
+    table: "players",
+    textFields: ["fullName", "email", "phone", "parentName", "parentPhone"],
+    phoneColumns: ["phone", "parentPhone"],
+  });
+  if (search) where.AND = [search];
   if (status) where.status = status;
   if (category) where.category = category;
   // "none" finds players that were never assigned a station.

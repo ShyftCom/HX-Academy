@@ -345,7 +345,7 @@ export default function LeadsPage() {
       </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("filters.search_placeholder")} className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("filters.search_placeholder")} className="w-64" debounceMs={300} />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
           <SelectTrigger className="w-44"><SelectValue placeholder={t("filters.all_statuses")} /></SelectTrigger>
           <SelectContent>

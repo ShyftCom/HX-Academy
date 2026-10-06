@@ -233,7 +233,7 @@ export default function PlayersPage() {
       </PageHeader>
 
       <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("page.search")} className="w-64" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("page.search")} className="w-64" debounceMs={300} />
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
           <SelectTrigger className="w-36"><SelectValue placeholder={t("common:ui.all_status")} /></SelectTrigger>
           <SelectContent>
