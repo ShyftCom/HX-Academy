@@ -54,7 +54,12 @@ export default function LoginPage() {
 
       const res = await fetch("/api/auth/me");
       const me = await res.json();
-      router.push(me.isPlayer ? "/player" : "/dashboard");
+      // ?callbackUrl= brings staff back to where sign-in interrupted them (the
+      // Claude consent screen). Same-origin paths only: "//evil.com" and
+      // "/\\evil.com" are protocol-relative to a browser, so they're refused.
+      const next = new URLSearchParams(window.location.search).get("callbackUrl");
+      const safeNext = next && /^\/(?![/\\])/.test(next) ? next : null;
+      router.push(me.isPlayer ? "/player" : safeNext ?? "/dashboard");
       router.refresh();
     } catch {
       setFormError(t("login.invalid_credentials"));

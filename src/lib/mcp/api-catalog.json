@@ -1,0 +1,2531 @@
+[
+ {
+  "path": "/api/activity-logs",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "module",
+   "action"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "userId",
+   "commissionRate",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "commissionRate",
+   "status"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates/[id]/withdraw",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "amount"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates/my",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates/referrals/[id]",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "amountPaid"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/affiliates/withdrawals/[id]",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "action",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/applications",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "statusId",
+   "planId",
+   "leadType"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/applications/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "statusId",
+   "adminNotes",
+   "assignedStaffId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/applications/[id]/approve",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "createAccount",
+   "password",
+   "subscriptionStart",
+   "subscriptionEnd"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/applications/export",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/attribute-groups",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [
+   "name",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/attribute-groups/[id]",
+  "methods": {
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/attribute-groups/[id]/attributes",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "value",
+   "colorHex"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/attributes/[id]",
+  "methods": {
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/branding",
+  "methods": {
+   "GET": null,
+   "POST": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "key"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/calendar/available-agents",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "date",
+   "time",
+   "duration"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/calendar/settings",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [
+   "agent_id"
+  ],
+  "bodyFields": [
+   "timezone",
+   "bufferMinutes",
+   "weeklySchedule"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/calendar/slots",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "agent_id",
+   "date",
+   "duration"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/charges",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId",
+   "categoryId",
+   "dateFrom",
+   "dateTo",
+   "isSalary"
+  ],
+  "bodyFields": [
+   "stationId",
+   "categoryId",
+   "title",
+   "amount",
+   "chargeDate",
+   "notes",
+   "isSalary",
+   "staffId",
+   "receiptUrl"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/charges/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "amount",
+   "chargeDate",
+   "categoryId",
+   "notes",
+   "isSalary"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/charges/categories",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [
+   "name",
+   "color",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/charges/categories/[id]",
+  "methods": {
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/coaches",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "fullName",
+   "role",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/coaches/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/coaches/reorder",
+  "methods": {
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/dashboard/stats",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/faqs",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "category"
+  ],
+  "bodyFields": [
+   "question",
+   "answer",
+   "category",
+   "programmeId",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/faqs/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/faqs/reorder",
+  "methods": {
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/file-requirements",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "titleFr",
+   "titleAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "isRequired",
+   "allowedTypes",
+   "maxSizeMb",
+   "isActive",
+   "order",
+   "appliesTo"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/file-requirements/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "titleFr",
+   "titleAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "isRequired",
+   "allowedTypes",
+   "maxSizeMb",
+   "isActive",
+   "order",
+   "appliesTo"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/files",
+  "methods": {
+   "GET": null,
+   "DELETE": null
+  },
+  "query": [
+   "folder",
+   "page",
+   "perPage",
+   "id"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/finance/profit",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "stationId",
+   "dateFrom",
+   "dateTo"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/form-fields",
+  "methods": {
+   "GET": null,
+   "POST": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "label",
+   "labelFr",
+   "labelAr",
+   "fieldName",
+   "fieldType",
+   "placeholder",
+   "placeholderFr",
+   "placeholderAr",
+   "options",
+   "isRequired",
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/form-fields/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "label",
+   "labelFr",
+   "labelAr",
+   "fieldType",
+   "placeholder",
+   "placeholderFr",
+   "placeholderAr",
+   "options",
+   "isRequired",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/attendance",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "staffId",
+   "stationId",
+   "month",
+   "year"
+  ],
+  "bodyFields": [
+   "staffId",
+   "date",
+   "status",
+   "checkIn",
+   "checkOut",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/dashboard",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/leave",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId",
+   "status"
+  ],
+  "bodyFields": [
+   "staffId",
+   "leaveType",
+   "startDate",
+   "endDate",
+   "reason"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/leave/[id]",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "action"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/payroll",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId",
+   "month",
+   "year"
+  ],
+  "bodyFields": [
+   "stationId",
+   "month",
+   "year"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/payroll/[id]",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "bonuses",
+   "deductions",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/payroll/[id]/pay",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/staff",
+  "methods": {
+   "GET": null,
+   "POST": "Creates the staff member together with their login. The staff member is a new person, not an existing account picked from a list — the old form listed every user, players' parents included, and tied the staff profile to one of them. The role chosen here decides which sidebar modules they can open."
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [
+   "stationId",
+   "phone",
+   "nationalId",
+   "hireDate",
+   "baseSalary",
+   "salaryType",
+   "bankAccount",
+   "fullName",
+   "email",
+   "password",
+   "roleId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/hrm/staff/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "roleId",
+   "fullName",
+   "role",
+   "phone",
+   "nationalId",
+   "hireDate",
+   "baseSalary",
+   "salaryType",
+   "bankAccount",
+   "status",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/landing-page",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "isPublished"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/landing-page/sections",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "type",
+   "title",
+   "content",
+   "isEnabled"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/landing-page/sections/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "content",
+   "isEnabled",
+   "order"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/lead-statuses",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "color",
+   "position",
+   "isTerminal"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/lead-statuses/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "color",
+   "order",
+   "isTerminal",
+   "fallbackStatusId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/lead-statuses/reorder",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "order"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "statusId",
+   "source",
+   "leadType",
+   "stationId",
+   "isConverted"
+  ],
+  "bodyFields": [],
+  "schemas": [
+   "createSchema = z.object({ fullName: z.string().min(1, \"Full name is required\"), phone: z.string().optional(), email: z.string().email().optional().or(z.literal(\"\")), dateOfBirth: z.string().optional(), parentName: z.string().optional(), parentPhone: z.string().optional(), address: z.string().optional(), categoryInterest: z.string().optional(), notes: z.string().optional(), source: z.string().optional(), statusId: z.string().optional(), assignedStaffId: z.string().optional(), })"
+  ]
+ },
+ {
+  "path": "/api/leads/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "fullName",
+   "phone",
+   "email",
+   "dateOfBirth",
+   "parentName",
+   "parentPhone",
+   "address",
+   "categoryInterest",
+   "notes",
+   "source",
+   "statusId",
+   "assignedStaffId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads/[id]/activity",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "actionType"
+  ],
+  "bodyFields": [
+   "actionType",
+   "description",
+   "metadata"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads/[id]/convert",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "sessionId",
+   "paymentStatus",
+   "paidAmount",
+   "email",
+   "password"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads/[id]/notes",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "content"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads/[id]/station",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/leads/[id]/status",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "status_id"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/locations",
+  "methods": {
+   "GET": "The locations the current user may manage a schedule for — the source for the admin location selector. Deliberately not /api/stations (which lists every branch to any signed-in user) nor /api/public/venues (which hides unpublished ones): a location-scoped admin must see their own branches and only those, published or not."
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/locations/[id]/schedule",
+  "methods": {
+   "GET": "One location's schedule: `id` is the station id.",
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/locations/[id]/schedule/[slotId]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/locations/[id]/schedule/duplicate",
+  "methods": {
+   "POST": "Seed this location's schedule from another one's, as a starting template."
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/locations/[id]/schedule/reorder",
+  "methods": {
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/meetings",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "agent_id",
+   "lead_id",
+   "from",
+   "to"
+  ],
+  "bodyFields": [
+   "leadId",
+   "agentId",
+   "date",
+   "time",
+   "durationMinutes",
+   "type",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/meetings/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "date",
+   "time",
+   "durationMinutes",
+   "type",
+   "notes",
+   "status"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/news",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/news/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/news/categories",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/news/categories/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "order",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/notifications",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "page",
+   "perPage"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/notifications/[id]/read",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/notifications/read-all",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/notifications/unread-count",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/orders",
+  "methods": {
+   "GET": null,
+   "POST": "Places an order. This is the store checkout, and the only caller is the player portal — the back office reads, re-statuses and deletes orders, but never creates one. So it stays reachable by any signed-in user rather than taking a permission: gating it would close the shop. What it stops taking on trust is who the order belongs to. `playerId` came straight from the request body, so a player could "
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "statusId",
+   "playerId",
+   "stationId"
+  ],
+  "bodyFields": [
+   "items",
+   "statusId",
+   "codData",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/orders/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "statusId",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/orders/statuses",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "color",
+   "isDefault"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/orders/statuses/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "color",
+   "isDefault"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pages",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "slug",
+   "title",
+   "template",
+   "isPublished",
+   "metaTitle",
+   "metaTitleFr",
+   "metaTitleAr",
+   "metaDescription",
+   "metaDescriptionFr",
+   "metaDescriptionAr",
+   "breadcrumbLabel",
+   "breadcrumbLabelFr",
+   "breadcrumbLabelAr"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pages/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "slug",
+   "title",
+   "template",
+   "isPublished",
+   "metaTitle",
+   "metaTitleFr",
+   "metaTitleAr",
+   "metaDescription",
+   "metaDescriptionFr",
+   "metaDescriptionAr",
+   "ogImage",
+   "canonicalUrl",
+   "noindex",
+   "nofollow",
+   "breadcrumbLabel",
+   "breadcrumbLabelFr",
+   "breadcrumbLabelAr"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pages/[id]/sections",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "type",
+   "title",
+   "content",
+   "isEnabled"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pages/[id]/sections/[sectionId]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "content",
+   "isEnabled"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pages/[id]/sections/reorder",
+  "methods": {
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pathway",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "color"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pathway/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/pathway/reorder",
+  "methods": {
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments",
+  "methods": {
+   "GET": null,
+   "POST": "Records a payment. Two callers share this route, and they are not equally trusted: - the back office (payments:create) files a payment on a player's behalf and may set the status, the notes and the amount it actually received; - the player portal submits its own receipt for review. Previously both were gated on auth() alone and the body was copied straight into the row, so a player could POST `sta"
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "status",
+   "playerId",
+   "stationId"
+  ],
+  "bodyFields": [
+   "planId",
+   "playerId",
+   "amount",
+   "status",
+   "adminNotes",
+   "subscriptionId",
+   "paymentMethodId",
+   "proof"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "amount",
+   "proof",
+   "adminNotes",
+   "paymentMethodId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/[id]/approve",
+  "methods": {
+   "POST": "Manual approval of an offline payment (bank transfer receipt, cash, etc.). The activation itself — approve the payment, start or extend the subscription, notify the player, fire the purchase pixel — lives in src/lib/payment-activation.ts, shared with the SlickPay callbacks so an online payment produces exactly the same result as an approved receipt."
+  },
+  "query": [],
+  "bodyFields": [
+   "adminNotes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/[id]/reject",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "reason"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/methods",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "instructions",
+   "accountDetails",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/methods/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "instructions",
+   "accountDetails",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/proof",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/proof/[id]",
+  "methods": {
+   "GET": "Serves a stored payment proof to the person who uploaded it, or to staff who can view payments."
+  },
+  "query": [
+   "download"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/slickpay/[id]/verify",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/slickpay/checkout",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "planId",
+   "playerId",
+   "subscriptionId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/payments/slickpay/status",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/permissions",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/pixels/[stationId]",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "platform",
+   "pixelId",
+   "accessToken",
+   "useConversionApi",
+   "testEventCode",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/pixels/event",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "eventName",
+   "stationId",
+   "userData",
+   "eventData"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/player/documents",
+  "methods": {
+   "GET": null,
+   "POST": null,
+   "DELETE": null
+  },
+  "query": [
+   "id"
+  ],
+  "bodyFields": [],
+  "schemas": [
+   "uploadSchema = z.object({ requirementId: z.string().min(1), fileName: z.string().min(1), fileUrl: z.string().url(), mimeType: z.string().optional(), size: z.number().int().nonnegative().optional(), })"
+  ]
+ },
+ {
+  "path": "/api/players",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "status",
+   "category",
+   "stationId"
+  ],
+  "bodyFields": [
+   "fullName",
+   "email",
+   "password",
+   "photo",
+   "phone",
+   "dateOfBirth",
+   "age",
+   "gender",
+   "parentName",
+   "parentPhone",
+   "address",
+   "emergencyContact",
+   "team",
+   "category",
+   "position",
+   "medicalNotes",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/players/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "photo",
+   "phone",
+   "parentPhone",
+   "address",
+   "fullName",
+   "email",
+   "dateOfBirth",
+   "age",
+   "gender",
+   "parentName",
+   "emergencyContact",
+   "team",
+   "category",
+   "position",
+   "medicalNotes",
+   "notes",
+   "password",
+   "status"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/players/[id]/station",
+  "methods": {
+   "PATCH": "Moving a player between stations is an academy administrative act, not player self-service — unlike GET/PUT on this resource there is no \"own record\" branch here, matching the status/password PATCH above it."
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/products",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "categoryId",
+   "status",
+   "public"
+  ],
+  "bodyFields": [
+   "name",
+   "price",
+   "nameFr",
+   "nameAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "images",
+   "discountPrice",
+   "stock",
+   "sku",
+   "categoryId",
+   "status",
+   "isFeatured",
+   "weight"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/products/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "images",
+   "price",
+   "discountPrice",
+   "stock",
+   "sku",
+   "categoryId",
+   "status",
+   "isFeatured",
+   "weight"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/products/[id]/variants",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "variants"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/products/[id]/variants/[variantId]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "price",
+   "stock",
+   "sku",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/products/categories",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "description",
+   "image"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/products/categories/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "description",
+   "image",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "slug",
+   "nameFr",
+   "nameAr",
+   "categoryId",
+   "isPubliclyListed"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/[id]/schedule",
+  "methods": {
+   "POST": "Kept for the Schedule tab inside the programme editor. Schedules are now owned by a location, so the body must name one; authorization and conflict checking happen against that location, exactly as on /api/locations/[id]/schedule."
+  },
+  "query": [],
+  "bodyFields": [
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/[id]/schedule/[scheduleId]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/[id]/schedule/reorder",
+  "methods": {
+   "PUT": "Ordering inside one programme's schedule tab. The rows can span several locations, so each one is authorized against its own station and silently dropped when the caller cannot reach it."
+  },
+  "query": [],
+  "bodyFields": [
+   "items"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/categories",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "colorTag"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/programmes/categories/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "colorTag",
+   "order",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/redirects",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "fromPath",
+   "toPath",
+   "statusCode",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/redirects/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "fromPath",
+   "toPath",
+   "statusCode",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/reports",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "type",
+   "period",
+   "startDate",
+   "endDate"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/roles",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "description",
+   "permissionIds"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/roles/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "description",
+   "permissionIds"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/settings",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/settings/slickpay",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [
+   "enabled",
+   "mode",
+   "accountUuid",
+   "publicKey",
+   "regenerateWebhookSecret"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/settings/slickpay/test",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "publicKey",
+   "mode"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/stations",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "wilaya",
+   "wilayaCode",
+   "address",
+   "phone",
+   "email",
+   "whatsapp",
+   "logoUrl"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/stations/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "wilaya",
+   "wilayaCode",
+   "address",
+   "phone",
+   "email",
+   "whatsapp",
+   "logoUrl",
+   "status",
+   "slug",
+   "heroImageUrl",
+   "galleryImages",
+   "shortDescription",
+   "shortDescriptionFr",
+   "shortDescriptionAr",
+   "fullDescription",
+   "fullDescriptionFr",
+   "fullDescriptionAr",
+   "facilities",
+   "facilitiesFr",
+   "facilitiesAr",
+   "pitchType",
+   "changingRooms",
+   "parkingInfo",
+   "parkingInfoFr",
+   "parkingInfoAr",
+   "transportInfo",
+   "transportInfoFr",
+   "transportInfoAr",
+   "accessibilityInfo",
+   "accessibilityInfoFr",
+   "accessibilityInfoAr",
+   "googleMapsUrl",
+   "latitude",
+   "longitude",
+   "displayOrder",
+   "isPubliclyListed"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/stations/global-stats",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/subscriptions",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "playerId",
+   "status",
+   "stationId"
+  ],
+  "bodyFields": [
+   "playerId",
+   "planId",
+   "status",
+   "startDate",
+   "notes"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/subscriptions/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "status",
+   "startDate"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/subscriptions/plans",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "price",
+   "duration",
+   "nameFr",
+   "nameAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "durationType",
+   "color",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/subscriptions/plans/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "duration",
+   "durationType",
+   "price",
+   "color",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/plans",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId",
+   "activeOnly"
+  ],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "programTrack",
+   "price",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "isActive",
+   "order",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/plans/[id]",
+  "methods": {
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "programTrack",
+   "price",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "isActive",
+   "order"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/players",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "sessionId",
+   "stationId",
+   "status"
+  ],
+  "bodyFields": [
+   "fullName",
+   "dateOfBirth",
+   "age",
+   "gender",
+   "healthNotes",
+   "guardianName",
+   "guardianPhone",
+   "guardianEmail",
+   "guardianRelation",
+   "sessionId",
+   "stationId",
+   "notes",
+   "paymentStatus",
+   "paidAmount",
+   "leadId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/players/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "fullName",
+   "dateOfBirth",
+   "age",
+   "gender",
+   "healthNotes",
+   "notes",
+   "guardianName",
+   "guardianPhone",
+   "guardianEmail",
+   "guardianRelation",
+   "sessionId",
+   "stationId",
+   "status",
+   "paymentStatus",
+   "paidAmount"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/sessions",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "stationId"
+  ],
+  "bodyFields": [
+   "name",
+   "startDate",
+   "endDate",
+   "capacity",
+   "price",
+   "description",
+   "stationId",
+   "nameFr",
+   "nameAr",
+   "descriptionFr",
+   "descriptionAr"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/summer-camp/sessions/[id]",
+  "methods": {
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "nameFr",
+   "nameAr",
+   "startDate",
+   "endDate",
+   "capacity",
+   "price",
+   "description",
+   "descriptionFr",
+   "descriptionAr",
+   "isActive",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/surveys",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "description",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/surveys/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "description",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/surveys/[id]/answers",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "answers",
+   "leadId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/surveys/[id]/questions",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "question",
+   "questionType",
+   "options",
+   "isRequired",
+   "disqualifyingOptions"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/surveys/questions/[id]",
+  "methods": {
+   "PUT": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "question",
+   "questionType",
+   "options",
+   "disqualifyingOptions",
+   "isRequired",
+   "order"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/tickets",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "status",
+   "priority",
+   "assignedToId",
+   "createdById",
+   "page",
+   "perPage"
+  ],
+  "bodyFields": [
+   "title",
+   "description",
+   "priority",
+   "assignedToId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/tickets/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "title",
+   "description",
+   "status",
+   "priority",
+   "assignedToId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/tickets/[id]/comments",
+  "methods": {
+   "POST": null
+  },
+  "query": [],
+  "bodyFields": [
+   "body"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/user/language",
+  "methods": {
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "language"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/users",
+  "methods": {
+   "GET": "Two separate problems lived in this handler. The first is that it leaked password hashes. The query uses `include` with no `select`, and Prisma then returns every scalar column — `password` among them. Every other handler that returns a user strips it (POST below, and both of the [id] handlers), so this was an oversight rather than a decision, but on `auth()` alone it meant any signed-in user coul",
+   "POST": null
+  },
+  "query": [
+   "q",
+   "page",
+   "perPage",
+   "roles",
+   "include_availability"
+  ],
+  "bodyFields": [
+   "email",
+   "password",
+   "name",
+   "roleId",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/users/[id]",
+  "methods": {
+   "GET": null,
+   "PUT": null,
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "roleId",
+   "isActive",
+   "password"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website-settings",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/footer",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [
+   "station_id"
+  ],
+  "bodyFields": [
+   "stationId",
+   "appearance",
+   "socialLinks",
+   "linkColumns",
+   "bottomLinks"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/header",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [
+   "station_id"
+  ],
+  "bodyFields": [
+   "stationId",
+   "branding",
+   "navItems",
+   "cta",
+   "options"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/reviews",
+  "methods": {
+   "GET": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "status",
+   "rating",
+   "productId",
+   "stationId"
+  ],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/reviews/[id]",
+  "methods": {
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "status",
+   "isFeatured",
+   "isVerified",
+   "adminReply"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/sc-settings",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/slides",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "station_id"
+  ],
+  "bodyFields": [
+   "stationId",
+   "imageUrl",
+   "title",
+   "titleFr",
+   "titleAr",
+   "subtitle",
+   "subtitleFr",
+   "subtitleAr",
+   "ctaLabel",
+   "ctaUrl",
+   "position"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/slides/[id]",
+  "methods": {
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "imageUrl",
+   "title",
+   "titleFr",
+   "titleAr",
+   "subtitle",
+   "subtitleFr",
+   "subtitleAr",
+   "ctaLabel",
+   "ctaUrl",
+   "position",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/sponsors",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "station_id"
+  ],
+  "bodyFields": [
+   "stationId",
+   "name",
+   "logoUrl",
+   "websiteUrl"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/sponsors/[id]",
+  "methods": {
+   "PATCH": null,
+   "DELETE": null
+  },
+  "query": [],
+  "bodyFields": [
+   "name",
+   "logoUrl",
+   "websiteUrl",
+   "position",
+   "isActive"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/store",
+  "methods": {
+   "GET": null,
+   "PUT": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/store/orders",
+  "methods": {
+   "GET": null,
+   "POST": null
+  },
+  "query": [
+   "page",
+   "perPage",
+   "q",
+   "status",
+   "stationId"
+  ],
+  "bodyFields": [
+   "customerName",
+   "customerPhone",
+   "customerEmail",
+   "wilaya",
+   "city",
+   "address",
+   "deliveryNotes",
+   "items",
+   "stationId"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/website/store/orders/[id]",
+  "methods": {
+   "GET": null,
+   "PATCH": null
+  },
+  "query": [],
+  "bodyFields": [
+   "status"
+  ],
+  "schemas": []
+ },
+ {
+  "path": "/api/wilayas",
+  "methods": {
+   "GET": null
+  },
+  "query": [],
+  "bodyFields": [],
+  "schemas": []
+ }
+]

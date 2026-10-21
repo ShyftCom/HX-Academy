@@ -106,6 +106,11 @@ export const PERMISSIONS = {
   SURVEYS_VIEW: "surveys:view",
   FILES_VIEW: "files:view",
   ACTIVITY_LOGS_VIEW: "activity_logs:view",
+  // Claude (MCP). A connection acts with its user's own permissions, so
+  // ai:connect grants nothing new beyond letting Claude act on the user's
+  // behalf. ai:manage sees and revokes every user's connections.
+  AI_CONNECT: "ai:connect",
+  AI_MANAGE: "ai:manage",
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

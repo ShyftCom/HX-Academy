@@ -120,6 +120,10 @@ async function main() {
     { name: "surveys:view", module: "surveys", action: "view", description: "Open the survey builder" },
     { name: "files:view", module: "files", action: "view", description: "Open the file manager" },
     { name: "activity_logs:view", module: "activity_logs", action: "view", description: "Open activity logs" },
+    // Not in MODULE_PERMISSIONS below: letting Claude act for you is opt-in per
+    // role, so only Super Admin and Admin (who get everything) start with it.
+    { name: "ai:connect", module: "ai", action: "connect", description: "Connect Claude to act on your behalf" },
+    { name: "ai:manage", module: "ai", action: "manage", description: "See and revoke everyone's Claude connections" },
   ];
 
   // These modules were reachable by every back-office role before they had a

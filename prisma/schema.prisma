@@ -58,6 +58,9 @@ model User {
   ticketsAssigned Ticket[]        @relation("TicketAssignedTo")
   ticketComments  TicketComment[] @relation("TicketComments")
 
+  // Claude (MCP) connections this login authorized
+  aiConnections AiConnection[]
+
   @@map("users")
 }
 
@@ -1852,4 +1855,72 @@ model TicketComment {
   createdAt DateTime @default(now())
 
   @@map("ticket_comments")
+}
+
+// ==================== CLAUDE / MCP CONNECTIONS ====================
+
+/// An OAuth client that registered itself through /api/oauth/register (RFC 7591
+/// dynamic client registration) — in practice claude.ai, Claude Desktop or
+/// Claude Code. Registration is open by design: a client is only a name and its
+/// redirect URIs, and nothing is granted until a staff member approves it.
+model AiOAuthClient {
+  id               String   @id @default(cuid())
+  clientId         String   @unique
+  /// sha256 of the secret, for clients that registered as confidential.
+  clientSecretHash String?
+  name             String
+  redirectUris     String[]
+  createdAt        DateTime @default(now())
+
+  connections AiConnection[]
+  codes       AiOAuthCode[]
+
+  @@map("ai_oauth_clients")
+}
+
+/// One connected Claude account (OAuth grant) or one personal access token.
+/// Claude acts as `user`, with that user's role and permissions — every call
+/// goes through the same API routes, and the same checks, as the back office.
+/// There is deliberately no cap on how many may exist.
+model AiConnection {
+  id               String         @id @default(cuid())
+  name             String
+  /// "oauth" (connected through the consent screen) or "token" (pasted key).
+  kind             String
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId         String?
+  client           AiOAuthClient? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  /// Read-only connections may only make GET calls.
+  readOnly         Boolean        @default(false)
+  accessTokenHash  String         @unique
+  /// First characters of the token, shown so a user can tell keys apart.
+  tokenPrefix      String
+  /// Null for personal access tokens, which do not expire on their own.
+  accessExpiresAt  DateTime?
+  refreshTokenHash String?        @unique
+  refreshExpiresAt DateTime?
+  lastUsedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime       @default(now())
+
+  @@index([userId])
+  @@map("ai_connections")
+}
+
+/// A single-use authorization code, exchanged at /api/oauth/token with PKCE.
+model AiOAuthCode {
+  id            String        @id @default(cuid())
+  codeHash      String        @unique
+  clientId      String
+  client        AiOAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId        String
+  redirectUri   String
+  codeChallenge String
+  name          String
+  readOnly      Boolean       @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime      @default(now())
+
+  @@map("ai_oauth_codes")
 }

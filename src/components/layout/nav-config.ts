@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity, Banknote, BarChart3, Bell, CalendarDays, CalendarOff, ClipboardList,
+  Activity, Banknote, BarChart3, Bell, Bot, CalendarDays, CalendarOff, ClipboardList,
   CreditCard, FileText, Folder, Globe, Handshake, ImagePlay, Inbox, Layers,
   LayoutDashboard, Link2, MapPin, MessagesSquare, Navigation, Package, Palette,
   PanelsTopLeft, Receipt, Settings, Shield, ShoppingBag, ShoppingCart, Star,
@@ -186,6 +186,7 @@ export const NAV_SECTIONS: NavSection[] = [
           { tKey: "affiliates", href: "/dashboard/affiliates", icon: Link2, permission: PERMISSIONS.AFFILIATES_MANAGE },
         ],
       },
+      { tKey: "ai_connections", href: "/dashboard/ai", icon: Bot, permission: [PERMISSIONS.AI_CONNECT, PERMISSIONS.AI_MANAGE] },
       { tKey: "branding", href: "/dashboard/branding", icon: Palette, permission: PERMISSIONS.SETTINGS_VIEW },
       { tKey: "settings", href: "/dashboard/settings", icon: Settings, permission: PERMISSIONS.SETTINGS_VIEW },
     ],
