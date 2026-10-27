@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +29,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useStation } from "@/context/StationContext";
 import { readJsonOrThrow } from "@/lib/api-error";
+import { saveLeadsListQuery, saveLeadsListScroll, savedLeadsListScroll } from "@/lib/leads-list-context";
 
 const schema = z.object({
   fullName: z.string().min(1, "common:bo.validation.full_name_required"),
@@ -192,19 +194,49 @@ function KanbanCard({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+// useSearchParams needs a Suspense boundary in the App Router.
 export default function LeadsPage() {
+  return (
+    <Suspense fallback={null}>
+      <LeadsPageContent />
+    </Suspense>
+  );
+}
+
+function LeadsPageContent() {
   const { t } = useTranslation("leads");
   const { t: tc } = useTranslation("common");
   const qc = useQueryClient();
   const { activeStationId, isGlobalView } = useStation();
-  const [view, setView] = useState<"table" | "kanban">("table");
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [sourceFilter, setSourceFilter] = useState("");
-  const [leadTypeFilter, setLeadTypeFilter] = useState("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const listQuery = searchParams.toString();
+
+  // List state lives in the URL so opening a lead and coming back (app link or
+  // browser Back) lands on the same page, filters and view.
+  const view: "table" | "kanban" = searchParams.get("view") === "kanban" ? "kanban" : "table";
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
+  const search = searchParams.get("q") ?? "";
+  const statusFilter = searchParams.get("status") ?? "";
+  const sourceFilter = searchParams.get("source") ?? "";
+  const leadTypeFilter = searchParams.get("type") ?? "all";
   /** Only offered in the all-stations view; the header switcher wins otherwise. */
-  const [stationFilter, setStationFilter] = useState("all");
+  const stationFilter = searchParams.get("station") ?? "all";
+
+  /** Sets (or clears, for defaults) URL params; any filter change goes back to page 1. */
+  const updateList = useCallback((changes: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const defaults: Record<string, string> = { view: "table", page: "1", q: "", status: "all", source: "all", type: "all", station: "all" };
+    if (!("page" in changes)) params.delete("page");
+    for (const [key, value] of Object.entries(changes)) {
+      if (!value || value === defaults[key]) params.delete(key);
+      else params.set(key, value);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [searchParams, router, pathname]);
+  const setPage = useCallback((p: number) => updateList({ page: String(p) }), [updateList]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editLead, setEditLead] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -225,6 +257,32 @@ export default function LeadsPage() {
       return fetch(`/api/leads?${params}`).then((r) => r.json());
     },
   });
+
+  // Remember this list position for the lead detail page's Back links.
+  useEffect(() => { saveLeadsListQuery(listQuery); }, [listQuery]);
+
+  useEffect(() => {
+    const main = document.getElementById("ob-main");
+    if (!main) return;
+    const onScroll = () => saveLeadsListScroll(listQuery, main.scrollTop);
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => main.removeEventListener("scroll", onScroll);
+  }, [listQuery]);
+
+  // Restore the scroll offset once the rows are on screen. The detail page's
+  // Back links opt out of Next's scroll handling, so this sets it either way.
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (scrollRestored.current || isLoading) return;
+    scrollRestored.current = true;
+    const main = document.getElementById("ob-main");
+    if (main) main.scrollTop = savedLeadsListScroll(listQuery);
+  }, [isLoading, listQuery]);
+
+  // Records deleted since the page was opened: move to the last page that exists.
+  useEffect(() => {
+    if (view === "table" && data?.totalPages >= 1 && page > data.totalPages) setPage(data.totalPages);
+  }, [view, data?.totalPages, page, setPage]);
 
   const { data: statuses } = useQuery<LeadStatus[]>({
     queryKey: ["lead-statuses"],
@@ -345,22 +403,22 @@ export default function LeadsPage() {
       </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("filters.search_placeholder")} className="w-64" debounceMs={300} />
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+        <SearchInput value={search} onChange={(v) => updateList({ q: v })} placeholder={t("filters.search_placeholder")} className="w-64" debounceMs={300} />
+        <Select value={statusFilter} onValueChange={(v) => updateList({ status: v })}>
           <SelectTrigger className="w-44"><SelectValue placeholder={t("filters.all_statuses")} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("filters.all_statuses")}</SelectItem>
             {statuses?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v); setPage(1); }}>
+        <Select value={sourceFilter} onValueChange={(v) => updateList({ source: v })}>
           <SelectTrigger className="w-40"><SelectValue placeholder={t("page.all_sources")} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("page.all_sources")}</SelectItem>
             {SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Select value={leadTypeFilter} onValueChange={(v) => { setLeadTypeFilter(v); setPage(1); }}>
+        <Select value={leadTypeFilter} onValueChange={(v) => updateList({ type: v })}>
           <SelectTrigger className="w-44"><SelectValue placeholder={t("page.all_programs")} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("page.all_programs")}</SelectItem>
@@ -369,7 +427,7 @@ export default function LeadsPage() {
           </SelectContent>
         </Select>
         {isGlobalView && (
-          <Select value={stationFilter} onValueChange={(v) => { setStationFilter(v); setPage(1); }}>
+          <Select value={stationFilter} onValueChange={(v) => updateList({ station: v })}>
             <SelectTrigger className="w-48"><SelectValue placeholder={t("filters.all_stations")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("filters.all_stations")}</SelectItem>
@@ -381,14 +439,14 @@ export default function LeadsPage() {
 
         {/* View toggle */}
         <div className="ms-auto flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--muted-bg)" }}>
-          <button onClick={() => setView("table")}
+          <button onClick={() => updateList({ view: "table", page: String(page) })}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
             style={view === "table"
               ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
               : { color: "var(--text-muted)" }}>
             <List className="w-3.5 h-3.5" /> {t("page.list")}
           </button>
-          <button onClick={() => setView("kanban")}
+          <button onClick={() => updateList({ view: "kanban", page: String(page) })}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
             style={view === "kanban"
               ? { background: "var(--card)", color: "var(--text-primary)", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generatePassword } from "@/lib/generate-password";
 import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
+import { LEADS_LIST_PATH, leadsListHref } from "@/lib/leads-list-context";
 import { useTranslation } from "react-i18next";
 
 interface Lead {
@@ -109,12 +110,18 @@ function RoleBadge({ role }: { role: string }) {
   );
 }
 
+const noopSubscribe = () => () => {};
+
 export default function LeadDetailPage() {
   const { t } = useTranslation("leads");
   const { t: tl } = useTranslation("leads");
   const { t: tc } = useTranslation("common");
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
+
+  // Back to the list page/filters the user came from; the default list on a
+  // direct link. The server snapshot is the default since SSR has no sessionStorage.
+  const listHref = useSyncExternalStore(noopSubscribe, leadsListHref, () => LEADS_LIST_PATH);
 
   const [activeTab, setActiveTab] = useState<"info" | "activity" | "notes">("info");
   const [activityFilter, setActivityFilter] = useState("all");
@@ -263,7 +270,7 @@ export default function LeadDetailPage() {
       <div className="text-center py-20">
         <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
         <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("detail.not_found")}</p>
-        <Link href="/dashboard/leads" className="text-sm mt-2 block" style={{ color: "#A02020" }}>{t("detail.back")}</Link>
+        <Link href={listHref} scroll={false} className="text-sm mt-2 block" style={{ color: "#A02020" }}>{t("detail.back")}</Link>
       </div>
     );
   }
@@ -287,7 +294,7 @@ export default function LeadDetailPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
-        <Link href="/dashboard/leads" className="hover:underline">{tl("title")}</Link>
+        <Link href={listHref} scroll={false} className="hover:underline">{tl("title")}</Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span style={{ color: "var(--text-primary)" }}>{lead.fullName}</span>
       </div>
