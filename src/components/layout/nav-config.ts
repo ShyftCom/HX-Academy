@@ -188,6 +188,7 @@ export const NAV_SECTIONS: NavSection[] = [
       },
       { tKey: "ai_connections", href: "/dashboard/ai", icon: Bot, permission: [PERMISSIONS.AI_CONNECT, PERMISSIONS.AI_MANAGE] },
       { tKey: "branding", href: "/dashboard/branding", icon: Palette, permission: PERMISSIONS.SETTINGS_VIEW },
+      { tKey: "api_connectors", href: "/dashboard/settings/connectors", icon: Zap, permission: PERMISSIONS.SETTINGS_VIEW },
       { tKey: "settings", href: "/dashboard/settings", icon: Settings, permission: PERMISSIONS.SETTINGS_VIEW },
     ],
   },

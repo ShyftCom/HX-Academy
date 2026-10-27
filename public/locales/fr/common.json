@@ -62,7 +62,8 @@
     "profile": "Profil",
     "sign_out": "Se déconnecter",
     "hrm_roles": "Rôles & accès",
-    "ai_connections": "Claude (IA)"
+    "ai_connections": "Claude (IA)",
+    "api_connectors": "Connecteurs API"
   },
   "actions": {
     "save": "Enregistrer",
@@ -883,6 +884,83 @@
         "forbidden": "Votre rôle n'est pas autorisé à connecter Claude. Demandez à un administrateur la permission « Connecter Claude ».",
         "invalid": "Cette demande de connexion est invalide ou a expiré. Recommencez depuis Claude.",
         "back_to_dashboard": "Retour au tableau de bord"
+      }
+    },
+    "ad_connectors": {
+      "title": "Connecteurs API",
+      "subtitle": "Balises publicitaires installées sur le site public. Les changements s'appliquent au prochain chargement de page — sans redéploiement.",
+      "status_active": "Actif",
+      "status_disabled": "Désactivé",
+      "status_not_configured": "Non configuré",
+      "status_invalid": "Invalide",
+      "lead_event": "Événement de conversion lead",
+      "last_updated": "Dernière mise à jour",
+      "never_saved": "Jamais enregistré",
+      "diagnostics": "Diagnostic",
+      "check_id_configured": "ID de suivi configuré",
+      "check_id_valid": "Format de l'ID valide",
+      "check_label": "Libellé de conversion lead défini",
+      "check_enabled": "Intégration activée",
+      "check_leads": "Conversions lead activées",
+      "script_loaded": "Script chargé dans ce navigateur",
+      "script_loading": "Chargement du script lancé dans ce navigateur (pas encore confirmé)",
+      "script_failed": "Échec du chargement du script dans ce navigateur (bloqueur de pub ou réseau)",
+      "script_blocked_by_consent": "Non chargé dans ce navigateur : consentement publicitaire refusé",
+      "script_unknown": "Pas encore vu dans ce navigateur — ouvrez le site public ici pour vérifier",
+      "last_local_event": "Dernier événement envoyé depuis ce navigateur : {{name}} le {{at}}",
+      "no_local_event": "Aucun événement envoyé depuis ce navigateur.",
+      "local_vs_provider": "Ceci indique ce que ce navigateur a transmis au script de la plateforme. Cela ne prouve pas sa réception — vérifiez dans les outils de la plateforme.",
+      "configure": "Configurer",
+      "edit": "Modifier",
+      "test_guide": "Guide de test",
+      "hide_guide": "Masquer le guide",
+      "saved": "Connecteur enregistré",
+      "toggle_enabled": "Activer l'intégration",
+      "toggle_page_views": "Suivre les pages vues",
+      "toggle_leads": "Suivre les conversions lead",
+      "fix_before_enable": "Corrigez les erreurs ci-dessus avant d'activer — ou désactivez l'intégration pour enregistrer un brouillon.",
+      "consent_note": "Les balises ne se chargent que si le visiteur n'a pas refusé le consentement publicitaire (cookie hx_ad_consent=denied) et n'envoie pas Global Privacy Control. Les conversions lead sont envoyées une seule fois par lead, après acceptation de la candidature par le serveur.",
+      "errors": {
+        "tracking_id_missing": "Saisissez l'ID de suivi.",
+        "tracking_id_invalid": "Cet ID ne correspond pas au format de la plateforme.",
+        "label_missing": "Saisissez le libellé de conversion (requis pour le suivi des leads).",
+        "label_invalid": "Le libellé de conversion contient des caractères invalides.",
+        "lead_event_invalid": "Événement lead non pris en charge."
+      },
+      "meta": {
+        "description": "Intégration existante. Envoie son propre événement Lead lors d'une candidature réussie.",
+        "managed_elsewhere": "Géré dans Paramètres → Meta Pixel. Cette page ne le modifie pas.",
+        "open_settings": "Ouvrir les paramètres"
+      },
+      "tiktok": {
+        "description": "Pixel TikTok : pages vues et conversion lead à l'envoi d'une candidature.",
+        "id_label": "ID du pixel TikTok",
+        "id_hint": "Events Manager → votre pixel → Paramètres. Majuscules et chiffres, ex. C4ABCDEF12GHIJ345678.",
+        "lead_event_hint": "Deux événements standard TikTok optimisés pour l'objectif Lead. SubmitForm pour un formulaire ; CompleteRegistration pour une inscription.",
+        "guide_1": "Installez l'extension TikTok Pixel Helper dans Chrome et ouvrez le site public — elle doit afficher votre ID et un Pageview.",
+        "guide_2": "Dans TikTok Events Manager → votre pixel → Tester les événements, ouvrez le site via le lien de test pour voir les événements sans les compter en campagne.",
+        "guide_3": "Envoyez une candidature test : l'extension doit afficher l'événement lead avec event_id lead_<id>.",
+        "guide_4": "Vérifiez Events Manager → Vue d'ensemble après ~30 minutes pour la réception confirmée."
+      },
+      "google_ads": {
+        "description": "Balise Google (gtag.js) pour Google Ads : pages vues de remarketing et action de conversion lead.",
+        "id_label": "ID de conversion",
+        "id_hint": "Google Ads → Objectifs → Conversions → votre action → Configuration de la balise → AW-XXXXXXXXX.",
+        "label_label": "Libellé de conversion lead",
+        "label_hint": "La partie après la barre oblique dans send_to : 'AW-XXXXXXXXX/<libellé>'.",
+        "guide_1": "Ouvrez tagassistant.google.com, connectez l'URL du site public et vérifiez que la balise AW- se déclenche.",
+        "guide_2": "Envoyez une candidature test et vérifiez un événement 'conversion' avec send_to AW-…/libellé dans Tag Assistant.",
+        "guide_3": "Dans Google Ads → Objectifs → Conversions, le statut passe à « Enregistrement des conversions » en quelques heures.",
+        "guide_4": "Les conversions de test sont comptées ; utilisez un libellé dédié aux tests si nécessaire."
+      },
+      "snapchat": {
+        "description": "Snap Pixel : pages vues et conversion SIGN_UP à l'envoi d'une candidature.",
+        "id_label": "ID du Snap Pixel",
+        "id_hint": "Snapchat Ads Manager → Events Manager → votre pixel. Un UUID comme 1a2b3c4d-….",
+        "guide_1": "Installez l'extension Snap Pixel Helper dans Chrome et ouvrez le site public — elle doit afficher PAGE_VIEW.",
+        "guide_2": "Envoyez une candidature test : l'extension doit afficher SIGN_UP avec client_dedup_id lead_<id>.",
+        "guide_3": "Dans Snapchat Events Manager → votre pixel → Test / Détails des événements, confirmez la réception.",
+        "guide_4": "Comptez jusqu'à une heure avant l'apparition dans les rapports Ads Manager."
       }
     }
   }

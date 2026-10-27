@@ -62,7 +62,8 @@
     "profile": "Profile",
     "sign_out": "Sign Out",
     "hrm_roles": "Roles & access",
-    "ai_connections": "Claude (AI)"
+    "ai_connections": "Claude (AI)",
+    "api_connectors": "API Connectors"
   },
   "actions": {
     "save": "Save",
@@ -878,6 +879,83 @@
         "forbidden": "Your role is not allowed to connect Claude. Ask an administrator to grant the \"Connect Claude\" permission.",
         "invalid": "This connection request is invalid or has expired. Start again from Claude.",
         "back_to_dashboard": "Back to dashboard"
+      }
+    },
+    "ad_connectors": {
+      "title": "API Connectors",
+      "subtitle": "Advertising tags installed on the public website. Changes apply on the next page load — no redeploy.",
+      "status_active": "Active",
+      "status_disabled": "Disabled",
+      "status_not_configured": "Not configured",
+      "status_invalid": "Invalid",
+      "lead_event": "Lead conversion event",
+      "last_updated": "Last updated",
+      "never_saved": "Never saved",
+      "diagnostics": "Diagnostics",
+      "check_id_configured": "Tracking ID configured",
+      "check_id_valid": "Tracking ID format valid",
+      "check_label": "Lead conversion label set",
+      "check_enabled": "Integration enabled",
+      "check_leads": "Lead conversions on",
+      "script_loaded": "Script loaded in this browser",
+      "script_loading": "Script started loading in this browser (no load confirmation yet)",
+      "script_failed": "Script failed to load in this browser (ad blocker or network)",
+      "script_blocked_by_consent": "Not loaded in this browser: ad consent denied",
+      "script_unknown": "Not seen in this browser yet — open the public site here to check",
+      "last_local_event": "Last event dispatched from this browser: {{name}} at {{at}}",
+      "no_local_event": "No event dispatched from this browser yet.",
+      "local_vs_provider": "This shows what this browser sent to the provider's script. It does not prove the platform received it — confirm in the provider's tools.",
+      "configure": "Configure",
+      "edit": "Edit",
+      "test_guide": "Testing guide",
+      "hide_guide": "Hide guide",
+      "saved": "Connector saved",
+      "toggle_enabled": "Enable integration",
+      "toggle_page_views": "Track page views",
+      "toggle_leads": "Track lead conversions",
+      "fix_before_enable": "Fix the errors above before enabling — or switch the integration off to save a draft.",
+      "consent_note": "Tags load only when the visitor has not denied ad consent (hx_ad_consent=denied cookie) and does not send Global Privacy Control. Lead conversions fire once per lead, only after the application is accepted by the server.",
+      "errors": {
+        "tracking_id_missing": "Enter the tracking ID.",
+        "tracking_id_invalid": "This ID doesn't match the platform's format.",
+        "label_missing": "Enter the conversion label (needed for lead tracking).",
+        "label_invalid": "The conversion label contains invalid characters.",
+        "lead_event_invalid": "Unsupported lead event."
+      },
+      "meta": {
+        "description": "Existing integration. Fires its own Lead event on a successful application.",
+        "managed_elsewhere": "Managed in Settings → Meta Pixel. This page does not change it.",
+        "open_settings": "Open Settings"
+      },
+      "tiktok": {
+        "description": "TikTok Pixel: page views and a lead conversion when an application is submitted.",
+        "id_label": "TikTok Pixel ID",
+        "id_hint": "Events Manager → your pixel → Settings. Uppercase letters and digits, e.g. C4ABCDEF12GHIJ345678.",
+        "lead_event_hint": "Both are TikTok standard events optimised for the Lead objective. SubmitForm suits a form; CompleteRegistration a sign-up.",
+        "guide_1": "Install the TikTok Pixel Helper extension in Chrome and open the public site — it should list your pixel ID and a Pageview.",
+        "guide_2": "In TikTok Events Manager → your pixel → Test events, open the site from the test link to see events live without counting them as campaign data.",
+        "guide_3": "Submit a test application: the helper should show the lead event with event_id lead_<id>.",
+        "guide_4": "Check Events Manager → Overview after ~30 minutes for confirmed receipt."
+      },
+      "google_ads": {
+        "description": "Google tag (gtag.js) for Google Ads: remarketing page views and the lead conversion action.",
+        "id_label": "Conversion ID",
+        "id_hint": "Google Ads → Goals → Conversions → your action → Tag setup → AW-XXXXXXXXX.",
+        "label_label": "Lead conversion label",
+        "label_hint": "The part after the slash in send_to: 'AW-XXXXXXXXX/<label>'.",
+        "guide_1": "Open tagassistant.google.com, connect the public site URL and confirm the AW- tag fires.",
+        "guide_2": "Submit a test application and check a 'conversion' event with send_to AW-…/label in Tag Assistant.",
+        "guide_3": "In Google Ads → Goals → Conversions, the action status moves to 'Recording conversions' within a few hours.",
+        "guide_4": "Test conversions are counted; remove them from reports or test with a dedicated label if that matters."
+      },
+      "snapchat": {
+        "description": "Snap Pixel: page views and a SIGN_UP conversion when an application is submitted.",
+        "id_label": "Snap Pixel ID",
+        "id_hint": "Snapchat Ads Manager → Events Manager → your pixel. A UUID like 1a2b3c4d-….",
+        "guide_1": "Install the Snap Pixel Helper extension in Chrome and open the public site — it should show PAGE_VIEW.",
+        "guide_2": "Submit a test application: the helper should show SIGN_UP with client_dedup_id lead_<id>.",
+        "guide_3": "In Snapchat Events Manager → your pixel → Test events / Event details, confirm receipt.",
+        "guide_4": "Allow up to an hour for events to appear in Ads Manager reporting."
       }
     }
   }

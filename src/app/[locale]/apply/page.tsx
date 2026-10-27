@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { emitLeadRegistrationCompleted } from "@/lib/ad-tracking/lead-event";
 
 /**
  * Public application form — a *lead* form, nothing more.
@@ -179,8 +180,12 @@ function ApplyFormInner() {
 
       // The route screens the answers one last time. If it turned the
       // applicant away, no lead exists — so no Lead event either.
-      if ((await res.json()).disqualified) { router.push(`/${locale}/apply/not-eligible`); return; }
+      const result = await res.json();
+      if (result.disqualified) { router.push(`/${locale}/apply/not-eligible`); return; }
 
+      // TikTok / Google Ads / Snapchat conversions. Never throws, and runs
+      // before the Meta call so neither can stop the other.
+      emitLeadRegistrationCompleted(result.leadId);
       window.fbq?.("track", "Lead");
       router.push(`/${locale}/apply/eligible`);
     } catch {

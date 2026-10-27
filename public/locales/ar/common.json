@@ -62,7 +62,8 @@
     "profile": "الملف الشخصي",
     "sign_out": "تسجيل الخروج",
     "hrm_roles": "الأدوار والصلاحيات",
-    "ai_connections": "Claude (الذكاء الاصطناعي)"
+    "ai_connections": "Claude (الذكاء الاصطناعي)",
+    "api_connectors": "موصلات API"
   },
   "actions": {
     "save": "حفظ",
@@ -898,6 +899,83 @@
         "forbidden": "دورك لا يسمح بربط Claude. اطلب من المسؤول منحك صلاحية «ربط Claude».",
         "invalid": "طلب الاتصال هذا غير صالح أو منتهي الصلاحية. ابدأ من جديد من Claude.",
         "back_to_dashboard": "العودة إلى لوحة التحكم"
+      }
+    },
+    "ad_connectors": {
+      "title": "موصلات API",
+      "subtitle": "وسوم إعلانية مثبتة على الموقع العام. تُطبَّق التغييرات عند تحميل الصفحة التالي — دون إعادة نشر.",
+      "status_active": "نشط",
+      "status_disabled": "معطّل",
+      "status_not_configured": "غير مُهيّأ",
+      "status_invalid": "غير صالح",
+      "lead_event": "حدث تحويل العميل المحتمل",
+      "last_updated": "آخر تحديث",
+      "never_saved": "لم يُحفظ بعد",
+      "diagnostics": "التشخيص",
+      "check_id_configured": "معرّف التتبع مُعدّ",
+      "check_id_valid": "صيغة المعرّف صحيحة",
+      "check_label": "تسمية التحويل مُعدّة",
+      "check_enabled": "التكامل مفعّل",
+      "check_leads": "تحويلات العملاء المحتملين مفعّلة",
+      "script_loaded": "تم تحميل السكربت في هذا المتصفح",
+      "script_loading": "بدأ تحميل السكربت في هذا المتصفح (دون تأكيد بعد)",
+      "script_failed": "فشل تحميل السكربت في هذا المتصفح (مانع إعلانات أو شبكة)",
+      "script_blocked_by_consent": "لم يُحمَّل في هذا المتصفح: تم رفض الموافقة الإعلانية",
+      "script_unknown": "لم يُرصد في هذا المتصفح بعد — افتح الموقع العام هنا للتحقق",
+      "last_local_event": "آخر حدث أُرسل من هذا المتصفح: {{name}} في {{at}}",
+      "no_local_event": "لم يُرسل أي حدث من هذا المتصفح بعد.",
+      "local_vs_provider": "يعرض هذا ما أرسله هذا المتصفح إلى سكربت المنصة، ولا يثبت استلام المنصة له — تحقّق من أدوات المنصة.",
+      "configure": "تهيئة",
+      "edit": "تعديل",
+      "test_guide": "دليل الاختبار",
+      "hide_guide": "إخفاء الدليل",
+      "saved": "تم حفظ الموصل",
+      "toggle_enabled": "تفعيل التكامل",
+      "toggle_page_views": "تتبع مشاهدات الصفحات",
+      "toggle_leads": "تتبع تحويلات العملاء المحتملين",
+      "fix_before_enable": "صحّح الأخطاء أعلاه قبل التفعيل — أو عطّل التكامل لحفظ مسودة.",
+      "consent_note": "تُحمَّل الوسوم فقط إذا لم يرفض الزائر الموافقة الإعلانية (ملف تعريف الارتباط hx_ad_consent=denied) ولم يُرسل إشارة Global Privacy Control. تُرسل تحويلات العملاء المحتملين مرة واحدة لكل عميل، بعد قبول الخادم للطلب.",
+      "errors": {
+        "tracking_id_missing": "أدخل معرّف التتبع.",
+        "tracking_id_invalid": "هذا المعرّف لا يطابق صيغة المنصة.",
+        "label_missing": "أدخل تسمية التحويل (مطلوبة لتتبع العملاء المحتملين).",
+        "label_invalid": "تحتوي تسمية التحويل على أحرف غير صالحة.",
+        "lead_event_invalid": "حدث غير مدعوم."
+      },
+      "meta": {
+        "description": "تكامل موجود. يرسل حدث Lead الخاص به عند نجاح الطلب.",
+        "managed_elsewhere": "يُدار من الإعدادات ← Meta Pixel. هذه الصفحة لا تغيّره.",
+        "open_settings": "فتح الإعدادات"
+      },
+      "tiktok": {
+        "description": "بكسل TikTok: مشاهدات الصفحات وتحويل عميل محتمل عند إرسال طلب.",
+        "id_label": "معرّف بكسل TikTok",
+        "id_hint": "Events Manager ← البكسل ← الإعدادات. أحرف كبيرة وأرقام، مثل C4ABCDEF12GHIJ345678.",
+        "lead_event_hint": "كلاهما حدث قياسي في TikTok مُحسَّن لهدف Lead. SubmitForm للنموذج، وCompleteRegistration للتسجيل.",
+        "guide_1": "ثبّت إضافة TikTok Pixel Helper في Chrome وافتح الموقع العام — يجب أن تعرض المعرّف وحدث Pageview.",
+        "guide_2": "في TikTok Events Manager ← البكسل ← اختبار الأحداث، افتح الموقع عبر رابط الاختبار لرؤية الأحداث دون احتسابها في الحملات.",
+        "guide_3": "أرسل طلبًا تجريبيًا: يجب أن تعرض الإضافة حدث العميل المحتمل مع event_id lead_<id>.",
+        "guide_4": "تحقّق من Events Manager ← نظرة عامة بعد ~30 دقيقة لتأكيد الاستلام."
+      },
+      "google_ads": {
+        "description": "وسم Google (gtag.js) لـ Google Ads: مشاهدات إعادة الاستهداف وإجراء تحويل العميل المحتمل.",
+        "id_label": "معرّف التحويل",
+        "id_hint": "Google Ads ← الأهداف ← التحويلات ← الإجراء ← إعداد الوسم ← AW-XXXXXXXXX.",
+        "label_label": "تسمية تحويل العميل المحتمل",
+        "label_hint": "الجزء بعد الشرطة المائلة في send_to: 'AW-XXXXXXXXX/<label>'.",
+        "guide_1": "افتح tagassistant.google.com، واربط رابط الموقع العام وتأكد من تشغيل وسم AW-.",
+        "guide_2": "أرسل طلبًا تجريبيًا وتحقق من حدث 'conversion' مع send_to AW-…/label في Tag Assistant.",
+        "guide_3": "في Google Ads ← الأهداف ← التحويلات، تتحول الحالة إلى «جارٍ تسجيل التحويلات» خلال ساعات.",
+        "guide_4": "تُحتسب التحويلات التجريبية؛ استخدم تسمية مخصصة للاختبار إن لزم."
+      },
+      "snapchat": {
+        "description": "Snap Pixel: مشاهدات الصفحات وتحويل SIGN_UP عند إرسال طلب.",
+        "id_label": "معرّف Snap Pixel",
+        "id_hint": "Snapchat Ads Manager ← Events Manager ← البكسل. معرّف UUID مثل 1a2b3c4d-….",
+        "guide_1": "ثبّت إضافة Snap Pixel Helper في Chrome وافتح الموقع العام — يجب أن تعرض PAGE_VIEW.",
+        "guide_2": "أرسل طلبًا تجريبيًا: يجب أن تعرض الإضافة SIGN_UP مع client_dedup_id lead_<id>.",
+        "guide_3": "في Snapchat Events Manager ← البكسل ← تفاصيل الأحداث، تأكّد من الاستلام.",
+        "guide_4": "قد يستغرق ظهور الأحداث في تقارير Ads Manager حتى ساعة."
       }
     }
   }

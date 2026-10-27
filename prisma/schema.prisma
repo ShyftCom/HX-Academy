@@ -165,6 +165,33 @@ model Setting {
   @@map("settings")
 }
 
+// Sitewide ad-platform tags for TikTok, Google Ads and Snapchat (API
+// Connectors page). One row per provider. The global Meta Pixel is NOT here —
+// it keeps its own meta_pixel_* rows in Setting — and the per-station
+// PixelConfig below is a separate, unrelated system.
+model AdConnector {
+  id               String   @id @default(cuid())
+  /// "tiktok" | "google_ads" | "snapchat"
+  provider         String   @unique
+  enabled          Boolean  @default(false)
+  /// TikTok/Snap pixel ID, or the Google Ads tag ID (AW-…)
+  trackingId       String   @default("")
+  /// Google Ads only: label of the Lead conversion action
+  conversionLabel  String   @default("")
+  /// Provider event name sent on a confirmed lead (TikTok: SubmitForm/CompleteRegistration)
+  leadEvent        String   @default("")
+  trackPageViews   Boolean  @default(true)
+  trackLeads       Boolean  @default(true)
+  /// "valid" | "invalid" | "incomplete" — set on every save
+  validationState  String   @default("incomplete")
+  validationErrors String?
+  updatedById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("ad_connectors")
+}
+
 // ==================== LEADS CRM ====================
 
 model LeadStatus {
