@@ -8,6 +8,8 @@ import { MapPin, Plus, Users, TrendingUp, Globe } from "lucide-react";
 import Link from "next/link";
 import { useQuery as useGlobalQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 function formatDA(n: number) {
   return n.toLocaleString("fr-DZ") + " DA";
@@ -15,6 +17,9 @@ function formatDA(n: number) {
 
 export default function StationsPage() {
   const { t } = useTranslation("stations");
+  // The route omits revenue for anyone without finance:overview.
+  const { can, isLoading: permsLoading } = usePermissions();
+  const seesRevenue = !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW);
   const { data: globalStats, isLoading } = useGlobalQuery({
     queryKey: ["global-stats"],
     queryFn: () => fetch("/api/stations/global-stats").then((r) => r.json()),
@@ -43,12 +48,14 @@ export default function StationsPage() {
             <p className="text-2xl font-bold">{globalStats?.totalPlayers ?? 0}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <p className="text-xs text-gray-500">{t("total_revenue")}</p>
-            <p className="text-2xl font-bold">{formatDA(globalStats?.totalRevenue ?? 0)}</p>
-          </CardContent>
-        </Card>
+        {seesRevenue && (
+          <Card>
+            <CardContent className="pt-4">
+              <p className="text-xs text-gray-500">{t("total_revenue")}</p>
+              <p className="text-2xl font-bold">{formatDA(globalStats?.totalRevenue ?? 0)}</p>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardContent className="pt-4">
             <p className="text-xs text-gray-500">{t("active_leads")}</p>
@@ -82,7 +89,7 @@ export default function StationsPage() {
                     <th className="text-start py-2 pe-4">{t("table.station")}</th>
                     <th className="text-start py-2 pe-4">{t("table.wilaya")}</th>
                     <th className="text-end py-2 pe-4">{t("table.players")}</th>
-                    <th className="text-end py-2 pe-4">{t("table.revenue")}</th>
+                    {seesRevenue && <th className="text-end py-2 pe-4">{t("table.revenue")}</th>}
                     <th className="text-end py-2 pe-4">{t("active_leads")}</th>
                     <th className="text-end py-2 pe-4">{t("table.conversion")}</th>
                     <th className="text-end py-2">{t("common:ui.actions")}</th>
@@ -98,7 +105,7 @@ export default function StationsPage() {
                           <Users className="h-3.5 w-3.5 text-gray-400" />{s.players}
                         </span>
                       </td>
-                      <td className="py-3 pe-4 text-end font-medium text-green-600">{formatDA(s.revenue)}</td>
+                      {seesRevenue && <td className="py-3 pe-4 text-end font-medium text-green-600">{formatDA(s.revenue ?? 0)}</td>}
                       <td className="py-3 pe-4 text-end">{s.leads}</td>
                       <td className="py-3 pe-4 text-end">
                         <Badge variant="secondary">{s.conversionRate}%</Badge>

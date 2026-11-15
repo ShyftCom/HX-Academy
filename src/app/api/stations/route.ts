@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireBackOfficeResponse, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { ensureLocationSchedule } from "@/lib/schedule";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { denied } = await requireBackOfficeResponse();
+  if (denied) return denied;
 
   const stations = await db.station.findMany({
     orderBy: { createdAt: "asc" },
@@ -20,6 +23,8 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.STATIONS_VIEW);
+  if (denied) return denied;
 
   const body = await req.json();
   const { name, wilaya, wilayaCode, address, phone, email, whatsapp, logoUrl } = body;

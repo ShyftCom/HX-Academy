@@ -96,7 +96,19 @@ export const PERMISSIONS = {
   STATIONS_VIEW: "stations:view",
   SUMMER_CAMP_VIEW: "summer_camp:view",
   TICKETS_VIEW: "tickets:view",
+  /** Open Finance and read the charges list. Not the revenue/profit overview. */
   FINANCE_VIEW: "finance:view",
+  /**
+   * Revenue, profit and every chart or total built from approved payments —
+   * the profit overview, the dashboard revenue cards, revenue reports, station
+   * revenue. Super Admin only by default: the seed never grants it to a role.
+   */
+  FINANCE_OVERVIEW: "finance:overview",
+  // Charges. Recording one is routine; rewriting or erasing one changes the
+  // books after the fact, so edit/delete start out Super Admin only.
+  CHARGES_CREATE: "charges:create",
+  CHARGES_EDIT: "charges:edit",
+  CHARGES_DELETE: "charges:delete",
   HRM_VIEW: "hrm:view",
   /** Add/edit staff, record attendance, decide leave, run payroll. */
   HRM_MANAGE: "hrm:manage",

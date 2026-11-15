@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireAnyPermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.AFFILIATE_VIEW, PERMISSIONS.AFFILIATES_MANAGE);
+  if (denied) return denied;
 
   const affiliate = await db.affiliate.findUnique({
     where: { userId: session.user.id },

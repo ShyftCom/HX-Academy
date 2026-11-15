@@ -13,12 +13,17 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
 export default function FinancePage() {
   const { t } = useTranslation("finance");
   const { activeStationId } = useStation();
+  // The shell renders this page while permissions load; don't ask for numbers
+  // the route will refuse an Admin.
+  const { can, isLoading: permsLoading } = usePermissions();
   const now = new Date();
   const [dateFrom, setDateFrom] = useState(new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0]);
   const [dateTo, setDateTo] = useState(now.toISOString().split("T")[0]);
@@ -27,6 +32,7 @@ export default function FinancePage() {
   const { data: profit, isLoading } = useQuery({
     queryKey: ["finance-profit", activeStationId, dateFrom, dateTo],
     queryFn: () => fetch(`/api/finance/profit?${params}`).then((r) => r.json()),
+    enabled: !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW),
   });
 
   const metrics = [

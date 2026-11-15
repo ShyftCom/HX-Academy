@@ -18,7 +18,9 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     },
   });
 
-  if (!user?.role) return [];
+  // A session is a signed JWT that outlives deactivation; checking here is what
+  // makes "deactivate" take effect on the next request rather than at expiry.
+  if (!user?.role || !user.isActive) return [];
   if (user.role.name === "Super Admin") return ["*"];
 
   return user.role.permissions.map((rp) => rp.permission.name);
@@ -61,6 +63,48 @@ export async function requirePermissionResponse(permission: string): Promise<Nex
 }
 
 /**
+ * Guard for back-office endpoints that every staff member legitimately needs
+ * (dashboard counters, station picker) and that no single module owns. A
+ * signed-in user with no permissions at all — a player or parent login, or a
+ * deactivated account — is refused. Returns the session and the caller's
+ * permissions so the handler can trim what it returns.
+ */
+export async function requireBackOfficeResponse(): Promise<
+  { denied: NextResponse; session: null; permissions: null } | { denied: null; session: Session; permissions: string[] }
+> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { denied: NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 }), session: null, permissions: null };
+  }
+  const permissions = await getUserPermissions(session.user.id);
+  if (!permissions.length) {
+    return { denied: NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 }), session: null, permissions: null };
+  }
+  return { denied: null, session, permissions };
+}
+
+/** `held` from getUserPermissions(): true for "*" or an exact match. */
+export function holds(held: string[], permission: string): boolean {
+  return held.includes("*") || held.includes(permission);
+}
+
+/**
+ * requirePermissionResponse for endpoints shared by several screens: passes
+ * when the caller holds any one of `permissions`.
+ */
+export async function requireAnyPermissionResponse(...permissions: string[]): Promise<NextResponse | null> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
+  }
+  const held = await getUserPermissions(session.user.id);
+  if (!permissions.some((p) => holds(held, p))) {
+    return NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 });
+  }
+  return null;
+}
+
+/**
  * Whether `callerId` may give someone `roleId`. A caller can hand out only a
  * role whose permissions they already hold themselves — otherwise anyone who
  * can create staff could mint a Super Admin account and walk through every
@@ -75,6 +119,50 @@ export async function canAssignRole(callerId: string, roleId: string): Promise<b
   if (held.includes("*")) return true;
   if (role.name === "Super Admin") return false;
   return role.permissions.every((rp) => held.includes(rp.permission.name));
+}
+
+/**
+ * Whether `callerId` may act on an account that currently holds `roleId`
+ * (edit it, reset its password, deactivate or delete it). Same rule as
+ * assigning: an Admin must not be able to take over a Super Admin by resetting
+ * their password, or lock them out by deactivating them.
+ */
+export async function canManageHolderOf(callerId: string, roleId: string | null | undefined): Promise<boolean> {
+  return !roleId || canAssignRole(callerId, roleId);
+}
+
+/**
+ * Rewrites a role's permission set on behalf of `callerId`, refusing to hand
+ * out anything the caller does not hold.
+ *
+ * Super Admin may set anything. Anyone else (holding roles:edit) may only add
+ * or remove permissions they hold themselves; permissions they do not hold
+ * keep whatever state they had on the role. Without this, roles:edit alone was
+ * enough to grant one's own role every permission in the system.
+ *
+ * Returns the permission ids the role ends up with, or an error naming why
+ * the request was refused.
+ */
+export async function resolveRolePermissionIds(
+  callerId: string,
+  requestedIds: string[],
+  currentIds: string[],
+): Promise<{ ids: string[] } | { error: string }> {
+  const held = await getUserPermissions(callerId);
+  const unique = [...new Set(requestedIds)];
+  const known = await db.permission.findMany({ where: { id: { in: unique } }, select: { id: true, name: true } });
+  if (known.length !== unique.length) return { error: "Unknown permission" };
+  if (held.includes("*")) return { ids: unique };
+
+  const all = await db.permission.findMany({ select: { id: true, name: true } });
+  const heldIds = new Set(all.filter((p) => held.includes(p.name)).map((p) => p.id));
+  const current = new Set(currentIds);
+  if (unique.some((id) => !heldIds.has(id) && !current.has(id))) {
+    return { error: "You cannot grant a permission you do not hold" };
+  }
+  const keptUnheld = currentIds.filter((id) => !heldIds.has(id));
+  const chosenHeld = unique.filter((id) => heldIds.has(id));
+  return { ids: [...new Set([...keptUnheld, ...chosenHeld])] };
 }
 
 /**

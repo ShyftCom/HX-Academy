@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
-import { getUserPermissions, hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+import { canAssignRole, getUserPermissions, hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { db } from "@/lib/db";
 
 /**
@@ -111,6 +111,10 @@ export async function POST(req: NextRequest) {
     }
     const existing = await db.user.findUnique({ where: { email: body.email } });
     if (existing) return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+    // users:create alone must not mint an account above the caller's own reach.
+    if (body.roleId && !(await canAssignRole(session.user.id, body.roleId))) {
+      return NextResponse.json({ error: "You cannot assign this role", code: "forbidden" }, { status: 403 });
+    }
 
     const hashed = await hashPassword(body.password);
     const user = await db.user.create({

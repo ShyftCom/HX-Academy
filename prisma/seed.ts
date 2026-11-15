@@ -111,7 +111,11 @@ async function main() {
     { name: "stations:view", module: "stations", action: "view", description: "Open stations" },
     { name: "summer_camp:view", module: "summer_camp", action: "view", description: "Open the summer camp module" },
     { name: "tickets:view", module: "tickets", action: "view", description: "Open tickets" },
-    { name: "finance:view", module: "finance", action: "view", description: "Open finance (profit overview, charges)" },
+    { name: "finance:view", module: "finance", action: "view", description: "Open finance and read the charges list" },
+    { name: "finance:overview", module: "finance", action: "overview", description: "See revenue, profit and financial charts (profit overview, dashboard revenue, revenue reports)" },
+    { name: "charges:create", module: "charges", action: "create", description: "Record a new charge" },
+    { name: "charges:edit", module: "charges", action: "edit", description: "Edit a recorded charge or manage charge categories" },
+    { name: "charges:delete", module: "charges", action: "delete", description: "Delete a recorded charge" },
     { name: "hrm:view", module: "hrm", action: "view", description: "Open HR (staff, attendance, leave, payroll)" },
     { name: "hrm:manage", module: "hrm", action: "manage", description: "Add staff, record attendance, decide leave, run payroll" },
     { name: "affiliate:view", module: "affiliate", action: "view", description: "Open My affiliation" },
@@ -139,11 +143,16 @@ async function main() {
   const existingPermissionNames = new Set((await db.permission.findMany({ select: { name: true } })).map((p) => p.name));
   const newModulePermissions = permissionData.filter((p) => MODULE_PERMISSIONS.has(p.name) && !existingPermissionNames.has(p.name)).map((p) => p.name);
 
+  // Never granted to any role by the seed — only Super Admin ("*") holds them
+  // until a Super Admin deliberately ticks them in Roles & access.
+  const SUPER_ADMIN_ONLY = new Set(["finance:overview", "charges:edit", "charges:delete"]);
+
   const permissions: Record<string, any> = {};
   for (const p of permissionData) {
     const perm = await db.permission.upsert({
       where: { name: p.name },
-      update: {},
+      // Descriptions are labels, not grants — keep them current.
+      update: { description: p.description },
       create: p,
     });
     permissions[p.name] = perm;
@@ -151,6 +160,7 @@ async function main() {
   console.log(`✅ ${permissionData.length} permissions created`);
 
   // Create Roles
+  const existingRoleNames = new Set((await db.role.findMany({ select: { name: true } })).map((r) => r.name));
   const superAdminRole = await db.role.upsert({
     where: { name: "Super Admin" },
     update: {},
@@ -175,27 +185,28 @@ async function main() {
     create: { name: "Player", description: "Academy player", isSystem: true },
   });
 
-  // Assign all permissions to Super Admin and Admin
-  for (const role of [superAdminRole, adminRole]) {
-    for (const perm of Object.values(permissions)) {
-      await db.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId: role.id, permissionId: (perm as any).id } },
-        update: {},
-        create: { roleId: role.id, permissionId: (perm as any).id },
-      });
-    }
-  }
+  // Default grants happen once — when the role or the permission is first
+  // created — and never again. This used to upsert every permission onto Admin
+  // (and Staff's defaults onto Staff) on every run, and the build runs the
+  // seed, so anything a Super Admin removed in Roles & access came back on the
+  // next deploy.
+  const newPermissionNames = new Set(permissionData.map((p) => p.name).filter((n) => !existingPermissionNames.has(n)));
+  const grantDefaults = async (roleId: string, names: string[]) => {
+    const data = names.filter((n) => permissions[n]).map((n) => ({ roleId, permissionId: permissions[n].id }));
+    if (data.length) await db.rolePermission.createMany({ data, skipDuplicates: true });
+  };
 
-  // Assign limited permissions to Staff
-  const staffPermNames = ["leads:view", "leads:create", "leads:edit", "players:view", "payments:view", "orders:view", "subscriptions:view"];
-  for (const name of staffPermNames) {
-    if (permissions[name]) {
-      await db.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId: staffRole.id, permissionId: permissions[name].id } },
-        update: {},
-        create: { roleId: staffRole.id, permissionId: permissions[name].id },
-      });
-    }
+  // Super Admin is "*" in getUserPermissions, so its rows are cosmetic; keep
+  // them complete so the roles screen shows it holding everything.
+  await grantDefaults(superAdminRole.id, Object.keys(permissions));
+
+  const adminNames = Object.keys(permissions).filter(
+    (n) => !SUPER_ADMIN_ONLY.has(n) && (!existingRoleNames.has("Admin") || newPermissionNames.has(n)),
+  );
+  await grantDefaults(adminRole.id, adminNames);
+
+  if (!existingRoleNames.has("Staff")) {
+    await grantDefaults(staffRole.id, ["leads:view", "leads:create", "leads:edit", "players:view", "payments:view", "orders:view", "subscriptions:view"]);
   }
   if (newModulePermissions.length) {
     const backOfficeRoles = await db.role.findMany({ where: { name: { not: "Player" } }, select: { id: true } });

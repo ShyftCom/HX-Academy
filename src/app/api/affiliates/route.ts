@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.AFFILIATES_MANAGE);
+  if (denied) return denied;
 
   const affiliates = await db.affiliate.findMany({
     include: {
@@ -33,6 +36,8 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.AFFILIATES_MANAGE);
+  if (denied) return denied;
 
   const { userId, commissionRate, stationId } = await req.json();
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });

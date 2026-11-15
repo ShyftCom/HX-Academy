@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+import { canAssignRole, canManageHolderOf, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+
+/** 403 unless the caller may act on this account's current role (see canManageHolderOf). */
+async function guardTarget(callerId: string, targetId: string): Promise<NextResponse | null> {
+  const target = await db.user.findUnique({ where: { id: targetId }, select: { roleId: true } });
+  if (!target) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await canManageHolderOf(callerId, target.roleId))) {
+    return NextResponse.json({ error: "You cannot manage this account", code: "forbidden" }, { status: 403 });
+  }
+  return null;
+}
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   // Any back-office account by id.
@@ -27,8 +37,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+  const blocked = await guardTarget(session.user.id, id);
+  if (blocked) return blocked;
   try {
     const body = await req.json();
+    if (body.roleId && !(await canAssignRole(session.user.id, body.roleId))) {
+      return NextResponse.json({ error: "You cannot assign this role", code: "forbidden" }, { status: 403 });
+    }
     const updateData: Record<string, unknown> = { name: body.name, roleId: body.roleId ?? null, isActive: body.isActive };
     if (body.password) updateData.password = await hashPassword(body.password);
 
@@ -49,6 +64,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+  const blocked = await guardTarget(session.user.id, id);
+  if (blocked) return blocked;
   try {
     const body = await req.json();
     const user = await db.user.update({ where: { id }, data: { isActive: body.isActive } });
@@ -64,6 +81,8 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   if (id === session.user.id) return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
+  const blocked = await guardTarget(session.user.id, id);
+  if (blocked) return blocked;
   try {
     await db.user.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });

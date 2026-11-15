@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
   const page = await db.landingPage.findFirst({ include: { sections: { orderBy: { order: "asc" } } } });
@@ -10,6 +11,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.WEBSITE_EDIT);
+  if (denied) return denied;
   try {
     const body = await req.json();
     let page = await db.landingPage.findFirst();

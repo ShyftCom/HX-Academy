@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { APPLICATION_SURVEY_SETTING } from "@/lib/setting-keys";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -10,6 +11,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   // an anonymous caller would tell every visitor which answers to avoid.
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SURVEYS_VIEW);
+  if (denied) return denied;
   const { id } = await params;
   const survey = await db.survey.findUnique({
     where: { id },
@@ -22,6 +25,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SURVEYS_VIEW);
+  if (denied) return denied;
   const { id } = await params;
   try {
     const body = await req.json();
@@ -33,6 +38,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SURVEYS_VIEW);
+  if (denied) return denied;
   const { id } = await params;
   try {
     await db.survey.delete({ where: { id } });

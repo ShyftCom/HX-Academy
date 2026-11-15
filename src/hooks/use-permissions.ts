@@ -32,7 +32,13 @@ export function useCurrentUser() {
       if (!res.ok) throw new Error("Failed to load current user");
       return res.json();
     },
-    staleTime: 5 * 60_000,
+    // Short and refreshed on focus, so a role edited by a Super Admin reshapes
+    // this user's sidebar within a minute — no sign-out needed. The server
+    // already re-reads permissions on every request; this only keeps the
+    // shell from drawing stale menus.
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 }

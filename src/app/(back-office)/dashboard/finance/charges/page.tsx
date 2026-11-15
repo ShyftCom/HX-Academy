@@ -13,6 +13,8 @@ import { Plus, Trash2, Receipt } from "lucide-react";
 import { useStation } from "@/context/StationContext";
 import { useTranslation } from "react-i18next";
 import { readJsonOrThrow, apiErrorMessage } from "@/lib/api-error";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
@@ -20,6 +22,12 @@ export default function ChargesPage() {
   const { t } = useTranslation("finance");
   const { activeStationId } = useStation();
   const qc = useQueryClient();
+  // Mirrors the charge routes: recording is routine, rewriting history is not.
+  // Hiding is presentation only — the routes enforce the same rules.
+  const { can } = usePermissions();
+  const canCreate = can(PERMISSIONS.CHARGES_CREATE);
+  const canManageCategories = can(PERMISSIONS.CHARGES_EDIT);
+  const canDelete = can(PERMISSIONS.CHARGES_DELETE);
   const [open, setOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [catName, setCatName] = useState("");
@@ -39,9 +47,9 @@ export default function ChargesPage() {
   });
 
   const createCharge = useMutation({
-    mutationFn: (data: any) => fetch("/api/charges", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
+    mutationFn: (data: any) => fetch("/api/charges", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then(readJsonOrThrow),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["charges"] }); toast.success(t("charges.added")); setOpen(false); setForm({ title: "", categoryId: "", amount: "", chargeDate: new Date().toISOString().split("T")[0], notes: "", isSalary: false }); },
-    onError: () => toast.error(t("charges.add_failed")),
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("charges.add_failed"))),
   });
 
   const deleteCharge = useMutation({
@@ -51,8 +59,9 @@ export default function ChargesPage() {
   });
 
   const createCategory = useMutation({
-    mutationFn: (data: any) => fetch("/api/charges/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.json()),
+    mutationFn: (data: any) => fetch("/api/charges/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then(readJsonOrThrow),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["charge-categories"] }); toast.success(t("charges.category_created")); setCatName(""); setCatOpen(false); },
+    onError: (e) => toast.error(apiErrorMessage(e, t, t("common:toast.save_failed"))),
   });
 
   const deleteCategory = useMutation({
@@ -66,8 +75,8 @@ export default function ChargesPage() {
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-bold">{t("charges.title")}</h1><p className="text-sm text-gray-500">{t("charges.subtitle")}</p></div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setCatOpen(!catOpen)}>{t("charges.manage_categories")}</Button>
-          <Dialog open={open} onOpenChange={setOpen}>
+          {canManageCategories && <Button variant="outline" onClick={() => setCatOpen(!catOpen)}>{t("charges.manage_categories")}</Button>}
+          {canCreate && <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="me-2 h-4 w-4" />{t("charges.add")}</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>{t("charges.add")}</DialogTitle></DialogHeader>
@@ -95,11 +104,11 @@ export default function ChargesPage() {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
+          </Dialog>}
         </div>
       </div>
 
-      {catOpen && (
+      {catOpen && canManageCategories && (
         <Card>
           <CardHeader><CardTitle>{t("charges.categories_title")}</CardTitle></CardHeader>
           <CardContent>
@@ -133,7 +142,7 @@ export default function ChargesPage() {
               <th className="text-start py-2 pe-4">{t("common:ui.category")}</th>
               <th className="text-end py-2 pe-4">{t("common:ui.amount")}</th>
               <th className="text-center py-2 pe-4">{t("charges.salary")}</th>
-              <th className="text-end py-2">{t("common:ui.actions")}</th>
+              {canDelete && <th className="text-end py-2">{t("common:ui.actions")}</th>}
             </tr></thead>
             <tbody>
               {charges.map((c: any) => (
@@ -147,11 +156,13 @@ export default function ChargesPage() {
                   </td>
                   <td className="py-3 pe-4 text-end font-medium text-red-500">{formatDA(c.amount)}</td>
                   <td className="py-3 pe-4 text-center">{c.isSalary ? <Badge variant="secondary">{t("charges.salary")}</Badge> : "—"}</td>
-                  <td className="py-3 text-end">
-                    <Button variant="ghost" size="icon" onClick={() => { if (confirm(t("common:bo.finance.delete_charge_confirm"))) deleteCharge.mutate(c.id); }}>
-                      <Trash2 className="h-4 w-4 text-red-400" />
-                    </Button>
-                  </td>
+                  {canDelete && (
+                    <td className="py-3 text-end">
+                      <Button variant="ghost" size="icon" onClick={() => { if (confirm(t("common:bo.finance.delete_charge_confirm"))) deleteCharge.mutate(c.id); }}>
+                        <Trash2 className="h-4 w-4 text-red-400" />
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

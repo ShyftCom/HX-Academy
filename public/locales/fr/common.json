@@ -793,6 +793,7 @@
       "subscriptions": "Abonnements",
       "payments": "Paiements",
       "finance": "Finance",
+      "charges": "Charges",
       "store": "Boutique",
       "orders": "Commandes",
       "hrm": "Gestion RH",
@@ -820,7 +821,8 @@
       "reject": "Rejeter",
       "manage": "Gérer",
       "export": "Exporter",
-      "manage_all": "Toutes les stations"
+      "manage_all": "Toutes les stations",
+      "overview": "Aperçu financier"
     },
     "ai": {
       "title": "Connexions Claude",

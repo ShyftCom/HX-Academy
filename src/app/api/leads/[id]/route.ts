@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.LEADS_VIEW);
+  if (denied) return denied;
   const { id } = await params;
   const lead = await db.lead.findUnique({
     where: { id },
@@ -24,6 +27,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.LEADS_EDIT);
+  if (denied) return denied;
   const { id } = await params;
 
   try {
@@ -133,6 +138,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.LEADS_DELETE);
+  if (denied) return denied;
   const { id } = await params;
 
   try {

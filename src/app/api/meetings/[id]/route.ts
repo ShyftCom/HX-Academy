@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireAnyPermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logLeadActivity } from "@/lib/lead-activity";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_VIEW);
+  if (denied) return denied;
 
   const { id } = await params;
   const meeting = await db.meeting.findUnique({
@@ -23,6 +26,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_EDIT);
+  if (denied) return denied;
 
   const { id } = await params;
   const body = await req.json();
@@ -70,6 +75,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_EDIT);
+  if (denied) return denied;
 
   const { id } = await params;
   const existing = await db.meeting.findUnique({ where: { id } });

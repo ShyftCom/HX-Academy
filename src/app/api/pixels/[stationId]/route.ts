@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireBackOfficeResponse, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 const PLATFORMS = ["facebook", "tiktok", "google", "snapchat"] as const;
 
@@ -10,6 +11,8 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { denied } = await requireBackOfficeResponse();
+  if (denied) return denied;
 
   const { stationId } = await params;
 
@@ -40,6 +43,8 @@ export async function PUT(
 ) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SETTINGS_EDIT);
+  if (denied) return denied;
 
   const { stationId } = await params;
 

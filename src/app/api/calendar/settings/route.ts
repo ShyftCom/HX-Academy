@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireAnyPermissionResponse, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { Prisma } from "@prisma/client";
 
 const DEFAULT_SCHEDULE = {
@@ -16,6 +17,8 @@ const DEFAULT_SCHEDULE = {
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_VIEW);
+  if (denied) return denied;
 
   const agentId = new URL(req.url).searchParams.get("agent_id") ?? session.user.id;
 
@@ -38,6 +41,8 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.SETTINGS_EDIT);
+  if (denied) return denied;
 
   const body = await req.json();
   const { timezone, bufferMinutes, weeklySchedule } = body as {

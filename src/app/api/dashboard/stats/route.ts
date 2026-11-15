@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { holds, requireBackOfficeResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { denied, permissions } = await requireBackOfficeResponse();
+  if (denied) return denied;
+  // Every staff member sees the dashboard; revenue and the activity feed are
+  // only returned to those who may see them elsewhere.
+  const seesRevenue = holds(permissions, PERMISSIONS.FINANCE_OVERVIEW);
+  const seesActivity = holds(permissions, PERMISSIONS.ACTIVITY_LOGS_VIEW);
 
   const stationId = req.nextUrl.searchParams.get("stationId") ?? "";
 
@@ -32,17 +36,17 @@ export async function GET(req: NextRequest) {
     db.player.count({ where: { status: "active", ...sf } }),
     db.subscription.count({ where: { status: "active", ...psf } }),
     db.payment.count({ where: { status: "pending", ...psf } }),
-    db.payment.aggregate({ where: { status: "approved", ...psf }, _sum: { amount: true } }),
-    db.payment.aggregate({ where: { status: "approved", approvalDate: { gte: startOfMonth }, ...psf }, _sum: { amount: true } }),
-    db.payment.aggregate({ where: { status: "approved", approvalDate: { gte: startOfLastMonth, lt: startOfMonth }, ...psf }, _sum: { amount: true } }),
+    seesRevenue ? db.payment.aggregate({ where: { status: "approved", ...psf }, _sum: { amount: true } }) : null,
+    seesRevenue ? db.payment.aggregate({ where: { status: "approved", approvalDate: { gte: startOfMonth }, ...psf }, _sum: { amount: true } }) : null,
+    seesRevenue ? db.payment.aggregate({ where: { status: "approved", approvalDate: { gte: startOfLastMonth, lt: startOfMonth }, ...psf }, _sum: { amount: true } }) : null,
     db.lead.count({ where: { createdAt: { gte: startOfMonth }, isConverted: false, ...sf } }),
     db.order.count({ where: { status: { name: "New" } } }).catch(() => 0),
-    db.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 10, include: { user: { select: { name: true } } } }),
+    seesActivity ? db.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 10, include: { user: { select: { name: true } } } }) : [],
     db.subscription.count({ where: { status: "active", endDate: { lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }, ...psf } }),
   ]);
 
-  const thisMonthRev = monthRevenue._sum.amount ?? 0;
-  const lastMonthRev = lastMonthRevenue._sum.amount ?? 0;
+  const thisMonthRev = monthRevenue?._sum.amount ?? 0;
+  const lastMonthRev = lastMonthRevenue?._sum.amount ?? 0;
   const revGrowth = lastMonthRev > 0 ? Math.round(((thisMonthRev - lastMonthRev) / lastMonthRev) * 100) : 0;
 
   return NextResponse.json({
@@ -50,9 +54,8 @@ export async function GET(req: NextRequest) {
     activePlayers,
     activeSubscriptions,
     pendingPayments,
-    totalRevenue: totalRevenue._sum.amount ?? 0,
-    monthRevenue: thisMonthRev,
-    revenueGrowth: revGrowth,
+    // Omitted, not zeroed, so a client can tell "hidden" from "nothing earned".
+    ...(seesRevenue ? { totalRevenue: totalRevenue?._sum.amount ?? 0, monthRevenue: thisMonthRev, revenueGrowth: revGrowth } : {}),
     newLeads,
     pendingOrders,
     recentActivity,

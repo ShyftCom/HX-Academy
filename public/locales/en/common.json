@@ -788,6 +788,7 @@
       "subscriptions": "Subscriptions",
       "payments": "Payments",
       "finance": "Finance",
+      "charges": "Charges",
       "store": "Store",
       "orders": "Orders",
       "hrm": "HR Management",
@@ -815,7 +816,8 @@
       "reject": "Reject",
       "manage": "Manage",
       "export": "Export",
-      "manage_all": "All locations"
+      "manage_all": "All locations",
+      "overview": "Financial overview"
     },
     "ai": {
       "title": "Claude connections",

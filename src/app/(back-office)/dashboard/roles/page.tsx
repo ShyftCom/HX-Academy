@@ -22,7 +22,7 @@ import { PERMISSIONS } from "@/lib/permission-names";
 // Sidebar order, so the matrix reads top-to-bottom like the menu it controls.
 const MODULE_ORDER = [
   "reports", "calendar", "stations", "players", "leads", "summer_camp", "tickets",
-  "subscriptions", "payments", "finance", "store", "orders", "hrm", "affiliate",
+  "subscriptions", "payments", "finance", "charges", "store", "orders", "hrm", "affiliate",
   "website", "schedule", "contact", "applications", "file_requirements", "surveys",
   "files", "activity_logs", "users", "roles", "affiliates", "settings",
 ];
@@ -35,7 +35,7 @@ export default function RolesPage() {
 
   // Mirrors the gates the role routes now enforce. Editing a role rewrites its
   // whole permission set, so it is the most consequential button in the app.
-  const { can } = usePermissions();
+  const { can, isSuperAdmin } = usePermissions();
   const canCreate = can(PERMISSIONS.ROLES_CREATE);
   const canEdit = can(PERMISSIONS.ROLES_EDIT);
   const canDelete = can(PERMISSIONS.ROLES_DELETE);
@@ -54,7 +54,7 @@ export default function RolesPage() {
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? t("common:toast.failed")); }
       return res.json();
     },
-    onSuccess: () => { toast.success(editRole ? t("common:bo.roles.updated") : t("common:bo.roles.created")); qc.invalidateQueries({ queryKey: ["roles"] }); setModalOpen(false); setEditRole(null); setForm({ name: "", description: "", permissionIds: [] }); },
+    onSuccess: () => { toast.success(editRole ? t("common:bo.roles.updated") : t("common:bo.roles.created")); qc.invalidateQueries({ queryKey: ["roles"] }); qc.invalidateQueries({ queryKey: ["auth-me"] }); setModalOpen(false); setEditRole(null); setForm({ name: "", description: "", permissionIds: [] }); },
     onError: (e: any) => toast.error(e.message || t("common:toast.save_failed")),
   });
 
@@ -119,7 +119,7 @@ export default function RolesPage() {
                     {(role.permissions?.length ?? 0) > 6 && <span className="text-xs text-gray-400">{t("common:bo.roles.more", { count: role.permissions.length - 6 })}</span>}
                   </div>
                   <div className="flex gap-2">
-                    {canEdit && <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>}
+                    {canEdit && (role.name !== "Super Admin" || isSuperAdmin) && <Button variant="outline" size="sm" onClick={() => openEdit(role)}><Edit className="me-1.5 h-3.5 w-3.5" />{t("common:ui.edit")}</Button>}
                     {canDelete && !role.isSystem && <Button variant="outline" size="sm" className="text-red-600" onClick={() => setDeleteId(role.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
                   </div>
                 </CardContent>
@@ -133,7 +133,8 @@ export default function RolesPage() {
         <DialogContent size="lg">
           <DialogHeader><DialogTitle>{editRole ? t("common:bo.roles.edit") : t("common:bo.roles.create")}</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
-            <Input label={t("roles.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("roles.name_ph")} />
+            {/* System role names are load-bearing; the route refuses a rename. */}
+            <Input label={t("roles.name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("roles.name_ph")} disabled={!!editRole?.isSystem} />
             <Textarea label={t("common:ui.description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("roles.desc_ph")} rows={2} />
             <div>
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("roles.permissions")}</p>

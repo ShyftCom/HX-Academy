@@ -51,7 +51,13 @@ interface RevenuePoint {
 export default function DashboardPage() {
   const { t } = useTranslation("common");
   const { activeStationId } = useStation();
-  const { can } = usePermissions();
+  const { can, isLoading: permsLoading } = usePermissions();
+  // /api/dashboard/stats omits revenue without finance:overview; hide the
+  // cards and chart rather than show a misleading 0 DA. Unlike can(), this
+  // waits for permissions — otherwise the chart would request revenue the
+  // server is about to refuse.
+  const seesRevenue = !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW);
+  const showRevenueChart = seesRevenue && can(PERMISSIONS.REPORTS_VIEW);
   // Recharts emits stroke/stopColor as SVG attributes, where var() does not
   // resolve — so the chart has to read the brand colour rather than inherit it.
   const brandPrimary = useBrandPrimary();
@@ -77,7 +83,7 @@ export default function DashboardPage() {
     },
     // Only fetched for users who may see reporting — the endpoint would refuse
     // anyway, but there's no reason to make the request and log a rejection.
-    enabled: can(PERMISSIONS.REPORTS_VIEW),
+    enabled: showRevenueChart,
   });
 
   const stats = statsQuery.data;
@@ -124,7 +130,7 @@ export default function DashboardPage() {
               icon={CreditCard}
               href={can(PERMISSIONS.SUBS_VIEW) ? "/dashboard/subscriptions" : undefined}
             />
-            <MetricCard
+            {seesRevenue && <MetricCard
               title={t("dashboard.monthly_revenue")}
               value={fmt.currency(stats?.monthRevenue ?? 0)}
               subtitle={t("dashboard.this_month")}
@@ -135,7 +141,7 @@ export default function DashboardPage() {
                   : undefined
               }
               featured
-            />
+            />}
             <MetricCard
               title={t("dashboard.pending_payments")}
               value={fmt.number(stats?.pendingPayments ?? 0)}
@@ -158,11 +164,11 @@ export default function DashboardPage() {
               icon={UserPlus}
               href={can(PERMISSIONS.LEADS_VIEW) ? "/dashboard/leads" : undefined}
             />
-            <MetricCard
+            {seesRevenue && <MetricCard
               title={t("dashboard.total_revenue")}
               value={fmt.currency(stats?.totalRevenue ?? 0)}
               icon={Receipt}
-            />
+            />}
             <MetricCard
               title={t("dashboard.pending_orders")}
               value={fmt.number(stats?.pendingOrders ?? 0)}
@@ -174,7 +180,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-5">
-        {can(PERMISSIONS.REPORTS_VIEW) && (
+        {showRevenueChart && (
           <ChartCard
             className="lg:col-span-3"
             title={t("dashboard.revenue_chart")}
@@ -217,7 +223,7 @@ export default function DashboardPage() {
           </ChartCard>
         )}
 
-        <Card className={cn("flex flex-col", can(PERMISSIONS.REPORTS_VIEW) ? "lg:col-span-2" : "lg:col-span-5")}>
+        <Card className={cn("flex flex-col", showRevenueChart ? "lg:col-span-2" : "lg:col-span-5")}>
           <CardHeader>
             <CardTitle>{t("dashboard.recent_activity")}</CardTitle>
           </CardHeader>

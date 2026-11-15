@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logActivity, createNotification } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { generatePassword } from "@/lib/generate-password";
@@ -8,6 +9,8 @@ import { generatePassword } from "@/lib/generate-password";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized", code: "unauthorized" }, { status: 401 });
+  const denied = await requirePermissionResponse(PERMISSIONS.LEADS_CONVERT);
+  if (denied) return denied;
   const { id } = await params;
 
   // Read once: the summer-camp branch below reads its own fields off the same body.

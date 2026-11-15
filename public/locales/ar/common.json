@@ -808,6 +808,7 @@
       "subscriptions": "الاشتراكات",
       "payments": "المدفوعات",
       "finance": "المالية",
+      "charges": "المصاريف",
       "store": "المتجر",
       "orders": "الطلبات",
       "hrm": "إدارة الموارد البشرية",
@@ -835,7 +836,8 @@
       "reject": "رفض",
       "manage": "إدارة",
       "export": "تصدير",
-      "manage_all": "كل الفروع"
+      "manage_all": "كل الفروع",
+      "overview": "النظرة المالية"
     },
     "ai": {
       "title": "اتصالات Claude",

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getUserPermissions, holds, PERMISSIONS } from "@/lib/permissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, subMonths, format } from "date-fns";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const held = await getUserPermissions(session.user.id);
+  if (!holds(held, PERMISSIONS.REPORTS_VIEW)) return NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 });
+  // Revenue is finance:overview's, not reports:view's — a reports user still
+  // gets the counts, never the money.
+  const seesRevenue = holds(held, PERMISSIONS.FINANCE_OVERVIEW);
 
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "overview";
@@ -29,6 +35,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (type === "revenue") {
+    if (!seesRevenue) return NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 });
     // Monthly revenue for the last 12 months
     const months = Array.from({ length: 12 }, (_, i) => {
       const d = subMonths(now, 11 - i);
@@ -79,7 +86,7 @@ export async function GET(req: NextRequest) {
       return {
         product: product?.name ?? "Unknown",
         sales: p._sum.quantity ?? 0,
-        revenue: (p._sum.price ?? 0) * (p._sum.quantity ?? 0),
+        ...(seesRevenue ? { revenue: (p._sum.price ?? 0) * (p._sum.quantity ?? 0) } : {}),
       };
     });
     return NextResponse.json({ data });
@@ -96,8 +103,8 @@ export async function GET(req: NextRequest) {
     totalOrders,
     pendingPayments,
   ] = await Promise.all([
-    db.payment.aggregate({ where: { status: "approved" }, _sum: { amount: true } }),
-    db.payment.aggregate({ where: { status: "approved", approvalDate: dateFilter }, _sum: { amount: true } }),
+    seesRevenue ? db.payment.aggregate({ where: { status: "approved" }, _sum: { amount: true } }) : null,
+    seesRevenue ? db.payment.aggregate({ where: { status: "approved", approvalDate: dateFilter }, _sum: { amount: true } }) : null,
     db.player.count(),
     db.subscription.count({ where: { status: "active" } }),
     db.lead.count(),
@@ -107,8 +114,7 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({
-    totalRevenue: totalRevenue._sum.amount ?? 0,
-    periodRevenue: monthRevenue._sum.amount ?? 0,
+    ...(seesRevenue ? { totalRevenue: totalRevenue?._sum.amount ?? 0, periodRevenue: monthRevenue?._sum.amount ?? 0 } : {}),
     totalPlayers,
     activeSubscriptions,
     totalLeads,

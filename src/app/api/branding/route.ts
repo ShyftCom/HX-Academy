@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { put, del } from "@vercel/blob";
 
 const LOGO_KEYS = [
@@ -15,7 +16,11 @@ export async function GET() {
   return NextResponse.json(result);
 }
 
+// GET stays public: the site, the portal and the login page all draw these logos.
+// Writes had no check at all — anyone could replace the academy's logo.
 export async function POST(req: NextRequest) {
+  const denied = await requirePermissionResponse(PERMISSIONS.SETTINGS_EDIT);
+  if (denied) return denied;
   const form = await req.formData();
   const key = form.get("key") as string;
   const file = form.get("file") as File | null;
@@ -39,6 +44,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const denied = await requirePermissionResponse(PERMISSIONS.SETTINGS_EDIT);
+  if (denied) return denied;
   const { key } = await req.json();
   if (!key || !LOGO_KEYS.includes(key)) {
     return NextResponse.json({ error: "Invalid key" }, { status: 400 });

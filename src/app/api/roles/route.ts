@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+import { hasPermission, requirePermissionResponse, resolveRolePermissionIds, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET() {
   // Listing roles is how an attacker finds the Super Admin role id to assign
@@ -38,12 +38,15 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     if (!body.name) return NextResponse.json({ error: "Name required" }, { status: 400 });
-    const role = await db.role.create({ data: { name: body.name, description: body.description ?? null } });
-    if (body.permissionIds?.length) {
-      await db.rolePermission.createMany({
-        data: body.permissionIds.map((pid: string) => ({ roleId: role.id, permissionId: pid })),
-      });
-    }
+    const resolved = await resolveRolePermissionIds(session.user.id, Array.isArray(body.permissionIds) ? body.permissionIds : [], []);
+    if ("error" in resolved) return NextResponse.json({ error: resolved.error, code: "forbidden" }, { status: 403 });
+    const role = await db.$transaction(async (tx) => {
+      const created = await tx.role.create({ data: { name: body.name, description: body.description ?? null } });
+      if (resolved.ids.length) {
+        await tx.rolePermission.createMany({ data: resolved.ids.map((pid) => ({ roleId: created.id, permissionId: pid })) });
+      }
+      return created;
+    });
     return NextResponse.json(role, { status: 201 });
   } catch (error: any) {
     if (error.code === "P2002") return NextResponse.json({ error: "Role name already exists" }, { status: 400 });

@@ -13,6 +13,8 @@ import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Legend } from "recharts";
 import { DollarSign, Users, CreditCard, ShoppingBag, TrendingUp, UserPlus, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePermissions } from "@/hooks/use-permissions";
+import { PERMISSIONS } from "@/lib/permission-names";
 
 const PERIODS = [
   { label: "common:bo.reports.today", value: "today" },
@@ -27,6 +29,9 @@ const PIE_COLORS = ["#3B82F6", "#10B981", "#EF4444", "#F59E0B"];
 export default function ReportsPage() {
   const { t } = useTranslation("admin");
   const [period, setPeriod] = useState("month");
+  // Revenue is finance:overview's; the route omits or refuses it otherwise.
+  const { can, isLoading: permsLoading } = usePermissions();
+  const seesRevenue = !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -44,6 +49,7 @@ export default function ReportsPage() {
   const { data: revenue } = useQuery({
     queryKey: ["reports-revenue"],
     queryFn: () => fetch(`/api/reports?type=revenue`).then((r) => r.json()),
+    enabled: seesRevenue,
   });
 
   const { data: subscriptions } = useQuery({
@@ -81,7 +87,7 @@ export default function ReportsPage() {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">{t("reports.overview")}</TabsTrigger>
-          <TabsTrigger value="revenue">{t("reports.revenue")}</TabsTrigger>
+          {seesRevenue && <TabsTrigger value="revenue">{t("reports.revenue")}</TabsTrigger>}
           <TabsTrigger value="subscriptions">{t("common:nav.subscriptions")}</TabsTrigger>
           <TabsTrigger value="leads">{t("common:ui.leads")}</TabsTrigger>
           <TabsTrigger value="products">{t("reports.top_products")}</TabsTrigger>
@@ -91,8 +97,8 @@ export default function ReportsPage() {
           {ovLoading ? <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div> : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard title={t("reports.total_revenue")} value={formatCurrency(overview?.totalRevenue ?? 0)} icon={DollarSign} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />
-                <StatCard title={t("reports.period_revenue")} value={formatCurrency(overview?.periodRevenue ?? 0)} icon={TrendingUp} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />
+                {seesRevenue && <StatCard title={t("reports.total_revenue")} value={formatCurrency(overview?.totalRevenue ?? 0)} icon={DollarSign} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-900/20" />}
+                {seesRevenue && <StatCard title={t("reports.period_revenue")} value={formatCurrency(overview?.periodRevenue ?? 0)} icon={TrendingUp} iconColor="text-blue-600" iconBg="bg-blue-50 dark:bg-blue-900/20" />}
                 <StatCard title={t("reports.total_players")} value={overview?.totalPlayers ?? 0} icon={Users} iconColor="text-purple-600" iconBg="bg-purple-50 dark:bg-purple-900/20" />
                 <StatCard title={t("reports.active_subs")} value={overview?.activeSubscriptions ?? 0} icon={CreditCard} iconColor="text-indigo-600" iconBg="bg-indigo-50 dark:bg-indigo-900/20" />
               </div>
@@ -106,7 +112,7 @@ export default function ReportsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="revenue" className="mt-5">
+        {seesRevenue && <TabsContent value="revenue" className="mt-5">
           <Card>
             <CardHeader><CardTitle>{t("reports.monthly_revenue")}</CardTitle></CardHeader>
             <CardContent>
@@ -121,7 +127,7 @@ export default function ReportsPage() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent>}
 
         <TabsContent value="subscriptions" className="mt-5">
           <Card>

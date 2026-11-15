@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { requireAnyPermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { getBlockedWindows, isAgentAvailableSync } from "@/lib/calendar";
 import { sendEmail, buildBookingConfirmationEmail } from "@/lib/email";
 import { logLeadActivity } from "@/lib/lead-activity";
@@ -8,6 +9,8 @@ import { logLeadActivity } from "@/lib/lead-activity";
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_VIEW);
+  if (denied) return denied;
 
   const { searchParams } = new URL(req.url);
   const agentId = searchParams.get("agent_id");
@@ -39,6 +42,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denied = await requireAnyPermissionResponse(PERMISSIONS.CALENDAR_VIEW, PERMISSIONS.LEADS_EDIT);
+  if (denied) return denied;
 
   const body = await req.json();
   const { leadId, agentId, date, time, durationMinutes = 30, type = "call", notes } = body as {

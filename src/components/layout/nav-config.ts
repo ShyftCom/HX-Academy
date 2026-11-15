@@ -95,7 +95,8 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: TrendingUp,
         permission: PERMISSIONS.FINANCE_VIEW,
         children: [
-          { tKey: "profit_overview", href: "/dashboard/finance", icon: BarChart3 },
+          // Revenue and profit — narrower than finance:view, which only opens charges.
+          { tKey: "profit_overview", href: "/dashboard/finance", icon: BarChart3, permission: PERMISSIONS.FINANCE_OVERVIEW },
           { tKey: "charges", href: "/dashboard/finance/charges", icon: Receipt },
         ],
       },
