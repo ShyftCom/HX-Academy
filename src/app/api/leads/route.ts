@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
-import { peopleSearchWhere } from "@/lib/search";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -40,12 +39,14 @@ export async function GET(req: NextRequest) {
 
   const where: Record<string, unknown> = {};
 
-  const search = await peopleSearchWhere(q, {
-    table: "leads",
-    textFields: ["fullName", "email", "phone", "parentName", "parentPhone"],
-    phoneColumns: ["phone", "parentPhone"],
-  });
-  if (search) where.AND = [search];
+  if (q) {
+    where.OR = [
+      { fullName: { contains: q } },
+      { phone: { contains: q } },
+      { email: { contains: q } },
+      { parentName: { contains: q } },
+    ];
+  }
   if (statusId) where.statusId = statusId;
   if (source) where.source = source;
   if (leadType) where.leadType = leadType;

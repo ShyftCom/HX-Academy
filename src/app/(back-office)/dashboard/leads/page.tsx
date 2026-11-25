@@ -403,7 +403,7 @@ function LeadsPageContent() {
       </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput value={search} onChange={(v) => updateList({ q: v })} placeholder={t("filters.search_placeholder")} className="w-64" debounceMs={300} />
+        <SearchInput value={search} onChange={(v) => updateList({ q: v })} placeholder={t("filters.search_placeholder")} className="w-64" />
         <Select value={statusFilter} onValueChange={(v) => updateList({ status: v })}>
           <SelectTrigger className="w-44"><SelectValue placeholder={t("filters.all_statuses")} /></SelectTrigger>
           <SelectContent>
