@@ -42,7 +42,8 @@ model User {
   processedWithdrawals AffiliateWithdrawal[]
 
   // Charges
-  paidCharges Charge[] @relation("ChargePaidBy")
+  paidCharges    Charge[] @relation("ChargePaidBy")
+  createdCharges Charge[] @relation("ChargeCreatedBy")
 
   // Reviews
   reviewReplies Review[] @relation("ReviewReplyBy")
@@ -1013,22 +1014,30 @@ model ChargeCategory {
 }
 
 model Charge {
-  id         String          @id @default(cuid())
-  stationId  String?
-  station    Station?        @relation(fields: [stationId], references: [id])
-  categoryId String?
-  category   ChargeCategory? @relation(fields: [categoryId], references: [id])
-  title      String
-  amount     Decimal         @db.Decimal(10, 2)
-  chargeDate DateTime
-  paidById   String?
-  paidBy     User?           @relation("ChargePaidBy", fields: [paidById], references: [id])
-  receiptUrl String?
-  notes      String?
-  isSalary   Boolean         @default(false)
-  staffId    String?
-  staff      StaffProfile?   @relation(fields: [staffId], references: [id])
-  createdAt  DateTime        @default(now())
+  id            String          @id @default(cuid())
+  stationId     String?
+  station       Station?        @relation(fields: [stationId], references: [id])
+  categoryId    String?
+  category      ChargeCategory? @relation(fields: [categoryId], references: [id])
+  title         String
+  amount        Decimal         @db.Decimal(10, 2)
+  chargeDate    DateTime
+  // Who actually paid: a known account (paidById) or, for anyone else, a name
+  // typed by hand (paidByName). Before these fields existed paidById was
+  // filled with whoever recorded the charge, so older rows read that way.
+  paidById      String?
+  paidBy        User?           @relation("ChargePaidBy", fields: [paidById], references: [id])
+  paidByName    String?
+  /// "cash" | "bank_transfer"; null on charges recorded before it was asked.
+  paymentMethod String?
+  createdById   String?
+  createdBy     User?           @relation("ChargeCreatedBy", fields: [createdById], references: [id])
+  receiptUrl    String?
+  notes         String?
+  isSalary      Boolean         @default(false)
+  staffId       String?
+  staff         StaffProfile?   @relation(fields: [staffId], references: [id])
+  createdAt     DateTime        @default(now())
 
   @@map("charges")
 }

@@ -29,6 +29,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useStation } from "@/context/StationContext";
 import { readJsonOrThrow } from "@/lib/api-error";
+import { LEAD_ASSIGNEE_QUERY } from "@/lib/lead-assignee-roles";
 import { saveLeadsListQuery, saveLeadsListScroll, savedLeadsListScroll } from "@/lib/leads-list-context";
 
 const schema = z.object({
@@ -223,11 +224,13 @@ function LeadsPageContent() {
   const leadTypeFilter = searchParams.get("type") ?? "all";
   /** Only offered in the all-stations view; the header switcher wins otherwise. */
   const stationFilter = searchParams.get("station") ?? "all";
+  /** "Traité par" — a sales rep who changed the lead's status at some point. */
+  const handlerFilter = searchParams.get("handler") ?? "all";
 
   /** Sets (or clears, for defaults) URL params; any filter change goes back to page 1. */
   const updateList = useCallback((changes: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
-    const defaults: Record<string, string> = { view: "table", page: "1", q: "", status: "all", source: "all", type: "all", station: "all" };
+    const defaults: Record<string, string> = { view: "table", page: "1", q: "", status: "all", source: "all", type: "all", station: "all", handler: "all" };
     if (!("page" in changes)) params.delete("page");
     for (const [key, value] of Object.entries(changes)) {
       if (!value || value === defaults[key]) params.delete(key);
@@ -245,7 +248,7 @@ function LeadsPageContent() {
   const [campConvertSessionId, setCampConvertSessionId] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["leads", page, search, statusFilter, sourceFilter, leadTypeFilter, activeStationId, stationFilter],
+    queryKey: ["leads", page, search, statusFilter, sourceFilter, leadTypeFilter, activeStationId, stationFilter, handlerFilter],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), perPage: view === "kanban" ? "200" : "20" });
       if (search) params.set("q", search);
@@ -254,6 +257,7 @@ function LeadsPageContent() {
       if (leadTypeFilter && leadTypeFilter !== "all") params.set("leadType", leadTypeFilter);
       if (activeStationId) params.set("stationId", activeStationId);
       else if (stationFilter !== "all") params.set("stationId", stationFilter);
+      if (handlerFilter !== "all") params.set("handledBy", handlerFilter);
       return fetch(`/api/leads?${params}`).then((r) => r.json());
     },
   });
@@ -296,8 +300,9 @@ function LeadsPageContent() {
   });
 
   const { data: staff } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetch("/api/users?perPage=100").then((r) => r.json()),
+    // Only accounts that may own a lead (see src/lib/lead-assignee.ts).
+    queryKey: ["users", "lead-assignees"],
+    queryFn: () => fetch(`/api/users?${LEAD_ASSIGNEE_QUERY}`).then((r) => r.json()),
   });
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
@@ -424,6 +429,13 @@ function LeadsPageContent() {
             <SelectItem value="all">{t("page.all_programs")}</SelectItem>
             <SelectItem value="academy">{t("page.academy")}</SelectItem>
             <SelectItem value="summer_camp">{t("page.summer_camp")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={handlerFilter} onValueChange={(v) => updateList({ handler: v })}>
+          <SelectTrigger className="w-48" aria-label={t("filters.handled_by")}><SelectValue placeholder={t("filters.all_handlers")} /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("filters.all_handlers")}</SelectItem>
+            {staff?.data?.map((u: { id: string; name: string }) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
           </SelectContent>
         </Select>
         {isGlobalView && (

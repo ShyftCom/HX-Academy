@@ -49,3 +49,10 @@ export const APPLY_OUTCOME_DEFAULTS: Record<string, string> = {
   [`${APPLY_OUTCOME_SETTINGS.rejectedBody}_ar`]:
     "شكرًا لاهتمامك بأكاديميتنا. بناءً على إجاباتك، لا يستوفي ملفك شروط القبول الحالية، ولا يمكننا متابعة تسجيلك.",
 };
+
+/**
+ * The sports season, as recurring month-days ("MM-DD"), behind the "Toute la
+ * saison sportive" finance filter. Absent means DEFAULT_SEASON in
+ * src/lib/date-range.ts (1 September → 30 June).
+ */
+export const SEASON_SETTINGS = { start: "season_start", end: "season_end" } as const;

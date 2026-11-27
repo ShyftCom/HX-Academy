@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useStation } from "@/context/StationContext";
 import { TrendingUp, TrendingDown, DollarSign, Users } from "lucide-react";
 import {
@@ -15,6 +14,8 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { usePermissions } from "@/hooks/use-permissions";
 import { PERMISSIONS } from "@/lib/permission-names";
+import { PeriodFilter, periodParams, useSeason, type Period } from "@/components/finance/period-filter";
+import { chargeCategoryLabel } from "@/lib/charge-labels";
 
 function formatDA(n: number) { return Number(n).toLocaleString("fr-DZ") + " DA"; }
 
@@ -24,16 +25,20 @@ export default function FinancePage() {
   // The shell renders this page while permissions load; don't ask for numbers
   // the route will refuse an Admin.
   const { can, isLoading: permsLoading } = usePermissions();
-  const now = new Date();
-  const [dateFrom, setDateFrom] = useState(new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0]);
-  const [dateTo, setDateTo] = useState(now.toISOString().split("T")[0]);
+  const [period, setPeriod] = useState<Period>({ preset: "this_month", customFrom: "", customTo: "" });
+  const { data: season, isLoading: seasonLoading } = useSeason();
+  // One resolved range drives every card and chart below; null while a custom
+  // range is incomplete, so nothing is fetched for half a range.
+  const range = periodParams(period, season);
 
-  const params = new URLSearchParams({ dateFrom, dateTo, ...(activeStationId ? { stationId: activeStationId } : {}) });
+  const params = new URLSearchParams({ ...(range ?? {}), ...(activeStationId ? { stationId: activeStationId } : {}) });
   const { data: profit, isLoading } = useQuery({
-    queryKey: ["finance-profit", activeStationId, dateFrom, dateTo],
+    queryKey: ["finance-profit", activeStationId, range?.dateFrom ?? null, range?.dateTo ?? null],
     queryFn: () => fetch(`/api/finance/profit?${params}`).then((r) => r.json()),
-    enabled: !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW),
+    enabled: !permsLoading && can(PERMISSIONS.FINANCE_OVERVIEW) && range !== null && !(period.preset === "season" && seasonLoading),
   });
+  // Recharts labels slices from `name`, so carry the translated label there.
+  const byCategory = (profit?.byCategory ?? []).map((c: { name: string | null; color: string; amount: number }) => ({ ...c, name: chargeCategoryLabel(c.name, t) }));
 
   const metrics = [
     { label: t("common:bo.finance.gross_revenue"), value: profit?.grossRevenue ?? 0, color: "text-green-600", icon: TrendingUp },
@@ -49,10 +54,8 @@ export default function FinancePage() {
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-gray-500">{t("subtitle")}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Input type="date" className="w-36 h-9" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-          <span className="text-gray-400">—</span>
-          <Input type="date" className="w-36 h-9" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <div className="flex flex-wrap items-center gap-2">
+          <PeriodFilter value={period} onChange={setPeriod} />
           <Button variant="outline" size="sm" asChild><Link href="/dashboard/finance/charges">{t("manage_charges")}</Link></Button>
         </div>
       </div>
@@ -85,9 +88,9 @@ export default function FinancePage() {
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v: any) => formatDA(Number(v))} />
                   <Legend />
-                  <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#22c55e" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="charges" name="Charges" stroke="#ef4444" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="profit" name="Profit" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="revenue" name={t("chart.revenue")} stroke="#22c55e" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="charges" name={t("chart.charges")} stroke="#ef4444" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="profit" name={t("chart.profit")} stroke="#3b82f6" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -101,11 +104,11 @@ export default function FinancePage() {
         <Card>
           <CardHeader><CardTitle>{t("by_category")}</CardTitle></CardHeader>
           <CardContent>
-            {profit?.byCategory?.length ? (
+            {byCategory.length ? (
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
-                  <Pie data={profit.byCategory} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`}>
-                    {profit.byCategory.map((entry: any, i: number) => (
+                  <Pie data={byCategory} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                    {byCategory.map((entry: { color: string }, i: number) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>

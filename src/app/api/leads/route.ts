@@ -5,6 +5,7 @@ import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
 import { z } from "zod";
+import { rejectInvalidAssignee } from "@/lib/lead-assignee";
 
 const createSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
   const leadType = searchParams.get("leadType") ?? "";
   const stationId = searchParams.get("stationId") ?? "";
   const isConverted = searchParams.get("isConverted");
+  const handledBy = searchParams.get("handledBy") ?? "";
 
   const where: Record<string, unknown> = {};
 
@@ -52,6 +54,11 @@ export async function GET(req: NextRequest) {
   if (leadType) where.leadType = leadType;
   // "none" finds leads that were never assigned a station.
   if (stationId) where.stationId = stationId === "none" ? null : stationId;
+  // "Traité par": leads on which this user changed the status at least once.
+  // Read from the status-change history, so a lead worked by two sales reps
+  // shows under both, and it never restricts who may open or edit the lead.
+  // Distinct from assignedStaffId, which is who owns the lead.
+  if (handledBy) where.activities = { some: { actionType: "status_change", performedById: handledBy } };
   if (isConverted !== null && isConverted !== undefined && isConverted !== "") {
     where.isConverted = isConverted === "true";
   }
@@ -82,6 +89,8 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
 
     const data = parsed.data;
+    const badAssignee = await rejectInvalidAssignee(data.assignedStaffId);
+    if (badAssignee) return badAssignee;
     const defaultStatus = await db.leadStatus.findFirst({ where: { isDefault: true } });
 
     const lead = await db.lead.create({

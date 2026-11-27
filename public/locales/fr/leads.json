@@ -32,7 +32,9 @@
     "all_agents": "Tous les agents",
     "filter_by_source": "Filtrer par source",
     "all_stations": "Toutes les stations",
-    "no_station": "Sans station"
+    "no_station": "Sans station",
+    "handled_by": "Traité par",
+    "all_handlers": "Tous les commerciaux"
   },
   "actions": {
     "add_lead": "Ajouter un lead",

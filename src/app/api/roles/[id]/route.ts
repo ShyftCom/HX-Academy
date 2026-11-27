@@ -66,8 +66,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return updated;
     });
     return NextResponse.json(role);
-  } catch (error: any) {
-    if (error?.code === "P2002") return NextResponse.json({ error: "Role name already exists" }, { status: 400 });
+  } catch (error) {
+    if ((error as { code?: string })?.code === "P2002") return NextResponse.json({ error: "Role name already exists" }, { status: 400 });
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }

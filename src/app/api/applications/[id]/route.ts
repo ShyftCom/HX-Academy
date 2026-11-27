@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { rejectInvalidAssignee } from "@/lib/lead-assignee";
 import { logActivity } from "@/lib/activity";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
@@ -38,6 +39,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   try {
     const body = await req.json();
+    if (body.assignedStaffId !== undefined) {
+      const current = await db.lead.findUnique({ where: { id }, select: { assignedStaffId: true } });
+      const badAssignee = await rejectInvalidAssignee(body.assignedStaffId, current?.assignedStaffId);
+      if (badAssignee) return badAssignee;
+    }
     const updated = await db.lead.update({
       where: { id },
       data: {

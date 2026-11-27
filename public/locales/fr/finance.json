@@ -20,6 +20,58 @@
     "added": "Charge ajoutée",
     "add_failed": "Échec de l'ajout de la charge",
     "deleted": "Charge supprimée",
-    "category_created": "Catégorie créée"
+    "category_created": "Catégorie créée",
+    "payment_method": "Mode de paiement",
+    "payment_methods": {
+      "cash": "Espèces",
+      "bank_transfer": "Virement bancaire"
+    },
+    "paid_by": "Payé par",
+    "paid_by_other": "Autre (saisie manuelle)",
+    "paid_by_other_ph": "Nom de la personne ayant payé",
+    "not_specified": "Non renseigné",
+    "view_details": "Voir les détails",
+    "details": "Détails de la charge",
+    "edit": "Modifier la charge",
+    "updated": "Charge modifiée",
+    "recorded_by": "Enregistrée par",
+    "no_notes": "Aucune note",
+    "yes": "Oui",
+    "no": "Non",
+    "period_total_one": "Total ({{count}} charge)",
+    "period_total_other": "Total ({{count}} charges)"
+  },
+  "categories": {
+    "rent": "Loyer",
+    "utilities": "Charges (eau, électricité…)",
+    "equipment": "Équipement",
+    "marketing": "Marketing",
+    "salaries": "Salaires",
+    "coaching": "Encadrement",
+    "other": "Autre"
+  },
+  "chart": {
+    "revenue": "Chiffre d'affaires",
+    "charges": "Charges",
+    "profit": "Bénéfice"
+  },
+  "period": {
+    "label": "Période",
+    "this_month": "Ce mois",
+    "last_month": "Mois précédent",
+    "this_year": "Cette année",
+    "season": "Toute la saison sportive",
+    "all": "Toute la période",
+    "custom": "Période personnalisée",
+    "from": "Du",
+    "to": "Au",
+    "invalid_range": "Dates invalides : la date de début doit être une date réelle et précéder la date de fin.",
+    "edit_season": "Modifier les dates de la saison",
+    "season_title": "Saison sportive",
+    "season_hint": "Ces dates s'appliquent chaque année au filtre « Toute la saison sportive ».",
+    "season_start": "Début de saison",
+    "season_end": "Fin de saison",
+    "season_saved": "Saison enregistrée",
+    "invalid_season": "Dates de saison invalides"
   }
 }

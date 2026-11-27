@@ -20,6 +20,62 @@
     "added": "تمت إضافة المصروف",
     "add_failed": "فشل إضافة المصروف",
     "deleted": "تم حذف المصروف",
-    "category_created": "تم إنشاء الفئة"
+    "category_created": "تم إنشاء الفئة",
+    "payment_method": "طريقة الدفع",
+    "payment_methods": {
+      "cash": "نقداً",
+      "bank_transfer": "تحويل بنكي"
+    },
+    "paid_by": "دفعها",
+    "paid_by_other": "آخر (إدخال يدوي)",
+    "paid_by_other_ph": "اسم الشخص الذي دفع",
+    "not_specified": "غير محدد",
+    "view_details": "عرض التفاصيل",
+    "details": "تفاصيل المصروف",
+    "edit": "تعديل المصروف",
+    "updated": "تم تعديل المصروف",
+    "recorded_by": "سجّلها",
+    "no_notes": "لا توجد ملاحظات",
+    "yes": "نعم",
+    "no": "لا",
+    "period_total_zero": "المجموع ({{count}} مصروف)",
+    "period_total_one": "المجموع (مصروف واحد)",
+    "period_total_two": "المجموع (مصروفان)",
+    "period_total_few": "المجموع ({{count}} مصاريف)",
+    "period_total_many": "المجموع ({{count}} مصروفاً)",
+    "period_total_other": "المجموع ({{count}} مصروف)"
+  },
+  "categories": {
+    "rent": "الإيجار",
+    "utilities": "الفواتير (ماء، كهرباء…)",
+    "equipment": "المعدات",
+    "marketing": "التسويق",
+    "salaries": "الرواتب",
+    "coaching": "التأطير",
+    "other": "أخرى"
+  },
+  "chart": {
+    "revenue": "رقم الأعمال",
+    "charges": "المصاريف",
+    "profit": "الربح"
+  },
+  "period": {
+    "label": "الفترة",
+    "this_month": "هذا الشهر",
+    "last_month": "الشهر السابق",
+    "this_year": "هذه السنة",
+    "season": "الموسم الرياضي كاملاً",
+    "all": "كل الفترة",
+    "custom": "فترة مخصصة",
+    "from": "من",
+    "to": "إلى",
+    "invalid_range": "تواريخ غير صالحة: يجب أن يكون تاريخ البداية تاريخاً حقيقياً وقبل تاريخ النهاية.",
+    "edit_season": "تعديل تواريخ الموسم",
+    "season_title": "الموسم الرياضي",
+    "season_hint": "تُطبَّق هذه التواريخ كل سنة على فلتر «الموسم الرياضي كاملاً».",
+    "season_start": "بداية الموسم",
+    "season_end": "نهاية الموسم",
+    "season_saved": "تم حفظ الموسم",
+    "invalid_season": "تواريخ الموسم غير صالحة"
   }
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
+import { parseDayRange } from "@/lib/date-range";
+import { SALARY_CATEGORY_NAME } from "@/lib/charge-fields";
 
 export async function GET(req: Request) {
   // Revenue and profit: Super Admin only unless a role is explicitly given
@@ -13,27 +15,18 @@ export async function GET(req: Request) {
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
 
-  const now = new Date();
-  const from = dateFrom ? new Date(dateFrom) : new Date(now.getFullYear(), now.getMonth(), 1);
-  const to = dateTo ? new Date(dateTo) : now;
+  // Both bounds optional: none at all is "all time". `to` covers its whole
+  // day, so charges and payments timestamped today are counted.
+  const dates = parseDayRange(dateFrom, dateTo);
+  if ("error" in dates) return NextResponse.json({ error: dates.error, code: "invalid_date" }, { status: 400 });
+  const chargeWhere = { ...(dates.range.gte || dates.range.lte ? { chargeDate: dates.range } : {}), ...(stationId ? { stationId } : {}) };
+  const paymentWhere = { status: "approved", ...(dates.range.gte || dates.range.lte ? { approvalDate: dates.range } : {}), ...(stationId ? { stationId } : {}) };
 
   const [revenueAgg, chargesAgg, salaryAgg, chargesWithCat] = await Promise.all([
-    db.payment.aggregate({
-      where: { status: "approved", approvalDate: { gte: from, lte: to }, ...(stationId ? { stationId } : {}) },
-      _sum: { amount: true },
-    }),
-    db.charge.aggregate({
-      where: { chargeDate: { gte: from, lte: to }, ...(stationId ? { stationId } : {}) },
-      _sum: { amount: true },
-    }),
-    db.charge.aggregate({
-      where: { isSalary: true, chargeDate: { gte: from, lte: to }, ...(stationId ? { stationId } : {}) },
-      _sum: { amount: true },
-    }),
-    db.charge.findMany({
-      where: { chargeDate: { gte: from, lte: to }, ...(stationId ? { stationId } : {}) },
-      include: { category: true },
-    }),
+    db.payment.aggregate({ where: paymentWhere, _sum: { amount: true } }),
+    db.charge.aggregate({ where: chargeWhere, _sum: { amount: true } }),
+    db.charge.aggregate({ where: { ...chargeWhere, isSalary: true }, _sum: { amount: true } }),
+    db.charge.findMany({ where: chargeWhere, include: { category: true } }),
   ]);
 
   const grossRevenue = revenueAgg._sum.amount ?? 0;
@@ -41,18 +34,26 @@ export async function GET(req: Request) {
   const salaryCharges = Number(salaryAgg._sum.amount ?? 0);
   const grossProfit = grossRevenue - totalCharges;
 
-  // Aggregate by category
-  const catMap: Record<string, { name: string; color: string; amount: number }> = {};
+  // By category, from the same rows as totalCharges, so the slices always sum
+  // to the total. Salaries live in charges only (paying a payroll writes one
+  // charge; payroll itself is never added here), so nothing is counted twice.
+  // A salary charge recorded without a category used to land in an anonymous
+  // "Uncategorized" slice; it belongs with salaries. `name: null` is the
+  // uncategorized slice, labelled by the client in the viewer's language.
+  const salariesCategory = chargesWithCat.find((c) => c.category?.name === SALARY_CATEGORY_NAME)?.category
+    ?? (await db.chargeCategory.findFirst({ where: { name: SALARY_CATEGORY_NAME, isGlobal: true } }));
+  const catMap: Record<string, { name: string | null; color: string; amount: number }> = {};
   for (const c of chargesWithCat) {
-    const key = c.category?.name ?? "Uncategorized";
-    if (!catMap[key]) catMap[key] = { name: key, color: c.category?.color ?? "#6B7280", amount: 0 };
+    const category = c.category ?? (c.isSalary ? salariesCategory : null);
+    const key = category?.id ?? "__none__";
+    if (!catMap[key]) catMap[key] = { name: category?.name ?? (c.isSalary ? SALARY_CATEGORY_NAME : null), color: category?.color ?? "#6B7280", amount: 0 };
     catMap[key].amount += Number(c.amount);
   }
 
   // Daily trend: group charges and revenue by day
   const dayMap: Record<string, { date: string; revenue: number; charges: number; profit: number }> = {};
   const approvedPayments = await db.payment.findMany({
-    where: { status: "approved", approvalDate: { gte: from, lte: to }, ...(stationId ? { stationId } : {}) },
+    where: paymentWhere,
     select: { approvalDate: true, amount: true },
   });
 

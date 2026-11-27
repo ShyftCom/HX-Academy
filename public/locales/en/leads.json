@@ -32,7 +32,9 @@
     "all_agents": "All agents",
     "filter_by_source": "Filter by source",
     "all_stations": "All stations",
-    "no_station": "No station"
+    "no_station": "No station",
+    "handled_by": "Handled by",
+    "all_handlers": "All sales reps"
   },
   "actions": {
     "add_lead": "Add Lead",

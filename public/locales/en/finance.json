@@ -20,6 +20,58 @@
     "added": "Charge added",
     "add_failed": "Failed to add charge",
     "deleted": "Charge deleted",
-    "category_created": "Category created"
+    "category_created": "Category created",
+    "payment_method": "Payment method",
+    "payment_methods": {
+      "cash": "Cash",
+      "bank_transfer": "Bank transfer"
+    },
+    "paid_by": "Paid by",
+    "paid_by_other": "Other (type a name)",
+    "paid_by_other_ph": "Name of the person who paid",
+    "not_specified": "Not specified",
+    "view_details": "View details",
+    "details": "Charge details",
+    "edit": "Edit charge",
+    "updated": "Charge updated",
+    "recorded_by": "Recorded by",
+    "no_notes": "No notes",
+    "yes": "Yes",
+    "no": "No",
+    "period_total_one": "Total ({{count}} charge)",
+    "period_total_other": "Total ({{count}} charges)"
+  },
+  "categories": {
+    "rent": "Rent",
+    "utilities": "Utilities",
+    "equipment": "Equipment",
+    "marketing": "Marketing",
+    "salaries": "Salaries",
+    "coaching": "Coaching",
+    "other": "Other"
+  },
+  "chart": {
+    "revenue": "Revenue",
+    "charges": "Charges",
+    "profit": "Profit"
+  },
+  "period": {
+    "label": "Period",
+    "this_month": "This month",
+    "last_month": "Last month",
+    "this_year": "This year",
+    "season": "Whole sports season",
+    "all": "All time",
+    "custom": "Custom range",
+    "from": "From",
+    "to": "To",
+    "invalid_range": "Invalid dates: the start must be a real date on or before the end.",
+    "edit_season": "Edit season dates",
+    "season_title": "Sports season",
+    "season_hint": "These dates apply every year to the \"Whole sports season\" filter.",
+    "season_start": "Season start",
+    "season_end": "Season end",
+    "season_saved": "Season saved",
+    "invalid_season": "Invalid season dates"
   }
 }

@@ -32,7 +32,9 @@
     "all_agents": "جميع الوكلاء",
     "filter_by_source": "تصفية حسب المصدر",
     "all_stations": "جميع الفروع",
-    "no_station": "بدون فرع"
+    "no_station": "بدون فرع",
+    "handled_by": "عالجه",
+    "all_handlers": "كل المندوبين"
   },
   "actions": {
     "add_lead": "إضافة عميل",

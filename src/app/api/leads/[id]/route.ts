@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { rejectInvalidAssignee } from "@/lib/lead-assignee";
 import { requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { logLeadActivity } from "@/lib/lead-activity";
@@ -40,6 +41,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       include: { status: true, assignedStaff: { select: { id: true, name: true } } },
     });
     if (!before) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    const badAssignee = await rejectInvalidAssignee(body.assignedStaffId, before.assignedStaffId);
+    if (badAssignee) return badAssignee;
 
     const lead = await db.lead.update({
       where: { id },

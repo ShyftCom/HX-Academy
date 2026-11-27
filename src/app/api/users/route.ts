@@ -49,6 +49,12 @@ export async function GET(req: NextRequest) {
 
   const where: Record<string, unknown> = {};
   if (q) where.OR = [{ name: { contains: q } }, { email: { contains: q } }];
+  // Every active staff account, whatever its role — e.g. "Payé par" on a
+  // charge. Excludes the Player role, which parent logins hold.
+  if (searchParams.get("backOffice") === "true") {
+    where.isActive = true;
+    where.role = { name: { not: "Player" } };
+  }
   if (rolesParam) {
     const roleNames = rolesParam.split(",").map((r) => r.trim());
     where.role = { name: { in: roleNames } };
