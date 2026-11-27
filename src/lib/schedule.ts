@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DbClient } from "@/lib/db";
 
 /**
  * Shared vocabulary for location-scoped schedules.
@@ -140,7 +140,7 @@ export function slotWriteData(input: Partial<SlotInput> & { stationId?: string }
   return data;
 }
 
-type Db = PrismaClient | Prisma.TransactionClient;
+type Db = DbClient;
 
 /**
  * The slot this one would collide with, or null.

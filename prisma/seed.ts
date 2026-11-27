@@ -258,6 +258,37 @@ async function main() {
     console.log(`✅ Bootstrap Super Admin created: ${bootstrapEmail}`);
   }
 
+  // ==================== ACADEMIES ====================
+  // Football Skills Academy is the space everything existing belongs to. It is
+  // created once and never renamed or re-flagged here, so an admin's edits
+  // stand. Futsal is created deliberately when it launches, not by the seed.
+  const academyCount = await db.academy.count();
+  if (academyCount === 0) {
+    await db.academy.create({ data: { slug: "football", name: "Football Skills Academy", isDefault: true, sortOrder: 0 } });
+    console.log("✅ Football Skills Academy created");
+  }
+
+  // Back-office permissions now come from a per-academy membership. The first
+  // time memberships exist at all, every staff account gets one in the
+  // default academy carrying the role it already had, so nobody's access
+  // changes. Only then: afterwards memberships are managed in the app, and a
+  // removal must not be undone by the next deploy. Player logins (parents)
+  // have no back-office role and get none.
+  if ((await db.userAcademy.count()) === 0) {
+    const defaultAcademy = await db.academy.findFirst({ where: { isDefault: true }, orderBy: { sortOrder: "asc" } });
+    if (defaultAcademy) {
+      const staff = await db.user.findMany({
+        where: { roleId: { not: null }, role: { name: { not: "Player" } } },
+        select: { id: true, roleId: true },
+      });
+      await db.userAcademy.createMany({
+        data: staff.map((u) => ({ userId: u.id, academyId: defaultAcademy.id, roleId: u.roleId! })),
+        skipDuplicates: true,
+      });
+      console.log(`✅ ${staff.length} staff account(s) given a membership in ${defaultAcademy.name}`);
+    }
+  }
+
   // Create Default Settings
   const defaultSettings = [
     { key: "academy_name", value: "Football Skills Academy" },

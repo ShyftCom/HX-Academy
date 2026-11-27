@@ -62,6 +62,9 @@ model User {
   // Claude (MCP) connections this login authorized
   aiConnections AiConnection[]
 
+  // The academies this login works in, and its role in each.
+  academyMemberships UserAcademy[]
+
   @@map("users")
 }
 
@@ -125,6 +128,7 @@ model Role {
 
   users       User[]
   permissions RolePermission[]
+  memberships UserAcademy[]
 
   @@map("roles")
 }
@@ -151,6 +155,46 @@ model RolePermission {
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
+}
+
+// ==================== ACADEMIES ====================
+
+/// One academy space (Football Skills Academy, Futsal Skills Academy) on the
+/// shared platform. Each space keeps its own data; accounts are shared and
+/// given a role per academy through UserAcademy. See src/lib/academy.ts.
+model Academy {
+  id        String   @id @default(cuid())
+  /// Stable machine name ("football", "futsal") — the value of the active-academy cookie.
+  slug      String   @unique
+  name      String
+  /// Where requests with no academy chosen yet land. Exactly one should be true.
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members UserAcademy[]
+
+  @@map("academies")
+}
+
+/// A login's role inside one academy. Back-office permissions come from here,
+/// for the academy the request is working in. Super Admin (User.roleId) is
+/// the exception: it holds every permission in every academy.
+model UserAcademy {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  academyId String
+  academy   Academy  @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, academyId])
+  @@index([academyId])
+  @@map("user_academies")
 }
 
 // ==================== SETTINGS ====================

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { academyScopeExtension } from "@/lib/academy-scope";
 
 /** A local/self-hosted Postgres URL, as opposed to a Neon serverless endpoint. */
 export function isLocalPostgresUrl(url: string): boolean {
@@ -20,13 +21,21 @@ function createPrismaClient() {
   const adapter = isLocalPostgresUrl(connectionString)
     ? new PrismaPg({ connectionString })
     : new PrismaNeon({ connectionString });
-  return new PrismaClient({ adapter });
+  const base = new PrismaClient({ adapter });
+  // Every query on an academy-owned model is filtered to the active academy;
+  // see src/lib/academy-scope.ts.
+  return base.$extends(academyScopeExtension(base));
 }
 
+type Db = ReturnType<typeof createPrismaClient>;
+
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: Db | undefined;
 };
 
 export const db = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+
+/** The app's database client, or the `tx` an interactive transaction hands its callback. */
+export type DbClient = Db | Omit<Db, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">;

@@ -964,6 +964,12 @@
         "guide_3": "Dans Snapchat Events Manager → votre pixel → Test / Détails des événements, confirmez la réception.",
         "guide_4": "Comptez jusqu'à une heure avant l'apparition dans les rapports Ads Manager."
       }
+    },
+    "academy": {
+      "label": "Académie",
+      "switch_failed": "Impossible de changer d'académie",
+      "choose_title": "Choisissez votre académie",
+      "choose_body": "Sur quelle académie travaillez-vous aujourd'hui ? Vous pourrez en changer à tout moment depuis la barre du haut."
     }
   }
 }

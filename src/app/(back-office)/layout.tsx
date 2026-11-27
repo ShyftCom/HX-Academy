@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ShieldOff } from "lucide-react";
 import { permissionForPath } from "@/components/layout/nav-config";
+import { AcademyChoiceGate } from "@/components/layout/academy-switcher";
 import { usePermissions } from "@/hooks/use-permissions";
 import { FullPageLoader } from "@/components/shared/loading-spinner";
 import { I18nProvider } from "@/components/providers/i18n-provider";
@@ -87,7 +88,7 @@ function BackOfficeShell({ children }: { children: React.ReactNode }) {
         >
           {/* Capped so dashboards don't stretch to 2560px on an ultrawide,
               where a 12-column grid becomes unreadable end-to-end. */}
-          <div className="mx-auto w-full max-w-[1600px]"><PageGuard>{children}</PageGuard></div>
+          <div className="mx-auto w-full max-w-[1600px]"><AcademyChoiceGate><PageGuard>{children}</PageGuard></AcademyChoiceGate></div>
         </main>
       </div>
     </div>

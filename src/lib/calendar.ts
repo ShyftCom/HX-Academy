@@ -30,7 +30,7 @@ export async function getBlockedWindows(
   agentId: string,
   date: string,
   bufferMinutes: number,
-  db: import("@prisma/client").PrismaClient,
+  db: import("@/lib/db").DbClient,
   excludeMeetingId?: string
 ): Promise<BlockedWindow[]> {
   const meetings = await db.meeting.findMany({

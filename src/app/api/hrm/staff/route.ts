@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { setMembershipInActiveAcademy } from "@/lib/academy";
 import { canAssignRole, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(req: Request) {
@@ -71,5 +72,6 @@ export async function POST(req: Request) {
       },
     });
   });
+  await setMembershipInActiveAcademy(profile.userId, roleId);
   return NextResponse.json(profile, { status: 201 });
 }

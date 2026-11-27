@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { setMembershipInActiveAcademy } from "@/lib/academy";
 import { canAssignRole, canManageHolderOf, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 /** 403 unless the caller may act on this account's current role (see canManageHolderOf). */
@@ -52,6 +53,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: updateData,
       include: { role: true },
     });
+    // The role set here is the role in the academy being worked in.
+    await setMembershipInActiveAcademy(user.id, user.roleId);
     const { password: _, ...safeUser } = user as any;
     return NextResponse.json(safeUser);
   } catch { return NextResponse.json({ error: "Update failed" }, { status: 500 }); }

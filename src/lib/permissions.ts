@@ -2,28 +2,38 @@ import { NextResponse } from "next/server";
 import type { Session } from "next-auth";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { getActiveAcademyId } from "@/lib/academy";
 import { PERMISSIONS as PERMISSION_NAMES } from "@/lib/permission-names";
 
+/**
+ * The caller's permissions in the academy this request is working in.
+ *
+ * Super Admin (User.roleId) holds everything in every academy. Everyone else
+ * gets the permissions of their role in the active academy (UserAcademy), and
+ * nothing in an academy they are not a member of — which is what keeps a
+ * Football-only admin out of Futsal data even if they set the academy cookie
+ * by hand.
+ */
 export async function getUserPermissions(userId: string): Promise<string[]> {
   const user = await db.user.findUnique({
     where: { id: userId },
-    include: {
-      role: {
-        include: {
-          permissions: {
-            include: { permission: true },
-          },
-        },
-      },
-    },
+    select: { isActive: true, role: { select: { name: true } } },
   });
 
   // A session is a signed JWT that outlives deactivation; checking here is what
   // makes "deactivate" take effect on the next request rather than at expiry.
-  if (!user?.role || !user.isActive) return [];
-  if (user.role.name === "Super Admin") return ["*"];
+  if (!user?.isActive) return [];
+  if (user.role?.name === "Super Admin") return ["*"];
 
-  return user.role.permissions.map((rp) => rp.permission.name);
+  const academyId = await getActiveAcademyId();
+  if (!academyId) return [];
+  const membership = await db.userAcademy.findUnique({
+    where: { userId_academyId: { userId, academyId } },
+    select: { role: { select: { name: true, permissions: { select: { permission: { select: { name: true } } } } } } },
+  });
+  if (!membership) return [];
+  if (membership.role.name === "Super Admin") return ["*"];
+  return membership.role.permissions.map((rp) => rp.permission.name);
 }
 
 export async function hasPermission(userId: string, permission: string): Promise<boolean> {

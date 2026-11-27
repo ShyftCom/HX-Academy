@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, hashPassword } from "@/lib/auth";
 import { canAssignRole, getUserPermissions, hasPermission, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 import { db } from "@/lib/db";
+import { setMembershipInActiveAcademy } from "@/lib/academy";
 
 /**
  * Two separate problems lived in this handler.
@@ -127,6 +128,8 @@ export async function POST(req: NextRequest) {
       data: { name: body.name, email: body.email, password: hashed, roleId: body.roleId ?? null, isActive: body.isActive ?? true },
       include: { role: true },
     });
+    // Permissions come from the membership; User.roleId still marks Super Admin and Player.
+    await setMembershipInActiveAcademy(user.id, user.roleId);
     const { password: _, ...safeUser } = user as any;
     return NextResponse.json(safeUser, { status: 201 });
   } catch (error) {

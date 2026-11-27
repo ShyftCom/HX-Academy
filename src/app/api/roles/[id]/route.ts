@@ -86,6 +86,9 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
     // Deleting a role strips it from its holders; only someone who could hand
     // that role out may take it away.
     if (!(await canAssignRole(session.user.id, id))) return NextResponse.json({ error: "Forbidden", code: "forbidden" }, { status: 403 });
+    // A role still held in an academy cannot go; reassign those staff first.
+    const holders = await db.userAcademy.count({ where: { roleId: id } });
+    if (holders > 0) return NextResponse.json({ error: `This role is still assigned to ${holders} staff member(s)`, code: "role_in_use" }, { status: 400 });
     await db.role.delete({ where: { id } });
     return NextResponse.json({ message: "Deleted" });
   } catch { return NextResponse.json({ error: "Delete failed" }, { status: 500 }); }

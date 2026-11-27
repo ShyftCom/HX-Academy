@@ -3,6 +3,7 @@
 import { Bell, LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { StationSwitcher } from "@/components/layout/station-switcher";
+import { AcademySwitcher } from "@/components/layout/academy-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -77,6 +78,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
       {/* Station scope sits at the start of the bar — it qualifies everything
           on the page, so it reads as context rather than as an action. */}
+      {/* Academy first: it decides which stations, players and figures exist at all. */}
+      <AcademySwitcher />
       <StationSwitcher />
 
       <div className="flex-1" />

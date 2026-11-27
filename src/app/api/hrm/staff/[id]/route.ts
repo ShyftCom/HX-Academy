@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { setMembershipInActiveAcademy } from "@/lib/academy";
 import { canAssignRole, requirePermissionResponse, PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -46,6 +47,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const role = await db.role.findUnique({ where: { id: body.roleId }, select: { name: true } });
     roleName = role?.name;
     await db.user.update({ where: { id: current.userId }, data: { roleId: body.roleId } });
+    await setMembershipInActiveAcademy(current.userId, body.roleId);
   }
 
   const staff = await db.staffProfile.update({

@@ -959,6 +959,12 @@
         "guide_3": "In Snapchat Events Manager → your pixel → Test events / Event details, confirm receipt.",
         "guide_4": "Allow up to an hour for events to appear in Ads Manager reporting."
       }
+    },
+    "academy": {
+      "label": "Academy",
+      "switch_failed": "Could not switch academy",
+      "choose_title": "Choose your academy",
+      "choose_body": "Which academy are you working in today? You can switch at any time from the top bar."
     }
   }
 }
